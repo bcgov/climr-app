@@ -1,0 +1,28 @@
+on:
+  workflow_dispatch:
+  push:
+    branches: [app]
+    paths-ignore:
+    - '.github/**'
+
+name: climrapp
+
+jobs:
+  climr:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@main
+      - name: copy app over
+        run: |
+          rm -f -R /tmp/Rtmp*
+          apt update -y -qq
+          rm -f -R /srv/shiny-server/climr-app || true
+          cp .Renviron ~/.Renviron
+          Rscript -e 'if (! requireNamespace("pak", quietly=TRUE)) install.packages("pak", repos = sprintf("https://r-lib.github.io/p/pak/devel/%s/%s/%s", .Platform$pkgType, R.Version()$os, R.Version()$arch))'
+          Rscript -e "pak::cache_delete()"
+          Rscript -e 'pak::pak(upgrade = TRUE, pkg = readLines("pak", warn = FALSE))'
+          cp -R ../climr-app /srv/shiny-server/
+          chown -R shiny:shiny /srv/shiny-server/climr-app
+          touch /srv/shiny-server/climr-app/restart.txt
+          Rscript scripts/utils.R
+          

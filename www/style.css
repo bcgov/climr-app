@@ -1,0 +1,80 @@
+div.outer {
+  position: fixed;
+  top: 56px;
+  left: 0;
+  right: 0;
+  bottom: 56px;
+  overflow: hidden;
+  padding: 0;
+}
+
+div.outer2 {
+  position: fixed;
+  top: 60px;
+  left: 4px;
+  right: 4px;
+  bottom: 60px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px;
+}
+
+footer.footer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+div.input-control {
+  top: 204px;
+  right: 10px;
+  background: #FFFFFF88;
+  padding: 0px;
+  border: 1px var(--bs-bcgold) solid;
+  border-radius: 5px;
+}
+
+div.input-control-header {
+  padding: 5px 10px 5px 10px;
+  border-bottom: 1px var(--bs-bcgold) solid;
+}
+
+div.input-control-header h4 {
+  margin-bottom: 0;
+}
+
+div.input-control-body {
+  padding: 5px 10px 5px 10px;
+}
+
+.selectize-dropdown, .selectize-input, .selectize-input input, #upload-label, #opacity-label, #resolution-label {
+  font-size: 0.85rem !important;
+}
+
+.form-group .input-group input.form-control {
+  line-height: 1.1 !important;
+}
+
+.form-group .input-group .input-group-btn .btn-file {
+  --bs-btn-padding-y: .25rem;
+  --bs-btn-padding-x: .5rem;
+  --bs-btn-font-size: .875rem;
+  --bs-btn-border-radius: var(--bs-border-radius-sm);
+}
+
+.form-group {
+  margin-bottom: 0.5rem !important;
+}
+
+.form-group .checkbox {
+  margin-top: .250rem;
+}
+
+.palselect-invert {
+  transform: scaleX(-1);
+}
+
+#downscale_download {
+  width: 17%;
+}
