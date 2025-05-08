@@ -170,8 +170,16 @@ shiny::shinyApp(
               ),
               accordion_panel(
                 title = "Method 2: Upload a file",
-                shiny::actionButton("upload_button", "Upload", icon("upload"),
-                                    style = "width:100%; background-color:#8f0e7e; color: #FFF")
+                # shiny::actionButton("upload_button", "Upload", icon("upload"),
+                #                     style = "width:100%; background-color:#8f0e7e; color: #FFF"),
+                shiny::div(
+                  #title = "Upload a csv, a raster or a shape file to add geographies",
+                  shiny::fileInput(
+                    inputId = "upload",
+                    label = "Upload a csv, a raster or a shape file to add geographies"
+                  )
+                )
+                
               )
             ),
             br(), br(),
@@ -250,6 +258,35 @@ shiny::shinyApp(
     
     # ---- Modal input storage
     output$climr <- leaflet::renderLeaflet(l)
+    
+    # ---- Geometry
+    source("scripts/geometry_workingcpy.R", local = TRUE)
+    sg <- session_geometry()
+    
+    # ---- Map events
+    shiny::observeEvent(input$climr_draw_start, {
+      if (shiny::in_devmode()) cat("Event: climr_draw_start", sep = "\n")
+      sg$add_point_enabled(FALSE)
+    })
+    shiny::observeEvent(input$climr_draw_stop, {
+      if (shiny::in_devmode()) cat("Event: climr_draw_stop", sep = "\n")
+      sg$add_point_enabled(TRUE)
+    })
+    shiny::observeEvent(input$climr_draw_new_feature, {
+      if (shiny::in_devmode()) cat("Event: climr_draw_new_feature", sep = "\n")
+      sg$add_draw_poly(input$climr_draw_new_feature)
+    })
+    shiny::observeEvent(input$climr_click, {
+      if (shiny::in_devmode()) cat("Event: climr_click", sep = "\n")
+      sg$add_point(input$climr_click$lat, input$climr_click$lng)
+    })
+    shiny::observeEvent(input$upload_button, {
+      if (shiny::in_devmode()) cat("Event: upload_button", sep = "\n")
+      sg$add_file(input$upload_button)
+    })
+
+    
+    sn <- \(j) setNames(j,j)
     
   }
 )
