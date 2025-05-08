@@ -1,4 +1,4 @@
-# COOP DEVL
+# COOP DEVL VERSION
 
 # Setup ----
 suppressPackageStartupMessages({
