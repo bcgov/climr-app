@@ -1,10 +1,12 @@
-# Geometry working copy
+# Geometry working
 
 # Geometry input logic ----
 session_geometry <- function() {
   
   sg <- data.table::data.table(
     id = integer(),
+    # lat = character(),
+    # long = character(),
     wkt = character(),
     group = character(),
     source = character(),
@@ -24,70 +26,70 @@ session_geometry <- function() {
   
   mp <- leaflet::leafletProxy("climr")
   
-  # rem_popup <- function(id) {
-  #   shiny::actionButton(
-  #     "sg_remove_%s" |> sprintf(id),
-  #     "Remove:%s" |> sprintf(id),
-  #     class = "btn btn-sm btn-danger action-button",
-  #     onclick = 'Shiny.setInputValue(\"sg_remove\", %s, {priority: \"event\"})' |> sprintf(id)
-  #   ) |> 
-  #     as.character()
-  # }
+  rem_popup <- function(id) {
+    shiny::actionButton(
+      "sg_remove_%s" |> sprintf(id),
+      "Remove:%s" |> sprintf(id),
+      class = "btn btn-sm btn-danger action-button",
+      onclick = 'Shiny.setInputValue(\"sg_remove\", %s, {priority: \"event\"})' |> sprintf(id)
+    ) |> 
+      as.character()
+  }
   
   refresh_DT <- function() {
     output$geom_dt <<- DT::renderDT(server = TRUE, {
-      #gdt <- data.table::copy(sg[,1:4])
-      gdt <- data.table::copy(sg[,1:2])
+      # gdt <- data.table::copy(sg[,1:4])
+      gdt <- data.table::copy(sg[,1:3])
       gdt$wkt[nchar(gdt$wkt) > 90] <- paste0(substr(gdt$wkt[nchar(gdt$wkt) > 90], 1, 87), "...")
-       gdt$action <- vapply(gdt$id, \(i) {
-        shiny::tagList(
-          shiny::actionLink(
-            "sg_view_%s" |> sprintf(i),
-            "View [\U1F5FA\UFE0F]",
-            onclick = 'Shiny.setInputValue(\"sg_view\", %s, {priority: \"event\"})' |> sprintf(i)
-          ),
-          if (sg[id == i, group == "marker" & source == "map_click"]) {
-            shiny::actionLink(
-              "sg_bivariate_%s" |> sprintf(i),
-              "Bivariate [\U1F4CA]",
-              onclick = 'Shiny.setInputValue(\"sg_bivariate\", %s, {priority: \"event\"})' |> sprintf(i)
-            )
-          },
-          if (sg[id == i, group == "marker" & source == "map_click"]) {
-            shiny::actionLink(
-              "sg_timeseries_%s" |> sprintf(i),
-              "Timeseries [\U1F4C8]",
-              onclick = 'Shiny.setInputValue(\"sg_timeseries\", %s, {priority: \"event\"})' |> sprintf(i)
-            )
-          },
-          if (sg[id == i, group == "marker" & source == "map_click"]) {
-            shiny::actionLink(
-              "sg_climate_diagram_%s" |> sprintf(i),
-              "Climate Diagram [\U1F4C8]",
-              onclick = 'Shiny.setInputValue(\"sg_climate_diagram\", %s, {priority: \"event\"})' |> sprintf(i)
-            )
-          },
-          if (sg[id == i, group == "marker" & source == "map_click"]) {
-            shiny::actionLink(
-              "sg_bloxplot_%s" |> sprintf(i),
-              "Boxplot [\U1F4C8]",
-              onclick = 'Shiny.setInputValue(\"sg_boxplot\", %s, {priority: \"event\"})' |> sprintf(i)
-            )
-          },
-          if (sg[id == i, group == "marker" & source == "map_click"]) {
-            shiny::actionLink(
-              "sg_climate_stripes_%s" |> sprintf(i),
-              "Stripes [\U1F321]",
-              onclick = 'Shiny.setInputValue(\"sg_climate_stripes\", %s, {priority: \"event\"})' |> sprintf(i)
-            )
-          },
-          shiny::actionLink(
-            "sg_remove_%s" |> sprintf(i),
-            "Remove [\U274C]",
-            onclick = 'Shiny.setInputValue(\"sg_remove\", %s, {priority: \"event\"})' |> sprintf(i)
-          )
-        ) |> as.character()
-      }, character(1))
+      # gdt$action <- vapply(gdt$id, \(i) {
+      #   shiny::tagList(
+      #     shiny::actionLink(
+      #       "sg_view_%s" |> sprintf(i),
+      #       "View [\U1F5FA\UFE0F]",
+      #       onclick = 'Shiny.setInputValue(\"sg_view\", %s, {priority: \"event\"})' |> sprintf(i)
+      #     ),
+      #     if (sg[id == i, group == "marker" & source == "map_click"]) {
+      #       shiny::actionLink(
+      #         "sg_bivariate_%s" |> sprintf(i),
+      #         "Bivariate [\U1F4CA]",
+      #         onclick = 'Shiny.setInputValue(\"sg_bivariate\", %s, {priority: \"event\"})' |> sprintf(i)
+      #       )
+      #     },
+      #     if (sg[id == i, group == "marker" & source == "map_click"]) {
+      #       shiny::actionLink(
+      #         "sg_timeseries_%s" |> sprintf(i),
+      #         "Timeseries [\U1F4C8]",
+      #         onclick = 'Shiny.setInputValue(\"sg_timeseries\", %s, {priority: \"event\"})' |> sprintf(i)
+      #       )
+      #     },
+      #     if (sg[id == i, group == "marker" & source == "map_click"]) {
+      #       shiny::actionLink(
+      #         "sg_climate_diagram_%s" |> sprintf(i),
+      #         "Climate Diagram [\U1F4C8]",
+      #         onclick = 'Shiny.setInputValue(\"sg_climate_diagram\", %s, {priority: \"event\"})' |> sprintf(i)
+      #       )
+      #     },
+      #     if (sg[id == i, group == "marker" & source == "map_click"]) {
+      #       shiny::actionLink(
+      #         "sg_bloxplot_%s" |> sprintf(i),
+      #         "Boxplot [\U1F4C8]",
+      #         onclick = 'Shiny.setInputValue(\"sg_boxplot\", %s, {priority: \"event\"})' |> sprintf(i)
+      #       )
+      #     },
+      #     if (sg[id == i, group == "marker" & source == "map_click"]) {
+      #       shiny::actionLink(
+      #         "sg_climate_stripes_%s" |> sprintf(i),
+      #         "Stripes [\U1F321]",
+      #         onclick = 'Shiny.setInputValue(\"sg_climate_stripes\", %s, {priority: \"event\"})' |> sprintf(i)
+      #       )
+      #     },
+      #     shiny::actionLink(
+      #       "sg_remove_%s" |> sprintf(i),
+      #       "Remove [\U274C]",
+      #       onclick = 'Shiny.setInputValue(\"sg_remove\", %s, {priority: \"event\"})' |> sprintf(i)
+      #     )
+      #   ) |> as.character()
+      # }, character(1))
       data.table::setnames(gdt, "wkt", "well-known text")
       data.table::setnames(gdt, tools::toTitleCase(names(gdt)))
       DT::datatable(gdt, rownames = FALSE, escape = FALSE, options = list(
@@ -160,7 +162,501 @@ session_geometry <- function() {
       )
     )
   }
-
+  
+  modal_bivariate <- function(wkt) {
+    shiny::showModal(
+      shiny::modalDialog(size = "xl",
+                         shiny::tabsetPanel(
+                           shiny::tabPanel("Parameters",
+                                           shiny::div(
+                                             title = "Climate variables for x axis.",
+                                             shiny::selectizeInput(
+                                               inputId = "bivariate_xvars",
+                                               label = "Climate variables X Axis",
+                                               width = "100%",
+                                               choices = c(downscale_extra_vars, list("Core" = downscale_core_vars)),
+                                               multiple = FALSE,
+                                               selected = "Tave_sm"
+                                             ),
+                                             shiny::selectizeInput(
+                                               inputId = "bivariate_yvars",
+                                               label = "Climate variables Y Axis",
+                                               width = "100%",
+                                               choices = c(downscale_extra_vars, list("Core" = downscale_core_vars)),
+                                               multiple = FALSE,
+                                               selected = "PPT_sm"
+                                             ),
+                                             shiny::div(
+                                               title = "20-year reference periods for GCM simulations.",
+                                               shiny::selectInput(
+                                                 inputId = "bivariate_gcm_periods",
+                                                 label = "General Circulation Model (GCM) Periods",
+                                                 width = "100%",
+                                                 choices = climr::list_gcm_periods() |> sn(),
+                                                 multiple = TRUE,
+                                                 selected = climr::list_gcm_periods()[1]
+                                               )
+                                             ),
+                                             shiny::div(
+                                               title = "Global climate models to downscale. Select multiple GCMs for ensemble outputs.",
+                                               shiny::selectInput(
+                                                 inputId = "bivariate_gcms",
+                                                 label = "Global climate model",
+                                                 width = "100%",
+                                                 choices = climr::list_gcms() |> sn(),
+                                                 multiple = TRUE,
+                                                 selected = climr::list_gcms()[c(1, 4, 5, 6, 7, 10, 11, 12)]
+                                               )
+                                             ),
+                                             shiny::div(
+                                               title = "SSP-RCP scenarios pairing shared socioeconomic pathways with representative concentration pathways.",
+                                               shiny::selectInput(
+                                                 inputId = "bivariate_ssps",
+                                                 label = "Shared Socio-economic Pathways (SSP) - Representative Concentration Pathways (RCP) Scenarios",
+                                                 width = "100%",
+                                                 choices = climr::list_ssps() |> sn(),
+                                                 multiple = TRUE,
+                                                 selected = climr::list_ssps()[2]
+                                               )
+                                             ),
+                                           )
+                           ),
+                           shiny::tabPanel("Bivariate Plot",
+                                           plotly::plotlyOutput("bivariate_plot", height = "600px")
+                           ),
+                           shiny::tabPanel("Description",
+                                           shiny::div(
+                                             style = "margin-top: 20px;",
+                                             shiny::p("Bivariate plots showing 21st century climate change for user-selected locations and climate variables."),
+                                             shiny::p("Purposes of the plot:"),
+                                             shiny::tags$ol(
+                                               shiny::tags$li("Show differences in climate change trends among global climate models (GCMs)"),
+                                               shiny::tags$li("Show the differences between multiple simulations of each model"),
+                                               shiny::tags$li("Compare simulated climate change to observed climate change in the 2001-2020 period")
+                                             ),
+                                             shiny::p("All climate changes are relative to the 1961-1990 reference period normals.")
+                                           )
+                           )
+                         )
+      )
+    )
+    output$bivariate_plot <- plotly::renderPlotly({
+      g <- terra::vect(wkt, crs = "EPSG:4326")
+      coords <- terra::crds(g)
+      elevs <- terra::extract(cec, g, method = "bilinear", ID = FALSE, raw = TRUE)[,1]
+      xyz <- data.table::data.table(
+        id = 1,
+        lon = coords[, 1],
+        lat = coords[, 2],
+        elev = elevs
+      )
+      withCallingHandlers(
+        message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+        warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+        error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+        {
+          climr::plot_bivariate_db(
+            xyz = xyz,
+            xvar = input$bivariate_xvars,
+            yvar = input$bivariate_yvars,
+            period_focal = input$bivariate_gcm_periods,
+            gcms = input$bivariate_gcms,
+            ssp = input$bivariate_ssps,
+            interactive = TRUE
+          )
+        }
+      )
+    })
+  }
+  
+  modal_timeseries <- function(wkt) {
+    shiny::showModal(
+      shiny::modalDialog(size = "xl",
+                         shiny::tabsetPanel(
+                           shiny::tabPanel("Parameters",
+                                           shiny::div(
+                                             title = "Climate variables.",
+                                             shiny::selectizeInput(
+                                               inputId = "timeseries_vars",
+                                               label = "Climate variables",
+                                               width = "100%",
+                                               choices = c(downscale_extra_vars, list("Core" = downscale_core_vars)),
+                                               multiple = FALSE,
+                                               selected = "Tmin_sm"
+                                             ),
+                                             shiny::div(
+                                               title = "Dataset for observational time series data. Options: 'climatena' for ClimateNA gridded time series, 'cru.gpcc' for CRU TS (temperature) and GPCC (precipitation), or 'Null' for none.",
+                                               shiny::selectInput(
+                                                 inputId = "timeseries_obs_ts_dataset",
+                                                 label = "Observation time-series data",
+                                                 width = "100%",
+                                                 choices = c("ClimateNA" = "climatena", "Climatic Research Unit / Global Precipitation Climatology Centre" = "cru.gpcc"),
+                                                 selected = "climatena",
+                                               )
+                                             ),
+                                             shiny::div(
+                                               title = "Global climate models to downscale. Select multiple GCMs for ensemble outputs.",
+                                               shiny::selectInput(
+                                                 inputId = "timeseries_gcms",
+                                                 label = "Global climate model",
+                                                 width = "100%",
+                                                 choices = climr::list_gcms() |> sn(),
+                                                 multiple = TRUE,
+                                                 selected = list_gcms()[c(1)]
+                                               )
+                                             ),
+                                             shiny::div(
+                                               title = "SSP-RCP scenarios pairing shared socioeconomic pathways with representative concentration pathways.",
+                                               shiny::selectInput(
+                                                 inputId = "timeseries_ssps",
+                                                 label = "Shared Socio-economic Pathways (SSP) - Representative Concentration Pathways (RCP) Scenarios",
+                                                 width = "100%",
+                                                 choices = climr::list_ssps() |> sn(),
+                                                 multiple = TRUE,
+                                                 selected = list_ssps()[1]
+                                               )
+                                             ),
+                                           )
+                           ),
+                           shiny::tabPanel("Timeseries Plot",
+                                           shiny::plotOutput("timeseries_plot", height = "600px")
+                           ),
+                           shiny::tabPanel("Description",
+                                           shiny::div(
+                                             style = "margin-top: 20px;",
+                                             shiny::p("Time series plots of 20th and 21st century climate change for user-selected locations and climate variables."),
+                                             shiny::p("Purposes of the plot:"),
+                                             shiny::tags$ul(
+                                               shiny::tags$li("View differences in interannual variability and climate change trends among global climate models (GCMs)"),
+                                               shiny::tags$li("View the differences between multiple simulations of each model"),
+                                               shiny::tags$li("Compare simulated and observed climate change from 1901 to present"),
+                                               shiny::tags$li("Compare time series of two different variables")
+                                             ),
+                                             shiny::p("All global climate model anomalies are bias-corrected to the 1961-1990 reference period normals.")
+                                           )
+                           )
+                         )
+      )
+    )
+    output$timeseries_plot <- shiny::renderPlot({
+      g <- terra::vect(wkt, crs = "EPSG:4326")
+      coords <- terra::crds(g)
+      elevs <- terra::extract(cec, g, method = "bilinear", ID = FALSE, raw = TRUE)[,1]
+      xyz <- data.table::data.table(
+        id = 1,
+        lon = coords[, 1],
+        lat = coords[, 2],
+        elev = elevs
+      )
+      withCallingHandlers(
+        message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+        warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+        error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+        {
+          data <- climr::plot_timeSeries_input_db(
+            xyz = xyz,
+            gcms = input$timeseries_gcms,
+            ssps = input$timeseries_ssps,
+            obs_ts_dataset = input$timeseries_obs_ts_dataset,
+            vars = input$timeseries_vars,
+          )
+        }
+      )
+      climr::plot_timeSeries(
+        X = data,
+        var1 = input$timeseries_vars,
+        obs_ts_dataset = input$timeseries_obs_ts_dataset,
+        gcms = input$timeseries_gcms,
+        ssps = input$timeseries_ssps        
+      )
+    })    
+  }
+  
+  modal_climate_diagram <- function(wkt) {
+    shiny::showModal(
+      shiny::modalDialog(size = "xl",
+                         shiny::tabsetPanel(
+                           shiny::tabPanel("Parameters",
+                                           shiny::div( title = "Climate Diagram Parameters",
+                                                       
+                                                       shiny::div(
+                                                         title = "Global climate models to downscale. Select multiple GCMs for ensemble outputs.",
+                                                         shiny::selectInput(
+                                                           inputId = "climate_diagram_gcms",
+                                                           label = "Global climate model",
+                                                           width = "100%",
+                                                           choices = climr::list_gcms() |> sn(),
+                                                           multiple = TRUE,
+                                                           selected = NULL
+                                                         )
+                                                       ),
+                                                       shiny::div(
+                                                         title = "SSP-RCP scenarios pairing shared socioeconomic pathways with representative concentration pathways.",
+                                                         shiny::selectInput(
+                                                           inputId = "climate_diagram_ssps",
+                                                           label = "Shared Socio-economic Pathways (SSP) - Representative Concentration Pathways (RCP) Scenarios",
+                                                           width = "100%",
+                                                           choices = climr::list_ssps() |> sn(),
+                                                           multiple = TRUE,
+                                                           selected = NULL
+                                                         )
+                                                       ),
+                                                       shiny::div(
+                                                         title = "20-year reference periods for GCM simulations.",
+                                                         shiny::selectInput(
+                                                           inputId = "climate_diagram_gcm_periods",
+                                                           label = "General Circulation Model (GCM) Periods",
+                                                           width = "100%",
+                                                           choices = climr::list_gcm_periods() |> sn(),
+                                                           multiple = TRUE,
+                                                           selected = NULL
+                                                         )
+                                                       ),
+                                                       
+                                           )
+                           ),
+                           shiny::tabPanel("Climate Diagram",
+                                           shiny::plotOutput("climate_diagram_plot", height = "600px")
+                           ),
+                           shiny::tabPanel("Description",
+                                           shiny::div(
+                                             style = "margin-top: 20px;",
+                                             shiny::p("Walter-Lieth Climate Diagram."),
+                                             shiny::p("Purposes of the diagram:"),
+                                             shiny::tags$ul(
+                                               shiny::tags$li("Allow identification of humid and drought periods over a year"),
+                                               shiny::tags$li("Allow for an easy climate comparison between geographic locations")
+                                             ),
+                                             shiny::p("All global climate model anomalies are bias-corrected to the 1961-1990 reference period normals.")
+                                           )
+                           )
+                         )
+      )
+    )
+    output$climate_diagram_plot <- shiny::renderPlot({
+      g <- terra::vect(wkt, crs = "EPSG:4326")
+      coords <- terra::crds(g)
+      elevs <- terra::extract(cec, g, method = "bilinear", ID = FALSE, raw = TRUE)[,1]
+      xyz <- data.table::data.table(
+        id = 1,
+        lon = coords[, 1],
+        lat = coords[, 2],
+        elev = elevs
+      )
+      withCallingHandlers(
+        message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+        warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+        error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+        {
+          data <- climr::create_climate_diagram_input(
+            xyz = xyz,
+            gcms = input$climate_diagram_gcms,
+            ssps = input$climate_diagram_ssps,
+            gcm_periods = input$climate_diagram_gcm_periods,
+            use_downscale_db = TRUE
+          )#
+        }
+      )
+      climr::create_climate_diagram(
+        temp = data$Tave,
+        precip = data$PPT,
+        elev = data$elev        
+      )
+    })    
+  }
+  
+  modal_boxplot <- function(wkt) {
+    shiny::showModal(
+      shiny::modalDialog(size = "xl",
+                         shiny::tabsetPanel(
+                           shiny::tabPanel("Parameters",
+                                           shiny::div( title = "Boxplot Parameters",
+                                                       
+                                                       shiny::div(
+                                                         title = "Global climate models to downscale. Select multiple GCMs for ensemble outputs.",
+                                                         shiny::selectInput(
+                                                           inputId = "boxplot_gcms",
+                                                           label = "Global climate model",
+                                                           width = "100%",
+                                                           choices = climr::list_gcms() |> sn(),
+                                                           multiple = TRUE,
+                                                           selected = climr::list_gcms()[1]
+                                                         )
+                                                       ),
+                                                       shiny::div(
+                                                         title = "SSP-RCP scenarios pairing shared socioeconomic pathways with representative concentration pathways.",
+                                                         shiny::selectInput(
+                                                           inputId = "boxplot_ssps",
+                                                           label = "Shared Socio-economic Pathways (SSP) - Representative Concentration Pathways (RCP) Scenarios",
+                                                           width = "100%",
+                                                           choices = climr::list_ssps() |> sn(),
+                                                           multiple = TRUE,
+                                                           selected = climr::list_ssps()[2]
+                                                         )
+                                                       ),
+                                                       shiny::div(
+                                                         title = "Variable to display",
+                                                         shiny::selectInput(
+                                                           inputId = "boxplot_by_var",
+                                                           label = "Variable to plot on the x axis - Temperatures (Tmin, Tmax, Tave) or Precipitations (PPT)",
+                                                           width = "100%",
+                                                           choices = c("Tmin", "Tmax", "Tave", "PPT") |> sn(),
+                                                           multiple = FALSE,
+                                                           selected = "PPT"
+                                                         )
+                                                       ),
+                                                       
+                                           )
+                           ),
+                           shiny::tabPanel("Boxplot",
+                                           shiny::plotOutput("boxplot", height = "600px")
+                           ),
+                           shiny::tabPanel("Description",
+                                           shiny::div(
+                                             style = "margin-top: 20px;",
+                                             shiny::p("Boxplot."),
+                                             shiny::p("Purposes of the plot:"),
+                                             shiny::tags$ul(
+                                               shiny::tags$li("Allow comparison of distribution over a year"),
+                                               shiny::tags$li("View the outliers for each months")
+                                             ),
+                                             shiny::p("All global climate model anomalies are bias-corrected to the 1961-1990 reference period normals.")
+                                           )
+                           )
+                         )
+      )
+    )
+    output$boxplot <- shiny::renderPlot({
+      g <- terra::vect(wkt, crs = "EPSG:4326")
+      coords <- terra::crds(g)
+      elevs <- terra::extract(cec, g, method = "bilinear", ID = FALSE, raw = TRUE)[,1]
+      xyz <- data.table::data.table(
+        id = 1,
+        lon = coords[, 1],
+        lat = coords[, 2],
+        elev = elevs
+      )
+      withCallingHandlers(
+        message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+        warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+        error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+        {
+          data <- climr::create_boxplot_input(
+            xyz = xyz, 
+            gcms = input$boxplot_gcms,
+            ssps = input$boxplot_ssps,
+            use_downscale_db = TRUE
+          )
+        }
+      )
+      climr::create_boxplot(
+        dt = data,
+        var = input$boxplot_by_var      
+      )
+    })    
+  }
+  
+  
+  
+  modal_climate_stripes <- function(wkt) {
+    shiny::showModal(
+      shiny::modalDialog(size = "xl",
+                         shiny::tabsetPanel(
+                           shiny::tabPanel("Parameters",
+                                           shiny::div( title = "Climate Stripes Parameters",
+                                                       
+                                                       shiny::div(
+                                                         title = "Global climate models to downscale. Select multiple GCMs for ensemble outputs.",
+                                                         shiny::selectInput(
+                                                           inputId = "climate_stripes_gcms",
+                                                           label = "Global climate model",
+                                                           width = "100%",
+                                                           choices = climr::list_gcms() |> sn(),
+                                                           multiple = TRUE,
+                                                           selected = climr::list_gcms()[1]
+                                                         )
+                                                       ),
+                                                       shiny::div(
+                                                         title = "SSP-RCP scenarios pairing shared socioeconomic pathways with representative concentration pathways.",
+                                                         shiny::selectInput(
+                                                           inputId = "climate_stripes_ssps",
+                                                           label = "Shared Socio-economic Pathways (SSP) - Representative Concentration Pathways (RCP) Scenarios",
+                                                           width = "100%",
+                                                           choices = climr::list_ssps() |> sn(),
+                                                           multiple = TRUE,
+                                                           selected = climr::list_ssps()[2]
+                                                         )
+                                                       ),
+                                                       
+                                           )
+                           ),
+                           shiny::tabPanel("Climate Stripes",
+                                           shiny::tabsetPanel(
+                                             shiny::tabPanel(
+                                               "Stripes",
+                                               plotly::plotlyOutput("climate_stripes", height = "600px")
+                                             ),
+                                             shiny::tabPanel(
+                                               "Bars with scales",
+                                               plotly::plotlyOutput("climate_stripes_with_scales", height = "600px")
+                                             )
+                                           )
+                                           
+                           ),
+                           shiny::tabPanel("Description",
+                                           shiny::div(
+                                             style = "margin-top: 20px;",
+                                             shiny::p("Climate Stripes"),
+                                             shiny::p("Purposes of the plot:"),
+                                             shiny::tags$ul(
+                                               shiny::tags$li("Allow comparison of difference of temperature with the average over all periods")
+                                             ),
+                                             shiny::p("All global climate model anomalies are bias-corrected to the 1961-1990 reference period normals.")
+                                           )
+                           )
+                         )
+      )
+    )
+    
+    climate_stripes_input <- reactive({
+      g <- terra::vect(wkt, crs = "EPSG:4326")
+      coords <- terra::crds(g)
+      elevs <- terra::extract(cec, g, method = "bilinear", ID = FALSE, raw = TRUE)[,1]
+      xyz <- data.table::data.table(
+        id = 1,
+        lon = coords[, 1],
+        lat = coords[, 2],
+        elev = elevs
+      )
+      withCallingHandlers(
+        message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+        warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+        error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+        {
+          data <- climr::create_climate_stripes_input(
+            xyz = xyz, 
+            gcms = input$climate_stripes_gcms,
+            ssps = input$climate_stripes_ssps,
+            use_downscale_db = TRUE
+          )
+        }
+      )
+      return(data)
+    })
+    output$climate_stripes <- plotly::renderPlotly({
+      
+      climr::create_climate_stripes(
+        dt = climate_stripes_input()
+      )
+    })    
+    
+    output$climate_stripes_with_scales <- plotly::renderPlotly({
+      climr::create_climate_stripes(
+        dt = climate_stripes_input(),
+        mode = "bars_with_scale"
+      )
+    })    
+  }
   
   refresh <- function(g) {
     refresh_DT()

@@ -44,7 +44,7 @@ if (!length(felev <- which(file.exists(elevtif)))) {
   cec <- terra::rast(elevtif[felev])
 }
 
-# Base map ---- ## Need to figure out how to set view so it starts centered on BC ##
+# Base map ---- 
 l <- leaflet::leaflet(
   options = leaflet::leafletOptions(maxZoom = 25)
 ) |>
@@ -97,8 +97,8 @@ l <- leaflet::leaflet(
     overlayGroups = c("Labels", "WNA BEC", "Climate"),
     position = "topright"
   ) |>
-  leaflet::setView(lng = -100, lat = 50, zoom = 5) |>
-  leaflet::addMiniMap(toggleDisplay = TRUE, minimized = TRUE) |>
+  leaflet::setView(lng = -125, lat = 55, zoom = 5) |>
+  #leaflet::addMiniMap(toggleDisplay = TRUE, minimized = TRUE) |>
   leaflet::hideGroup(c("WNA BEC", "Climate")) |>
   leaflet::showGroup("Hillshade")
 
@@ -133,7 +133,8 @@ shiny::shinyApp(
         title = "Map",
         shiny::sidebarLayout(
           shiny::sidebarPanel(
-           
+            style = "height: 84vh; overflow-y: auto; overflow-x: auto;", 
+            
              # need to adjust this so the helplink is centered, create the link
             shiny::actionLink(
               inputId = "tutorial",
@@ -152,7 +153,7 @@ shiny::shinyApp(
                   # shiny::div(
                   #   class = "outer2",
                   #   DT::DTOutput(outputId = "geom_dt")
-                  #),
+                  # ),
                   #shiny::actionButton("add_button", "Enter New", icon("plus")),
                   shiny::actionButton("delete_button", "Delete Selected", icon("trash-alt")),
                   #br(), br(),
