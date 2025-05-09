@@ -101,6 +101,9 @@ session_geometry <- function() {
       #data.table::setnames(gdt, "wkt", "well-known text")
       data.table::setnames(gdt, tools::toTitleCase(names(gdt)))
       DT::datatable(gdt, rownames = FALSE, escape = FALSE, options = list(
+        dom = 'ltp',
+        pageLength = 5,
+        lengthMenu = c(5, 10, 25, 50, 100),
         rowCallback = DT::JS("
           function(row, data, index) {
             if (data[3] === \"map_click\") {
