@@ -41,64 +41,19 @@ session_geometry <- function() {
   
   
   refresh_DT <- function() {
+    
     output$geom_dt <<- DT::renderDT(server = TRUE, {
-      # gdt <- data.table::copy(sg[,1:4])
+      
+      # only render table if a point has been clicked on
+      map_points <- reactiveValues(dt = sg)
+      
+      if (nrow(map_points$dt) > 0) {
       
       # change ID to a character to match alignment
       sg$id <- as.character(sg$id)
       
+      # create data table to display
       gdt <- data.table::copy(sg[,1:3])
-      #gdt$wkt[nchar(gdt$wkt) > 90] <- paste0(substr(gdt$wkt[nchar(gdt$wkt) > 90], 1, 87), "...")
-      # gdt$action <- vapply(gdt$id, \(i) {
-      #   shiny::tagList(
-      #     shiny::actionLink(
-      #       "sg_view_%s" |> sprintf(i),
-      #       "View [\U1F5FA\UFE0F]",
-      #       onclick = 'Shiny.setInputValue(\"sg_view\", %s, {priority: \"event\"})' |> sprintf(i)
-      #     ),
-      #     if (sg[id == i, group == "marker" & source == "map_click"]) {
-      #       shiny::actionLink(
-      #         "sg_bivariate_%s" |> sprintf(i),
-      #         "Bivariate [\U1F4CA]",
-      #         onclick = 'Shiny.setInputValue(\"sg_bivariate\", %s, {priority: \"event\"})' |> sprintf(i)
-      #       )
-      #     },
-      #     if (sg[id == i, group == "marker" & source == "map_click"]) {
-      #       shiny::actionLink(
-      #         "sg_timeseries_%s" |> sprintf(i),
-      #         "Timeseries [\U1F4C8]",
-      #         onclick = 'Shiny.setInputValue(\"sg_timeseries\", %s, {priority: \"event\"})' |> sprintf(i)
-      #       )
-      #     },
-      #     if (sg[id == i, group == "marker" & source == "map_click"]) {
-      #       shiny::actionLink(
-      #         "sg_climate_diagram_%s" |> sprintf(i),
-      #         "Climate Diagram [\U1F4C8]",
-      #         onclick = 'Shiny.setInputValue(\"sg_climate_diagram\", %s, {priority: \"event\"})' |> sprintf(i)
-      #       )
-      #     },
-      #     if (sg[id == i, group == "marker" & source == "map_click"]) {
-      #       shiny::actionLink(
-      #         "sg_bloxplot_%s" |> sprintf(i),
-      #         "Boxplot [\U1F4C8]",
-      #         onclick = 'Shiny.setInputValue(\"sg_boxplot\", %s, {priority: \"event\"})' |> sprintf(i)
-      #       )
-      #     },
-      #     if (sg[id == i, group == "marker" & source == "map_click"]) {
-      #       shiny::actionLink(
-      #         "sg_climate_stripes_%s" |> sprintf(i),
-      #         "Stripes [\U1F321]",
-      #         onclick = 'Shiny.setInputValue(\"sg_climate_stripes\", %s, {priority: \"event\"})' |> sprintf(i)
-      #       )
-      #     },
-      #     shiny::actionLink(
-      #       "sg_remove_%s" |> sprintf(i),
-      #       "Remove [\U274C]",
-      #       onclick = 'Shiny.setInputValue(\"sg_remove\", %s, {priority: \"event\"})' |> sprintf(i)
-      #     )
-      #   ) |> as.character()
-      # }, character(1))
-      #data.table::setnames(gdt, "wkt", "well-known text")
       data.table::setnames(gdt, tools::toTitleCase(names(gdt)))
       DT::datatable(gdt, rownames = FALSE, escape = FALSE, options = list(
         dom = 'ltp',
@@ -114,6 +69,9 @@ session_geometry <- function() {
           }
         ")
       ))
+      } else {
+        NULL
+      }
     })
   }
   refresh_DT()
@@ -198,24 +156,24 @@ session_geometry <- function() {
     session$sendCustomMessage(type="jsCode", list(code = "$('.input-control-body a.shiny-download-link').removeClass('btn-success');"))
   }
   
-  # rem <- function(rid) {
-  #   
-  #   t <- sg[id %in% rid, list(group, source, datapath)]
-  #   
-  #   # Drop datapath from fileuploads if any
-  #   d <- unique(t$datapath)
-  #   d <- d[!is.na(d)]
-  #   if (length(d)) {
-  #     fg[[d]] <<- NULL
-  #     unlink(d, recursive = TRUE)
-  #   }
-  #   
-  #   # Refresh geometries
-  #   g <- unique(t$group)
-  #   sg <<- sg[!id %in% rid]
-  #   refresh(g)
-  #   
-  # }
+  rem <- function(rid) {
+
+    t <- sg[id %in% rid, list(group, source, datapath)]
+
+    # Drop datapath from fileuploads if any
+    d <- unique(t$datapath)
+    d <- d[!is.na(d)]
+    if (length(d)) {
+      fg[[d]] <<- NULL
+      unlink(d, recursive = TRUE)
+    }
+
+    # Refresh geometries
+    g <- unique(t$group)
+    sg <<- sg[!id %in% rid]
+    refresh(g)
+
+  }
   
   click_enabled <- TRUE
   click_ignore_next <- FALSE

@@ -145,33 +145,34 @@ shiny::shinyApp(
             accordion(
               # need to add help icons to each of the methods
               multiple = FALSE,
+              
               accordion_panel(
                 title = "Method 1: By selection on map",
-                accordion_panel(
-                  title = "Click on map to add points",
-                  DT::DTOutput("geom_dt", width = "100%"),
-                  # shiny::div(
-                  #   class = "outer2",
-                  #   DT::DTOutput(outputId = "geom_dt")
-                  # ),
-                  #shiny::actionButton("add_button", "Enter New", icon("plus")),
-                  shiny::actionButton("delete_button", "Delete Selected", icon("trash-alt")),
-                  #br(), br(),
-                  #shiny::actionButton("downscale_params", "Choose Downscale Parameters")
-                ),
-                accordion_panel(
-                  title = "Draw on map to add area-of-interest",
-                  ("Choose drawing tool:"),
-                  shiny::actionButton("draw_square", icon("square")),
-                  shiny::actionButton("draw_circle", icon("circle")),
-                  shiny::actionButton("draw_polygon", icon("draw-polygon")), #change this icon
-                  DT::DTOutput("points_table", width = "100%"),
-                  #shiny::actionButton("add_button", "Enter New", icon("plus")),
-                  shiny::actionButton("delete_button", "Delete Selected", icon("trash-alt")),
-                  #br(), br(),
-                  #shiny::actionButton("downscale_params", "Choose Downscale Parameters")
+                
+                accordion(
+                  multiple = FALSE,
+                  
+                  accordion_panel(
+                    title = "Click on map to add points",
+                    DT::DTOutput("geom_dt", width = "100%"),
+                    #shiny::actionButton("add_button", "Enter New", icon("plus")),
+                    shiny::actionButton("delete_button", "Delete Selected", icon("trash-alt")),
+                    value = "acc1_pan1"
+                  ),
+                
+                  accordion_panel(
+                    title = "Draw on map to add area-of-interest",
+                    ("Choose drawing tool:"),
+                    shiny::actionButton("draw_square", icon("square")),
+                    shiny::actionButton("draw_circle", icon("circle")),
+                    shiny::actionButton("draw_polygon", icon("draw-polygon")), #change this icon
+                    DT::DTOutput("points_table", width = "100%"),
+                    #shiny::actionButton("add_button", "Enter New", icon("plus")),
+                    shiny::actionButton("delete_button", "Delete Selected", icon("trash-alt"))
+                  )
                 )
               ),
+              
               accordion_panel(
                 title = "Method 2: Upload a file",
                 # shiny::actionButton("upload_button", "Upload", icon("upload"),
@@ -196,17 +197,7 @@ shiny::shinyApp(
           )
         )
       ),
-      # shiny::navbarMenu(
-      #   "Data",
-      #   "Locations",
-      #   shiny::tabPanel(
-      #     title = "Geometry",
-      #     shiny::div(
-      #       class = "outer2",
-      #       DT::DTOutput(outputId = "geom_dt")
-      #     )
-      #   )
-      # ),
+     
       shiny::navbarMenu(
         "About",
         "How to use",
