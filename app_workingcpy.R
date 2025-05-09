@@ -279,6 +279,12 @@ shiny::shinyApp(
       if (shiny::in_devmode()) cat("Event: upload_button", sep = "\n")
       sg$add_file(input$upload_button)
     })
+    
+    # delete a map point
+    shiny::observeEvent(input$delete_button, {
+      
+      # call a global function in geometry.R to remove rows?
+    })
 
     
     sn <- \(j) setNames(j,j)

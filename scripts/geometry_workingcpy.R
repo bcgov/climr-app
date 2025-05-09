@@ -157,7 +157,8 @@ session_geometry <- function() {
   }
   
   rem <- function(rid) {
-
+    
+    # select rows from sg based on row id
     t <- sg[id %in% rid, list(group, source, datapath)]
 
     # Drop datapath from fileuploads if any
@@ -170,6 +171,8 @@ session_geometry <- function() {
 
     # Refresh geometries
     g <- unique(t$group)
+    
+    # remove the selected rows and refresh DT
     sg <<- sg[!id %in% rid]
     refresh(g)
 
@@ -429,9 +432,9 @@ session_geometry <- function() {
     get = function() {
       return(sg)
     },
-    # rm = function(rid) {
-    #   rem(rid)
-    # },
+    rm = function(rid) {
+      rem(rid)
+    },
     # view = function(rid) {
     #   view_map(rid)
     # },
