@@ -99,7 +99,6 @@ l <- leaflet::leaflet(
   ) |>
   leaflet::setView(lng = -100, lat = 50, zoom = 5) |>
   leaflet::addMiniMap(toggleDisplay = TRUE, minimized = TRUE) |>
-  #default_draw_tool() |> ## REMOVE DRAWING TOOL ##
   leaflet::hideGroup(c("WNA BEC", "Climate")) |>
   leaflet::showGroup("Hillshade")
 
@@ -135,7 +134,7 @@ shiny::shinyApp(
         shiny::sidebarLayout(
           shiny::sidebarPanel(
            
-             # need to adjust this so the helplink is centered
+             # need to adjust this so the helplink is centered, create the link
             shiny::actionLink(
               inputId = "tutorial",
               label = "Click here for a tutorial"
@@ -149,7 +148,11 @@ shiny::shinyApp(
                 title = "Method 1: By selection on map",
                 accordion_panel(
                   title = "Click on map to add points",
-                  DT::DTOutput("points_table", width = "100%"),
+                  DT::DTOutput("geom_dt", width = "100%"),
+                  # shiny::div(
+                  #   class = "outer2",
+                  #   DT::DTOutput(outputId = "geom_dt")
+                  #),
                   #shiny::actionButton("add_button", "Enter New", icon("plus")),
                   shiny::actionButton("delete_button", "Delete Selected", icon("trash-alt")),
                   #br(), br(),
@@ -192,17 +195,17 @@ shiny::shinyApp(
           )
         )
       ),
-      shiny::navbarMenu(
-        "Data",
-        "Locations",
-        shiny::tabPanel(
-          title = "Geometry",
-          shiny::div(
-            class = "outer2",
-            DT::DTOutput(outputId = "geom_dt")
-          )
-        )
-      ),
+      # shiny::navbarMenu(
+      #   "Data",
+      #   "Locations",
+      #   shiny::tabPanel(
+      #     title = "Geometry",
+      #     shiny::div(
+      #       class = "outer2",
+      #       DT::DTOutput(outputId = "geom_dt")
+      #     )
+      #   )
+      # ),
       shiny::navbarMenu(
         "About",
         "How to use",
