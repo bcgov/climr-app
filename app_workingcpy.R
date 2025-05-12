@@ -96,8 +96,8 @@ l <- leaflet::leaflet(
     position = "topright"
   ) |>
   leaflet::setView(lng = -125, lat = 55, zoom = 5) |>
-  #leaflet::addMiniMap(toggleDisplay = TRUE, minimized = TRUE) |>
-  #default_draw_tool() |>
+  leaflet::addMiniMap(toggleDisplay = TRUE, minimized = TRUE) |>
+  default_draw_tool() |>
   leaflet::hideGroup(c("WNA BEC", "Climate")) |>
   leaflet::showGroup("Hillshade")
 
@@ -147,29 +147,10 @@ shiny::shinyApp(
               
               accordion_panel(
                 title = "Method 1: By selection on map",
-                
-                accordion(
-                  multiple = FALSE,
-                  
-                  accordion_panel(
-                    title = "Click on map to add points",
-                    DT::DTOutput("geom_dt", width = "100%"),
-                    #shiny::actionButton("add_button", "Enter New", icon("plus")),
-                    shiny::actionButton("delete_button_point", "Delete Selected", icon("trash-alt")),
-                    value = "acc1_pan1"
-                  ),
-                
-                  accordion_panel(
-                    title = "Draw on map to add area-of-interest",
-                    ("Choose drawing tool:"),
-                    shiny::actionButton("draw_square", icon("square")),
-                    shiny::actionButton("draw_circle", icon("circle")),
-                    shiny::actionButton("draw_polygon", icon("draw-polygon")), #change this icon
-                    DT::DTOutput("points_table", width = "100%"),
-                    #shiny::actionButton("add_button", "Enter New", icon("plus")),
-                    shiny::actionButton("delete_button_draw", "Delete Selected", icon("trash-alt"))
-                  )
-                )
+                p("Click on map to add points or draw an area-of-interest using shape tools."),
+                DT::DTOutput("geom_dt", width = "100%"),
+                shiny::actionButton("delete_button_point", "Delete Selected", icon("trash-alt")),
+                value = "acc1"
               ),
               
               accordion_panel(
@@ -279,21 +260,409 @@ shiny::shinyApp(
       sg$add_file(input$upload_button)
     })
     
-    # delete a map point (currently using row ID to delete not point ID)
+    # delete a map point via data table
     shiny::observeEvent(input$delete_button_point, {
       if (shiny::in_devmode()) cat("Event: sg_remove", sep = "\n")
       row_num <- input$geom_dt_rows_selected
       point_id <- as.numeric(map_points$dt[row_num,1])
+      if (length(point_id) != 0) {
       sg$rm(point_id)
+      } else {
+        showModal(
+          modalDialog(
+            title = "Warning",
+            paste("Please select row(s)." ),
+            easyClose = TRUE
+          )
+        )
+      }
     })
+    
     # pop-up remove button for map points
     shiny::observeEvent(input$sg_remove, {
       if (shiny::in_devmode()) cat("Event: sg_remove", sep = "\n")
       sg$rm(input$sg_remove)
     })
 
-    
     sn <- \(j) setNames(j,j)
+    
+    # ---- Downscale events
+    downscale_modal <- function() {
+      shiny::showModal(
+        shiny::modalDialog(
+          title = "Downscale Parameters", size = "xl", fade = FALSE, class = "modal-dialog-scrollable",
+          shiny::div(
+            title = "Which map of 1961-1990 climatological normals to use as the high-resolution reference climate map for downscaling. 'auto' selects the best available map per point.",
+            shiny::selectInput(
+              inputId = "downscale_which_refmap",
+              label = "Reference Map",
+              width = "100%",
+              choices = c(
+                local({z <- climr::list_refmaps(); substr(z, 8L, z |> nchar()) |> tools::toTitleCase() |> setNames(object = z, nm = _)})
+              ),
+              selected = vstore[["downscale_which_refmap"]]
+            )
+          ),
+          shiny::div(
+            title = "Historical period for observational climate data, averaged over this period. Select 'Null' for no observational periods.",
+            shiny::selectInput(
+              inputId = "downscale_obs_periods",
+              label = "Observation periods",
+              width = "100%",
+              choices = list("Options" = climr::list_obs_periods() |> sn(), "Remove all" = c("null" = "NULL")),
+              selected = vstore[["downscale_obs_periods"]]
+            )
+          ),
+          shiny::div(
+            title = "Years to obtain individual years or time series of observational climate data.",
+            shiny::selectInput(
+              inputId = "downscale_obs_years",
+              label = "Observation years",
+              width = "100%",
+              choices = list("Options" = climr::list_obs_years() |> sn(), "Remove all" = c("null" = "NULL")),
+              multiple = TRUE,
+              selected = vstore[["downscale_obs_years"]]
+            )
+          ),
+          shiny::div(
+            title = "Dataset for observational time series data. Options: 'climatena' for ClimateNA gridded time series, 'cru.gpcc' for CRU TS (temperature) and GPCC (precipitation), or 'Null' for none.",
+            shiny::selectInput(
+              inputId = "downscale_obs_ts_dataset",
+              label = "Observation time-series data",
+              width = "100%",
+              selected = vstore[["downscale_obs_ts_dataset"]],
+              choices = c("ClimateNA" = "climatena", "Climatic Research Unit / Global Precipitation Climatology Centre" = "cru.gpcc", "null" = "NULL")
+            )
+          ),
+          shiny::div(
+            title = "Global climate models to downscale. Select multiple GCMs for ensemble outputs.",
+            shiny::selectInput(
+              inputId = "downscale_gcms",
+              label = "Global climate model",
+              width = "100%",
+              choices = list("Options" = climr::list_gcms() |> sn(), "Remove all" = c("null" = "NULL")),
+              multiple = TRUE,
+              selected = vstore[["downscale_gcms"]]
+            )
+          ),
+          shiny::div(
+            title = "SSP-RCP scenarios pairing shared socioeconomic pathways with representative concentration pathways.",
+            shiny::selectInput(
+              inputId = "downscale_ssps",
+              label = "Shared Socio-economic Pathways (SSP) - Representative Concentration Pathways (RCP) Scenarios",
+              width = "100%",
+              choices = list("Options" = climr::list_ssps() |> sn(), "Remove all" = c("null" = "NULL")),
+              multiple = TRUE,
+              selected = vstore[["downscale_ssps"]]
+            )
+          ),
+          shiny::div(
+            title = "20-year reference periods for GCM simulations.",
+            shiny::selectInput(
+              inputId = "downscale_gcm_periods",
+              label = "General Circulation Model (GCM) Periods",
+              width = "100%",
+              choices = list("Options" = climr::list_gcm_periods() |> sn(), "Remove all" = c("null" = "NULL")),
+              multiple = TRUE,
+              selected = vstore[["downscale_gcm_periods"]]
+            )
+          ),
+          shiny::div(
+            title = "Time series years for GCM simulations of future SSP scenarios.",
+            shiny::selectInput(
+              inputId = "downscale_gcm_ssp_years",
+              label = "General circulation model (GCM) Shared Socio-economic Pathways (SSP) Years",
+              width = "100%",
+              choices = list("Options" = climr::list_gcm_ssp_years() |> sn(), "Remove all" = c("null" = "NULL")),
+              multiple = TRUE,
+              selected = vstore[["downscale_gcm_ssp_years"]]
+            )
+          ),
+          shiny::div(
+            title = "Time series years for GCM simulations of the historical scenario.",
+            shiny::selectInput(
+              inputId = "downscale_gcm_hist_years",
+              label = "General circulation model (GCM) Historical Years",
+              width = "100%",
+              choices = list("Options" = climr::list_gcm_hist_years() |> sn(), "Remove all" = c("null" = "NULL")),
+              multiple = TRUE,
+              selected = vstore[["downscale_gcm_hist_years"]]
+            )
+          ),
+          shiny::div(
+            title = "Maximum number of model runs to include. 0 returns only the ensemble mean.",
+            shiny::selectInput(
+              inputId = "downscale_max_run",
+              label = "Maximum number of model runs",
+              width = "100%",
+              choices = c("ensembleMean" = 0, 1:10),
+              multiple = FALSE,
+              selected = vstore[["downscale_max_run"]]
+            )
+          ),
+          shiny::div(
+            title = "Names of specific runs to return instead of using max_run. Overrides max_run if specified.",
+            shiny::selectInput(
+              inputId = "downscale_run_nm",
+              label = "Name of specified runs",
+              width = "100%",
+              choices = list("Options" = {
+                gcms <- vstore[["downscale_gcms"]]
+                ssps <- vstore[["downscale_ssps"]]
+                if (!length(gcms) && !length(ssps)) {
+                  c()
+                } else if (length(gcms) && !length(ssps)) {
+                  climr::list_runs_historic(gcm = gcms) |> sn()
+                } else if (length(gcms) && length(ssps)) {
+                  climr::list_runs_ssp(gcm = gcms, ssp = ssps) |> sn()
+                }
+              }, "Remove all" = c("null" = "NULL")),
+              multiple = TRUE,
+              selected = vstore[["downscale_run_nm"]]
+            )
+          ),
+          shiny::div(
+            title = "Extra Climate variables to compute. Defaults to monthly PPT, Tmax, Tmin if not specified.",
+            shiny::selectizeInput(
+              inputId = "downscale_extra_vars",
+              label = "Extra Climate variables",
+              width = "100%",
+              choices = c(downscale_extra_vars, list("Remove all" = c("null" = "NULL"))),
+              multiple = TRUE,
+              selected = vstore[["downscale_extra_vars"]]
+            )
+          ),
+          shiny::div(
+            title = "Apply elevation adjustment to precipitation values during downscaling.",
+            shiny::checkboxInput(
+              inputId = "downscale_core_ppt_lr",
+              label = "Precipitation elevation adjustment",
+              value = vstore[["downscale_core_ppt_lr"]]
+            )
+          ),
+          footer = shiny::tagList(
+            shiny::actionButton(
+              inputId = "downscale_reset",
+              label = "Reset",
+              class = "btn btn-warning"
+            ),           
+            shiny::modalButton("Close")
+          )
+        )
+      )
+    }
+    
+    shiny::observeEvent(input$downscale_parameters, {
+      if (shiny::in_devmode()) cat("Event: downscale_parameters", sep = "\n")
+      downscale_modal()
+    })
+    
+    update_vstore_and_notify <- function(vstore_key, input_value, msg_format) {
+      vpl <- 30
+      current_value <- vstore[[vstore_key]]
+      if ("NULL" %in% input_value) {
+        if (length(input_value) > 1) {
+          if ("NULL" %in% current_value) {
+            shiny::updateSelectInput(inputId = vstore_key, selected = setdiff(input_value, "NULL"))
+          } else {
+            shiny::updateSelectInput(inputId = vstore_key, selected = "NULL")
+          }
+          return()
+        }
+      }
+      
+      additions <- setdiff(input_value, current_value)
+      deletions <- setdiff(current_value, input_value)
+      vstore[[vstore_key]] <- input_value
+      if (length(additions) > 0) {
+        diff_value <- substr(paste(additions, collapse = ", "), 1, vpl)
+        shiny::showNotification(
+          sprintf("%s added [%s]", msg_format, diff_value),
+          duration = 2
+        )
+      } else if (length(deletions) > 0) {
+        diff_value <- substr(paste(deletions, collapse = ", "), 1, vpl)
+        shiny::showNotification(
+          sprintf("%s removed [%s]", msg_format, diff_value),
+          duration = 2
+        )
+      }
+    }
+    
+    shiny::observeEvent(input$downscale_which_refmap, {
+      if (shiny::in_devmode()) cat("Event: downscale_which_refmap", sep = "\n")
+      update_vstore_and_notify("downscale_which_refmap", input$downscale_which_refmap, "Ref map")
+    })
+    shiny::observeEvent(input$downscale_obs_periods, {
+      if (shiny::in_devmode()) cat("Event: downscale_obs_periods", sep = "\n")
+      update_vstore_and_notify("downscale_obs_periods", input$downscale_obs_periods, "Obs periods")
+    })
+    shiny::observeEvent(input$downscale_obs_years, {
+      if (shiny::in_devmode()) cat("Event: downscale_obs_years", sep = "\n")
+      update_vstore_and_notify("downscale_obs_years", input$downscale_obs_years, "Obs years")
+    })
+    shiny::observeEvent(input$downscale_obs_ts_dataset, {
+      if (shiny::in_devmode()) cat("Event: downscale_obs_ts_dataset", sep = "\n")
+      update_vstore_and_notify("downscale_obs_ts_dataset", input$downscale_obs_ts_dataset, "Obs dataset")
+    })
+    shiny::observeEvent(input$downscale_gcms, {
+      if (shiny::in_devmode()) cat("Event: downscale_gcms", sep = "\n")
+      update_vstore_and_notify("downscale_gcms", input$downscale_gcms, "GCMs")
+      update_run_nm_select()
+    })
+    shiny::observeEvent(input$downscale_ssps, {
+      if (shiny::in_devmode()) cat("Event: downscale_ssps", sep = "\n")
+      update_vstore_and_notify("downscale_ssps", input$downscale_ssps, "SSPs")
+      update_run_nm_select()
+    })
+    shiny::observeEvent(input$downscale_gcm_periods, {
+      if (shiny::in_devmode()) cat("Event: downscale_gcm_periods", sep = "\n")
+      update_vstore_and_notify("downscale_gcm_periods", input$downscale_gcm_periods, "GCM periods")
+    })
+    shiny::observeEvent(input$downscale_gcm_ssp_years, {
+      if (shiny::in_devmode()) cat("Event: downscale_gcm_ssp_years", sep = "\n")
+      update_vstore_and_notify("downscale_gcm_ssp_years", input$downscale_gcm_ssp_years, "GCM SSP years")
+    })
+    shiny::observeEvent(input$downscale_gcm_hist_years, {
+      if (shiny::in_devmode()) cat("Event: downscale_gcm_hist_years", sep = "\n")
+      update_vstore_and_notify("downscale_gcm_hist_years", input$downscale_gcm_hist_years, "GCM hist years")
+    })
+    shiny::observeEvent(input$downscale_max_run, {
+      if (shiny::in_devmode()) cat("Event: downscale_max_run", sep = "\n")
+      update_vstore_and_notify("downscale_max_run", input$downscale_max_run, "Max run")
+    })
+    shiny::observeEvent(input$downscale_run_nm, {
+      if (shiny::in_devmode()) cat("Event: downscale_run_nm", sep = "\n")
+      update_vstore_and_notify("downscale_run_nm", input$downscale_run_nm, "Run name")
+    })
+    shiny::observeEvent(input$downscale_extra_vars, {
+      if (shiny::in_devmode()) cat("Event: downscale_extra_vars", sep = "\n")
+      update_vstore_and_notify("downscale_extra_vars", input$downscale_extra_vars, "Core vars")
+    })
+    shiny::observeEvent(input$downscale_core_ppt_lr, {
+      if (shiny::in_devmode()) cat("Event: downscale_core_ppt_lr", sep = "\n")
+      update_vstore_and_notify("downscale_core_ppt_lr", input$downscale_core_ppt_lr, "Core PPT LR")
+    })
+    
+    shiny::observeEvent(input$downscale_reset, {
+      if (shiny::in_devmode()) cat("Event: downscale_reset", sep = "\n")
+      shiny::showModal(
+        shiny::modalDialog(
+          title = "Confirm Reset",
+          "Are you sure you want to reset the downscale preferences to default values?",
+          footer = tagList(
+            shiny::actionButton("confirm_reset_yes", "Yes", class = "btn btn-danger"),
+            shiny::actionButton("confirm_reset_no", "No")
+          ),
+          easyClose = TRUE
+        )
+      )
+    })
+    
+    shiny::observeEvent(input$confirm_reset_yes, {
+      if (shiny::in_devmode()) cat("Event: confirm_reset_yes", sep = "\n")
+      lapply(names(downscale_default), \(x) {
+        vstore[[x]] <- downscale_default[[x]]
+      })
+      downscale_modal()
+    })
+    
+    shiny::observeEvent(input$confirm_reset_no, {
+      if (shiny::in_devmode()) cat("Event: confirm_reset_no", sep = "\n")
+      downscale_modal()
+    })
+    
+    update_run_nm_select <- function() {
+      gcms <- vstore[["downscale_gcms"]]
+      ssps <- vstore[["downscale_ssps"]]
+      if (!length(gcms) && !length(ssps)) {
+        opt_choices <- c()
+      } else if (length(gcms) && !length(ssps)) {
+        opt_choices <- climr::list_runs_historic(gcm = gcms) |> sn()
+      } else if (length(gcms) && length(ssps)) {
+        opt_choices <- climr::list_runs_ssp(gcm = gcms, ssp = ssps) |> sn()
+      }
+      choices <- list("Options" = opt_choices, "Remove all" = c("null" = "NULL"))
+      if (all(vstore[["downscale_run_nm"]] %in% unlist(choices))) {
+        select <- vstore[["downscale_run_nm"]]
+      } else {
+        select <- NULL
+      }
+      shiny::updateSelectInput(inputId = "downscale_run_nm", choices = choices, selected = select)
+    }
+    
+    shiny::observeEvent(input$downscale_process, {
+      if (shiny::in_devmode()) cat("Event: downscale_process", sep = "\n")
+      vstore[["processing"]] <- FALSE
+      output$downscale_points_count_estimate <- shiny::renderUI({
+        pce <- sg$process_count(vstore[["downscale_resolution"]])
+        bslib::card(
+          full_screen = FALSE,
+          height = "auto",
+          bslib::card_header("Load estimation"),
+          class = "bg-warning",
+          fill = TRUE,
+          bslib::card_body(
+            shiny::tags$span(
+              if (pce$marker_count > 0) "[%s] points from [%s] markers geometries." |> sprintf(format(pce$marker_count, big.mark = ","), format(pce$marker, big.mark = ",")),
+              shiny::br(),
+              if (pce$shape_count > 0) "[%s] points from [%s] shapes geometries." |> sprintf(format(pce$shape_count, big.mark = ","), format(pce$shape, big.mark = ","))
+            )
+          )
+        )
+      })
+      shiny::showModal(
+        shiny::modalDialog(
+          title = "Preferences for Downscale Processing", size = "l",
+          shiny::div(
+            title = "tif: Shapes/rasters are returned as GeoTIFF. csv: all points are returned in csv.",
+            shiny::radioButtons(
+              inputId = "downscale_output",
+              label = "Downscale Output Format Priority",
+              choices = c("Geographic Tag Image File Format (GeoTIFF)" = "tif", "Comma Separated Value (csv)" = "csv"),
+              inline = TRUE,
+              selected = vstore[["downscale_output"]]
+            )
+          ),
+          shiny::div(
+            title = "Target resolution for shapes drawn on map or added using file upload. Does not apply to points, raster or csv files.",
+            shiny::sliderInput(
+              inputId = "downscale_resolution",
+              label = "Downscale Resolution (m)",
+              value = vstore[["downscale_resolution"]],
+              width = "100%",
+              min = 250,
+              max = 50000,
+              step = 250,
+              post = "m",
+              ticks = FALSE
+            )
+          ),
+          shiny::uiOutput("downscale_points_count_estimate"),
+          shiny::actionButton(
+            inputId = "downscale_process_launch",
+            label = "Launch Downscale Process",
+            title = "Trigger a downscale processing run. At the end of the run, the download button on the main control panel will be enabled.",
+            class = "btn btn-primary btn-lg",
+            icon = shiny::icon("play"),
+            width = "100%"
+          )
+        )
+      )
+    })
+    shiny::observeEvent(input$downscale_output, {
+      if (shiny::in_devmode()) cat("Event: downscale_output", sep = "\n")
+      vstore[["downscale_output"]] <- input$downscale_output
+    })
+    shiny::observeEvent(input$downscale_resolution, {
+      if (shiny::in_devmode()) cat("Event: downscale_resolution", sep = "\n")
+      vstore[["downscale_resolution"]] <- input$downscale_resolution
+    })
+    shiny::observeEvent(input$downscale_process_launch, {
+      if (shiny::in_devmode()) cat("Event: downscale_process_launch", sep = "\n")
+      if (vstore[["processing"]]) return()
+      sg$process()
+    })
     
   }
 )

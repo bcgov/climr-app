@@ -28,11 +28,14 @@ session_geometry <- function() {
   # allow map to be modified instead of re-rendering
   mp <- leaflet::leafletProxy("climr")
   
-  # remove button on map clicks
+  # pop-up remove button on map clicks
   rem_popup <- function(id) {
+    
+    # want to add id, lat, long to the popup window here
+    
     shiny::actionButton(
       "sg_remove_%s" |> sprintf(id),
-      "Remove:%s" |> sprintf(id),
+      "Remove: %s" |> sprintf(id),
       class = "btn btn-sm btn-danger action-button",
       onclick = 'Shiny.setInputValue(\"sg_remove\", %s, {priority: \"event\"})' |> sprintf(id)
     ) |> 
@@ -143,12 +146,34 @@ session_geometry <- function() {
   push <- function(new, g, s, d = NA_character_) {
     id <- max(c(0L,sg$id))+1L
     
-    # Extract long and lat coordinates
-    coords <- gsub("POINT \\(|\\)", "", new)
-    coords_split <- strsplit(coords, " ")[[1]]
+    if (grepl("POINT", new)) {
+      
+      # Extract long and lat coordinates
+      coords <- gsub("POINT \\(|\\)", "", new)
+      coords_split <- strsplit(coords, " ")[[1]]
+      
+      lon <- round(as.numeric(coords_split[1]), 5)
+      lat <- round(as.numeric(coords_split[2]), 5)
     
-    lon <- round(as.numeric(coords_split[1]), 5)
-    lat <- round(as.numeric(coords_split[2]), 5)
+      } else {
+        
+      # Extract list of long and lat to find centroid coords
+      coords <- gsub("POLYGON \\(\\(|\\)\\)", "", new)
+      coords_split <- strsplit(coords, "[, ]+")[[1]]
+      lon_coords <- numeric()
+      lat_coords <- numeric()
+      index = 1
+      for (c in coords_split) {
+        if (index %% 2 != 0) {
+          lon_coords[index] = as.numeric(c)
+        } else {
+          lat_coords[index] = as.numeric(c)
+        }
+        index = index +1
+      }
+      lon <- round(mean(lon_coords[!is.na(lon_coords)]), 5)
+      lat <- round(mean(lat_coords[!is.na(lat_coords)]), 5)
+    }
     
     sg <<- rbind(sg, data.table::data.table(id = id, lat = lat, long = lon, wkt = new, group = g, source = s, datapath = d))
     # To show hull when npoints > 100
