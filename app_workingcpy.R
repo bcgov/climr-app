@@ -168,7 +168,7 @@ shiny::shinyApp(
               )
             ),
             br(), br(),
-            shiny::actionButton("downscale_params", "Choose Downscale Parameters",
+            shiny::actionButton("downscale_parameters", "Choose Downscale Parameters",
                                 style = "width:100%", disabled = TRUE)
           ),
           shiny::mainPanel(
@@ -234,6 +234,46 @@ shiny::shinyApp(
     # ---- Modal input storage
     output$climr <- leaflet::renderLeaflet(l)
     
+    downscale_default <- list(
+      downscale_which_refmap = "refmap_climr",
+      downscale_obs_periods = "2001_2020",
+      downscale_obs_years = "NULL",
+      downscale_obs_ts_dataset = "NULL",
+      downscale_gcms = "NULL",
+      downscale_ssps = "NULL",
+      downscale_gcm_periods = "NULL",
+      downscale_gcm_ssp_years = "NULL",
+      downscale_gcm_hist_years = "NULL",
+      downscale_max_run = 0,
+      downscale_run_nm = "NULL",
+      downscale_extra_vars = "NULL",
+      downscale_core_ppt_lr = FALSE
+    )
+    
+    vstore <- reactiveValues(
+      tifsource = names(climr_tif) |> head(1),
+      time = NULL,
+      element = NULL,
+      climatevar = "NONE",
+      downscale_which_refmap = downscale_default[["downscale_which_refmap"]],
+      downscale_obs_periods = downscale_default[["downscale_obs_periods"]],
+      downscale_obs_years = downscale_default[["downscale_obs_years"]],
+      downscale_obs_ts_dataset = downscale_default[["downscale_obs_ts_dataset"]],
+      downscale_gcms = downscale_default[["downscale_gcms"]],
+      downscale_ssps = downscale_default[["downscale_ssps"]],
+      downscale_gcm_periods = downscale_default[["downscale_gcm_periods"]],
+      downscale_gcm_ssp_years = downscale_default[["downscale_gcm_ssp_years"]],
+      downscale_gcm_hist_years = downscale_default[["downscale_gcm_hist_years"]],
+      downscale_max_run = downscale_default[["downscale_max_run"]],
+      downscale_run_nm = downscale_default[["downscale_run_nm"]],
+      downscale_extra_vars = downscale_default[["downscale_extra_vars"]],
+      downscale_core_ppt_lr = downscale_default[["downscale_core_ppt_lr"]],
+      downscale_output = "tif",
+      downscale_resolution = 2500,
+      vscale = "none",
+      processing = FALSE
+    )
+    
     # ---- Geometry
     source("scripts/geometry_workingcpy.R", local = TRUE)
     sg <- session_geometry()
@@ -242,6 +282,8 @@ shiny::shinyApp(
     shiny::observeEvent(input$climr_draw_start, {
       if (shiny::in_devmode()) cat("Event: climr_draw_start", sep = "\n")
       sg$add_point_enabled(FALSE)
+      updateActionButton(session = getDefaultReactiveDomain(),
+                         "downscale_parameters", disabled = FALSE)
     })
     shiny::observeEvent(input$climr_draw_stop, {
       if (shiny::in_devmode()) cat("Event: climr_draw_stop", sep = "\n")
@@ -254,11 +296,27 @@ shiny::shinyApp(
     shiny::observeEvent(input$climr_click, {
       if (shiny::in_devmode()) cat("Event: climr_click", sep = "\n")
       sg$add_point(input$climr_click$lat, input$climr_click$lng)
+      updateActionButton(session = getDefaultReactiveDomain(),
+                         "downscale_parameters", disabled = FALSE)
     })
     shiny::observeEvent(input$upload_button, {
       if (shiny::in_devmode()) cat("Event: upload_button", sep = "\n")
       sg$add_file(input$upload_button)
+      updateActionButton(session = getDefaultReactiveDomain(),
+                         "downscale_parameters", disabled = FALSE)
     })
+    
+    # pop-up remove button for map points
+    shiny::observeEvent(input$sg_remove, {
+      if (shiny::in_devmode()) cat("Event: sg_remove", sep = "\n")
+      sg$rm(input$sg_remove)
+      if (nrow(map_points$dt) == 1) {
+        updateActionButton(session = getDefaultReactiveDomain(),
+                          "downscale_parameters", disabled = TRUE)
+      }
+    })
+    
+    # ---- Data table events
     
     # delete a map point via data table
     shiny::observeEvent(input$delete_button_point, {
@@ -266,7 +324,11 @@ shiny::shinyApp(
       row_num <- input$geom_dt_rows_selected
       point_id <- as.numeric(map_points$dt[row_num,1])
       if (length(point_id) != 0) {
-      sg$rm(point_id)
+        sg$rm(point_id)
+        if (nrow(map_points$dt) == 1) {
+        updateActionButton(session = getDefaultReactiveDomain(),
+                          "downscale_parameters", disabled = TRUE)
+      }
       } else {
         showModal(
           modalDialog(
@@ -275,13 +337,7 @@ shiny::shinyApp(
             easyClose = TRUE
           )
         )
-      }
-    })
-    
-    # pop-up remove button for map points
-    shiny::observeEvent(input$sg_remove, {
-      if (shiny::in_devmode()) cat("Event: sg_remove", sep = "\n")
-      sg$rm(input$sg_remove)
+      } 
     })
 
     sn <- \(j) setNames(j,j)
