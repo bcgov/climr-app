@@ -45,7 +45,7 @@ session_geometry <- function() {
     output$geom_dt <<- DT::renderDT(server = TRUE, {
       
       # only render table if a point has been clicked on
-      map_points <- reactiveValues(dt = sg)
+      map_points <<- reactiveValues(dt = sg)
       
       if (nrow(map_points$dt) > 0) {
       
@@ -54,8 +54,9 @@ session_geometry <- function() {
       
       # create data table to display
       gdt <- data.table::copy(sg[,1:3])
+      
       data.table::setnames(gdt, tools::toTitleCase(names(gdt)))
-      DT::datatable(gdt, rownames = FALSE, escape = FALSE, options = list(
+      DT::datatable(gdt, rownames = FALSE, escape = FALSE, selection = 'single', options = list(
         dom = 'ltp',
         pageLength = 5,
         lengthMenu = c(5, 10, 25, 50, 100),
@@ -433,7 +434,7 @@ session_geometry <- function() {
       return(sg)
     },
     rm = function(rid) {
-      rem(rid)
+        rem(rid)
     },
     # view = function(rid) {
     #   view_map(rid)

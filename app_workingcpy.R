@@ -1,5 +1,3 @@
-# COOP DEVL VERSION
-
 # Setup ----
 suppressPackageStartupMessages({
   library(archive)
@@ -99,6 +97,7 @@ l <- leaflet::leaflet(
   ) |>
   leaflet::setView(lng = -125, lat = 55, zoom = 5) |>
   #leaflet::addMiniMap(toggleDisplay = TRUE, minimized = TRUE) |>
+  #default_draw_tool() |>
   leaflet::hideGroup(c("WNA BEC", "Climate")) |>
   leaflet::showGroup("Hillshade")
 
@@ -135,7 +134,7 @@ shiny::shinyApp(
           shiny::sidebarPanel(
             style = "height: 84vh; overflow-y: auto; overflow-x: auto;", 
             
-             # need to adjust this so the helplink is centered, create the link
+            # need to adjust this so the helplink is centered, create the link
             shiny::actionLink(
               inputId = "tutorial",
               label = "Click here for a tutorial"
@@ -156,7 +155,7 @@ shiny::shinyApp(
                     title = "Click on map to add points",
                     DT::DTOutput("geom_dt", width = "100%"),
                     #shiny::actionButton("add_button", "Enter New", icon("plus")),
-                    shiny::actionButton("delete_button", "Delete Selected", icon("trash-alt")),
+                    shiny::actionButton("delete_button_point", "Delete Selected", icon("trash-alt")),
                     value = "acc1_pan1"
                   ),
                 
@@ -168,7 +167,7 @@ shiny::shinyApp(
                     shiny::actionButton("draw_polygon", icon("draw-polygon")), #change this icon
                     DT::DTOutput("points_table", width = "100%"),
                     #shiny::actionButton("add_button", "Enter New", icon("plus")),
-                    shiny::actionButton("delete_button", "Delete Selected", icon("trash-alt"))
+                    shiny::actionButton("delete_button_draw", "Delete Selected", icon("trash-alt"))
                   )
                 )
               ),
@@ -280,10 +279,17 @@ shiny::shinyApp(
       sg$add_file(input$upload_button)
     })
     
-    # delete a map point
-    shiny::observeEvent(input$delete_button, {
-      
-      # call a global function in geometry.R to remove rows?
+    # delete a map point (currently using row ID to delete not point ID)
+    shiny::observeEvent(input$delete_button_point, {
+      if (shiny::in_devmode()) cat("Event: sg_remove", sep = "\n")
+      row_num <- input$geom_dt_rows_selected
+      point_id <- as.numeric(map_points$dt[row_num,1])
+      sg$rm(point_id)
+    })
+    # pop-up remove button for map points
+    shiny::observeEvent(input$sg_remove, {
+      if (shiny::in_devmode()) cat("Event: sg_remove", sep = "\n")
+      sg$rm(input$sg_remove)
     })
 
     

@@ -1,5 +1,3 @@
-# COOP DEVL VERSION
-
 # Setup ----
 suppressPackageStartupMessages({
   library(archive)
