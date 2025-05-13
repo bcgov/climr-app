@@ -121,7 +121,7 @@ shiny::shinyApp(
       ),
       title = shiny::tagList(
         shiny::tags$image(
-          src = "images/bcid-logo-rev-en.svg",
+          src = "images/bcid-logo-en.svg",
           style = "display: inline-block",
           height = "35px",
           alt = "British Columbia"
@@ -139,7 +139,20 @@ shiny::shinyApp(
               inputId = "tutorial",
               label = "Click here for a tutorial"
               ),
-            br(), br(),
+            br(),
+            
+            splitLayout(
+              actionButton("clear_selections", "Clear Selections",
+                           style = "width:100%; height:70px; background-color:#c21104; color: #FFF"),
+              actionButton(
+                "generate_results",
+                label = "Generate results",
+                icon = icon("plus-square"),
+                style = "width:100%; height:70px; background-color:#003366; color: #FFF"
+              )
+            ),
+            br(),
+            
             strong("Add Sites Using One of the 2 Methods Below:"),
             accordion(
               # need to add help icons to each of the methods
@@ -155,8 +168,6 @@ shiny::shinyApp(
               
               accordion_panel(
                 title = "Method 2: Upload a file",
-                # shiny::actionButton("upload_button", "Upload", icon("upload"),
-                #                     style = "width:100%; background-color:#8f0e7e; color: #FFF"),
                 shiny::div(
                   #title = "Upload a csv, a raster or a shape file to add geographies",
                   shiny::fileInput(
@@ -279,6 +290,8 @@ shiny::shinyApp(
     sg <- session_geometry()
     
     # ---- Map events
+    
+    # add map points and drawing map shapes logic
     shiny::observeEvent(input$climr_draw_start, {
       if (shiny::in_devmode()) cat("Event: climr_draw_start", sep = "\n")
       sg$add_point_enabled(FALSE)
@@ -299,9 +312,11 @@ shiny::shinyApp(
       updateActionButton(session = getDefaultReactiveDomain(),
                          "downscale_parameters", disabled = FALSE)
     })
-    shiny::observeEvent(input$upload_button, {
-      if (shiny::in_devmode()) cat("Event: upload_button", sep = "\n")
-      sg$add_file(input$upload_button)
+    
+    # upload a file
+    shiny::observeEvent(input$upload, {
+      if (shiny::in_devmode()) cat("Event: upload", sep = "\n")
+      sg$add_file(input$upload)
       updateActionButton(session = getDefaultReactiveDomain(),
                          "downscale_parameters", disabled = FALSE)
     })
@@ -310,7 +325,7 @@ shiny::shinyApp(
     shiny::observeEvent(input$sg_remove, {
       if (shiny::in_devmode()) cat("Event: sg_remove", sep = "\n")
       sg$rm(input$sg_remove)
-      if (nrow(map_points$dt) == 1) {
+      if (nrow(map_points$dt) < 1) {
         updateActionButton(session = getDefaultReactiveDomain(),
                           "downscale_parameters", disabled = TRUE)
       }
@@ -325,7 +340,7 @@ shiny::shinyApp(
       point_id <- as.numeric(map_points$dt[row_num,1])
       if (length(point_id) != 0) {
         sg$rm(point_id)
-        if (nrow(map_points$dt) == 1) {
+        if (nrow(map_points$dt) < 1) {
         updateActionButton(session = getDefaultReactiveDomain(),
                           "downscale_parameters", disabled = TRUE)
       }
@@ -338,6 +353,11 @@ shiny::shinyApp(
           )
         )
       } 
+    })
+    
+    # clear all selections (map and file) logic
+    shiny::observeEvent(input$clear_selections, {
+      sg$clear_all()
     })
 
     sn <- \(j) setNames(j,j)
@@ -510,8 +530,19 @@ shiny::shinyApp(
     
     shiny::observeEvent(input$downscale_parameters, {
       if (shiny::in_devmode()) cat("Event: downscale_parameters", sep = "\n")
-      # before displaying the popup window, use the source column in the map_points table to make sure they are all the same
-      downscale_modal()
+      
+      # ensure all data sources are the same before opening Downscale Parameters
+      if (length(unique((map_points$dt)$source)) == 1) {
+        downscale_modal()
+      } else {
+        showModal(
+          modalDialog(
+            title = "Warning",
+            paste("Please ensure input is points OR area-of-interest OR a file input."),
+            easyClose = TRUE
+          )
+        )
+      }
     })
     
     update_vstore_and_notify <- function(vstore_key, input_value, msg_format) {

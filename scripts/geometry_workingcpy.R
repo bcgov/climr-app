@@ -47,8 +47,8 @@ session_geometry <- function() {
     
     output$geom_dt <<- DT::renderDT(server = TRUE, {
       
-      # only render table if a point has been clicked on
-      map_points <<- reactiveValues(dt = sg)
+      # only render table if a point has been clicked on (do not display file uploads)
+      map_points <<- reactiveValues(dt = sg %>% filter(source != "file_upload"))
       
       if (nrow(map_points$dt) > 0) {
       
@@ -200,8 +200,35 @@ session_geometry <- function() {
     
     # remove the selected rows and refresh DT
     sg <<- sg[!id %in% rid]
+    
+    # refresh global DT
+    map_points <<- reactiveValues(dt = sg)
     refresh(g)
 
+  }
+  
+  # clear all map point/shapes & files
+  clear <- function() {
+    if ((nrow(map_points$dt) > 0) | (length(fg) != 0)) {
+      for (id in (map_points$dt)$id) {
+        rem(id)
+        refresh_DT()
+      }
+      rem(sg[source %in% c("file_upload", "raster_upload")]$id)
+      refresh_DT()
+     } 
+      #if (length(fg) != 0) {
+    #   rem(sg[source %in% c("file_upload", "raster_upload")]$id)
+    # } 
+      else {
+      showModal(
+        modalDialog(
+          title = "Warning",
+          paste("Nothing to clear." ),
+          easyClose = TRUE
+        )
+      )
+    }
   }
   
   click_enabled <- TRUE
@@ -312,9 +339,9 @@ session_geometry <- function() {
                 terra::convHull() |>
                 terra::geom(wkt = TRUE)
             }
-            push(new_p, "marker", "file_upload", d0)
+            #push(new_p, "marker", "file_upload", d0)
           } else {
-            push(new_p, "shape", "file_upload", d0)
+            #push(new_p, "shape", "file_upload", d0)
           }
           
           return()
@@ -345,7 +372,7 @@ session_geometry <- function() {
             terra::convHull() |>
             terra::geom(wkt = TRUE)
         }
-        push(new_p, "marker", "file_upload", d0)
+        #push(new_p, "marker", "file_upload", d0)
         return()
         
       }
@@ -460,6 +487,9 @@ session_geometry <- function() {
     },
     rm = function(rid) {
         rem(rid)
+    },
+    clear_all = function() {
+      clear()
     },
     # view = function(rid) {
     #   view_map(rid)
