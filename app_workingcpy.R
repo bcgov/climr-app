@@ -346,7 +346,7 @@ shiny::shinyApp(
     downscale_modal <- function() {
       shiny::showModal(
         shiny::modalDialog(
-          title = "Downscale Parameters", size = "xl", fade = FALSE, class = "modal-dialog-scrollable",
+          title = "Downscale Parameters", size = "l", fade = FALSE, class = "modal-dialog-scrollable",
           shiny::div(
             title = "Which map of 1961-1990 climatological normals to use as the high-resolution reference climate map for downscaling. 'auto' selects the best available map per point.",
             shiny::selectInput(
@@ -510,6 +510,7 @@ shiny::shinyApp(
     
     shiny::observeEvent(input$downscale_parameters, {
       if (shiny::in_devmode()) cat("Event: downscale_parameters", sep = "\n")
+      # before displaying the popup window, use the source column in the map_points table to make sure they are all the same
       downscale_modal()
     })
     
