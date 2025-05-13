@@ -162,7 +162,7 @@ shiny::shinyApp(
                 title = "Method 1: By selection on map",
                 p("Click on map to add points or draw an area-of-interest using shape tools."),
                 DT::DTOutput("geom_dt", width = "100%"),
-                shiny::actionButton("delete_button_point", "Delete Selected", icon("trash-alt")),
+                shiny::actionButton("delete_button", "Delete Selected", icon("trash-alt")),
                 value = "acc1"
               ),
               
@@ -334,10 +334,10 @@ shiny::shinyApp(
     # ---- Data table events
     
     # delete a map point via data table
-    shiny::observeEvent(input$delete_button_point, {
+    shiny::observeEvent(input$delete_button, {
       if (shiny::in_devmode()) cat("Event: sg_remove", sep = "\n")
       row_num <- input$geom_dt_rows_selected
-      point_id <- as.numeric(map_points$dt[row_num,1])
+      point_id <- as.numeric(map_points_clicked[row_num,1])
       if (length(point_id) != 0) {
         sg$rm(point_id)
         if (nrow(map_points$dt) < 1) {
@@ -390,6 +390,8 @@ shiny::shinyApp(
             open = FALSE,
             accordion_panel(
               title = "Observed Climate Data"
+              
+              
             )
           ),
           shiny::div(

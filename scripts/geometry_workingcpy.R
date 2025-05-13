@@ -31,8 +31,6 @@ session_geometry <- function() {
   # pop-up remove button on map clicks
   rem_popup <- function(id) {
     
-    # want to add id, lat, long to the popup window here
-    
     shiny::actionButton(
       "sg_remove_%s" |> sprintf(id),
       "Remove: %s" |> sprintf(id),
@@ -47,16 +45,19 @@ session_geometry <- function() {
     
     output$geom_dt <<- DT::renderDT(server = TRUE, {
       
-      # only render table if a point has been clicked on (do not display file uploads)
-      map_points <<- reactiveValues(dt = sg %>% filter(source != "file_upload"))
-      
-      if (nrow(map_points$dt) > 0) {
-      
       # change ID to a character to match alignment
       sg$id <- as.character(sg$id)
       
+      # create global DT
+      map_points <<- reactiveValues(dt = sg)
+      
+      # only render table if a point/shape has been clicked on (do not display file uploads)
+      map_points_clicked <<- ((map_points$dt) %>% filter((source %in% c("map_draw", "map_click"))))
+      
+      if (nrow(map_points_clicked) > 0) {
+      
       # create data table to display
-      gdt <- data.table::copy(sg[,1:3])
+      gdt <- data.table::copy(map_points_clicked[,1:3])
       
       data.table::setnames(gdt, tools::toTitleCase(names(gdt)))
       DT::datatable(gdt, rownames = FALSE, escape = FALSE, selection = 'single', options = list(
@@ -170,7 +171,7 @@ session_geometry <- function() {
           lat_coords[index] = as.numeric(c)
         }
         index = index +1
-      }
+      } 
       lon <- round(mean(lon_coords[!is.na(lon_coords)]), 5)
       lat <- round(mean(lat_coords[!is.na(lat_coords)]), 5)
     }
@@ -179,6 +180,7 @@ session_geometry <- function() {
     # To show hull when npoints > 100
     if (!grepl("POINT", new)) g <- "shape"
     refresh(g)
+    refresh_DT()
     session$sendCustomMessage(type="jsCode", list(code = "$('.input-control-body a.shiny-download-link').removeClass('btn-success');"))
   }
   
@@ -202,21 +204,22 @@ session_geometry <- function() {
     sg <<- sg[!id %in% rid]
     
     # refresh global DT
-    map_points <<- reactiveValues(dt = sg)
+    refresh_DT()
     refresh(g)
 
   }
   
   # clear all map point/shapes & files
   clear <- function() {
+    # remove points and drawn AOIs
     if ((nrow(map_points$dt) > 0) | (length(fg) != 0)) {
       for (id in (map_points$dt)$id) {
         rem(id)
-        refresh_DT()
       }
+      # remove file uploads
       rem(sg[source %in% c("file_upload", "raster_upload")]$id)
-      refresh_DT()
-     } else {
+     } 
+      else {
       showModal(
         modalDialog(
           title = "Warning",
