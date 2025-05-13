@@ -216,11 +216,7 @@ session_geometry <- function() {
       }
       rem(sg[source %in% c("file_upload", "raster_upload")]$id)
       refresh_DT()
-     } 
-      #if (length(fg) != 0) {
-    #   rem(sg[source %in% c("file_upload", "raster_upload")]$id)
-    # } 
-      else {
+     } else {
       showModal(
         modalDialog(
           title = "Warning",
@@ -339,9 +335,9 @@ session_geometry <- function() {
                 terra::convHull() |>
                 terra::geom(wkt = TRUE)
             }
-            #push(new_p, "marker", "file_upload", d0)
+            push(new_p, "marker", "file_upload", d0)
           } else {
-            #push(new_p, "shape", "file_upload", d0)
+            push(new_p, "shape", "file_upload", d0)
           }
           
           return()
@@ -372,7 +368,7 @@ session_geometry <- function() {
             terra::convHull() |>
             terra::geom(wkt = TRUE)
         }
-        #push(new_p, "marker", "file_upload", d0)
+        push(new_p, "marker", "file_upload", d0)
         return()
         
       }

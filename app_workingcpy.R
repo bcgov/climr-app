@@ -358,6 +358,8 @@ shiny::shinyApp(
     # clear all selections (map and file) logic
     shiny::observeEvent(input$clear_selections, {
       sg$clear_all()
+      updateActionButton(session = getDefaultReactiveDomain(),
+                         "downscale_parameters", disabled = TRUE)
     })
 
     sn <- \(j) setNames(j,j)
@@ -367,6 +369,8 @@ shiny::shinyApp(
       shiny::showModal(
         shiny::modalDialog(
           title = "Downscale Parameters", size = "l", fade = FALSE, class = "modal-dialog-scrollable",
+          
+          # Reference map selection
           shiny::div(
             title = "Which map of 1961-1990 climatological normals to use as the high-resolution reference climate map for downscaling. 'auto' selects the best available map per point.",
             shiny::selectInput(
@@ -377,6 +381,15 @@ shiny::shinyApp(
                 local({z <- climr::list_refmaps(); substr(z, 8L, z |> nchar()) |> tools::toTitleCase() |> setNames(object = z, nm = _)})
               ),
               selected = vstore[["downscale_which_refmap"]]
+            )
+          ),
+          br(),
+          
+          # Observed climate data parameters
+          accordion(
+            open = FALSE,
+            accordion_panel(
+              title = "Observed Climate Data"
             )
           ),
           shiny::div(
@@ -538,7 +551,7 @@ shiny::shinyApp(
         showModal(
           modalDialog(
             title = "Warning",
-            paste("Please ensure input is points OR area-of-interest OR a file input."),
+            paste("Please ensure input is points OR area-of-interest OR file input."),
             easyClose = TRUE
           )
         )
