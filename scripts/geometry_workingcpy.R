@@ -203,10 +203,10 @@ session_geometry <- function() {
     # remove the selected rows and refresh DT
     sg <<- sg[!id %in% rid]
     
-    # refresh global DT
-    refresh_DT()
+    map_points <<- reactiveValues(dt = sg)
+    map_points_clicked <<- ((map_points$dt) %>% filter((source %in% c("map_draw", "map_click"))))
+    
     refresh(g)
-
   }
   
   # clear all map point/shapes & files
