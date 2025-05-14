@@ -44,15 +44,18 @@ session_geometry <- function() {
   refresh_DT <- function() {
     
     output$geom_dt <<- DT::renderDT(server = TRUE, {
+      req(sg)
       
       # change ID to a character to match alignment
       sg$id <- as.character(sg$id)
       
       # create global DT
       map_points <<- reactiveValues(dt = sg)
+      #map_points <- reactiveValues(dt = sg)
       
       # only render table if a point/shape has been clicked on (do not display file uploads)
       map_points_clicked <<- ((map_points$dt) %>% filter((source %in% c("map_draw", "map_click"))))
+      #map_points_clicked <- reactiveValues(dt = (sg %>% filter((source %in% c("map_draw", "map_click")))))
       
       if (nrow(map_points_clicked) > 0) {
       
@@ -144,6 +147,7 @@ session_geometry <- function() {
     if ("shape" %in% g) update_map_shape()
   }
   
+  # add new geometries to sg DT
   push <- function(new, g, s, d = NA_character_) {
     id <- max(c(0L,sg$id))+1L
     
@@ -180,7 +184,7 @@ session_geometry <- function() {
     # To show hull when npoints > 100
     if (!grepl("POINT", new)) g <- "shape"
     refresh(g)
-    refresh_DT()
+    #refresh_DT()
     session$sendCustomMessage(type="jsCode", list(code = "$('.input-control-body a.shiny-download-link').removeClass('btn-success');"))
   }
   
@@ -203,9 +207,8 @@ session_geometry <- function() {
     # remove the selected rows and refresh DT
     sg <<- sg[!id %in% rid]
     
-    map_points <<- reactiveValues(dt = sg)
-    map_points_clicked <<- ((map_points$dt) %>% filter((source %in% c("map_draw", "map_click"))))
-    
+    # refresh reactive DT in sidebar
+    #refresh_DT()
     refresh(g)
   }
   
