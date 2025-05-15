@@ -253,7 +253,8 @@ shiny::shinyApp(
     
     downscale_default <- list(
       downscale_which_refmap = "refmap_climr",
-      downscale_obs_periods = "2001_2020",
+      # downscale_obs_periods = "2001_2020",
+      downscale_obs_periods = "NULL",
       downscale_obs_years_radio = "No",
       downscale_obs_years = "NULL",
       downscale_obs_ts_dataset = "NULL",
@@ -374,6 +375,9 @@ shiny::shinyApp(
       sg$clear_all()
       updateActionButton(session = getDefaultReactiveDomain(),
                          "downscale_parameters", disabled = TRUE)
+      lapply(names(downscale_default), \(x) {
+        vstore[[x]] <- downscale_default[[x]]
+      })
     })
 
     sn <- \(j) setNames(j,j)
@@ -817,8 +821,8 @@ shiny::shinyApp(
       shiny::updateSelectInput(inputId = "downscale_run_nm", choices = choices, selected = select)
     }
     
-    shiny::observeEvent(input$downscale_process, {
-      if (shiny::in_devmode()) cat("Event: downscale_process", sep = "\n")
+    shiny::observeEvent(input$generate_results, {
+      if (shiny::in_devmode()) cat("Event: generate_results", sep = "\n")
       vstore[["processing"]] <- FALSE
       output$downscale_points_count_estimate <- shiny::renderUI({
         pce <- sg$process_count(vstore[["downscale_resolution"]])
