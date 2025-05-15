@@ -643,6 +643,7 @@ shiny::shinyApp(
     })
     shiny::observeEvent(input$observed_years_radio,{
       if (shiny::in_devmode()) cat("Event: downscale_obs_years", sep = "\n")
+      update_vstore_and_notify("observed_years_radio", input$observed_years_radio, "Obs radios")
       
       # only observe if user-specified
       if (input$observed_years_radio == "Yes") {
@@ -660,13 +661,6 @@ shiny::shinyApp(
       })
       }
     })
-    # shiny::observeEvent(input$downscale_obs_years, {
-    #   if (shiny::in_devmode()) cat("Event: downscale_obs_years", sep = "\n")
-    #   date_range <- (min(input$downscale_obs_years):max(input$downscale_obs_years))
-    #   for (year in date_range) {
-    #     update_vstore_and_notify("downscale_obs_years", year, "Obs years")
-    #   }
-    # })
     shiny::observeEvent(input$downscale_obs_ts_dataset, {
       if (shiny::in_devmode()) cat("Event: downscale_obs_ts_dataset", sep = "\n")
       update_vstore_and_notify("downscale_obs_ts_dataset", input$downscale_obs_ts_dataset, "Obs dataset")
