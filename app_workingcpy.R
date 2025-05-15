@@ -260,8 +260,10 @@ shiny::shinyApp(
       downscale_gcms = "NULL",
       downscale_ssps = "NULL",
       downscale_gcm_periods = "NULL",
-      downscale_gcm_ssp_years = "NULL",
-      downscale_gcm_hist_years = "NULL",
+      # downscale_gcm_ssp_years = "NULL",
+      # downscale_gcm_hist_years = "NULL",
+      downscale_gcm_years_radio = "No",
+      downscale_gcm_years = "NULL",
       downscale_max_run = 0,
       downscale_run_nm = "NULL",
       downscale_extra_vars = "NULL",
@@ -281,8 +283,10 @@ shiny::shinyApp(
       downscale_gcms = downscale_default[["downscale_gcms"]],
       downscale_ssps = downscale_default[["downscale_ssps"]],
       downscale_gcm_periods = downscale_default[["downscale_gcm_periods"]],
-      downscale_gcm_ssp_years = downscale_default[["downscale_gcm_ssp_years"]],
-      downscale_gcm_hist_years = downscale_default[["downscale_gcm_hist_years"]],
+      # downscale_gcm_ssp_years = downscale_default[["downscale_gcm_ssp_years"]],
+      # downscale_gcm_hist_years = downscale_default[["downscale_gcm_hist_years"]],
+      downscale_gcm_years_radio = downscale_default[["downscale_gcm_years_radio"]],
+      downscale_gcm_years = downscale_default[["downscale_gcm_years"]],
       downscale_max_run = downscale_default[["downscale_max_run"]],
       downscale_run_nm = downscale_default[["downscale_run_nm"]],
       downscale_extra_vars = downscale_default[["downscale_extra_vars"]],
@@ -381,14 +385,23 @@ shiny::shinyApp(
           # Reference map selection
           shiny::div(
             title = "Which map of 1961-1990 climatological normals to use as the high-resolution reference climate map for downscaling. 'auto' selects the best available map per point.",
-            shiny::selectInput(
+            # shiny::selectInput(
+            #   inputId = "downscale_which_refmap",
+            #   label = "Choose Reference Map:",
+            #   width = "100%",
+            #   choices = c(
+            #     local({z <- climr::list_refmaps(); substr(z, 8L, z |> nchar()) |> tools::toTitleCase() |> setNames(object = z, nm = _)})
+            #   ),
+            #   selected = vstore[["downscale_which_refmap"]]
+            # )
+            shiny::radioButtons(
               inputId = "downscale_which_refmap",
               label = "Choose Reference Map:",
-              width = "100%",
-              choices = c(
-                local({z <- climr::list_refmaps(); substr(z, 8L, z |> nchar()) |> tools::toTitleCase() |> setNames(object = z, nm = _)})
+              choices = c(local({z <- climr::list_refmaps(); substr(z, 8L, z |> nchar()) |> tools::toTitleCase() |> setNames(object = z, nm = _)})
               ),
-              selected = vstore[["downscale_which_refmap"]]
+              selected = vstore[["downscale_which_refmap"]],
+              inline = TRUE,
+              width = "100%",
             )
           ),
           br(),
@@ -403,16 +416,17 @@ shiny::shinyApp(
               
               shiny::div(
                 title = "Historical period for observed climate data, averaged over this period. Select 'Null' for no observed periods.",
-                shiny::selectInput(
+                shiny::checkboxGroupInput(
                   inputId = "downscale_obs_periods",
                   label = "Choose observed periods:",
+                  inline = TRUE,
                   width = "100%",
-                  choices = list("Options" = climr::list_obs_periods() |> sn(), "Remove all" = c("null" = "NULL")),
+                  choices = climr::list_obs_periods() |> sn(),
                   selected = vstore[["downscale_obs_periods"]]
                 )
               ),
               shiny::div(
-                title = "Years to obtain individual years or time series of observational climate data.",
+                title = "Would you like to choose the years to obtain individual years or time series of observational climate data?",
                 shiny::radioButtons(
                   inputId = "observed_years_radio",
                   label = "Would you like to specify observed years?",
@@ -421,40 +435,28 @@ shiny::shinyApp(
                   width = "100%"
                 ),
               ),
-              conditionalPanel(
-                condition = "input.observed_years_radio == 'Yes'",
-                shiny::div(
-                  title = "Years to obtain individual years or time series of observational climate data.",
-                  # shiny::selectInput(
-                  #   inputId = "downscale_obs_years",
-                  #   label = "Observation years",
-                  #   width = "100%",
-                  #   choices = list("Options" = climr::list_obs_years() |> sn(), "Remove all" = c("null" = "NULL")),
-                  #   multiple = TRUE,
-                  #   selected = vstore[["downscale_obs_years"]]
-                  # )
-                  shiny::sliderInput(
-                    inputId = "downscale_obs_years",
-                    label = "Choose observed years range:",
-                    # make these show up as dates!
-                    min = min(climr::list_obs_years()),
-                    max = max(climr::list_obs_years()),
-                    value = c(min(vstore[["downscale_obs_years"]]), max(vstore[["downscale_obs_years"]])),
-                    width = "100%"
-                  ),
-                  selected = c(min(vstore[["downscale_obs_years"]]), max(vstore[["downscale_obs_years"]])),
-                ),
-                shiny::div(
-                  title = "Dataset for observational time series data. Options: 'climatena' for ClimateNA gridded time series, 'cru.gpcc' for CRU TS (temperature) and GPCC (precipitation), or 'Null' for none.",
-                  shiny::selectInput(
-                    inputId = "downscale_obs_ts_dataset",
-                    label = "Choose observation time-series data:",
-                    width = "100%",
-                    selected = vstore[["downscale_obs_ts_dataset"]],
-                    choices = c("ClimateNA" = "climatena", "Climatic Research Unit / Global Precipitation Climatology Centre" = "cru.gpcc", "null" = "NULL")
+              output$observed_years_radio <- renderUI({
+                if (input$observed_years_radio == "Yes") {
+                  if ("NULL" %in% vstore$downscale_obs_years) {
+                    date_range_preset <- c(min(climr::list_obs_years()):max(climr::list_obs_years()))
+                    update_vstore_and_notify("downscale_obs_years", date_range_preset, "Obs years")
+                  }
+                  shiny::div(
+                    shiny::sliderInput(
+                      inputId = "downscale_obs_years",
+                      label = "Choose observed years range:",
+                      # make these show up as dates!
+                      min = min(climr::list_obs_years()),
+                      max = max(climr::list_obs_years()),
+                      value = c(min(vstore[["downscale_obs_years"]]), max(vstore[["downscale_obs_years"]])),
+                      width = "100%"
+                      ),
+                    selected = c(min(vstore[["downscale_obs_years"]]), max(vstore[["downscale_obs_years"]])),
                   )
-                )
-              ),
+                } else {
+                  NULL
+                }
+              })
             ),
             
             # Simulated climate data parameters
@@ -464,59 +466,77 @@ shiny::shinyApp(
               
               shiny::div(
                 title = "Global climate models to downscale. Select multiple GCMs for ensemble outputs.",
-                shiny::selectInput(
+                shiny::checkboxGroupInput(
                   inputId = "downscale_gcms",
-                  label = "Global climate model",
+                  label = "Choose Global Climate Model (GCM):",
                   width = "100%",
-                  choices = list("Options" = climr::list_gcms() |> sn(), "Remove all" = c("null" = "NULL")),
-                  multiple = TRUE,
+                  inline = TRUE,
+                  choices = climr::list_gcms() |> sn(),
                   selected = vstore[["downscale_gcms"]]
                 )
               ),
               shiny::div(
-                title = "SSP-RCP scenarios pairing shared socioeconomic pathways with representative concentration pathways.",
-                shiny::selectInput(
-                  inputId = "downscale_ssps",
-                  label = "Shared Socio-economic Pathways (SSP) - Representative Concentration Pathways (RCP) Scenarios",
-                  width = "100%",
-                  choices = list("Options" = climr::list_ssps() |> sn(), "Remove all" = c("null" = "NULL")),
-                  multiple = TRUE,
-                  selected = vstore[["downscale_ssps"]]
-                )
-              ),
-              shiny::div(
                 title = "20-year reference periods for GCM simulations.",
-                shiny::selectInput(
+                shiny::checkboxGroupInput(
                   inputId = "downscale_gcm_periods",
-                  label = "General Circulation Model (GCM) Periods",
+                  label = "Choose GCM periods:",
                   width = "100%",
-                  choices = list("Options" = climr::list_gcm_periods() |> sn(), "Remove all" = c("null" = "NULL")),
-                  multiple = TRUE,
+                  inline = TRUE,
+                  choices = climr::list_gcm_periods() |> sn(),
                   selected = vstore[["downscale_gcm_periods"]]
                 )
               ),
               shiny::div(
-                title = "Time series years for GCM simulations of future SSP scenarios.",
-                shiny::selectInput(
-                  inputId = "downscale_gcm_ssp_years",
-                  label = "General circulation model (GCM) Shared Socio-economic Pathways (SSP) Years",
-                  width = "100%",
-                  choices = list("Options" = climr::list_gcm_ssp_years() |> sn(), "Remove all" = c("null" = "NULL")),
-                  multiple = TRUE,
-                  selected = vstore[["downscale_gcm_ssp_years"]]
-                )
+                title = "Would you like to choose time series years for GCM simulations of the historical scenario and future SSP scenarios?",
+                shiny::radioButtons(
+                  inputId = "gcm_years_radio",
+                  label = "Would you like to specify GCM years?",
+                  choices = c("Yes", "No"),
+                  selected = vstore[["downscale_gcm_years_radio"]],
+                  width = "100%"
+                ),
               ),
-              shiny::div(
-                title = "Time series years for GCM simulations of the historical scenario.",
-                shiny::selectInput(
-                  inputId = "downscale_gcm_hist_years",
-                  label = "General circulation model (GCM) Historical Years",
-                  width = "100%",
-                  choices = list("Options" = climr::list_gcm_hist_years() |> sn(), "Remove all" = c("null" = "NULL")),
-                  multiple = TRUE,
-                  selected = vstore[["downscale_gcm_hist_years"]]
-                )
-              ),
+              output$gcm_years_radio <- renderUI({
+                if (input$gcm_years_radio == "Yes") {
+                  if ("NULL" %in% vstore$downscale_gcm_years) {
+                    date_range_preset <- c(min(climr::list_gcm_hist_years()):(max(climr::list_gcm_hist_years())-100))
+                    update_vstore_and_notify("downscale_gcm_years", date_range_preset, "GCM years")
+                  }
+                  shiny::div(
+                    title = "Time series years for GCM simulations of the historical scenario and future SSP scenarios.",
+                    shiny::sliderInput(
+                      inputId = "downscale_gcm_years",
+                      label = "Choose GCM years:",
+                      width = "100%",
+                      min = min(climr::list_gcm_hist_years()),
+                      max = max(climr::list_gcm_ssp_years()),
+                      value = c(min(vstore[["downscale_gcm_years"]]), max(vstore[["downscale_gcm_years"]])),
+                      step = 1
+                    ),
+                    selected = c(min(vstore[["downscale_gcm_years"]]), max(vstore[["downscale_gcm_years"]])),
+                  )
+                } else {
+                  NULL
+                }
+              }),
+              output$downscale_gcm_years <- renderUI({
+                if (any(min(climr::list_gcm_ssp_years()):max(climr::list_gcm_ssp_years()) %in% input$downscale_gcm_years)) {
+                  shiny::div(
+                    title = "SSP scenarios pairing shared socioeconomic pathways with representative concentration pathways (only necessary if choosing years past 2014).",
+                    shiny::checkboxGroupInput(
+                      inputId = "downscale_ssps",
+                      label = " Choose Shared Socio-economic Pathways (SSP) scenarios:",
+                      width = "100%",
+                      inline = TRUE,
+                      #choices = list("Options" = climr::list_ssps() |> sn(), "Remove all" = c("null" = "NULL")),
+                      choices = climr::list_ssps() |> sn(),
+                      selected = vstore[["downscale_ssps"]]
+                      )
+                    )
+                } else {
+                  NULL
+                }
+              }),
               shiny::div(
                 title = "Maximum number of model runs to include. 0 returns only the ensemble mean.",
                 shiny::selectInput(
@@ -528,27 +548,28 @@ shiny::shinyApp(
                   selected = vstore[["downscale_max_run"]]
                 )
               ),
-              shiny::div(
-                title = "Names of specific runs to return instead of using max_run. Overrides max_run if specified.",
-                shiny::selectInput(
-                  inputId = "downscale_run_nm",
-                  label = "Name of specified runs",
-                  width = "100%",
-                  choices = list("Options" = {
-                    gcms <- vstore[["downscale_gcms"]]
-                    ssps <- vstore[["downscale_ssps"]]
-                    if (!length(gcms) && !length(ssps)) {
-                      c()
-                    } else if (length(gcms) && !length(ssps)) {
-                      climr::list_runs_historic(gcm = gcms) |> sn()
-                    } else if (length(gcms) && length(ssps)) {
-                      climr::list_runs_ssp(gcm = gcms, ssp = ssps) |> sn()
-                    }
-                  }, "Remove all" = c("null" = "NULL")),
-                  multiple = TRUE,
-                  selected = vstore[["downscale_run_nm"]]
-                )
-              ),
+              # # leave out for now -- too technical for app
+              # shiny::div(
+              #   title = "Names of specific runs to return instead of using max_run. Overrides max_run if specified.",
+              #   shiny::selectInput(
+              #     inputId = "downscale_run_nm",
+              #     label = "Name of specified runs",
+              #     width = "100%",
+              #     choices = list("Options" = {
+              #       gcms <- vstore[["downscale_gcms"]]
+              #       ssps <- vstore[["downscale_ssps"]]
+              #       if (!length(gcms) && !length(ssps)) {
+              #         c()
+              #       } else if (length(gcms) && !length(ssps)) {
+              #         climr::list_runs_historic(gcm = gcms) |> sn()
+              #       } else if (length(gcms) && length(ssps)) {
+              #         climr::list_runs_ssp(gcm = gcms, ssp = ssps) |> sn()
+              #       }
+              #     }, "Remove all" = c("null" = "NULL")),
+              #     multiple = TRUE,
+              #     selected = vstore[["downscale_run_nm"]]
+              #   )
+              # ),
             )
           ),
           br(),
@@ -654,6 +675,16 @@ shiny::shinyApp(
           date_range <- (min(input$downscale_obs_years):max(input$downscale_obs_years))
           update_vstore_and_notify("downscale_obs_years", date_range, "Obs years")
       })
+      } 
+      
+      # if no is clicked again, reset years to default - THIS MIGHT NOT WORK IS NO LONGER REMOVING YEARS JUST REPLACING WITH NULL
+      else if (input$observed_years_radio == "No") {
+        shiny::observeEvent(input$downscale_obs_years, {
+          if (shiny::in_devmode()) cat("Event: downscale_obs_years", sep = "\n")
+          
+          # reset years to default
+          update_vstore_and_notify("downscale_obs_years", downscale_default[["downscale_obs_years"]], "Obs years")
+        })
       }
     })
     shiny::observeEvent(input$downscale_obs_ts_dataset, {
@@ -674,13 +705,39 @@ shiny::shinyApp(
       if (shiny::in_devmode()) cat("Event: downscale_gcm_periods", sep = "\n")
       update_vstore_and_notify("downscale_gcm_periods", input$downscale_gcm_periods, "GCM periods")
     })
-    shiny::observeEvent(input$downscale_gcm_ssp_years, {
-      if (shiny::in_devmode()) cat("Event: downscale_gcm_ssp_years", sep = "\n")
-      update_vstore_and_notify("downscale_gcm_ssp_years", input$downscale_gcm_ssp_years, "GCM SSP years")
-    })
-    shiny::observeEvent(input$downscale_gcm_hist_years, {
-      if (shiny::in_devmode()) cat("Event: downscale_gcm_hist_years", sep = "\n")
-      update_vstore_and_notify("downscale_gcm_hist_years", input$downscale_gcm_hist_years, "GCM hist years")
+    # shiny::observeEvent(input$downscale_gcm_ssp_years, {
+    #   if (shiny::in_devmode()) cat("Event: downscale_gcm_ssp_years", sep = "\n")
+    #   update_vstore_and_notify("downscale_gcm_ssp_years", input$downscale_gcm_ssp_years, "GCM SSP years")
+    # })
+    # shiny::observeEvent(input$downscale_gcm_hist_years, {
+    #   if (shiny::in_devmode()) cat("Event: downscale_gcm_hist_years", sep = "\n")
+    #   update_vstore_and_notify("downscale_gcm_hist_years", input$downscale_gcm_hist_years, "GCM hist years")
+    # })
+    shiny::observeEvent(input$gcm_years_radio,{
+      if (shiny::in_devmode()) cat("Event: downscale_gcm_years_radio", sep = "\n")
+      update_vstore_and_notify("downscale_gcm_years_radio", input$gcm_years_radio, "GCM radios")
+      
+      # only observe if user-specified
+      if (input$gcm_years_radio == "Yes") {
+        shiny::observeEvent(input$downscale_gcm_years, {
+          #observe({print(input$downscale_gcm_years)}) used to check if binding is correct
+          if (shiny::in_devmode()) cat("Event: downscale_gcm_years", sep = "\n")
+          
+          # add selected range
+          date_range <- (min(input$downscale_gcm_years):max(input$downscale_gcm_years))
+          update_vstore_and_notify("downscale_gcm_years", date_range, "GCM years")
+        })
+      } 
+      
+      # if no is clicked again, reset years to default - THIS MIGHT NOT WORK IS NO LONGER REMOVING YEARS JUST REPLACING WITH NULL
+      else if (input$gcm_years_radio == "No") {
+        shiny::observeEvent(input$downscale_gcm_years, {
+          if (shiny::in_devmode()) cat("Event: downscale_gcm_years", sep = "\n")
+          
+          # reset years to default
+          update_vstore_and_notify("downscale_gcm_years", downscale_default[["downscale_gcm_years"]], "GCM years")
+        })
+      }
     })
     shiny::observeEvent(input$downscale_max_run, {
       if (shiny::in_devmode()) cat("Event: downscale_max_run", sep = "\n")

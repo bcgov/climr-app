@@ -1,5 +1,3 @@
-# COOP DEVL VERSION
-
 # Geometry input logic ----
 session_geometry <- function() {
   
