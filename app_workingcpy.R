@@ -264,8 +264,9 @@ shiny::shinyApp(
       # downscale_gcm_hist_years = "NULL",
       downscale_gcm_years_radio = "No",
       downscale_gcm_years = "NULL",
+      downscale_ensemble_mean = 0, # is default for YES
       downscale_max_run = 0,
-      downscale_run_nm = "NULL",
+      #downscale_run_nm = "NULL",
       downscale_extra_vars = "NULL",
       downscale_core_ppt_lr = FALSE
     )
@@ -287,8 +288,9 @@ shiny::shinyApp(
       # downscale_gcm_hist_years = downscale_default[["downscale_gcm_hist_years"]],
       downscale_gcm_years_radio = downscale_default[["downscale_gcm_years_radio"]],
       downscale_gcm_years = downscale_default[["downscale_gcm_years"]],
+      downscale_ensemble_mean = downscale_default[["downscale_ensemble_mean"]],
       downscale_max_run = downscale_default[["downscale_max_run"]],
-      downscale_run_nm = downscale_default[["downscale_run_nm"]],
+      #downscale_run_nm = downscale_default[["downscale_run_nm"]],
       downscale_extra_vars = downscale_default[["downscale_extra_vars"]],
       downscale_core_ppt_lr = downscale_default[["downscale_core_ppt_lr"]],
       downscale_output = "tif",
@@ -538,14 +540,26 @@ shiny::shinyApp(
                 }
               }),
               shiny::div(
-                title = "Maximum number of model runs to include. 0 returns only the ensemble mean.",
-                shiny::selectInput(
+                title = "Use the ensemble mean of model runs.",
+                shiny::radioButtons(
                   inputId = "downscale_max_run",
-                  label = "Maximum number of model runs",
+                  label = "Use ensemble mean for maxinum number of model runs to include?",
                   width = "100%",
-                  choices = c("ensembleMean" = 0, 1:10),
-                  multiple = FALSE,
+                  choices = c("Yes" = 0, "No" = "NULL"), # THIS MAY CREATE ISSUES WHEN DOWNSCALING
+                  inline = TRUE,
                   selected = vstore[["downscale_max_run"]]
+                )
+              ),
+              shiny::div(
+                title = "Maximum number of model runs to include.",
+                shiny::numericInput(
+                  inputId = "downscale_max_run",
+                  label = "Choose maximum number of model runs:",
+                  value = vstore[["downscale_max_run"]],
+                  width = "100%",
+                  min = 0,
+                  max = 10,
+                  step = 1
                 )
               ),
               # # leave out for now -- too technical for app
