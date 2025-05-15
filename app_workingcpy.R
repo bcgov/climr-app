@@ -254,6 +254,7 @@ shiny::shinyApp(
     downscale_default <- list(
       downscale_which_refmap = "refmap_climr",
       downscale_obs_periods = "2001_2020",
+      downscale_obs_years_radio = "No",
       downscale_obs_years = "NULL",
       downscale_obs_ts_dataset = "NULL",
       downscale_gcms = "NULL",
@@ -274,7 +275,7 @@ shiny::shinyApp(
       climatevar = "NONE",
       downscale_which_refmap = downscale_default[["downscale_which_refmap"]],
       downscale_obs_periods = downscale_default[["downscale_obs_periods"]],
-      observed_years_radio = "No",
+      downscale_obs_years_radio = downscale_default[["downscale_obs_years_radio"]],
       downscale_obs_years = downscale_default[["downscale_obs_years"]],
       downscale_obs_ts_dataset = downscale_default[["downscale_obs_ts_dataset"]],
       downscale_gcms = downscale_default[["downscale_gcms"]],
@@ -416,10 +417,9 @@ shiny::shinyApp(
                   inputId = "observed_years_radio",
                   label = "Would you like to specify observed years?",
                   choices = c("Yes", "No"),
-                  selected = vstore[["observed_years_radio"]],
+                  selected = vstore[["downscale_obs_years_radio"]],
                   width = "100%"
                 ),
-                selected = vstore[["observed_years_radio"]]
               ),
               conditionalPanel(
                 condition = "input.observed_years_radio == 'Yes'",
@@ -439,10 +439,10 @@ shiny::shinyApp(
                     # make these show up as dates!
                     min = min(climr::list_obs_years()),
                     max = max(climr::list_obs_years()),
-                    value = c(min(climr::list_obs_years()), max(climr::list_obs_years())),
+                    value = c(min(vstore[["downscale_obs_years"]]), max(vstore[["downscale_obs_years"]])),
                     width = "100%"
                   ),
-                  selected = vstore[["downscale_obs_years"]]
+                  selected = c(min(vstore[["downscale_obs_years"]]), max(vstore[["downscale_obs_years"]])),
                 ),
                 shiny::div(
                   title = "Dataset for observational time series data. Options: 'climatena' for ClimateNA gridded time series, 'cru.gpcc' for CRU TS (temperature) and GPCC (precipitation), or 'Null' for none.",
@@ -642,22 +642,17 @@ shiny::shinyApp(
       update_vstore_and_notify("downscale_obs_periods", input$downscale_obs_periods, "Obs periods")
     })
     shiny::observeEvent(input$observed_years_radio,{
-      if (shiny::in_devmode()) cat("Event: downscale_obs_years", sep = "\n")
-      update_vstore_and_notify("observed_years_radio", input$observed_years_radio, "Obs radios")
+      if (shiny::in_devmode()) cat("Event: downscale_obs_years_radio", sep = "\n")
+      update_vstore_and_notify("downscale_obs_years_radio", input$observed_years_radio, "Obs radios")
       
       # only observe if user-specified
       if (input$observed_years_radio == "Yes") {
         shiny::observeEvent(input$downscale_obs_years, {
           if (shiny::in_devmode()) cat("Event: downscale_obs_years", sep = "\n")
           
-          # clear all previously stored years
-          update_vstore_and_notify("downscale_obs_years", NULL, "Obs years")
-          
           # add selected range
           date_range <- (min(input$downscale_obs_years):max(input$downscale_obs_years))
-          for (year in date_range) {
-            update_vstore_and_notify("downscale_obs_years", year, "Obs years")
-          }
+          update_vstore_and_notify("downscale_obs_years", date_range, "Obs years")
       })
       }
     })
