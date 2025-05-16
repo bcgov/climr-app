@@ -244,20 +244,9 @@ shiny::shinyApp(
     
     #browser()
     
-    # # initialize reactive object to contain DT
-    # map_points <- reactiveValues(dt = NULL,
-    #                              filtered_dt = NULL)
-    # # map_points_clicked <- data.table()
-    
-    # initialize sg_dt
-    sg_dt <- data.table::data.table(
-      id = integer(),
-      lat = character(),
-      long = character(),
-      wkt = character(),
-      group = character(),
-      source = character(),
-      datapath = character()
+    # initialize sg_dt as reactive
+    sg_dt <- reactiveValues(dt = NULL,
+      filtered_dt = NULL
     )
     
     # ---- Modal input storage
@@ -352,7 +341,7 @@ shiny::shinyApp(
     shiny::observeEvent(input$sg_remove, {
       if (shiny::in_devmode()) cat("Event: sg_remove", sep = "\n")
       sg$rm(input$sg_remove)
-      if (nrow(sg_dt) < 1) {
+      if (nrow(sg_dt$dt) < 1) {
         updateActionButton(session = getDefaultReactiveDomain(),
                           "downscale_parameters", disabled = TRUE)
       }
@@ -364,10 +353,10 @@ shiny::shinyApp(
     shiny::observeEvent(input$delete_button, {
       if (shiny::in_devmode()) cat("Event: sg_remove", sep = "\n")
       row_num <- input$geom_dt_rows_selected
-      point_id <- sg_dt[row_num,1] # THIS IS BUGGY BECAUSE THE TABLES ARE DIFFERENT
+      point_id <- sg_dt$filtered_dt[row_num,1] 
       if (length(point_id) != 0) {
         sg$rm(point_id)
-        if (nrow(sg_dt) < 1) {
+        if (nrow(sg_dt$dt) < 1) {
         updateActionButton(session = getDefaultReactiveDomain(),
                           "downscale_parameters", disabled = TRUE)
       }
@@ -639,17 +628,17 @@ shiny::shinyApp(
       if (shiny::in_devmode()) cat("Event: downscale_parameters", sep = "\n")
       
       # ensure all data sources are the same before opening Downscale Parameters
-      if (length(unique((map_points$dt)$source)) == 1) {
+      # if (length(unique((sg$dt)$source)) == 1) {
         downscale_modal()
-      } else {
-        showModal(
-          modalDialog(
-            title = "Warning",
-            paste("Please ensure input is points OR area-of-interest OR file input."),
-            easyClose = TRUE
-          )
-        )
-      }
+      # } else {
+      #   showModal(
+      #     modalDialog(
+      #       title = "Warning",
+      #       paste("Please ensure input is points OR area-of-interest OR file input."),
+      #       easyClose = TRUE
+      #     )
+      #   )
+      # }
     })
     
     update_vstore_and_notify <- function(vstore_key, input_value, msg_format) {
@@ -837,7 +826,7 @@ shiny::shinyApp(
       if (shiny::in_devmode()) cat("Event: generate_results", sep = "\n")
       vstore[["processing"]] <- FALSE
       output$downscale_points_count_estimate <- shiny::renderUI({
-        pce <- sg$process_count(vstore[["downscale_resolution"]])
+        pce <- (sg$dt)$process_count(vstore[["downscale_resolution"]])
         bslib::card(
           full_screen = FALSE,
           height = "auto",
@@ -903,7 +892,7 @@ shiny::shinyApp(
     shiny::observeEvent(input$downscale_process_launch, {
       if (shiny::in_devmode()) cat("Event: downscale_process_launch", sep = "\n")
       if (vstore[["processing"]]) return()
-      sg$process()
+      (sg$dt)$process()
     })
     
   }
