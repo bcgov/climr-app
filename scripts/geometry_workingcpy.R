@@ -1,15 +1,15 @@
 # Geometry input logic ----
 session_geometry <- function(sg_dt) {
   
-  sg_dt$dt <- data.table::data.table(
-    id = integer(),
-    lat = character(),
-    long = character(),
-    wkt = character(),
-    group = character(),
-    source = character(),
-    datapath = character()
-  )
+  # sg_dt$dt <- data.table::data.table(
+  #   id = integer(),
+  #   lat = character(),
+  #   long = character(),
+  #   wkt = character(),
+  #   group = character(),
+  #   source = character(),
+  #   datapath = character()
+  # )
   
   observe ({
     req(sg_dt$dt)
@@ -46,7 +46,7 @@ session_geometry <- function(sg_dt) {
   
   refresh_DT <- function() {
     
-    output$geom_dt <<- DT::renderDT(server = TRUE, {
+    output$geom_dt <- DT::renderDT(server = TRUE, {
       req(sg_dt$filtered_dt)
       
       if (nrow(sg_dt$filtered_dt) > 0) {
@@ -175,7 +175,7 @@ session_geometry <- function(sg_dt) {
       lat <- round(mean(lat_coords[!is.na(lat_coords)]), 5)
     }
     
-    sg_dt$dt <<- rbind(sg_dt$dt, data.table::data.table(id = id, lat = lat, long = lon, wkt = new, group = g, source = s, datapath = d))
+    sg_dt$dt <- rbind(sg_dt$dt, data.table::data.table(id = id, lat = lat, long = lon, wkt = new, group = g, source = s, datapath = d))
     # To show hull when npoints > 100
     if (!grepl("POINT", new)) g <- "shape"
     refresh(g)
@@ -200,7 +200,7 @@ session_geometry <- function(sg_dt) {
     g <- unique(t$group)
     
     # remove the selected rows and refresh DT
-    sg_dt$dt <<- (sg_dt$dt)[!id %in% rid]
+    sg_dt$dt <- (sg_dt$dt)[!id %in% rid]
     
     # refresh reactive DT in sidebar
     #refresh_DT()

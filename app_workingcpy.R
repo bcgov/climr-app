@@ -245,7 +245,15 @@ shiny::shinyApp(
     #browser()
     
     # initialize sg_dt as reactive
-    sg_dt <- reactiveValues(dt = NULL,
+    sg_dt <- reactiveValues(dt = data.table::data.table(
+      id = integer(),
+      lat = character(),
+      long = character(),
+      wkt = character(),
+      group = character(),
+      source = character(),
+      datapath = character()
+    ),
       filtered_dt = NULL
     )
     
@@ -626,19 +634,33 @@ shiny::shinyApp(
     
     shiny::observeEvent(input$downscale_parameters, {
       if (shiny::in_devmode()) cat("Event: downscale_parameters", sep = "\n")
+      temp_dt <- sg$dt
       
-      # ensure all data sources are the same before opening Downscale Parameters
-      # if (length(unique((sg$dt)$source)) == 1) {
-        downscale_modal()
-      # } else {
-      #   showModal(
-      #     modalDialog(
-      #       title = "Warning",
-      #       paste("Please ensure input is points OR area-of-interest OR file input."),
-      #       easyClose = TRUE
-      #     )
-      #   )
-      # }
+      if (!is.null(temp_dt) && nrow(temp_dt) > 0) {
+        sources <- unique(na.omit(temp_dt$source))
+        
+        # ensure all data sources are the same before opening Downscale Parameters
+        if (length(unique((sources))) == 1) {
+          downscale_modal()
+        } else {
+          showModal(
+            modalDialog(
+              title = "Warning",
+              paste("Please ensure input is points OR area-of-interest OR file input."),
+              easyClose = TRUE
+            )
+          )
+        }
+      } else if (is.null(temp_dt)) {
+        showModal(
+          modalDialog(
+            title = "Warning",
+            paste("NULL"),
+            easyClose = TRUE
+          )
+        )
+      }
+    
     })
     
     update_vstore_and_notify <- function(vstore_key, input_value, msg_format) {
