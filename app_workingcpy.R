@@ -908,7 +908,21 @@ shiny::shinyApp(
                 class = "btn btn-primary btn-lg",
                 icon = shiny::icon("play"),
                 width = "100%"
-              )
+              ),
+              output$downscale_process_launch <- renderUI({
+                # only display text preview if output is a CSV, display raster on map
+                if (vstore[["downscale_output"]] == "csv") {
+                  
+                  # display a preview - currently not sure how the program is returning the data, so don't know how to display
+                  datatable(head(output_files))
+                }
+              }),
+              shiny::downloadButton(
+                outputId = "downscale_download",
+                label = "Download Downscaled Data",
+                title = "Download downscaled geographies archive",
+                class = "btn btn-secondary btn-xl"
+              ),
             )
           )
         } else {
@@ -941,7 +955,8 @@ shiny::shinyApp(
     shiny::observeEvent(input$downscale_process_launch, {
       if (shiny::in_devmode()) cat("Event: downscale_process_launch", sep = "\n")
       if (vstore[["processing"]]) return()
-      sg$process()
+      output_files <- sg$process()
+      sg$download(output_files)
     })
     
   }
