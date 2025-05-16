@@ -634,7 +634,7 @@ shiny::shinyApp(
     
     shiny::observeEvent(input$downscale_parameters, {
       if (shiny::in_devmode()) cat("Event: downscale_parameters", sep = "\n")
-      temp_dt <- sg$dt
+      temp_dt <- sg_dt$dt
       
       if (!is.null(temp_dt) && nrow(temp_dt) > 0) {
         sources <- unique(na.omit(temp_dt$source))
@@ -655,7 +655,7 @@ shiny::shinyApp(
         showModal(
           modalDialog(
             title = "Warning",
-            paste("NULL"),
+            paste("There is no data to downscale."),
             easyClose = TRUE
           )
         )
