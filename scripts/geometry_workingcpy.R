@@ -1,24 +1,20 @@
 # Geometry input logic ----
-session_geometry <- function(map_points) {
+session_geometry <- function(sg_dt) {
   
-  sg <- data.table::data.table(
-    id = integer(),
-    lat = character(),
-    long = character(),
-    wkt = character(),
-    group = character(),
-    source = character(),
-    datapath = character()
-  )
-  
-  # set reactive tables to sg
-  map_points$dt <- sg
-  map_points$filtered_dt <- (sg %>% filter((source %in% c("map_draw", "map_click"))))
+  # sg_dt <- data.table::data.table(
+  #   id = integer(),
+  #   lat = character(),
+  #   long = character(),
+  #   wkt = character(),
+  #   group = character(),
+  #   source = character(),
+  #   datapath = character()
+  # )
   
   # deal with file upload data
   fg <- list()
   fg_ <- function(d0, ...) {
-    to_rem <- sg[source %in% c("file_upload", "raster_upload")]$id
+    to_rem <- sg_dt[source %in% c("file_upload", "raster_upload")]$id
     if (length(to_rem)) {
       shiny::showNotification("Replacing previous file upload geometries.", type = "warning")
       rem(to_rem)
@@ -46,23 +42,15 @@ session_geometry <- function(map_points) {
   refresh_DT <- function() {
     
     output$geom_dt <<- DT::renderDT(server = TRUE, {
-      req(sg)
+      req(sg_dt)
       
-      # change ID to a character to match alignment
-      sg$id <- as.character(sg$id)
-      
-      # create global DT
-      # map_points <<- reactiveValues(dt = sg)
-      # #map_points <- reactiveValues(dt = sg)
-      
-      # only render table if a point/shape has been clicked on (do not display file uploads)
-      # map_points_clicked <<- ((map_points$dt) %>% filter((source %in% c("map_draw", "map_click"))))
-      # #map_points_clicked <- reactiveValues(dt = (sg %>% filter((source %in% c("map_draw", "map_click")))))
-      
-      if (nrow(map_points$filtered_dt) > 0) {
+      if (nrow(sg_dt) > 0) {
       
       # create data table to display
-      gdt <- data.table::copy((map_points$filtered_dt)[,1:3])
+      gdt <- data.table::copy((sg_dt %>% filter((source %in% c("map_draw", "map_click"))))[,1:3])
+      
+      # change ID to a character to match alignment
+      gdt$id <- as.character(gdt$id)
       
       data.table::setnames(gdt, tools::toTitleCase(names(gdt)))
       DT::datatable(gdt, rownames = FALSE, escape = FALSE, selection = 'single', options = list(
@@ -87,7 +75,7 @@ session_geometry <- function(map_points) {
   refresh_DT()
   
   update_map_marker <- function() {
-    mg <- sg[group == "marker" & grepl("POINT", wkt)]
+    mg <- sg_dt[group == "marker" & grepl("POINT", wkt)]
     mp |> leaflet::clearGroup("sg_marker")
     if (nrow(mg)) {
       mp |> leaflet::addAwesomeMarkers(
@@ -100,7 +88,7 @@ session_geometry <- function(map_points) {
   }
   
   update_map_shape <- function() {
-    mg <- sg[group == "shape" | grepl("POLYGON", wkt)]
+    mg <- sg_dt[group == "shape" | grepl("POLYGON", wkt)]
     mp |> leaflet::clearGroup("sg_shape") |>
       leaflet.extras::removeDrawToolbar(clearFeatures = TRUE) |>
       default_draw_tool()
@@ -144,14 +132,14 @@ session_geometry <- function(map_points) {
   
   refresh <- function(g) {
     refresh_DT()
-    shiny::updateActionButton(inputId = "downscale_process", disabled = {nrow(sg) <= 0})
+    shiny::updateActionButton(inputId = "downscale_process", disabled = {nrow(sg_dt) <= 0})
     if ("marker" %in% g) update_map_marker()
     if ("shape" %in% g) update_map_shape()
   }
   
-  # add new geometries to sg DT
+  # add new geometries to sg_dt
   push <- function(new, g, s, d = NA_character_) {
-    id <- max(c(0L,sg$id))+1L
+    id <- max(c(0L,sg_dt$id))+1L
     
     if (grepl("POINT", new)) {
       
@@ -182,7 +170,7 @@ session_geometry <- function(map_points) {
       lat <- round(mean(lat_coords[!is.na(lat_coords)]), 5)
     }
     
-    sg <<- rbind(sg, data.table::data.table(id = id, lat = lat, long = lon, wkt = new, group = g, source = s, datapath = d))
+    sg_dt <<- rbind(sg_dt, data.table::data.table(id = id, lat = lat, long = lon, wkt = new, group = g, source = s, datapath = d))
     # To show hull when npoints > 100
     if (!grepl("POINT", new)) g <- "shape"
     refresh(g)
@@ -192,8 +180,8 @@ session_geometry <- function(map_points) {
   
   rem <- function(rid) {
     
-    # select rows from sg based on row id
-    t <- sg[id %in% rid, list(group, source, datapath)]
+    # select rows from sg_dt based on row id
+    t <- sg_dt[id %in% rid, list(group, source, datapath)]
 
     # Drop datapath from fileuploads if any
     d <- unique(t$datapath)
@@ -207,7 +195,7 @@ session_geometry <- function(map_points) {
     g <- unique(t$group)
     
     # remove the selected rows and refresh DT
-    sg <<- sg[!id %in% rid]
+    sg_dt <<- sg_dt[!id %in% rid]
     
     # refresh reactive DT in sidebar
     #refresh_DT()
@@ -217,12 +205,12 @@ session_geometry <- function(map_points) {
   # clear all map point/shapes & files
   clear <- function() {
     # remove points and drawn AOIs
-    if ((nrow(map_points$dt) > 0) | (length(fg) != 0)) {
-      for (id in (map_points$dt)$id) {
+    if ((nrow(sg_dt) > 0) | (length(fg) != 0)) {
+      for (id in (sg_dt$id)) {
         rem(id)
       }
       # remove file uploads
-      rem(sg[source %in% c("file_upload", "raster_upload")]$id)
+      rem(sg_dt[source %in% c("file_upload", "raster_upload")]$id)
      } 
       else {
       showModal(
@@ -456,7 +444,7 @@ session_geometry <- function(map_points) {
           
           run_id <- generate_run_id()
           
-          output_files <- process_downscale(sg, cec, vstore, fg, run_id)
+          output_files <- process_downscale(sg_dt, cec, vstore, fg, run_id)
           
           if (!length(output_files)) {
             vstore[["processing"]] <- FALSE
@@ -487,7 +475,7 @@ session_geometry <- function(map_points) {
       shiny::removeModal()
     },
     get = function() {
-      return(sg)
+      return(sg_dt)
     },
     rm = function(rid) {
         rem(rid)
@@ -521,14 +509,14 @@ session_geometry <- function(map_points) {
       # Process all loose points first
       marker <- 0
       marker_count <- 0
-      if ("marker" %in% sg[["group"]]) {
-        marker_count <- sum(sg$group == "marker" & sg$source == "map_click")
+      if ("marker" %in% sg_dt[["group"]]) {
+        marker_count <- sum(sg_dt$group == "marker" & sg_dt$source == "map_click")
         marker <- marker_count
-        file_idx <- which(sg$group == "marker" & sg$source == "file_upload")
+        file_idx <- which(sg_dt$group == "marker" & sg_dt$source == "file_upload")
         if (length(file_idx)) {
           marker <- sum(marker, length(file_idx))
           marker_count <- vapply(file_idx, \(i) {
-            curf <- fg[[sg[["datapath"]][i]]]
+            curf <- fg[[sg_dt[["datapath"]][i]]]
             nrow(curf$table)  
           }, FUN.VALUE = integer(1)) |> sum(marker_count, na.rm = TRUE)
         }
@@ -537,31 +525,31 @@ session_geometry <- function(map_points) {
       # Process str8 raster
       shape <- 0
       shape_count <- 0
-      if ("raster_upload" %in% sg$source) {
-        raster_idx <- which(sg$source == "raster_upload")
+      if ("raster_upload" %in% sg_dt$source) {
+        raster_idx <- which(sg_dt$source == "raster_upload")
         for (i in raster_idx) {
           shape <- shape + 1
-          shape_count <- shape_count + {fg[[sg[["datapath"]][i]]]$raster |> terra::ncell()}
+          shape_count <- shape_count + {fg[[sg_dt[["datapath"]][i]]]$raster |> terra::ncell()}
         }
       }
       
       # Process shapes
-      if ("shape" %in% sg[!source %in% "raster_upload"][["group"]]) {
-        map_shape_idx <- which(sg$group %in% "shape" & sg$source %in% "map_draw")
-        file_upload_idx <- which(sg$group %in% "shape" & sg$source %in% "file_upload")
+      if ("shape" %in% sg_dt[!source %in% "raster_upload"][["group"]]) {
+        map_shape_idx <- which(sg_dt$group %in% "shape" & sg_dt$source %in% "map_draw")
+        file_upload_idx <- which(sg_dt$group %in% "shape" & sg_dt$source %in% "file_upload")
         # Do map draw since no need to loop within for shape list
         for (i in map_shape_idx) {
           shape <- shape + 1
-          shape_count <- shape_count + {terra::vect(sg$wkt[i], crs = "EPSG:4326") |>
+          shape_count <- shape_count + {terra::vect(sg_dt$wkt[i], crs = "EPSG:4326") |>
               rastmakerg(resolution) |>
               terra::ncell()}
         }
         
         # Do file upload with loop
         for (i in file_upload_idx) {
-          for (j in seq_along(fg[[sg[["datapath"]][i]]]$shape)) {
+          for (j in seq_along(fg[[sg_dt[["datapath"]][i]]]$shape)) {
             shape <- shape + 1
-            shape_count <- shape_count + {fg[[sg[["datapath"]][i]]]$shape[j] |>
+            shape_count <- shape_count + {fg[[sg_dt[["datapath"]][i]]]$shape[j] |>
                 rastmakerg(resolution) |>
                 terra::ncell()}
           }

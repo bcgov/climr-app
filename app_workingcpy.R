@@ -244,10 +244,21 @@ shiny::shinyApp(
     
     #browser()
     
-    # initialize reactive object to contain DT
-    map_points <- reactiveValues(dt = NULL,
-                                 filtered_dt = NULL)
-    # map_points_clicked <- data.table()
+    # # initialize reactive object to contain DT
+    # map_points <- reactiveValues(dt = NULL,
+    #                              filtered_dt = NULL)
+    # # map_points_clicked <- data.table()
+    
+    # initialize sg_dt
+    sg_dt <- data.table::data.table(
+      id = integer(),
+      lat = character(),
+      long = character(),
+      wkt = character(),
+      group = character(),
+      source = character(),
+      datapath = character()
+    )
     
     # ---- Modal input storage
     output$climr <- leaflet::renderLeaflet(l)
@@ -303,7 +314,7 @@ shiny::shinyApp(
     
     # ---- Geometry
     source("scripts/geometry_workingcpy.R", local = TRUE)
-    sg <- session_geometry(map_points)
+    sg <- session_geometry(sg_dt)
     
     # ---- Map events
     
@@ -341,7 +352,7 @@ shiny::shinyApp(
     shiny::observeEvent(input$sg_remove, {
       if (shiny::in_devmode()) cat("Event: sg_remove", sep = "\n")
       sg$rm(input$sg_remove)
-      if (nrow(map_points$dt) < 1) {
+      if (nrow(sg_dt) < 1) {
         updateActionButton(session = getDefaultReactiveDomain(),
                           "downscale_parameters", disabled = TRUE)
       }
@@ -353,10 +364,10 @@ shiny::shinyApp(
     shiny::observeEvent(input$delete_button, {
       if (shiny::in_devmode()) cat("Event: sg_remove", sep = "\n")
       row_num <- input$geom_dt_rows_selected
-      point_id <- as.numeric(map_points$filtered_dt[row_num,1])
+      point_id <- sg_dt[row_num,1] # THIS IS BUGGY BECAUSE THE TABLES ARE DIFFERENT
       if (length(point_id) != 0) {
         sg$rm(point_id)
-        if (nrow(map_points$dt) < 1) {
+        if (nrow(sg_dt) < 1) {
         updateActionButton(session = getDefaultReactiveDomain(),
                           "downscale_parameters", disabled = TRUE)
       }
