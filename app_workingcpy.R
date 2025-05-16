@@ -651,7 +651,7 @@ shiny::shinyApp(
             )
           )
         }
-      } else if (is.null(temp_dt)) {
+      } else {
         showModal(
           modalDialog(
             title = "Warning",
@@ -846,62 +846,89 @@ shiny::shinyApp(
     
     shiny::observeEvent(input$generate_results, {
       if (shiny::in_devmode()) cat("Event: generate_results", sep = "\n")
-      vstore[["processing"]] <- FALSE
-      output$downscale_points_count_estimate <- shiny::renderUI({
-        pce <- (sg$dt)$process_count(vstore[["downscale_resolution"]])
-        bslib::card(
-          full_screen = FALSE,
-          height = "auto",
-          bslib::card_header("Load estimation"),
-          class = "bg-warning",
-          fill = TRUE,
-          bslib::card_body(
-            shiny::tags$span(
-              if (pce$marker_count > 0) "[%s] points from [%s] markers geometries." |> sprintf(format(pce$marker_count, big.mark = ","), format(pce$marker, big.mark = ",")),
-              shiny::br(),
-              if (pce$shape_count > 0) "[%s] points from [%s] shapes geometries." |> sprintf(format(pce$shape_count, big.mark = ","), format(pce$shape, big.mark = ","))
+      
+      # check that it is possible to downscale the data 
+      temp_dt <- sg_dt$dt
+      
+      if (!is.null(temp_dt) && nrow(temp_dt) > 0) {
+        sources <- unique(na.omit(temp_dt$source))
+        
+        # ensure all data sources are the same before opening Downscale Launch window
+        if (length(unique((sources))) == 1) {
+          vstore[["processing"]] <- FALSE
+          output$downscale_points_count_estimate <- shiny::renderUI({
+            pce <- sg$process_count(vstore[["downscale_resolution"]])
+            bslib::card(
+              full_screen = FALSE,
+              height = "auto",
+              bslib::card_header("Load estimation"),
+              class = "bg-warning",
+              fill = TRUE,
+              bslib::card_body(
+                shiny::tags$span(
+                  if (pce$marker_count > 0) "[%s] points from [%s] markers geometries." |> sprintf(format(pce$marker_count, big.mark = ","), format(pce$marker, big.mark = ",")),
+                  shiny::br(),
+                  if (pce$shape_count > 0) "[%s] points from [%s] shapes geometries." |> sprintf(format(pce$shape_count, big.mark = ","), format(pce$shape, big.mark = ","))
+                )
+              )
+            )
+          })
+          shiny::showModal(
+            shiny::modalDialog(
+              title = "Preferences for Downscale Processing", size = "l",
+              shiny::div(
+                title = "tif: Shapes/rasters are returned as GeoTIFF. csv: all points are returned in csv.",
+                shiny::radioButtons(
+                  inputId = "downscale_output",
+                  label = "Downscale Output Format Priority",
+                  choices = c("Geographic Tag Image File Format (GeoTIFF)" = "tif", "Comma Separated Value (csv)" = "csv"),
+                  inline = TRUE,
+                  selected = vstore[["downscale_output"]]
+                )
+              ),
+              shiny::div(
+                title = "Target resolution for shapes drawn on map or added using file upload. Does not apply to points, raster or csv files.",
+                shiny::sliderInput(
+                  inputId = "downscale_resolution",
+                  label = "Downscale Resolution (m)",
+                  value = vstore[["downscale_resolution"]],
+                  width = "100%",
+                  min = 250,
+                  max = 50000,
+                  step = 250,
+                  post = "m",
+                  ticks = FALSE
+                )
+              ),
+              shiny::uiOutput("downscale_points_count_estimate"),
+              shiny::actionButton(
+                inputId = "downscale_process_launch",
+                label = "Launch Downscale Process",
+                title = "Trigger a downscale processing run. At the end of the run, the download button on the main control panel will be enabled.",
+                class = "btn btn-primary btn-lg",
+                icon = shiny::icon("play"),
+                width = "100%"
+              )
             )
           )
-        )
-      })
-      shiny::showModal(
-        shiny::modalDialog(
-          title = "Preferences for Downscale Processing", size = "l",
-          shiny::div(
-            title = "tif: Shapes/rasters are returned as GeoTIFF. csv: all points are returned in csv.",
-            shiny::radioButtons(
-              inputId = "downscale_output",
-              label = "Downscale Output Format Priority",
-              choices = c("Geographic Tag Image File Format (GeoTIFF)" = "tif", "Comma Separated Value (csv)" = "csv"),
-              inline = TRUE,
-              selected = vstore[["downscale_output"]]
+        } else {
+          showModal(
+            modalDialog(
+              title = "Warning",
+              paste("Please ensure input is points OR area-of-interest OR file input."),
+              easyClose = TRUE
             )
-          ),
-          shiny::div(
-            title = "Target resolution for shapes drawn on map or added using file upload. Does not apply to points, raster or csv files.",
-            shiny::sliderInput(
-              inputId = "downscale_resolution",
-              label = "Downscale Resolution (m)",
-              value = vstore[["downscale_resolution"]],
-              width = "100%",
-              min = 250,
-              max = 50000,
-              step = 250,
-              post = "m",
-              ticks = FALSE
-            )
-          ),
-          shiny::uiOutput("downscale_points_count_estimate"),
-          shiny::actionButton(
-            inputId = "downscale_process_launch",
-            label = "Launch Downscale Process",
-            title = "Trigger a downscale processing run. At the end of the run, the download button on the main control panel will be enabled.",
-            class = "btn btn-primary btn-lg",
-            icon = shiny::icon("play"),
-            width = "100%"
+          )
+        }
+      } else {
+        showModal(
+          modalDialog(
+            title = "Warning",
+            paste("There is no data to downscale."),
+            easyClose = TRUE
           )
         )
-      )
+      }
     })
     shiny::observeEvent(input$downscale_output, {
       if (shiny::in_devmode()) cat("Event: downscale_output", sep = "\n")
@@ -914,7 +941,7 @@ shiny::shinyApp(
     shiny::observeEvent(input$downscale_process_launch, {
       if (shiny::in_devmode()) cat("Event: downscale_process_launch", sep = "\n")
       if (vstore[["processing"]]) return()
-      (sg$dt)$process()
+      sg$process()
     })
     
   }
