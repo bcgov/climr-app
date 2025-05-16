@@ -244,8 +244,9 @@ shiny::shinyApp(
     
     #browser()
     
-    # # initialize reactive DT
-    # map_points <- reactiveValues(dt = data.table())
+    # initialize reactive object to contain DT
+    map_points <- reactiveValues(dt = NULL,
+                                 filtered_dt = NULL)
     # map_points_clicked <- data.table()
     
     # ---- Modal input storage
@@ -302,7 +303,7 @@ shiny::shinyApp(
     
     # ---- Geometry
     source("scripts/geometry_workingcpy.R", local = TRUE)
-    sg <- session_geometry()
+    sg <- session_geometry(map_points)
     
     # ---- Map events
     
@@ -352,7 +353,7 @@ shiny::shinyApp(
     shiny::observeEvent(input$delete_button, {
       if (shiny::in_devmode()) cat("Event: sg_remove", sep = "\n")
       row_num <- input$geom_dt_rows_selected
-      point_id <- as.numeric(map_points_clicked[row_num,1])
+      point_id <- as.numeric(map_points$filtered_dt[row_num,1])
       if (length(point_id) != 0) {
         sg$rm(point_id)
         if (nrow(map_points$dt) < 1) {

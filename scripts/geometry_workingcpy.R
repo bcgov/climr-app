@@ -1,5 +1,5 @@
 # Geometry input logic ----
-session_geometry <- function() {
+session_geometry <- function(map_points) {
   
   sg <- data.table::data.table(
     id = integer(),
@@ -10,6 +10,10 @@ session_geometry <- function() {
     source = character(),
     datapath = character()
   )
+  
+  # set reactive tables to sg
+  map_points$dt <- sg
+  map_points$filtered_dt <- (sg %>% filter((source %in% c("map_draw", "map_click"))))
   
   # deal with file upload data
   fg <- list()
@@ -48,17 +52,17 @@ session_geometry <- function() {
       sg$id <- as.character(sg$id)
       
       # create global DT
-      map_points <<- reactiveValues(dt = sg)
-      #map_points <- reactiveValues(dt = sg)
+      # map_points <<- reactiveValues(dt = sg)
+      # #map_points <- reactiveValues(dt = sg)
       
       # only render table if a point/shape has been clicked on (do not display file uploads)
-      map_points_clicked <<- ((map_points$dt) %>% filter((source %in% c("map_draw", "map_click"))))
-      #map_points_clicked <- reactiveValues(dt = (sg %>% filter((source %in% c("map_draw", "map_click")))))
+      # map_points_clicked <<- ((map_points$dt) %>% filter((source %in% c("map_draw", "map_click"))))
+      # #map_points_clicked <- reactiveValues(dt = (sg %>% filter((source %in% c("map_draw", "map_click")))))
       
-      if (nrow(map_points_clicked) > 0) {
+      if (nrow(map_points$filtered_dt) > 0) {
       
       # create data table to display
-      gdt <- data.table::copy(map_points_clicked[,1:3])
+      gdt <- data.table::copy((map_points$filtered_dt)[,1:3])
       
       data.table::setnames(gdt, tools::toTitleCase(names(gdt)))
       DT::datatable(gdt, rownames = FALSE, escape = FALSE, selection = 'single', options = list(
