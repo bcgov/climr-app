@@ -18,6 +18,13 @@ suppressPackageStartupMessages({
   source("scripts/utils.R", local = TRUE)
 })
 
+# Tooltip setup
+tooltipsIcon <- icon("question-circle")
+# Use regular style instead of solid
+tooltipsIcon$attribs$class <- gsub("fa ", "far ", tooltipsIcon$attribs$class, fixed = TRUE)
+# Wrap in a span to be able to use prompter
+tooltipsIcon <- span(tooltipsIcon)
+
 # Shiny options
 options(shiny.autoreload = TRUE)
 options(shiny.maxRequestSize = 1000 * 1024^2)
@@ -130,20 +137,23 @@ shiny::shinyApp(
       ),
       shiny::tabPanel(
         title = "Map",
+        prompter::use_prompt(),
         shiny::sidebarLayout(
           shiny::sidebarPanel(
             style = "height: 84vh; overflow-y: auto; overflow-x: auto;", 
             
-            # need to adjust this so the helplink is centered, create the link
-            shiny::actionLink(
-              inputId = "tutorial",
-              label = "Click here for a tutorial"
-              ),
+            # create the link!!!
+            shiny::div(
+              style = "text-align: center;",
+              shiny::actionLink(
+                inputId = "tutorial",
+                label = "Click here for a tutorial",
+                )
+            ),
             br(),
-            
             splitLayout(
               actionButton("clear_selections", "Clear Selections",
-                           style = "width:100%; height:70px; background-color:#c21104; color: #FFF"),
+                            style = "width:100%; height:70px; background-color:#c21104; color: #FFF"),
               actionButton(
                 "generate_results",
                 label = "Generate results",
@@ -159,7 +169,14 @@ shiny::shinyApp(
               multiple = FALSE,
               
               accordion_panel(
-                title = "Method 1: By selection on map",
+                title = h5("Method 1: By selection on map",
+                prompter::add_prompt(
+                  tooltipsIcon,
+                  message = HTML(paste("Click on map to add points or draw an area-of-interest using shape tools in left-hand corner of map.")),
+                  position = "top-left",
+                  size = "large",
+                  shadow = FALSE
+                )),
                 p("Click on map to add points or draw an area-of-interest using shape tools."),
                 DT::DTOutput("geom_dt", width = "100%"),
                 shiny::actionButton("delete_button", "Delete Selected", icon("trash-alt")),
@@ -917,11 +934,12 @@ shiny::shinyApp(
                   datatable(head(output_files))
                 }
               }),
+              # NEED TO FIX THIS BUTTON - TOO SMALL??
               shiny::downloadButton(
                 outputId = "downscale_download",
                 label = "Download Downscaled Data",
                 title = "Download downscaled geographies archive",
-                class = "btn btn-secondary btn-xl"
+                class = "btn btn-secondary btn-sm"
               ),
             )
           )
