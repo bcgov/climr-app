@@ -137,7 +137,7 @@ session_geometry <- function(sg_dt) {
   
   refresh <- function(g) {
     refresh_DT()
-    shiny::updateActionButton(inputId = "downscale_process", disabled = {nrow(sg_dt$dt) <= 0})
+    shiny::updateActionButton(inputId = "generate_results", disabled = {nrow(sg_dt$dt) <= 0})
     if ("marker" %in% g) update_map_marker()
     if ("shape" %in% g) update_map_shape()
   }
@@ -437,96 +437,56 @@ session_geometry <- function(sg_dt) {
       return()
       
     },
-    # process = function() {
-    #   vstore[["processing"]] <- TRUE
-    #   shiny::updateActionButton(inputId = "downscale_process", disabled = TRUE)
-    #   shiny::updateActionButton(inputId = "downscale_process_launch", disabled = TRUE)
-    #   withCallingHandlers(
-    #     message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
-    #     warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
-    #     error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
-    #     {
-    #       
-    #       run_id <- generate_run_id()
-    #       
-    #       output_files <- process_downscale(sg_dt$dt, cec, vstore, fg, run_id)
-    #       
-    #       if (!length(output_files)) {
-    #         vstore[["processing"]] <- FALSE
-    #         shiny::updateActionButton(inputId = "downscale_process", disabled = FALSE)
-    #         shiny::removeModal()
-    #         shiny::showNotification("No output generated.", type = "warning")
-    #         return()
-    #       }
-    #       
-    #       output$downscale_download <- shiny::downloadHandler(
-    #         filename = function() {
-    #           paste0("downscale_", run_id, ".zip")
-    #         },
-    #         content = function(file) {            
-    #           on.exit(unlink(output_files), add = TRUE)
-    #           zip::zipr(file, output_files)
-    #         },
-    #         contentType = "application/zip"
-    #       )
-    #       
-    #       session$sendCustomMessage(type="jsCode", list(code = "$('.input-control-body a.shiny-download-link').addClass('btn-success');"))
-    #       shiny::showNotification("Downscale process completed. You can now download the results.", type = "message")
-    #     }
-    #   )
-    #   vstore[["processing"]] <- FALSE
-    #   shiny::updateActionButton(inputId = "downscale_process_launch", disabled = FALSE)
-    #   shiny::updateActionButton(inputId = "downscale_process", disabled = FALSE)
-    #   shiny::removeModal()
-    # },
     process = function() {
       vstore[["processing"]] <- TRUE
-      shiny::updateActionButton(inputId = "downscale_process", disabled = TRUE)
+      shiny::updateActionButton(inputId = "generate_results", disabled = TRUE)
       shiny::updateActionButton(inputId = "downscale_process_launch", disabled = TRUE)
       withCallingHandlers(
         message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
         warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
         error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
         {
-          
+
           run_id <- generate_run_id()
-          
+
           output_files <- process_downscale(sg_dt$dt, cec, vstore, fg, run_id)
-          
+
           if (!length(output_files)) {
             vstore[["processing"]] <- FALSE
-            shiny::updateActionButton(inputId = "downscale_process", disabled = FALSE)
-            shiny::removeModal()
+            shiny::updateActionButton(inputId = "generate_results", disabled = FALSE)
+            #shiny::removeModal()
             shiny::showNotification("No output generated.", type = "warning")
             return()
+          } else if (tools::file_ext(output_files) == "csv") {
+            output$preview_table <- DT::renderDT(server = TRUE, {
+              req(output_files)
+              
+              dt <- head(read.csv(output_files))
+              
+              DT::datatable(dt, rownames = FALSE, escape = FALSE, options = list(
+                dom = 't', scrollX = TRUE))
+            })
           }
-        }
-      )
-    },
-    
-    download = function(output_files) {
-      withCallingHandlers(
-      {
-          
+
           output$downscale_download <- shiny::downloadHandler(
             filename = function() {
               paste0("downscale_", run_id, ".zip")
             },
-            content = function(file) {            
+            content = function(file) {
               on.exit(unlink(output_files), add = TRUE)
               zip::zipr(file, output_files)
             },
             contentType = "application/zip"
           )
-          
+
           session$sendCustomMessage(type="jsCode", list(code = "$('.input-control-body a.shiny-download-link').addClass('btn-success');"))
           shiny::showNotification("Downscale process completed. You can now download the results.", type = "message")
         }
       )
       vstore[["processing"]] <- FALSE
-      shiny::updateActionButton(inputId = "downscale_process_launch", disabled = FALSE)
-      shiny::updateActionButton(inputId = "downscale_process", disabled = FALSE)
-      shiny::removeModal()
+      shiny::updateActionButton(inputId = "downscale_process_launch", disabled = TRUE)
+      shiny::updateActionButton(inputId = "generate_results", disabled = FALSE)
+      #shiny::removeModal()
     },
     get = function() {
       return(sg_dt$dt)

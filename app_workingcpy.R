@@ -288,8 +288,7 @@ shiny::shinyApp(
     
     downscale_default <- list(
       downscale_which_refmap = "refmap_climr",
-      # downscale_obs_periods = "2001_2020",
-      downscale_obs_periods = "NULL",
+      downscale_obs_periods = "2001_2020",
       downscale_obs_years_radio = "No",
       downscale_obs_years = "NULL",
       downscale_obs_ts_dataset = "NULL",
@@ -329,7 +328,7 @@ shiny::shinyApp(
       #downscale_run_nm = downscale_default[["downscale_run_nm"]],
       downscale_extra_vars = downscale_default[["downscale_extra_vars"]],
       downscale_core_ppt_lr = downscale_default[["downscale_core_ppt_lr"]],
-      downscale_output = "tif",
+      downscale_output = "csv",
       downscale_resolution = 2500,
       vscale = "none",
       processing = FALSE
@@ -954,20 +953,34 @@ shiny::shinyApp(
             shiny::modalDialog(
               title = "Preferences for Downscale Processing", size = "l",
               shiny::div(
-                title = "tif: Shapes/rasters are returned as GeoTIFF. csv: all points are returned in csv.",
                 shiny::radioButtons(
                   inputId = "downscale_output",
-                  label = "Downscale Output Format Priority",
+                  label = h5("Choose downscale output format:",
+                             prompter::add_prompt(
+                               tooltipsIcon,
+                               message = HTML(paste("tif: Shapes/rasters are returned as GeoTIFF. csv: all points are returned in csv.")),
+                               position = "top",
+                               size = "large",
+                               shadow = FALSE
+                             )
+                  ),
                   choices = c("Geographic Tag Image File Format (GeoTIFF)" = "tif", "Comma Separated Value (csv)" = "csv"),
                   inline = TRUE,
                   selected = vstore[["downscale_output"]]
                 )
               ),
               shiny::div(
-                title = "Target resolution for shapes drawn on map or added using file upload. Does not apply to points, raster or csv files.",
                 shiny::sliderInput(
                   inputId = "downscale_resolution",
-                  label = "Downscale Resolution (m)",
+                  label = h5("Downscale Resolution (m)",
+                             prompter::add_prompt(
+                               tooltipsIcon,
+                               message = HTML(paste("Target resolution for shapes drawn on map or added using file upload. Does not apply to points, raster or csv files.")),
+                               position = "top",
+                               size = "large",
+                               shadow = FALSE
+                             )
+                  ),
                   value = vstore[["downscale_resolution"]],
                   width = "100%",
                   min = 250,
@@ -986,20 +999,15 @@ shiny::shinyApp(
                 icon = shiny::icon("play"),
                 width = "100%"
               ),
-              output$downscale_process_launch <- renderUI({
-                # only display text preview if output is a CSV, display raster on map
-                if (vstore[["downscale_output"]] == "csv") {
-                  
-                  # display a preview - currently not sure how the program is returning the data, so don't know how to display
-                  datatable(head(output_files))
-                }
-              }),
-              # NEED TO FIX THIS BUTTON - TOO SMALL??
+              br(), br(),
+              
+              DT::DTOutput("preview_table", width = "100%"),
+              
               shiny::downloadButton(
                 outputId = "downscale_download",
                 label = "Download Downscaled Data",
                 title = "Download downscaled geographies archive",
-                class = "btn btn-secondary btn-sm"
+                style = "width: 100%;"
               ),
             )
           )
@@ -1033,8 +1041,7 @@ shiny::shinyApp(
     shiny::observeEvent(input$downscale_process_launch, {
       if (shiny::in_devmode()) cat("Event: downscale_process_launch", sep = "\n")
       if (vstore[["processing"]]) return()
-      output_files <- sg$process()
-      sg$download(output_files)
+      sg$process()
     })
     
   }
