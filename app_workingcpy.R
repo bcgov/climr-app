@@ -586,7 +586,7 @@ shiny::shinyApp(
                       label = h5("Choose GCM years:",
                                  prompter::add_prompt(
                                    tooltipsIcon,
-                                   message = HTML(paste("Time series years for GCM simulations of the historical scenario and future SSP scenarios.")),
+                                   message = HTML(paste("Choose time series years for GCM simulations of the historical scenario and future SSP scenarios.")),
                                    position = "top",
                                    size = "large",
                                    shadow = FALSE
@@ -680,19 +680,21 @@ shiny::shinyApp(
             title = "Extra Climate variables to compute. Defaults to monthly PPT, Tmax, Tmin if not specified.",
             shiny::selectizeInput(
               inputId = "downscale_extra_vars",
-              label = "Extra Climate variables",
+              label = h5("Choose extra climate variables:"),
               width = "100%",
               choices = c(downscale_extra_vars, list("Remove all" = c("null" = "NULL"))),
               multiple = TRUE,
               selected = vstore[["downscale_extra_vars"]]
             )
           ),
+          br(),
+          
           shiny::div(
-            title = "Apply elevation adjustment to precipitation values during downscaling.",
             shiny::checkboxInput(
               inputId = "downscale_core_ppt_lr",
-              label = "Precipitation elevation adjustment",
-              value = vstore[["downscale_core_ppt_lr"]]
+              label = "Apply elevation adjustment to precipitation values during downscaling",
+              value = vstore[["downscale_core_ppt_lr"]],
+              width = "100%"
             )
           ),
           footer = shiny::tagList(
