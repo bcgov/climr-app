@@ -158,7 +158,8 @@ shiny::shinyApp(
                 "generate_results",
                 label = "Generate results",
                 icon = icon("plus-square"),
-                style = "width:100%; height:70px; background-color:#003366; color: #FFF"
+                style = "width:100%; height:70px; background-color:#003366; color: #FFF",
+                disabled = TRUE
               )
             ),
             br(),
@@ -170,13 +171,14 @@ shiny::shinyApp(
               
               accordion_panel(
                 title = h5("Method 1: By selection on map",
-                prompter::add_prompt(
-                  tooltipsIcon,
-                  message = HTML(paste("Click on map to add points or draw an area-of-interest using shape tools in left-hand corner of map.")),
-                  position = "top-left",
-                  size = "large",
-                  shadow = FALSE
-                )),
+                            prompter::add_prompt(
+                              tooltipsIcon,
+                              message = HTML(paste("Click on map to add points or draw an area-of-interest using shape tools in left-hand corner of map.")),
+                              position = "top",
+                              size = "large",
+                              shadow = FALSE
+                            )
+                ),
                 p("Click on map to add points or draw an area-of-interest using shape tools."),
                 DT::DTOutput("geom_dt", width = "100%"),
                 shiny::actionButton("delete_button", "Delete Selected", icon("trash-alt")),
@@ -184,15 +186,22 @@ shiny::shinyApp(
               ),
               
               accordion_panel(
-                title = "Method 2: Upload a file",
+                title = h5("Method 2: Upload a file",
+                           prompter::add_prompt(
+                             tooltipsIcon,
+                             message = HTML(paste("Upload a csv, a raster or a shape file to add geographies.")),
+                             position = "top",
+                             size = "large",
+                             shadow = FALSE
+                           )
+                ),
                 shiny::div(
-                  #title = "Upload a csv, a raster or a shape file to add geographies",
                   shiny::fileInput(
                     inputId = "upload",
                     label = "Upload a csv, a raster or a shape file to add geographies"
                   )
-                )
-                
+                ),
+                value = "acc2"
               )
             ),
             br(), br(),
@@ -338,6 +347,8 @@ shiny::shinyApp(
       sg$add_point_enabled(FALSE)
       updateActionButton(session = getDefaultReactiveDomain(),
                          "downscale_parameters", disabled = FALSE)
+      updateActionButton(session = getDefaultReactiveDomain(),
+                         "generate_results", disabled = FALSE)
     })
     shiny::observeEvent(input$climr_draw_stop, {
       if (shiny::in_devmode()) cat("Event: climr_draw_stop", sep = "\n")
@@ -352,6 +363,8 @@ shiny::shinyApp(
       sg$add_point(input$climr_click$lat, input$climr_click$lng)
       updateActionButton(session = getDefaultReactiveDomain(),
                          "downscale_parameters", disabled = FALSE)
+      updateActionButton(session = getDefaultReactiveDomain(),
+                         "generate_results", disabled = FALSE)
     })
     
     # upload a file
@@ -360,6 +373,8 @@ shiny::shinyApp(
       sg$add_file(input$upload)
       updateActionButton(session = getDefaultReactiveDomain(),
                          "downscale_parameters", disabled = FALSE)
+      updateActionButton(session = getDefaultReactiveDomain(),
+                         "generate_results", disabled = FALSE)
     })
     
     # pop-up remove button for map points
@@ -369,6 +384,8 @@ shiny::shinyApp(
       if (nrow(sg_dt$dt) < 1) {
         updateActionButton(session = getDefaultReactiveDomain(),
                           "downscale_parameters", disabled = TRUE)
+        updateActionButton(session = getDefaultReactiveDomain(),
+                           "generate_results", disabled = TRUE)
       }
     })
     
@@ -384,6 +401,8 @@ shiny::shinyApp(
         if (nrow(sg_dt$dt) < 1) {
         updateActionButton(session = getDefaultReactiveDomain(),
                           "downscale_parameters", disabled = TRUE)
+        updateActionButton(session = getDefaultReactiveDomain(),
+                          "generate_results", disabled = TRUE)
       }
       } else {
         showModal(
@@ -401,6 +420,8 @@ shiny::shinyApp(
       sg$clear_all()
       updateActionButton(session = getDefaultReactiveDomain(),
                          "downscale_parameters", disabled = TRUE)
+      updateActionButton(session = getDefaultReactiveDomain(),
+                         "generate_results", disabled = TRUE)
       lapply(names(downscale_default), \(x) {
         vstore[[x]] <- downscale_default[[x]]
       })
@@ -416,19 +437,17 @@ shiny::shinyApp(
           
           # Reference map selection
           shiny::div(
-            title = "Which map of 1961-1990 climatological normals to use as the high-resolution reference climate map for downscaling. 'auto' selects the best available map per point.",
-            # shiny::selectInput(
-            #   inputId = "downscale_which_refmap",
-            #   label = "Choose Reference Map:",
-            #   width = "100%",
-            #   choices = c(
-            #     local({z <- climr::list_refmaps(); substr(z, 8L, z |> nchar()) |> tools::toTitleCase() |> setNames(object = z, nm = _)})
-            #   ),
-            #   selected = vstore[["downscale_which_refmap"]]
-            # )
             shiny::radioButtons(
               inputId = "downscale_which_refmap",
-              label = "Choose Reference Map:",
+              label = h5("Choose Reference Map:", 
+                         prompter::add_prompt(
+                           tooltipsIcon,
+                           message = HTML(paste("Which map of 1961-1990 climatological normals to use as the high-resolution reference climate map for downscaling.")),
+                           position = "top",
+                           size = "large",
+                           shadow = FALSE
+                         )
+              ),
               choices = c(local({z <- climr::list_refmaps(); substr(z, 8L, z |> nchar()) |> tools::toTitleCase() |> setNames(object = z, nm = _)})
               ),
               selected = vstore[["downscale_which_refmap"]],
@@ -441,27 +460,33 @@ shiny::shinyApp(
           accordion(
             open = FALSE,
             
-            # Observed climate data parameters **for each of these - need to add helplinks!!!
+            # Observed climate data parameters
             accordion_panel(
-              title = "Observed Climate Data",
+              title = h5("Observed Climate Data"),
               value = "acc_observed",
               
               shiny::div(
-                title = "Historical period for observed climate data, averaged over this period. Select 'Null' for no observed periods.",
                 shiny::checkboxGroupInput(
                   inputId = "downscale_obs_periods",
-                  label = "Choose observed periods:",
+                  label = h5("Choose observed periods:",
+                             prompter::add_prompt(
+                               tooltipsIcon,
+                               message = HTML(paste("Historical period for observed climate data, averaged over this period.")),
+                               position = "top",
+                               size = "large",
+                               shadow = FALSE
+                             )
+                  ),
                   inline = TRUE,
                   width = "100%",
-                  choices = climr::list_obs_periods() |> sn(),
+                  choices = c(climr::list_obs_periods() |> sn()),
                   selected = vstore[["downscale_obs_periods"]]
                 )
               ),
               shiny::div(
-                title = "Would you like to choose the years to obtain individual years or time series of observational climate data?",
                 shiny::radioButtons(
                   inputId = "observed_years_radio",
-                  label = "Would you like to specify observed years?",
+                  label = h5("Would you like to specify observed years?"),
                   choices = c("Yes", "No"),
                   selected = vstore[["downscale_obs_years_radio"]],
                   width = "100%"
@@ -476,12 +501,20 @@ shiny::shinyApp(
                   shiny::div(
                     shiny::sliderInput(
                       inputId = "downscale_obs_years",
-                      label = "Choose observed years range:",
-                      # make these show up as dates!
+                      label = h5("Choose observed years range:",
+                                 prompter::add_prompt(
+                                   tooltipsIcon,
+                                   message = HTML(paste("Choose years to obtain individual years or time series of observational climate data.")),
+                                   position = "top",
+                                   size = "large",
+                                   shadow = FALSE
+                                 )
+                      ),
                       min = min(climr::list_obs_years()),
                       max = max(climr::list_obs_years()),
                       value = c(min(vstore[["downscale_obs_years"]]), max(vstore[["downscale_obs_years"]])),
-                      width = "100%"
+                      width = "100%",
+                      sep = ""
                       ),
                     selected = c(min(vstore[["downscale_obs_years"]]), max(vstore[["downscale_obs_years"]])),
                   )
@@ -493,14 +526,21 @@ shiny::shinyApp(
             
             # Simulated climate data parameters
             accordion_panel(
-              title = "Simulated Climate Data",
+              title = h5("Simulated Climate Data"),
               value = "acc_simulated",
               
               shiny::div(
-                title = "Global climate models to downscale. Select multiple GCMs for ensemble outputs.",
                 shiny::checkboxGroupInput(
                   inputId = "downscale_gcms",
-                  label = "Choose Global Climate Model (GCM):",
+                  label = h5("Choose Global Climate Model (GCM):",
+                             prompter::add_prompt(
+                               tooltipsIcon,
+                               message = HTML(paste("Global climate models to downscale. Select multiple GCMs for ensemble outputs.")),
+                               position = "top",
+                               size = "large",
+                               shadow = FALSE
+                             )
+                  ),
                   width = "100%",
                   inline = TRUE,
                   choices = climr::list_gcms() |> sn(),
@@ -508,21 +548,27 @@ shiny::shinyApp(
                 )
               ),
               shiny::div(
-                title = "20-year reference periods for GCM simulations.",
                 shiny::checkboxGroupInput(
                   inputId = "downscale_gcm_periods",
-                  label = "Choose GCM periods:",
+                  label = h5("Choose GCM periods:",
+                             prompter::add_prompt(
+                               tooltipsIcon,
+                               message = HTML(paste("20-year reference periods for GCM simulations.")),
+                               position = "top",
+                               size = "large",
+                               shadow = FALSE
+                             )
+                  ),
                   width = "100%",
                   inline = TRUE,
-                  choices = climr::list_gcm_periods() |> sn(),
+                  choices = c(climr::list_gcm_periods() |> sn()),
                   selected = vstore[["downscale_gcm_periods"]]
                 )
               ),
               shiny::div(
-                title = "Would you like to choose time series years for GCM simulations of the historical scenario and future SSP scenarios?",
                 shiny::radioButtons(
                   inputId = "gcm_years_radio",
-                  label = "Would you like to specify GCM years?",
+                  label = h5("Would you like to specify GCM years?"),
                   choices = c("Yes", "No"),
                   selected = vstore[["downscale_gcm_years_radio"]],
                   width = "100%"
@@ -535,15 +581,23 @@ shiny::shinyApp(
                     update_vstore_and_notify("downscale_gcm_years", date_range_preset, "GCM years")
                   }
                   shiny::div(
-                    title = "Time series years for GCM simulations of the historical scenario and future SSP scenarios.",
                     shiny::sliderInput(
                       inputId = "downscale_gcm_years",
-                      label = "Choose GCM years:",
+                      label = h5("Choose GCM years:",
+                                 prompter::add_prompt(
+                                   tooltipsIcon,
+                                   message = HTML(paste("Time series years for GCM simulations of the historical scenario and future SSP scenarios.")),
+                                   position = "top",
+                                   size = "large",
+                                   shadow = FALSE
+                                 )
+                      ),
                       width = "100%",
                       min = min(climr::list_gcm_hist_years()),
                       max = max(climr::list_gcm_ssp_years()),
                       value = c(min(vstore[["downscale_gcm_years"]]), max(vstore[["downscale_gcm_years"]])),
-                      step = 1
+                      step = 1,
+                      sep = ""
                     ),
                     selected = c(min(vstore[["downscale_gcm_years"]]), max(vstore[["downscale_gcm_years"]])),
                   )
@@ -554,13 +608,19 @@ shiny::shinyApp(
               output$downscale_gcm_years <- renderUI({
                 if (any(min(climr::list_gcm_ssp_years()):max(climr::list_gcm_ssp_years()) %in% input$downscale_gcm_years)) {
                   shiny::div(
-                    title = "SSP scenarios pairing shared socioeconomic pathways with representative concentration pathways (only necessary if choosing years past 2014).",
                     shiny::checkboxGroupInput(
                       inputId = "downscale_ssps",
-                      label = " Choose Shared Socio-economic Pathways (SSP) scenarios:",
+                      label = h5("Choose Shared Socio-economic Pathways (SSP) scenarios:",
+                                 prompter::add_prompt(
+                                   tooltipsIcon,
+                                   message = HTML(paste("SSP scenarios pairing shared socioeconomic pathways with representative concentration pathways (only necessary if choosing years past 2014).")),
+                                   position = "top",
+                                   size = "large",
+                                   shadow = FALSE
+                                 )
+                      ),
                       width = "100%",
                       inline = TRUE,
-                      #choices = list("Options" = climr::list_ssps() |> sn(), "Remove all" = c("null" = "NULL")),
                       choices = climr::list_ssps() |> sn(),
                       selected = vstore[["downscale_ssps"]]
                       )
@@ -570,10 +630,9 @@ shiny::shinyApp(
                 }
               }),
               shiny::div(
-                title = "Use the ensemble mean of model runs.",
                 shiny::radioButtons(
                   inputId = "downscale_max_run",
-                  label = "Use ensemble mean for maxinum number of model runs to include?",
+                  label = h5("Use ensemble mean for maxinum number of model runs to include?"),
                   width = "100%",
                   choices = c("Yes" = 0, "No" = "NULL"), # THIS MAY CREATE ISSUES WHEN DOWNSCALING
                   inline = TRUE,
@@ -581,10 +640,9 @@ shiny::shinyApp(
                 )
               ),
               shiny::div(
-                title = "Maximum number of model runs to include.",
                 shiny::numericInput(
                   inputId = "downscale_max_run",
-                  label = "Choose maximum number of model runs:",
+                  label = h5("Choose maximum number of model runs:"),
                   value = vstore[["downscale_max_run"]],
                   width = "100%",
                   min = 0,
