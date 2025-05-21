@@ -303,7 +303,8 @@ shiny::shinyApp(
       downscale_max_run = 0,
       #downscale_run_nm = "NULL",
       downscale_extra_vars = "NULL",
-      downscale_core_ppt_lr = FALSE
+      downscale_core_ppt_lr = FALSE,
+      downscale_return_refperiod = TRUE
     )
     
     vstore <- reactiveValues(
@@ -328,6 +329,7 @@ shiny::shinyApp(
       #downscale_run_nm = downscale_default[["downscale_run_nm"]],
       downscale_extra_vars = downscale_default[["downscale_extra_vars"]],
       downscale_core_ppt_lr = downscale_default[["downscale_core_ppt_lr"]],
+      downscale_return_refperiod = downscale_default[["downscale_return_refperiod"]],
       downscale_output = "csv",
       downscale_resolution = 2500,
       vscale = "none",
