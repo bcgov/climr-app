@@ -491,36 +491,9 @@ shiny::shinyApp(
                   width = "100%"
                 ),
               ),
-              output$observed_years_radio <- renderUI({
-                if (input$observed_years_radio == "Yes") {
-                  if ("NULL" %in% vstore$downscale_obs_years) {
-                    date_range_preset <- c(min(climr::list_obs_years()):max(climr::list_obs_years()))
-                    update_vstore_and_notify("downscale_obs_years", date_range_preset, "Obs years")
-                  }
-                  shiny::div(
-                    shiny::sliderInput(
-                      inputId = "downscale_obs_years",
-                      label = h5("Choose observed years range:",
-                                 prompter::add_prompt(
-                                   tooltipsIcon,
-                                   message = HTML(paste("Choose years to obtain individual years or time series of observational climate data.")),
-                                   position = "top",
-                                   size = "large",
-                                   shadow = FALSE
-                                 )
-                      ),
-                      min = min(climr::list_obs_years()),
-                      max = max(climr::list_obs_years()),
-                      value = c(min(vstore[["downscale_obs_years"]]), max(vstore[["downscale_obs_years"]])),
-                      width = "100%",
-                      sep = ""
-                      ),
-                    selected = c(min(vstore[["downscale_obs_years"]]), max(vstore[["downscale_obs_years"]])),
-                  )
-                } else {
-                  NULL
-                }
-              })
+              
+              # reactive output for selecting Observed Years
+              uiOutput("observed_years_radio")
             ),
             
             # Simulated climate data parameters
@@ -573,61 +546,13 @@ shiny::shinyApp(
                   width = "100%"
                 ),
               ),
-              output$gcm_years_radio <- renderUI({
-                if (input$gcm_years_radio == "Yes") {
-                  if ("NULL" %in% vstore$downscale_gcm_years) {
-                    date_range_preset <- c(min(climr::list_gcm_hist_years()):(max(climr::list_gcm_hist_years())-100))
-                    update_vstore_and_notify("downscale_gcm_years", date_range_preset, "GCM years")
-                  }
-                  shiny::div(
-                    shiny::sliderInput(
-                      inputId = "downscale_gcm_years",
-                      label = h5("Choose GCM years:",
-                                 prompter::add_prompt(
-                                   tooltipsIcon,
-                                   message = HTML(paste("Choose time series years for GCM simulations of the historical scenario and future SSP scenarios.")),
-                                   position = "top",
-                                   size = "large",
-                                   shadow = FALSE
-                                 )
-                      ),
-                      width = "100%",
-                      min = min(climr::list_gcm_hist_years()),
-                      max = max(climr::list_gcm_ssp_years()),
-                      value = c(min(vstore[["downscale_gcm_years"]]), max(vstore[["downscale_gcm_years"]])),
-                      step = 1,
-                      sep = ""
-                    ),
-                    selected = c(min(vstore[["downscale_gcm_years"]]), max(vstore[["downscale_gcm_years"]])),
-                  )
-                } else {
-                  NULL
-                }
-              }),
-              output$downscale_gcm_years <- renderUI({
-                if (any(min(climr::list_gcm_ssp_years()):max(climr::list_gcm_ssp_years()) %in% input$downscale_gcm_years)) {
-                  shiny::div(
-                    shiny::checkboxGroupInput(
-                      inputId = "downscale_ssps",
-                      label = h5("Choose Shared Socio-economic Pathways (SSP) scenarios:",
-                                 prompter::add_prompt(
-                                   tooltipsIcon,
-                                   message = HTML(paste("SSP scenarios pairing shared socioeconomic pathways with representative concentration pathways (only necessary if choosing years past 2014).")),
-                                   position = "top",
-                                   size = "large",
-                                   shadow = FALSE
-                                 )
-                      ),
-                      width = "100%",
-                      inline = TRUE,
-                      choices = climr::list_ssps() |> sn(),
-                      selected = vstore[["downscale_ssps"]]
-                      )
-                    )
-                } else {
-                  NULL
-                }
-              }),
+              
+              # reactive output for selecting GCM Years
+              uiOutput("gcm_years_radio"),
+              
+              # reactive output for selecting SSPs
+              uiOutput("downscale_gcm_years"),
+              
               shiny::div(
                 shiny::radioButtons(
                   inputId = "downscale_max_run",
@@ -1044,6 +969,96 @@ shiny::shinyApp(
       sg$process()
     })
     
+    # reactive output for selecting Observed Years
+    output$observed_years_radio <- renderUI({
+      if (input$observed_years_radio == "Yes") {
+        if ("NULL" %in% vstore$downscale_obs_years) {
+          date_range_preset <- c(min(climr::list_obs_years()):max(climr::list_obs_years()))
+          update_vstore_and_notify("downscale_obs_years", date_range_preset, "Obs years")
+        }
+        shiny::div(
+          shiny::sliderInput(
+            inputId = "downscale_obs_years",
+            label = h5("Choose observed years range:",
+                       prompter::add_prompt(
+                         tooltipsIcon,
+                         message = HTML(paste("Choose years to obtain individual years or time series of observational climate data.")),
+                         position = "top",
+                         size = "large",
+                         shadow = FALSE
+                       )
+            ),
+            min = min(climr::list_obs_years()),
+            max = max(climr::list_obs_years()),
+            value = c(min(vstore[["downscale_obs_years"]]), max(vstore[["downscale_obs_years"]])),
+            width = "100%",
+            sep = ""
+          ),
+          selected = c(min(vstore[["downscale_obs_years"]]), max(vstore[["downscale_obs_years"]])),
+        )
+      } else {
+        NULL
+      }
+    })
+    
+    # reactive output for selecting GCM Years
+    output$gcm_years_radio <- renderUI({
+      if (input$gcm_years_radio == "Yes") {
+        if ("NULL" %in% vstore$downscale_gcm_years) {
+          date_range_preset <- c(min(climr::list_gcm_hist_years()):(max(climr::list_gcm_hist_years())-100))
+          update_vstore_and_notify("downscale_gcm_years", date_range_preset, "GCM years")
+        }
+        shiny::div(
+          shiny::sliderInput(
+            inputId = "downscale_gcm_years",
+            label = h5("Choose GCM years:",
+                       prompter::add_prompt(
+                         tooltipsIcon,
+                         message = HTML(paste("Choose time series years for GCM simulations of the historical scenario and future SSP scenarios.")),
+                         position = "top",
+                         size = "large",
+                         shadow = FALSE
+                       )
+            ),
+            width = "100%",
+            min = min(climr::list_gcm_hist_years()),
+            max = max(climr::list_gcm_ssp_years()),
+            value = c(min(vstore[["downscale_gcm_years"]]), max(vstore[["downscale_gcm_years"]])),
+            step = 1,
+            sep = ""
+          ),
+          selected = c(min(vstore[["downscale_gcm_years"]]), max(vstore[["downscale_gcm_years"]])),
+        )
+      } else {
+        NULL
+      }
+    })
+    
+    # reactive output for selecting SSPs
+    output$downscale_gcm_years <- renderUI({
+      if (any(min(climr::list_gcm_ssp_years()):max(climr::list_gcm_ssp_years()) %in% input$downscale_gcm_years)) {
+        shiny::div(
+          shiny::checkboxGroupInput(
+            inputId = "downscale_ssps",
+            label = h5("Choose Shared Socio-economic Pathways (SSP) scenarios:",
+                       prompter::add_prompt(
+                         tooltipsIcon,
+                         message = HTML(paste("SSP scenarios pairing shared socioeconomic pathways with representative concentration pathways (only necessary if choosing years past 2014).")),
+                         position = "top",
+                         size = "large",
+                         shadow = FALSE
+                       )
+            ),
+            width = "100%",
+            inline = TRUE,
+            choices = climr::list_ssps() |> sn(),
+            selected = vstore[["downscale_ssps"]]
+          )
+        )
+      } else {
+        NULL
+      }
+    })
   }
 )
 
