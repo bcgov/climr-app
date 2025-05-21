@@ -1,16 +1,6 @@
 # Geometry input logic ----
 session_geometry <- function(sg_dt) {
   
-  # sg_dt$dt <- data.table::data.table(
-  #   id = integer(),
-  #   lat = character(),
-  #   long = character(),
-  #   wkt = character(),
-  #   group = character(),
-  #   source = character(),
-  #   datapath = character()
-  # )
-  
   observe ({
     req(sg_dt$dt)
     sg_dt$filtered_dt <- (sg_dt$dt)[source %in% c("map_click", "map_draw")]

@@ -301,10 +301,10 @@ shiny::shinyApp(
       downscale_gcm_years = "NULL",
       downscale_ensemble_mean = 0, # is default for YES
       downscale_max_run = 0,
-      #downscale_run_nm = "NULL",
+      downscale_run_nm = "NULL",
       downscale_extra_vars = "NULL",
       downscale_core_ppt_lr = FALSE,
-      downscale_return_refperiod = TRUE
+      downscale_return_refperiod = FALSE
     )
     
     vstore <- reactiveValues(
@@ -326,7 +326,7 @@ shiny::shinyApp(
       downscale_gcm_years = downscale_default[["downscale_gcm_years"]],
       downscale_ensemble_mean = downscale_default[["downscale_ensemble_mean"]],
       downscale_max_run = downscale_default[["downscale_max_run"]],
-      #downscale_run_nm = downscale_default[["downscale_run_nm"]],
+      downscale_run_nm = downscale_default[["downscale_run_nm"]],
       downscale_extra_vars = downscale_default[["downscale_extra_vars"]],
       downscale_core_ppt_lr = downscale_default[["downscale_core_ppt_lr"]],
       downscale_return_refperiod = downscale_default[["downscale_return_refperiod"]],
@@ -480,7 +480,7 @@ shiny::shinyApp(
                   ),
                   inline = TRUE,
                   width = "100%",
-                  choices = c(climr::list_obs_periods() |> sn()),
+                  choices = c("1961_1990", climr::list_obs_periods() |> sn()),
                   selected = vstore[["downscale_obs_periods"]]
                 )
               ),
@@ -551,7 +551,7 @@ shiny::shinyApp(
               
               # reactive output for selecting GCM Years
               uiOutput("gcm_years_radio"),
-              
+
               # reactive output for selecting SSPs
               uiOutput("downscale_gcm_years"),
               
@@ -603,10 +603,17 @@ shiny::shinyApp(
           br(),
           
           shiny::div(
-            title = "Extra Climate variables to compute. Defaults to monthly PPT, Tmax, Tmin if not specified.",
             shiny::selectizeInput(
               inputId = "downscale_extra_vars",
-              label = h5("Choose extra climate variables:"),
+              label = h5("Choose extra climate variables:",
+                         prompter::add_prompt(
+                           tooltipsIcon,
+                           message = HTML(paste("Extra climate variables to compute. Defaults to monthly PPT, Tmax, Tmin if not specified.")),
+                           position = "top",
+                           size = "large",
+                           shadow = FALSE
+                         )
+              ),
               width = "100%",
               choices = c(downscale_extra_vars, list("Remove all" = c("null" = "NULL"))),
               multiple = TRUE,
@@ -704,28 +711,33 @@ shiny::shinyApp(
     })
     shiny::observeEvent(input$downscale_obs_periods, {
       if (shiny::in_devmode()) cat("Event: downscale_obs_periods", sep = "\n")
-      update_vstore_and_notify("downscale_obs_periods", input$downscale_obs_periods, "Obs periods")
+      if ("1961_1990" %in% input$downscale_obs_periods) {
+        update_vstore_and_notify("downscale_return_refperiod", TRUE, "Return ref period")
+      } else {
+        update_vstore_and_notify("downscale_return_refperiod", FALSE, "Return ref period")
+      }
+      update_vstore_and_notify("downscale_obs_periods", input$downscale_obs_periods[input$downscale_obs_periods != "1961_1990"], "Obs periods")
     })
     shiny::observeEvent(input$observed_years_radio,{
       if (shiny::in_devmode()) cat("Event: downscale_obs_years_radio", sep = "\n")
       update_vstore_and_notify("downscale_obs_years_radio", input$observed_years_radio, "Obs radios")
-      
+
       # only observe if user-specified
       if (input$observed_years_radio == "Yes") {
         shiny::observeEvent(input$downscale_obs_years, {
           if (shiny::in_devmode()) cat("Event: downscale_obs_years", sep = "\n")
-          
+
           # add selected range
           date_range <- (min(input$downscale_obs_years):max(input$downscale_obs_years))
           update_vstore_and_notify("downscale_obs_years", date_range, "Obs years")
       })
-      } 
-      
+      }
+
       # if no is clicked again, reset years to default - THIS MIGHT NOT WORK IS NO LONGER REMOVING YEARS JUST REPLACING WITH NULL
       else if (input$observed_years_radio == "No") {
         shiny::observeEvent(input$downscale_obs_years, {
           if (shiny::in_devmode()) cat("Event: downscale_obs_years", sep = "\n")
-          
+
           # reset years to default
           update_vstore_and_notify("downscale_obs_years", downscale_default[["downscale_obs_years"]], "Obs years")
         })
@@ -743,7 +755,7 @@ shiny::shinyApp(
     shiny::observeEvent(input$downscale_ssps, {
       if (shiny::in_devmode()) cat("Event: downscale_ssps", sep = "\n")
       update_vstore_and_notify("downscale_ssps", input$downscale_ssps, "SSPs")
-      update_run_nm_select()
+      #update_run_nm_select()
     })
     shiny::observeEvent(input$downscale_gcm_periods, {
       if (shiny::in_devmode()) cat("Event: downscale_gcm_periods", sep = "\n")
@@ -760,26 +772,26 @@ shiny::shinyApp(
     shiny::observeEvent(input$gcm_years_radio,{
       if (shiny::in_devmode()) cat("Event: downscale_gcm_years_radio", sep = "\n")
       update_vstore_and_notify("downscale_gcm_years_radio", input$gcm_years_radio, "GCM radios")
-      
+
       # only observe if user-specified
       if (input$gcm_years_radio == "Yes") {
         shiny::observeEvent(input$downscale_gcm_years, {
           #observe({print(input$downscale_gcm_years)}) used to check if binding is correct
           if (shiny::in_devmode()) cat("Event: downscale_gcm_years", sep = "\n")
-          
+
           # add selected range
           date_range <- (min(input$downscale_gcm_years):max(input$downscale_gcm_years))
           update_vstore_and_notify("downscale_gcm_years", date_range, "GCM years")
         })
-      } 
-      
-      # if no is clicked again, reset years to default - THIS MIGHT NOT WORK IS NO LONGER REMOVING YEARS JUST REPLACING WITH NULL
+      }
+
+      # if no is clicked again, reset years to default
       else if (input$gcm_years_radio == "No") {
         shiny::observeEvent(input$downscale_gcm_years, {
           if (shiny::in_devmode()) cat("Event: downscale_gcm_years", sep = "\n")
-          
+
           # reset years to default
-          update_vstore_and_notify("downscale_gcm_years", downscale_default[["downscale_gcm_years"]], "GCM years")
+          update_vstore_and_notify("downscale_gcm_years", "NULL", "GCM years")
         })
       }
     })
@@ -787,10 +799,10 @@ shiny::shinyApp(
       if (shiny::in_devmode()) cat("Event: downscale_max_run", sep = "\n")
       update_vstore_and_notify("downscale_max_run", input$downscale_max_run, "Max run")
     })
-    shiny::observeEvent(input$downscale_run_nm, {
-      if (shiny::in_devmode()) cat("Event: downscale_run_nm", sep = "\n")
-      update_vstore_and_notify("downscale_run_nm", input$downscale_run_nm, "Run name")
-    })
+    # shiny::observeEvent(input$downscale_run_nm, {
+    #   if (shiny::in_devmode()) cat("Event: downscale_run_nm", sep = "\n")
+    #   update_vstore_and_notify("downscale_run_nm", input$downscale_run_nm, "Run name")
+    # })
     shiny::observeEvent(input$downscale_extra_vars, {
       if (shiny::in_devmode()) cat("Event: downscale_extra_vars", sep = "\n")
       update_vstore_and_notify("downscale_extra_vars", input$downscale_extra_vars, "Core vars")
@@ -799,7 +811,7 @@ shiny::shinyApp(
       if (shiny::in_devmode()) cat("Event: downscale_core_ppt_lr", sep = "\n")
       update_vstore_and_notify("downscale_core_ppt_lr", input$downscale_core_ppt_lr, "Core PPT LR")
     })
-    
+
     shiny::observeEvent(input$downscale_reset, {
       if (shiny::in_devmode()) cat("Event: downscale_reset", sep = "\n")
       shiny::showModal(
@@ -828,24 +840,24 @@ shiny::shinyApp(
       downscale_modal()
     })
     
-    update_run_nm_select <- function() {
-      gcms <- vstore[["downscale_gcms"]]
-      ssps <- vstore[["downscale_ssps"]]
-      if (!length(gcms) && !length(ssps)) {
-        opt_choices <- c()
-      } else if (length(gcms) && !length(ssps)) {
-        opt_choices <- climr::list_runs_historic(gcm = gcms) |> sn()
-      } else if (length(gcms) && length(ssps)) {
-        opt_choices <- climr::list_runs_ssp(gcm = gcms, ssp = ssps) |> sn()
-      }
-      choices <- list("Options" = opt_choices, "Remove all" = c("null" = "NULL"))
-      if (all(vstore[["downscale_run_nm"]] %in% unlist(choices))) {
-        select <- vstore[["downscale_run_nm"]]
-      } else {
-        select <- NULL
-      }
-      shiny::updateSelectInput(inputId = "downscale_run_nm", choices = choices, selected = select)
-    }
+    # update_run_nm_select <- function() {
+    #   gcms <- vstore[["downscale_gcms"]]
+    #   ssps <- vstore[["downscale_ssps"]]
+    #   if (!length(gcms) && !length(ssps)) {
+    #     opt_choices <- c()
+    #   } else if (length(gcms) && !length(ssps)) {
+    #     opt_choices <- climr::list_runs_historic(gcm = gcms) |> sn()
+    #   } else if (length(gcms) && length(ssps)) {
+    #     opt_choices <- climr::list_runs_ssp(gcm = gcms, ssp = ssps) |> sn()
+    #   }
+    #   choices <- list("Options" = opt_choices, "Remove all" = c("null" = "NULL"))
+    #   if (all(vstore[["downscale_run_nm"]] %in% unlist(choices))) {
+    #     select <- vstore[["downscale_run_nm"]]
+    #   } else {
+    #     select <- NULL
+    #   }
+    #   shiny::updateSelectInput(inputId = "downscale_run_nm", choices = choices, selected = select)
+    # }
     
     shiny::observeEvent(input$generate_results, {
       if (shiny::in_devmode()) cat("Event: generate_results", sep = "\n")
