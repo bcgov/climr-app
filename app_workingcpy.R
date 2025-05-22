@@ -294,9 +294,9 @@ shiny::shinyApp(
       downscale_obs_ts_dataset = "NULL",
       downscale_gcms = "NULL",
       downscale_ssps = "NULL",
-      downscale_gcm_periods = "NULL",
-      # downscale_gcm_ssp_years = "NULL",
-      # downscale_gcm_hist_years = "NULL",
+      # downscale_gcm_periods = "NULL",
+      downscale_gcm_ssp_years = "NULL",
+      downscale_gcm_hist_years = "NULL",
       downscale_gcm_years_radio = "No",
       downscale_gcm_years = "NULL",
       downscale_ensemble_mean = 0, # is default for YES
@@ -320,10 +320,10 @@ shiny::shinyApp(
       downscale_gcms = downscale_default[["downscale_gcms"]],
       downscale_ssps = downscale_default[["downscale_ssps"]],
       downscale_gcm_periods = downscale_default[["downscale_gcm_periods"]],
-      # downscale_gcm_ssp_years = downscale_default[["downscale_gcm_ssp_years"]],
-      # downscale_gcm_hist_years = downscale_default[["downscale_gcm_hist_years"]],
+      downscale_gcm_ssp_years = downscale_default[["downscale_gcm_ssp_years"]],
+      downscale_gcm_hist_years = downscale_default[["downscale_gcm_hist_years"]],
       downscale_gcm_years_radio = downscale_default[["downscale_gcm_years_radio"]],
-      downscale_gcm_years = downscale_default[["downscale_gcm_years"]],
+      # downscale_gcm_years = downscale_default[["downscale_gcm_years"]],
       downscale_ensemble_mean = downscale_default[["downscale_ensemble_mean"]],
       downscale_max_run = downscale_default[["downscale_max_run"]],
       downscale_run_nm = downscale_default[["downscale_run_nm"]],
@@ -603,22 +603,39 @@ shiny::shinyApp(
           br(),
           
           shiny::div(
-            shiny::selectizeInput(
+            # shiny::selectizeInput(
+            #   inputId = "downscale_extra_vars",
+            #   label = h5("Choose extra climate variables:",
+            #              prompter::add_prompt(
+            #                tooltipsIcon,
+            #                message = HTML(paste("Extra climate variables to compute. Defaults to monthly PPT, Tmax, Tmin if not specified.")),
+            #                position = "top",
+            #                size = "large",
+            #                shadow = FALSE
+            #              )
+            #   ),
+            #   width = "100%",
+            #   choices = c(downscale_extra_vars, list("Remove all" = c("null" = "NULL"))),
+            #   multiple = TRUE,
+            #   selected = vstore[["downscale_extra_vars"]]
+            # ),
+            shiny::checkboxGroupInput(
               inputId = "downscale_extra_vars",
               label = h5("Choose extra climate variables:",
                          prompter::add_prompt(
                            tooltipsIcon,
-                           message = HTML(paste("Extra climate variables to compute. Defaults to monthly PPT, Tmax, Tmin if not specified.")),
+                           message = HTML(paste("Extra climate variables to compute. Select a package which contains all variables of that category, and/or create a custom package. Defaults to monthly PPT, Tmax, Tmin if not specified.")),
                            position = "top",
                            size = "large",
                            shadow = FALSE
                          )
               ),
               width = "100%",
-              choices = c(downscale_extra_vars, list("Remove all" = c("null" = "NULL"))),
-              multiple = TRUE,
-              selected = vstore[["downscale_extra_vars"]]
-            )
+              choices = c("Monthly", "Seasonal", "Annual", "Custom"),
+              selected = vstore[["downscale_extra_vars"]],
+              inline = TRUE,
+              uiOutput("downscale_extra_vars_custom")
+              )
           ),
           br(),
           
@@ -781,7 +798,18 @@ shiny::shinyApp(
 
           # add selected range
           date_range <- (min(input$downscale_gcm_years):max(input$downscale_gcm_years))
-          update_vstore_and_notify("downscale_gcm_years", date_range, "GCM years")
+          if (2015 %in% date_range & (min(date_range) != 2015)) {
+            hist_range <- (min(input$downscale_gcm_years):2014)
+            ssp_range <- (2015:max(input$downscale_gcm_years))
+          } else if (min(date_range) >= 2015) {
+            hist_range <- "NULL"
+            ssp_range <- (min(input$downscale_gcm_years):max(input$downscale_gcm_years))
+          } else {
+            hist_range <- (min(input$downscale_gcm_years):max(input$downscale_gcm_years))
+            ssp_range <- NULL
+          }
+          update_vstore_and_notify("downscale_gcm_hist_years", hist_range, "GCM hist years")
+          update_vstore_and_notify("downscale_gcm_ssp_years", ssp_range, "GCM SSP years")
         })
       }
 
@@ -791,7 +819,8 @@ shiny::shinyApp(
           if (shiny::in_devmode()) cat("Event: downscale_gcm_years", sep = "\n")
 
           # reset years to default
-          update_vstore_and_notify("downscale_gcm_years", "NULL", "GCM years")
+          update_vstore_and_notify("downscale_gcm_hist_years", "NULL", "GCM hist years")
+          update_vstore_and_notify("downscale_gcm_ssp_years", "NULL", "GCM SSP years")
         })
       }
     })
