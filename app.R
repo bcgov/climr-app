@@ -302,7 +302,11 @@ shiny::shinyApp(
       downscale_ensemble_mean = 0, # is default for YES
       downscale_max_run = 0,
       downscale_run_nm = "NULL",
+      downscale_extra_vars_packages = "NULL",
       downscale_extra_vars = "NULL",
+      downscale_extra_vars_custom_monthly = "NULL",
+      downscale_extra_vars_custom_seasonal = "NULL",
+      downscale_extra_vars_custom_annual = "NULL",
       downscale_core_ppt_lr = FALSE,
       downscale_return_refperiod = FALSE
     )
@@ -327,7 +331,11 @@ shiny::shinyApp(
       downscale_ensemble_mean = downscale_default[["downscale_ensemble_mean"]],
       downscale_max_run = downscale_default[["downscale_max_run"]],
       downscale_run_nm = downscale_default[["downscale_run_nm"]],
+      downscale_extra_vars_packages = downscale_default[["downscale_extra_vars_packages"]],
       downscale_extra_vars = downscale_default[["downscale_extra_vars"]],
+      downscale_extra_vars_custom_monthly = downscale_default[["downscale_extra_vars_custom_monthly"]],
+      downscale_extra_vars_custom_seasonal = downscale_default[["downscale_extra_vars_custom_seasonal"]],
+      downscale_extra_vars_custom_annual = downscale_default[["downscale_extra_vars_custom_annual"]],
       downscale_core_ppt_lr = downscale_default[["downscale_core_ppt_lr"]],
       downscale_return_refperiod = downscale_default[["downscale_return_refperiod"]],
       downscale_output = "csv",
@@ -603,24 +611,8 @@ shiny::shinyApp(
           br(),
           
           shiny::div(
-            # shiny::selectizeInput(
-            #   inputId = "downscale_extra_vars",
-            #   label = h5("Choose extra climate variables:",
-            #              prompter::add_prompt(
-            #                tooltipsIcon,
-            #                message = HTML(paste("Extra climate variables to compute. Defaults to monthly PPT, Tmax, Tmin if not specified.")),
-            #                position = "top",
-            #                size = "large",
-            #                shadow = FALSE
-            #              )
-            #   ),
-            #   width = "100%",
-            #   choices = c(downscale_extra_vars, list("Remove all" = c("null" = "NULL"))),
-            #   multiple = TRUE,
-            #   selected = vstore[["downscale_extra_vars"]]
-            # ),
             shiny::checkboxGroupInput(
-              inputId = "downscale_extra_vars",
+              inputId = "downscale_extra_vars_packages",
               label = h5("Choose extra climate variables:",
                          prompter::add_prompt(
                            tooltipsIcon,
@@ -632,7 +624,7 @@ shiny::shinyApp(
               ),
               width = "100%",
               choices = c("Monthly", "Seasonal", "Annual", "Custom"),
-              selected = vstore[["downscale_extra_vars"]],
+              selected = vstore[["downscale_extra_vars_packages"]],
               inline = TRUE
               ),
             uiOutput("downscale_extra_vars_custom")
@@ -832,16 +824,30 @@ shiny::shinyApp(
     #   if (shiny::in_devmode()) cat("Event: downscale_run_nm", sep = "\n")
     #   update_vstore_and_notify("downscale_run_nm", input$downscale_run_nm, "Run name")
     # })
-    shiny::observeEvent(input$downscale_extra_vars, {
+    shiny::observeEvent(input$downscale_extra_vars_packages, {
       if (shiny::in_devmode()) cat("Event: downscale_extra_vars", sep = "\n")
-      if (input$downscale_extra_vars == "Monthly") {
+      if ("Monthly" %in% input$downscale_extra_vars_packages) {
         update_vstore_and_notify("downscale_extra_vars", downscale_extra_vars$Monthly, "Monthly vars")
-      } if (input$downscale_extra_vars == "Seasonal") {
+      }
+      if ("Seasonal" %in% input$downscale_extra_vars_packages) {
         update_vstore_and_notify("downscale_extra_vars", downscale_extra_vars$Seasonal, "Seasonal vars")
-      } if (input$downscale_extra_vars == "Annual") {
+      }
+      if ("Annual" %in% input$downscale_extra_vars_packages) {
         update_vstore_and_notify("downscale_extra_vars", downscale_extra_vars$Annual, "Annual vars")
-      } if (input$downscale_extra_vars == "Custom") {
-        update_vstore_and_notify("downscale_extra_vars", input$downscale_extra_vars_custom, "Custom vars")
+      }
+      if ("Custom" %in% input$downscale_extra_vars_packages) {
+        shiny::observeEvent(input$monthly_extra_vars, {
+          if (shiny::in_devmode()) cat("Event: downscale_extra_vars_custom_monthly", sep = "\n")
+          update_vstore_and_notify("downscale_extra_vars_custom_monthly", input$monthly_extra_vars, "Monthly custom vars")
+        })
+        shiny::observeEvent(input$seasonal_extra_vars, {
+          if (shiny::in_devmode()) cat("Event: downscale_extra_vars_custom_seasonal", sep = "\n")
+          update_vstore_and_notify("downscale_extra_vars_custom_seasonal", input$seasonal_extra_vars, "Seasonal custom vars")
+        })
+        shiny::observeEvent(input$annual_extra_vars, {
+          if (shiny::in_devmode()) cat("Event: downscale_extra_vars_custom_annual", sep = "\n")
+          update_vstore_and_notify("downscale_extra_vars_custom_annual", input$annual_extra_vars, "Annual custom vars")
+        })
       }
       # update_vstore_and_notify("downscale_extra_vars", input$downscale_extra_vars, "Core vars")
     })
@@ -1116,7 +1122,7 @@ shiny::shinyApp(
     output$downscale_extra_vars_custom <- renderUI({
       if ("Custom" %in% input$downscale_extra_vars) {
         accordion(
-          open = FALSE,
+          id = "climate_vars_acc",
           accordion_panel(
             title = h5("Monthly Variables"),
             value = "monthly_acc",
@@ -1126,19 +1132,19 @@ shiny::shinyApp(
               width = "100%",
               inline = TRUE,
               choices = c(downscale_extra_vars$Monthly),
-              selected = vstore[["downscale_extra_vars"]]
+              selected = vstore[["downscale_extra_vars_custom_monthly"]]
             )
           ),
           accordion_panel(
             title = h5("Seasonal Variables"),
             value = "seasonal_acc",
             shiny::checkboxGroupInput(
-              inputId = "Seasonal_extra_vars",
+              inputId = "seasonal_extra_vars",
               label = h5("Choose seasonal variables:"),
               width = "100%",
               inline = TRUE,
               choices = c(downscale_extra_vars$Seasonal),
-              selected = vstore[["downscale_extra_vars"]]
+              selected = vstore[["downscale_extra_vars_custom_seasonal"]]
             )
           ),
           accordion_panel(
@@ -1150,7 +1156,7 @@ shiny::shinyApp(
               width = "100%",
               inline = TRUE,
               choices = c(downscale_extra_vars$Annual),
-              selected = vstore[["downscale_extra_vars"]]
+              selected = vstore[["downscale_extra_vars_custom_annual"]]
             )
           )
         )
