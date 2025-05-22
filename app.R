@@ -1120,7 +1120,7 @@ shiny::shinyApp(
     
     # reactive output for selecting a custom package for extra climate variables
     output$downscale_extra_vars_custom <- renderUI({
-      if ("Custom" %in% input$downscale_extra_vars) {
+      if ("Custom" %in% input$downscale_extra_vars_packages) {
         accordion(
           id = "climate_vars_acc",
           accordion_panel(
