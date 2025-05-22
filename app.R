@@ -295,7 +295,7 @@ shiny::shinyApp(
       downscale_obs_ts_dataset = "NULL",
       downscale_gcms = "NULL",
       downscale_ssps = "NULL",
-      # downscale_gcm_periods = "NULL",
+      downscale_gcm_periods = "NULL",
       downscale_gcm_ssp_years = "NULL",
       downscale_gcm_hist_years = "NULL",
       downscale_gcm_years_radio = "No",
@@ -329,7 +329,7 @@ shiny::shinyApp(
       downscale_gcm_ssp_years = downscale_default[["downscale_gcm_ssp_years"]],
       downscale_gcm_hist_years = downscale_default[["downscale_gcm_hist_years"]],
       downscale_gcm_years_radio = downscale_default[["downscale_gcm_years_radio"]],
-      # downscale_gcm_years = downscale_default[["downscale_gcm_years"]],
+      downscale_gcm_years = downscale_default[["downscale_gcm_years"]],
       downscale_ensemble_mean = downscale_default[["downscale_ensemble_mean"]],
       downscale_max_run = downscale_default[["downscale_max_run"]],
       downscale_run_nm = downscale_default[["downscale_run_nm"]],
@@ -723,7 +723,7 @@ shiny::shinyApp(
     shiny::observeEvent(input$downscale_obs_periods_checkboxes, {
       update_vstore_and_notify("downscale_obs_periods_checkboxes", input$downscale_obs_periods_checkboxes, "Obs periods")
       if (shiny::in_devmode()) cat("Event: downscale_obs_periods", sep = "\n")
-      if ("1961_1990" %in% input$downscale_obs_periods) {
+      if ("1961_1990" %in% input$downscale_obs_periods_checkboxes) {
         update_vstore_and_notify("downscale_return_refperiod", TRUE, "Return ref period")
       } else {
         update_vstore_and_notify("downscale_return_refperiod", FALSE, "Return ref period")
@@ -745,13 +745,14 @@ shiny::shinyApp(
       })
       }
 
-      # if no is clicked again, reset years to default - THIS MIGHT NOT WORK IS NO LONGER REMOVING YEARS JUST REPLACING WITH NULL
+      # if no is clicked again, reset years to default
       else if (input$observed_years_radio == "No") {
         shiny::observeEvent(input$downscale_obs_years, {
           if (shiny::in_devmode()) cat("Event: downscale_obs_years", sep = "\n")
 
-          # reset years to default
-          update_vstore_and_notify("downscale_obs_years", downscale_default[["downscale_obs_years"]], "Obs years")
+          # reset years to default - I DONT KNOW WHY THIS DOESN'T WORK!!!
+          date_range_preset <- c(min(climr::list_obs_years()):max(climr::list_obs_years()))
+          update_vstore_and_notify("downscale_obs_years", date_range_preset, "Obs years")
         })
       }
     })
@@ -878,6 +879,7 @@ shiny::shinyApp(
       )
     })
     
+    #THIS IS NOT RESETTING THE YEARS PROPERLY
     shiny::observeEvent(input$confirm_reset_yes, {
       if (shiny::in_devmode()) cat("Event: confirm_reset_yes", sep = "\n")
       lapply(names(downscale_default), \(x) {
