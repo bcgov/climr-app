@@ -288,6 +288,7 @@ shiny::shinyApp(
     
     downscale_default <- list(
       downscale_which_refmap = "refmap_climr",
+      downscale_obs_periods_checkboxes = "2001_2020",
       downscale_obs_periods = "2001_2020",
       downscale_obs_years_radio = "No",
       downscale_obs_years = "NULL",
@@ -317,6 +318,7 @@ shiny::shinyApp(
       element = NULL,
       climatevar = "NONE",
       downscale_which_refmap = downscale_default[["downscale_which_refmap"]],
+      downscale_obs_periods_checkboxes = downscale_default[["downscale_obs_periods_checkboxes"]],
       downscale_obs_periods = downscale_default[["downscale_obs_periods"]],
       downscale_obs_years_radio = downscale_default[["downscale_obs_years_radio"]],
       downscale_obs_years = downscale_default[["downscale_obs_years"]],
@@ -476,7 +478,7 @@ shiny::shinyApp(
               
               shiny::div(
                 shiny::checkboxGroupInput(
-                  inputId = "downscale_obs_periods",
+                  inputId = "downscale_obs_periods_checkboxes",
                   label = h5("Choose observed periods:",
                              prompter::add_prompt(
                                tooltipsIcon,
@@ -489,7 +491,7 @@ shiny::shinyApp(
                   inline = TRUE,
                   width = "100%",
                   choices = c("1961_1990", climr::list_obs_periods() |> sn()),
-                  selected = vstore[["downscale_obs_periods"]]
+                  selected = vstore[["downscale_obs_periods_checkboxes"]]
                 )
               ),
               shiny::div(
@@ -718,14 +720,15 @@ shiny::shinyApp(
       if (shiny::in_devmode()) cat("Event: downscale_which_refmap", sep = "\n")
       update_vstore_and_notify("downscale_which_refmap", input$downscale_which_refmap, "Ref map")
     })
-    shiny::observeEvent(input$downscale_obs_periods, {
+    shiny::observeEvent(input$downscale_obs_periods_checkboxes, {
+      update_vstore_and_notify("downscale_obs_periods_checkboxes", input$downscale_obs_periods_checkboxes, "Obs periods")
       if (shiny::in_devmode()) cat("Event: downscale_obs_periods", sep = "\n")
       if ("1961_1990" %in% input$downscale_obs_periods) {
         update_vstore_and_notify("downscale_return_refperiod", TRUE, "Return ref period")
       } else {
         update_vstore_and_notify("downscale_return_refperiod", FALSE, "Return ref period")
       }
-      update_vstore_and_notify("downscale_obs_periods", input$downscale_obs_periods[input$downscale_obs_periods != "1961_1990"], "Obs periods")
+      update_vstore_and_notify("downscale_obs_periods", input$downscale_obs_periods_checkboxes[input$downscale_obs_periods_checkboxes != "1961_1990"], "Obs periods")
     })
     shiny::observeEvent(input$observed_years_radio,{
       if (shiny::in_devmode()) cat("Event: downscale_obs_years_radio", sep = "\n")

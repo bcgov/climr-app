@@ -324,6 +324,8 @@ generate_run_id <- function() {
 albers_crs <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m"
 
 process_downscale <- function(sg, cec, vstore, fg, run_id) {
+  
+  browser()
 
   output_files <- c()
   n <- \(x) if (length(x) && !"NULL" %in% x) x
@@ -339,6 +341,7 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
       obs_years  = vstore[["downscale_obs_years"]] |> n(),
       obs_ts_dataset = vstore[["downscale_obs_ts_dataset"]] |> n(),
       return_refperiod = vstore[["downscale_return_refperiod"]],
+      # return_refperiod = FALSE, # use for debugging with old app script
       gcms = vstore[["downscale_gcms"]] |> n(),
       ssps = vstore[["downscale_ssps"]] |> n(),
       gcm_periods = vstore[["downscale_gcm_periods"]] |> n(),
