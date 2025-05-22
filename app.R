@@ -128,7 +128,7 @@ shiny::shinyApp(
       ),
       title = shiny::tagList(
         shiny::tags$image(
-          src = "images/bcid-logo-en.svg",
+          src = "images/bcid-logo-rev-en.svg",
           style = "display: inline-block",
           height = "35px",
           alt = "British Columbia"
@@ -834,7 +834,16 @@ shiny::shinyApp(
     # })
     shiny::observeEvent(input$downscale_extra_vars, {
       if (shiny::in_devmode()) cat("Event: downscale_extra_vars", sep = "\n")
-      update_vstore_and_notify("downscale_extra_vars", input$downscale_extra_vars, "Core vars")
+      if (input$downscale_extra_vars == "Monthly") {
+        update_vstore_and_notify("downscale_extra_vars", downscale_extra_vars$Monthly, "Monthly vars")
+      } if (input$downscale_extra_vars == "Seasonal") {
+        update_vstore_and_notify("downscale_extra_vars", downscale_extra_vars$Seasonal, "Seasonal vars")
+      } if (input$downscale_extra_vars == "Annual") {
+        update_vstore_and_notify("downscale_extra_vars", downscale_extra_vars$Annual, "Annual vars")
+      } if (input$downscale_extra_vars == "Custom") {
+        update_vstore_and_notify("downscale_extra_vars", input$downscale_extra_vars_custom, "Custom vars")
+      }
+      # update_vstore_and_notify("downscale_extra_vars", input$downscale_extra_vars, "Core vars")
     })
     shiny::observeEvent(input$downscale_core_ppt_lr, {
       if (shiny::in_devmode()) cat("Event: downscale_core_ppt_lr", sep = "\n")
@@ -1100,6 +1109,51 @@ shiny::shinyApp(
         )
       } else {
         NULL
+      }
+    })
+    
+    # reactive output for selecting a custom package for extra climate variables
+    output$downscale_extra_vars_custom <- renderUI({
+      if ("Custom" %in% input$downscale_extra_vars) {
+        accordion(
+          open = FALSE,
+          accordion_panel(
+            title = h5("Monthly Variables"),
+            value = "monthly_acc",
+            shiny::checkboxGroupInput(
+              inputId = "monthly_extra_vars",
+              label = h5("Choose monthly variables:"),
+              width = "100%",
+              inline = TRUE,
+              choices = c(downscale_extra_vars$Monthly),
+              selected = vstore[["downscale_extra_vars"]]
+            )
+          ),
+          accordion_panel(
+            title = h5("Seasonal Variables"),
+            value = "seasonal_acc",
+            shiny::checkboxGroupInput(
+              inputId = "Seasonal_extra_vars",
+              label = h5("Choose seasonal variables:"),
+              width = "100%",
+              inline = TRUE,
+              choices = c(downscale_extra_vars$Seasonal),
+              selected = vstore[["downscale_extra_vars"]]
+            )
+          ),
+          accordion_panel(
+            title = h5("Annual Variables"),
+            value = "annual_acc",
+            shiny::checkboxGroupInput(
+              inputId = "annual_extra_vars",
+              label = h5("Choose annual variables:"),
+              width = "100%",
+              inline = TRUE,
+              choices = c(downscale_extra_vars$Annual),
+              selected = vstore[["downscale_extra_vars"]]
+            )
+          )
+        )
       }
     })
   }

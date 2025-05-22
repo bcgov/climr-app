@@ -453,8 +453,10 @@ session_geometry <- function(sg_dt) {
               
               dt <- head(read.csv(output_files))
               
+              # NEED TO FIGURE OUT HOW TO HAVE CAPTION AT TOP LIKE A TITLE
+              
               DT::datatable(dt, rownames = FALSE, escape = FALSE, options = list(
-                dom = 't', scrollX = TRUE))
+                dom = 't', scrollX = TRUE), caption = "Preview of Downscaled Data")
             })
           }
 
