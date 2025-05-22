@@ -827,15 +827,19 @@ shiny::shinyApp(
     shiny::observeEvent(input$downscale_extra_vars_packages, {
       if (shiny::in_devmode()) cat("Event: downscale_extra_vars", sep = "\n")
       if ("Monthly" %in% input$downscale_extra_vars_packages) {
+        update_vstore_and_notify("downscale_extra_vars_packages", input$downscale_extra_vars_packages, "Monthly package")
         update_vstore_and_notify("downscale_extra_vars", downscale_extra_vars$Monthly, "Monthly vars")
       }
       if ("Seasonal" %in% input$downscale_extra_vars_packages) {
+        update_vstore_and_notify("downscale_extra_vars_packages", input$downscale_extra_vars_packages, "Seasonal package")
         update_vstore_and_notify("downscale_extra_vars", downscale_extra_vars$Seasonal, "Seasonal vars")
       }
       if ("Annual" %in% input$downscale_extra_vars_packages) {
+        update_vstore_and_notify("downscale_extra_vars_packages", input$downscale_extra_vars_packages, "Annual package")
         update_vstore_and_notify("downscale_extra_vars", downscale_extra_vars$Annual, "Annual vars")
       }
       if ("Custom" %in% input$downscale_extra_vars_packages) {
+        update_vstore_and_notify("downscale_extra_vars_packages", input$downscale_extra_vars_packages, "Custom package")
         shiny::observeEvent(input$monthly_extra_vars, {
           if (shiny::in_devmode()) cat("Event: downscale_extra_vars_custom_monthly", sep = "\n")
           update_vstore_and_notify("downscale_extra_vars_custom_monthly", input$monthly_extra_vars, "Monthly custom vars")
