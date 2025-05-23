@@ -267,9 +267,7 @@ shiny::shinyApp(
   # Shiny server ----
   server = function(input, output, session) {
     session$allowReconnect("force")
-    
-    #browser()
-    
+
     # initialize sg_dt as reactive
     sg_dt <- reactiveValues(dt = data.table::data.table(
       id = integer(),
@@ -343,7 +341,8 @@ shiny::shinyApp(
       downscale_output = "csv",
       downscale_resolution = 2500,
       vscale = "none",
-      processing = FALSE
+      processing = FALSE,
+      downscale_raster_preview = NULL
     )
     
     # ---- Geometry
@@ -857,8 +856,7 @@ shiny::shinyApp(
         )
       )
     })
-    
-    #THIS IS NOT RESETTING THE YEARS PROPERLY
+
     shiny::observeEvent(input$confirm_reset_yes, {
       if (shiny::in_devmode()) cat("Event: confirm_reset_yes", sep = "\n")
       lapply(names(downscale_default), \(x) {
@@ -972,7 +970,11 @@ shiny::shinyApp(
               ),
               br(), br(),
               
+              # preview for csv results
               DT::DTOutput("preview_table", width = "100%"),
+              
+              # options for raster preview
+              uiOutput("preview_raster_options", width = "100%"),
               
               shiny::downloadButton(
                 outputId = "downscale_download",
@@ -1013,6 +1015,11 @@ shiny::shinyApp(
       if (shiny::in_devmode()) cat("Event: downscale_process_launch", sep = "\n")
       if (vstore[["processing"]]) return()
       sg$process()
+    })
+    shiny::observeEvent(input$ds_ras_prev_options, {
+      if (shiny::in_devmode()) cat("Event: downscale_raster_preview", sep = "\n")
+      update_vstore_and_notify("downscale_raster_preview", input$ds_ras_prev_options, "Preview raster")
+      leaflet::addRasterImage(mp, preview_raster[[input$ds_ras_prev_options]])
     })
     
     # reactive output for selecting Observed Years

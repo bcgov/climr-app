@@ -325,7 +325,7 @@ albers_crs <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_
 
 process_downscale <- function(sg, cec, vstore, fg, run_id) {
   
-  # browser()
+  #browser()
 
   output_files <- c()
   n <- \(x) if (length(x) && !"NULL" %in% x) x
@@ -419,6 +419,10 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
     }
 
     res <- ds(xyz)
+    
+    # keep a copy of res for previewing raster
+    preview_raster <<- res
+    
     # Write the current res to CSV using the same run_id
     csv_file <- file.path(temp_dir, paste0("downscale_", run_id, ".csv"))
     data.table::fwrite(x = res, file = csv_file, row.names = FALSE)
@@ -438,6 +442,9 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
       # Write the current res to tif using the same run_id
       out_file <- file.path(temp_dir, paste0("downscale_", run_id, "_raster_",i,".%s" |> sprintf(vstore[["downscale_output"]])))
       if (vstore[["downscale_output"]] %in% "tif") {
+        # keep a copy of res for previewing raster
+        preview_raster <<- res
+        
         terra::writeRaster(x = res, filename = out_file, gdal=c("PREDICTOR=2"), datatype="FLT4S", overwrite = TRUE)
       } else {
         data.table::as.data.table(res) |> data.table::fwrite(file = out_file, row.names = TRUE)
@@ -464,9 +471,13 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
       xyz <- g |> rastmaker()
       res <- ds(xyz)
       res <- terra::mask(res, g)
+      
       # Write the current res to tif using the same run_id
       out_file <- file.path(temp_dir, paste0("downscale_", run_id, "_map_draw_",i,".%s" |> sprintf(vstore[["downscale_output"]])))
       if (vstore[["downscale_output"]] %in% "tif") {
+        # keep a copy of res for previewing raster
+        preview_raster <<- res
+        
         terra::writeRaster(x = res, filename = out_file, gdal=c("PREDICTOR=2"), datatype="FLT4S", overwrite = TRUE)
       } else {
         data.table::as.data.table(res) |> data.table::fwrite(file = out_file, row.names = TRUE)
@@ -482,15 +493,19 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
         xyz <- g |> rastmaker()
         res <- ds(xyz)
         res <- terra::mask(res, g)
+        
         # Write the current res to tif using the same run_id
         out_file <- file.path(temp_dir, paste0("downscale_", run_id, "_file_upload_", i,"_shape_", j, ".%s" |> sprintf(vstore[["downscale_output"]])))
         if (vstore[["downscale_output"]] %in% "tif") {
+          # keep a copy of res for previewing raster
+          preview_raster <<- res
+          
           terra::writeRaster(x = res, filename = out_file, gdal=c("PREDICTOR=2"), datatype="FLT4S", overwrite = TRUE)
         } else {
           data.table::as.data.table(res) |> data.table::fwrite(file = out_file, row.names = TRUE)
         }      
         output_files <- c(output_files, out_file)
-        rm(xyz, res, g)
+        rm(xyz, res, g) 
       }
     }
 
