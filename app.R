@@ -204,9 +204,14 @@ shiny::shinyApp(
                 value = "acc2"
               )
             ),
-            br(), br(),
+            br(),
             shiny::actionButton("downscale_parameters", "Choose Downscale Parameters",
-                                style = "width:100%", disabled = TRUE)
+                                style = "width:100%", disabled = TRUE),
+            
+            br(), br(),
+            
+            # options for raster preview
+            uiOutput("preview_raster_options", width = "100%"),
           ),
           shiny::mainPanel(
             # create map as UI element
@@ -973,8 +978,8 @@ shiny::shinyApp(
               # preview for csv results
               DT::DTOutput("preview_table", width = "100%"),
               
-              # options for raster preview
-              uiOutput("preview_raster_options", width = "100%"),
+              # # options for raster preview
+              # uiOutput("preview_raster_options", width = "100%"),
               
               shiny::downloadButton(
                 outputId = "downscale_download",

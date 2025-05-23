@@ -459,22 +459,36 @@ session_geometry <- function(sg_dt) {
                 dom = 't', scrollX = TRUE), caption = "Preview of Downscaled Data")
             })
           } else if (tools::file_ext(output_files) == "tif") {
+            
+            # close Downscale Processing window
+            shiny::removeModal()
+            
+            # raster previews
             output$preview_raster_options <- shiny::renderUI({
-              shiny::radioButtons(
-                inputId = "ds_ras_prev_options",
-                label = h5("Choose the raster layer you would like to preview:",
-                           prompter::add_prompt(
-                             tooltipsIcon,
-                             message = HTML(paste("Shows a list of the downscaled raster layers. Choose a layer you would like to preview on the map.")),
-                             position = "top",
-                             size = "large",
-                             shadow = FALSE
-                           )
+              shiny::div(
+                shiny::radioButtons(
+                  inputId = "ds_ras_prev_options",
+                  label = h5("Choose the raster layer you would like to preview:",
+                             prompter::add_prompt(
+                               tooltipsIcon,
+                               message = HTML(paste("Shows a list of the downscaled raster layers. Choose a layer you would like to preview on the map.")),
+                               position = "top-left",
+                               size = "large",
+                               shadow = FALSE
+                             )
+                  ),
+                  width = "100%",
+                  inline = TRUE,
+                  choices = names(preview_raster),
+                  selected = vstore[["downscale_raster_preview"]]
                 ),
-                width = "100%",
-                inline = TRUE,
-                choices = names(preview_raster),
-                selected = vstore[["downscale_raster_preview"]]
+                br(),
+                shiny::downloadButton(
+                  outputId = "downscale_download",
+                  label = "Download Downscaled Data",
+                  title = "Download downscaled geographies archive",
+                  style = "width: 100%;"
+                )
               )
             })
           }
