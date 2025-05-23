@@ -733,28 +733,22 @@ shiny::shinyApp(
     shiny::observeEvent(input$observed_years_radio,{
       if (shiny::in_devmode()) cat("Event: downscale_obs_years_radio", sep = "\n")
       update_vstore_and_notify("downscale_obs_years_radio", input$observed_years_radio, "Obs radios")
-
-      # only observe if user-specified
-      if (input$observed_years_radio == "Yes") {
-        shiny::observeEvent(input$downscale_obs_years, {
-          if (shiny::in_devmode()) cat("Event: downscale_obs_years", sep = "\n")
-
-          # add selected range
-          date_range <- (min(input$downscale_obs_years):max(input$downscale_obs_years))
-          update_vstore_and_notify("downscale_obs_years", date_range, "Obs years")
-      })
+      
+      if (input$observed_years_radio == "No") {
+        update_vstore_and_notify("downscale_obs_years", "NULL", "Obs years")
       }
-
-      # if no is clicked again, reset years to default
-      else if (input$observed_years_radio == "No") {
-        shiny::observeEvent(input$downscale_obs_years, {
-          if (shiny::in_devmode()) cat("Event: downscale_obs_years", sep = "\n")
-
-          # reset years to default - I DONT KNOW WHY THIS DOESN'T WORK!!!
-          date_range_preset <- c(min(climr::list_obs_years()):max(climr::list_obs_years()))
-          update_vstore_and_notify("downscale_obs_years", date_range_preset, "Obs years")
-        })
-      }
+    })
+    shiny::observeEvent(input$downscale_obs_years, {
+        if (shiny::in_devmode()) cat("Event: downscale_obs_years", sep = "\n")
+        date_range <- min(input$downscale_obs_years):max(input$downscale_obs_years)
+        update_vstore_and_notify("downscale_obs_years", date_range, "Obs years")
+    })
+    shiny::observe({
+      vstore[["downscale_obs_years_radio"]]
+      updateSliderInput(session = getDefaultReactiveDomain(),
+                        inputId = "downscale_obs_years",
+                        value = c(min(vstore[["downscale_obs_years"]]), max(vstore[["downscale_obs_years"]]))
+                        )
     })
     shiny::observeEvent(input$downscale_obs_ts_dataset, {
       if (shiny::in_devmode()) cat("Event: downscale_obs_ts_dataset", sep = "\n")
@@ -768,57 +762,46 @@ shiny::shinyApp(
     shiny::observeEvent(input$downscale_ssps, {
       if (shiny::in_devmode()) cat("Event: downscale_ssps", sep = "\n")
       update_vstore_and_notify("downscale_ssps", input$downscale_ssps, "SSPs")
-      #update_run_nm_select()
+      update_run_nm_select()
     })
     shiny::observeEvent(input$downscale_gcm_periods, {
       if (shiny::in_devmode()) cat("Event: downscale_gcm_periods", sep = "\n")
       update_vstore_and_notify("downscale_gcm_periods", input$downscale_gcm_periods, "GCM periods")
     })
-    # shiny::observeEvent(input$downscale_gcm_ssp_years, {
-    #   if (shiny::in_devmode()) cat("Event: downscale_gcm_ssp_years", sep = "\n")
-    #   update_vstore_and_notify("downscale_gcm_ssp_years", input$downscale_gcm_ssp_years, "GCM SSP years")
-    # })
-    # shiny::observeEvent(input$downscale_gcm_hist_years, {
-    #   if (shiny::in_devmode()) cat("Event: downscale_gcm_hist_years", sep = "\n")
-    #   update_vstore_and_notify("downscale_gcm_hist_years", input$downscale_gcm_hist_years, "GCM hist years")
-    # })
-    shiny::observeEvent(input$gcm_years_radio,{
+    shiny::observeEvent(input$gcm_years_radio, {
       if (shiny::in_devmode()) cat("Event: downscale_gcm_years_radio", sep = "\n")
       update_vstore_and_notify("downscale_gcm_years_radio", input$gcm_years_radio, "GCM radios")
-
-      # only observe if user-specified
-      if (input$gcm_years_radio == "Yes") {
-        shiny::observeEvent(input$downscale_gcm_years, {
-          #observe({print(input$downscale_gcm_years)}) used to check if binding is correct
-          if (shiny::in_devmode()) cat("Event: downscale_gcm_years", sep = "\n")
-
-          # add selected range
-          date_range <- (min(input$downscale_gcm_years):max(input$downscale_gcm_years))
-          if (2015 %in% date_range & (min(date_range) != 2015)) {
-            hist_range <- (min(input$downscale_gcm_years):2014)
-            ssp_range <- (2015:max(input$downscale_gcm_years))
-          } else if (min(date_range) >= 2015) {
-            hist_range <- "NULL"
-            ssp_range <- (min(input$downscale_gcm_years):max(input$downscale_gcm_years))
-          } else {
-            hist_range <- (min(input$downscale_gcm_years):max(input$downscale_gcm_years))
-            ssp_range <- NULL
-          }
-          update_vstore_and_notify("downscale_gcm_hist_years", hist_range, "GCM hist years")
-          update_vstore_and_notify("downscale_gcm_ssp_years", ssp_range, "GCM SSP years")
-        })
+      
+      if (input$gcm_years_radio == "No") {
+        update_vstore_and_notify("downscale_gcm_years", "NULL", "GCM years")
+        update_vstore_and_notify("downscale_gcm_hist_years", "NULL", "GCM hist years")
+        update_vstore_and_notify("downscale_gcm_ssp_years", "NULL", "GCM SSP years")
       }
-
-      # if no is clicked again, reset years to default
-      else if (input$gcm_years_radio == "No") {
-        shiny::observeEvent(input$downscale_gcm_years, {
-          if (shiny::in_devmode()) cat("Event: downscale_gcm_years", sep = "\n")
-
-          # reset years to default
-          update_vstore_and_notify("downscale_gcm_hist_years", "NULL", "GCM hist years")
-          update_vstore_and_notify("downscale_gcm_ssp_years", "NULL", "GCM SSP years")
-        })
+    })
+    shiny::observeEvent(input$downscale_gcm_years, {
+      if (shiny::in_devmode()) cat("Event: downscale_gcm_years", sep = "\n")
+      
+      # add selected range
+      date_range <- (min(input$downscale_gcm_years):max(input$downscale_gcm_years))
+      if (2015 %in% date_range & (min(date_range) != 2015)) {
+        hist_range <- (min(input$downscale_gcm_years):2014)
+        ssp_range <- (2015:max(input$downscale_gcm_years))
+      } else if (min(date_range) >= 2015) {
+        hist_range <- "NULL"
+        ssp_range <- (min(input$downscale_gcm_years):max(input$downscale_gcm_years))
+      } else {
+        hist_range <- (min(input$downscale_gcm_years):max(input$downscale_gcm_years))
+        ssp_range <- NULL
       }
+        update_vstore_and_notify("downscale_gcm_hist_years", hist_range, "GCM hist years")
+        update_vstore_and_notify("downscale_gcm_ssp_years", ssp_range, "GCM SSP years")
+    })
+    shiny::observe({
+      vstore[["downscale_gcm_years_radio"]]
+      updateSliderInput(session = getDefaultReactiveDomain(),
+                        inputId = "downscale_gcm_years",
+                        value = c(min(vstore[["downscale_gcm_years"]]), max(vstore[["downscale_gcm_years"]]))
+      )
     })
     shiny::observeEvent(input$downscale_max_run, {
       if (shiny::in_devmode()) cat("Event: downscale_max_run", sep = "\n")
@@ -844,20 +827,16 @@ shiny::shinyApp(
       }
       if ("Custom" %in% input$downscale_extra_vars_packages) {
         update_vstore_and_notify("downscale_extra_vars_packages", input$downscale_extra_vars_packages, "Custom package")
-        shiny::observeEvent(input$monthly_extra_vars, {
-          if (shiny::in_devmode()) cat("Event: downscale_extra_vars_custom_monthly", sep = "\n")
-          update_vstore_and_notify("downscale_extra_vars_custom_monthly", input$monthly_extra_vars, "Monthly custom vars")
-        })
-        shiny::observeEvent(input$seasonal_extra_vars, {
-          if (shiny::in_devmode()) cat("Event: downscale_extra_vars_custom_seasonal", sep = "\n")
-          update_vstore_and_notify("downscale_extra_vars_custom_seasonal", input$seasonal_extra_vars, "Seasonal custom vars")
-        })
-        shiny::observeEvent(input$annual_extra_vars, {
-          if (shiny::in_devmode()) cat("Event: downscale_extra_vars_custom_annual", sep = "\n")
-          update_vstore_and_notify("downscale_extra_vars_custom_annual", input$annual_extra_vars, "Annual custom vars")
-        })
       }
-      # update_vstore_and_notify("downscale_extra_vars", input$downscale_extra_vars, "Core vars")
+    })
+    shiny::observeEvent(input$monthly_extra_vars, {
+      update_vstore_and_notify("downscale_extra_vars_custom_monthly", input$monthly_extra_vars, "Monthly custom vars")
+    })
+    shiny::observeEvent(input$seasonal_extra_vars, {
+      update_vstore_and_notify("downscale_extra_vars_custom_seasonal", input$seasonal_extra_vars, "Seasonal custom vars")
+    })
+    shiny::observeEvent(input$annual_extra_vars, {
+      update_vstore_and_notify("downscale_extra_vars_custom_annual", input$annual_extra_vars, "Annual custom vars")
     })
     shiny::observeEvent(input$downscale_core_ppt_lr, {
       if (shiny::in_devmode()) cat("Event: downscale_core_ppt_lr", sep = "\n")
@@ -893,24 +872,24 @@ shiny::shinyApp(
       downscale_modal()
     })
     
-    # update_run_nm_select <- function() {
-    #   gcms <- vstore[["downscale_gcms"]]
-    #   ssps <- vstore[["downscale_ssps"]]
-    #   if (!length(gcms) && !length(ssps)) {
-    #     opt_choices <- c()
-    #   } else if (length(gcms) && !length(ssps)) {
-    #     opt_choices <- climr::list_runs_historic(gcm = gcms) |> sn()
-    #   } else if (length(gcms) && length(ssps)) {
-    #     opt_choices <- climr::list_runs_ssp(gcm = gcms, ssp = ssps) |> sn()
-    #   }
-    #   choices <- list("Options" = opt_choices, "Remove all" = c("null" = "NULL"))
-    #   if (all(vstore[["downscale_run_nm"]] %in% unlist(choices))) {
-    #     select <- vstore[["downscale_run_nm"]]
-    #   } else {
-    #     select <- NULL
-    #   }
-    #   shiny::updateSelectInput(inputId = "downscale_run_nm", choices = choices, selected = select)
-    # }
+    update_run_nm_select <- function() {
+      gcms <- vstore[["downscale_gcms"]]
+      ssps <- vstore[["downscale_ssps"]]
+      if (!length(gcms) && !length(ssps)) {
+        opt_choices <- c()
+      } else if (length(gcms) && !length(ssps)) {
+        opt_choices <- climr::list_runs_historic(gcm = gcms) |> sn()
+      } else if (length(gcms) && length(ssps)) {
+        opt_choices <- climr::list_runs_ssp(gcm = gcms, ssp = ssps) |> sn()
+      }
+      choices <- list("Options" = opt_choices, "Remove all" = c("null" = "NULL"))
+      if (all(vstore[["downscale_run_nm"]] %in% unlist(choices))) {
+        select <- vstore[["downscale_run_nm"]]
+      } else {
+        select <- NULL
+      }
+      shiny::updateSelectInput(inputId = "downscale_run_nm", choices = choices, selected = select)
+    }
     
     shiny::observeEvent(input$generate_results, {
       if (shiny::in_devmode()) cat("Event: generate_results", sep = "\n")
@@ -1074,6 +1053,8 @@ shiny::shinyApp(
         if ("NULL" %in% vstore$downscale_gcm_years) {
           date_range_preset <- c(min(climr::list_gcm_hist_years()):(max(climr::list_gcm_hist_years())-100))
           update_vstore_and_notify("downscale_gcm_years", date_range_preset, "GCM years")
+          update_vstore_and_notify("downscale_gcm_hist_years", date_range_preset, "GCM hist years")
+          
         }
         shiny::div(
           shiny::sliderInput(
