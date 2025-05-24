@@ -286,6 +286,9 @@ shiny::shinyApp(
       filtered_dt = NULL
     )
     
+    # reactive state for raster preview
+    show_ui <<- reactiveVal(TRUE)
+    
     # ---- Modal input storage
     output$climr <- leaflet::renderLeaflet(l)
     
@@ -312,7 +315,8 @@ shiny::shinyApp(
       downscale_extra_vars_custom_seasonal = "NULL",
       downscale_extra_vars_custom_annual = "NULL",
       downscale_core_ppt_lr = FALSE,
-      downscale_return_refperiod = FALSE
+      downscale_return_refperiod = FALSE,
+      downscale_raster_preview = NULL
     )
     
     vstore <- reactiveValues(
@@ -347,7 +351,7 @@ shiny::shinyApp(
       downscale_resolution = 2500,
       vscale = "none",
       processing = FALSE,
-      downscale_raster_preview = NULL
+      downscale_raster_preview = downscale_default[["downscale_raster_preview"]]
     )
     
     # ---- Geometry
@@ -440,6 +444,13 @@ shiny::shinyApp(
       lapply(names(downscale_default), \(x) {
         vstore[[x]] <- downscale_default[[x]]
       })
+      # remove any previewed rasters
+      if (!is.null(vstore[["downscale_raster_preview"]])) {
+        leaflet::removeImage(mp, "rast_layer")
+      }
+      # remove preview raster options
+      show_ui(FALSE)
+      
     })
 
     sn <- \(j) setNames(j,j)
@@ -958,8 +969,8 @@ shiny::shinyApp(
                   value = vstore[["downscale_resolution"]],
                   width = "100%",
                   min = 250,
-                  max = 50000,
-                  step = 250,
+                  max = 10000,
+                  step = 50,
                   post = "m",
                   ticks = FALSE
                 )
@@ -1020,11 +1031,15 @@ shiny::shinyApp(
       if (shiny::in_devmode()) cat("Event: downscale_process_launch", sep = "\n")
       if (vstore[["processing"]]) return()
       sg$process()
+      show_ui(TRUE)
     })
     shiny::observeEvent(input$ds_ras_prev_options, {
       if (shiny::in_devmode()) cat("Event: downscale_raster_preview", sep = "\n")
+      if (!is.null(vstore[["downscale_raster_preview"]])) {
+        leaflet::removeImage(mp, "rast_layer")
+      }
       update_vstore_and_notify("downscale_raster_preview", input$ds_ras_prev_options, "Preview raster")
-      leaflet::addRasterImage(mp, preview_raster[[input$ds_ras_prev_options]])
+      leaflet::addRasterImage(mp, preview_raster[[input$ds_ras_prev_options]], layerId = "rast_layer")
     })
     
     # reactive output for selecting Observed Years
