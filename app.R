@@ -550,6 +550,24 @@ shiny::shinyApp(
               ),
               shiny::div(
                 shiny::checkboxGroupInput(
+                  inputId = "downscale_ssps",
+                  label = h5("Choose Shared Socio-economic Pathways (SSP) scenarios:",
+                             prompter::add_prompt(
+                               tooltipsIcon,
+                               message = HTML(paste("SSP scenarios pairing shared socioeconomic pathways with representative concentration pathways (only necessary if choosing periods/years past 2014).")),
+                               position = "top",
+                               size = "large",
+                               shadow = FALSE
+                             )
+                  ),
+                  width = "100%",
+                  inline = TRUE,
+                  choices = climr::list_ssps() |> sn(),
+                  selected = vstore[["downscale_ssps"]]
+                )
+              ),
+              shiny::div(
+                shiny::checkboxGroupInput(
                   inputId = "downscale_gcm_periods",
                   label = h5("Choose GCM periods:",
                              prompter::add_prompt(
@@ -578,9 +596,6 @@ shiny::shinyApp(
               
               # reactive output for selecting GCM Years
               uiOutput("gcm_years_radio"),
-
-              # reactive output for selecting SSPs
-              uiOutput("downscale_gcm_years"),
               
               shiny::div(
                 shiny::radioButtons(
@@ -1105,32 +1120,6 @@ shiny::shinyApp(
             sep = ""
           ),
           selected = c(min(vstore[["downscale_gcm_years"]]), max(vstore[["downscale_gcm_years"]])),
-        )
-      } else {
-        NULL
-      }
-    })
-    
-    # reactive output for selecting SSPs
-    output$downscale_gcm_years <- renderUI({
-      if (any(min(climr::list_gcm_ssp_years()):max(climr::list_gcm_ssp_years()) %in% input$downscale_gcm_years)) {
-        shiny::div(
-          shiny::checkboxGroupInput(
-            inputId = "downscale_ssps",
-            label = h5("Choose Shared Socio-economic Pathways (SSP) scenarios:",
-                       prompter::add_prompt(
-                         tooltipsIcon,
-                         message = HTML(paste("SSP scenarios pairing shared socioeconomic pathways with representative concentration pathways (only necessary if choosing years past 2014).")),
-                         position = "top",
-                         size = "large",
-                         shadow = FALSE
-                       )
-            ),
-            width = "100%",
-            inline = TRUE,
-            choices = climr::list_ssps() |> sn(),
-            selected = vstore[["downscale_ssps"]]
-          )
         )
       } else {
         NULL
