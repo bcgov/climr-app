@@ -840,7 +840,7 @@ shiny::shinyApp(
       update_vstore_and_notify("downscale_which_refmap", input$downscale_which_refmap, "Ref map", "radioButtons")
     })
     
-    # observed periods - THERE IS STILL AN UPDATE BUG HERE
+    # observed periods
     shiny::observeEvent(input$downscale_obs_periods_checkboxes, {
       update_vstore_and_notify("downscale_obs_periods_checkboxes", input$downscale_obs_periods_checkboxes, "Obs periods", "checkboxGroupInput")
       if (shiny::in_devmode()) cat("Event: downscale_obs_periods", sep = "\n")
@@ -853,6 +853,7 @@ shiny::shinyApp(
     })
     shiny::observe({
       vstore[["downscale_obs_periods_checkboxes"]]
+      update_vstore_and_notify("downscale_obs_periods_checkboxes", input$downscale_obs_periods_checkboxes, "Obs periods", "checkboxGroupInput")
       updateCheckboxGroupInput(session = getDefaultReactiveDomain(),
                                inputId = "downscale_obs_periods_checkboxes",
                                selected = vstore[["downscale_obs_periods_checkboxes"]]
@@ -1039,11 +1040,11 @@ shiny::shinyApp(
     # extra climate variables custom selection - this is still buggy because the remove calls are in cycle wuth the observe calls, don't know how to fix this
     shiny::observeEvent(input$downscale_extra_vars_custom_monthly, {
       if (shiny::in_devmode()) cat("Event: downscale_extra_vars_custom_monthly", sep = "\n")
-      update_vstore_and_notify("downscale_extra_vars_custom_monthly", input$downscale_extra_vars_custom_monthly, "Extra variables")
+      update_vstore_and_notify("downscale_extra_vars_custom_monthly", input$downscale_extra_vars_custom_monthly, "Extra variables - monthly")
     })
     shiny::observe({
       vstore[["downscale_extra_vars_custom_monthly"]]
-      update_vstore_and_notify("downscale_extra_vars_custom_monthly", input$downscale_extra_vars_custom_monthly, "Extra variables")
+      update_vstore_and_notify("downscale_extra_vars_custom_monthly", input$downscale_extra_vars_custom_monthly, "Extra variables - monthly")
       updateCheckboxGroupInput(session = getDefaultReactiveDomain(),
                                inputId = "downscale_extra_vars_custom_monthly",
                                selected = vstore[["downscale_extra_vars_custom_monthly"]]
@@ -1051,11 +1052,11 @@ shiny::shinyApp(
     })
     shiny::observeEvent(input$downscale_extra_vars_custom_seasonal, {
       if (shiny::in_devmode()) cat("Event: downscale_extra_vars_custom_seasonal", sep = "\n")
-      update_vstore_and_notify("downscale_extra_vars_custom_seasonal", input$downscale_extra_vars_custom_seasonal, "Extra variables")
+      update_vstore_and_notify("downscale_extra_vars_custom_seasonal", input$downscale_extra_vars_custom_seasonal, "Extra variables - seasonal")
     })
     shiny::observe({
       vstore[["downscale_extra_vars_custom_seasonal"]]
-      update_vstore_and_notify("downscale_extra_vars_custom_seasonal", input$downscale_extra_vars_custom_seasonal, "Extra variables")
+      update_vstore_and_notify("downscale_extra_vars_custom_seasonal", input$downscale_extra_vars_custom_seasonal, "Extra variables - seasonal")
       updateCheckboxGroupInput(session = getDefaultReactiveDomain(),
                                inputId = "downscale_extra_vars_custom_seasonal",
                                selected = vstore[["downscale_extra_vars_custom_seasonal"]]
@@ -1063,11 +1064,11 @@ shiny::shinyApp(
     })
     shiny::observeEvent(input$downscale_extra_vars_custom_annual, {
       if (shiny::in_devmode()) cat("Event: downscale_extra_vars_custom_annual", sep = "\n")
-      update_vstore_and_notify("downscale_extra_vars_custom_annual", input$downscale_extra_vars_custom_annual, "Extra variables")
+      update_vstore_and_notify("downscale_extra_vars_custom_annual", input$downscale_extra_vars_custom_annual, "Extra variables - annual")
     })
     shiny::observe({
       vstore[["downscale_extra_vars_custom_annual"]]
-      update_vstore_and_notify("downscale_extra_vars_custom_annual", input$downscale_extra_vars_custom_annual, "Extra variables")
+      update_vstore_and_notify("downscale_extra_vars_custom_annual", input$downscale_extra_vars_custom_annual, "Extra variables - annual")
       updateCheckboxGroupInput(session = getDefaultReactiveDomain(),
                                inputId = "downscale_extra_vars_custom_annual",
                                selected = vstore[["downscale_extra_vars_custom_annual"]]
