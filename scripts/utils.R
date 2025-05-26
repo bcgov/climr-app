@@ -347,6 +347,7 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
       gcm_periods = vstore[["downscale_gcm_periods"]] |> n(),
       gcm_ssp_years = vstore[["downscale_gcm_ssp_years"]] |> n(),
       gcm_hist_years = vstore[["downscale_gcm_hist_years"]] |> n(),
+      ensemble_mean = vstore[["downscale_ensemble_mean"]] |> n(),
       max_run = vstore[["downscale_max_run"]] |> n() |> as.integer(),
       run_nm = vstore[["downscale_run_nm"]] |> n(),
       vars = c(downscale_core_vars, vstore[["downscale_extra_vars"]] |> n(), vstore[["downscale_extra_vars_custom_monthly"]] |> n(), vstore[["downscale_extra_vars_custom_seasonal"]] |> n(), vstore[["downscale_extra_vars_custom_annual"]] |> n()),
