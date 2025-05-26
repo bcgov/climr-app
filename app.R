@@ -441,15 +441,17 @@ shiny::shinyApp(
                          "downscale_parameters", disabled = TRUE)
       updateActionButton(session = getDefaultReactiveDomain(),
                          "generate_results", disabled = TRUE)
-      lapply(names(downscale_default), \(x) {
-        vstore[[x]] <- downscale_default[[x]]
-      })
       # remove any previewed rasters
       if (!is.null(vstore[["downscale_raster_preview"]])) {
         leaflet::removeImage(mp, "rast_layer")
       }
       # remove preview raster options
       show_ui(FALSE)
+      
+      # reset all parameters to defaults
+      lapply(names(downscale_default), \(x) {
+        vstore[[x]] <- downscale_default[[x]]
+      })
       
     })
 
