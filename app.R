@@ -316,6 +316,7 @@ shiny::shinyApp(
       downscale_extra_vars_custom_annual = "NULL",
       downscale_core_ppt_lr = FALSE,
       downscale_return_refperiod = FALSE,
+      ds_ras_prev_options = NULL,
       downscale_raster_preview = NULL
     )
     
@@ -351,6 +352,7 @@ shiny::shinyApp(
       downscale_resolution = 2500,
       vscale = "none",
       processing = FALSE,
+      ds_ras_prev_options = downscale_default[["ds_ras_prev_options"]],
       downscale_raster_preview = downscale_default[["downscale_raster_preview"]]
     )
     
@@ -1247,6 +1249,9 @@ shiny::shinyApp(
     shiny::observeEvent(input$downscale_output, {
       if (shiny::in_devmode()) cat("Event: downscale_output", sep = "\n")
       vstore[["downscale_output"]] <- input$downscale_output
+      if (input$downscale_output == "csv") {
+        show_ui(FALSE)
+      }
     })
     shiny::observeEvent(input$downscale_resolution, {
       if (shiny::in_devmode()) cat("Event: downscale_resolution", sep = "\n")
@@ -1260,12 +1265,15 @@ shiny::shinyApp(
     })
     shiny::observeEvent(input$ds_ras_prev_options, {
       if (shiny::in_devmode()) cat("Event: downscale_raster_preview", sep = "\n")
-      if (!is.null(vstore[["downscale_raster_preview"]])) {
-        leaflet::removeImage(mp, "rast_layer")
+      if (vstore[["downscale_output"]] == "tif") {
+        if (!is.null(vstore[["downscale_raster_preview"]])) {
+          leaflet::removeImage(mp, "rast_layer")
+        }
+        update_vstore_and_notify("downscale_raster_preview", input$ds_ras_prev_options, "Preview raster")
+        update_vstore_and_notify("ds_ras_prev_options", input$ds_ras_prev_options, "Preview raster")
+        leaflet::addRasterImage(mp, preview_raster[[input$ds_ras_prev_options]], layerId = "rast_layer")
+       # leaflet::addLegend(mp, pal = colorNumeric(palette = "viridis", domain = c(0,100)))
       }
-      update_vstore_and_notify("downscale_raster_preview", input$ds_ras_prev_options, "Preview raster")
-      leaflet::addRasterImage(mp, preview_raster[[input$ds_ras_prev_options]], layerId = "rast_layer")
-      leaflet::addLegend(mp, pal = colorNumeric(palette = "viridis", domain = c(0,100)))
     })
     
     # reactive output for selecting Observed Years
@@ -1377,7 +1385,7 @@ shiny::shinyApp(
             )
           )
         )
-      } 
+      }
     })
   }
 )
