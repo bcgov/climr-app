@@ -206,16 +206,27 @@ session_geometry <- function(sg_dt) {
       }
       # remove file uploads
       rem((sg_dt$dt)[source %in% c("file_upload", "raster_upload")]$id)
-     } 
-    #   else {
-    #   showModal(
-    #     modalDialog(
-    #       title = "Warning",
-    #       paste("Nothing to clear." ),
-    #       easyClose = TRUE
-    #     )
-    #   )
-    # }
+    }
+    
+    # disable buttons
+    updateActionButton(session = getDefaultReactiveDomain(),
+                       "downscale_parameters", disabled = TRUE)
+    updateActionButton(session = getDefaultReactiveDomain(),
+                       "generate_results", disabled = TRUE)
+    
+    # remove any previewed rasters and legends
+    if (!is.null(vstore[["downscale_raster_preview"]])) {
+      leaflet::removeImage(mp, "rast_layer")
+    }
+    leaflet::clearControls(mp)
+    
+    # remove preview raster accordion
+    show_ui(FALSE)
+    
+    # reset all parameters to defaults
+    lapply(names(downscale_default), \(x) {
+      vstore[[x]] <- downscale_default[[x]]
+    })
   }
   
   click_enabled <- TRUE
@@ -534,6 +545,14 @@ session_geometry <- function(sg_dt) {
                         selected = vstore[["ds_ras_time_periods"]]
                       )
                     ),
+                  ),
+                  shiny::div(
+                    shiny::checkboxInput(
+                      inputId = "log_scale",
+                      label = "Apply log transform to raster preview",
+                      value = vstore[["log_transform_raster"]],
+                      width = "100%"
+                    )
                   ),
                   br(),
                   shiny::actionButton(
