@@ -316,7 +316,8 @@ shiny::shinyApp(
       downscale_extra_vars_custom_annual = "NULL",
       downscale_core_ppt_lr = FALSE,
       downscale_return_refperiod = FALSE,
-      ds_ras_prev_options = NULL,
+      ds_ras_elements = NULL,
+      ds_ras_time_periods = NULL,
       downscale_raster_preview = NULL
     )
     
@@ -352,7 +353,8 @@ shiny::shinyApp(
       downscale_resolution = 2500,
       vscale = "none",
       processing = FALSE,
-      ds_ras_prev_options = downscale_default[["ds_ras_prev_options"]],
+      ds_ras_elements = downscale_default[["ds_ras_elements"]],
+      ds_ras_time_periods = downscale_default[["ds_ras_time_periods"]],
       downscale_raster_preview = downscale_default[["downscale_raster_preview"]]
     )
     
@@ -443,10 +445,11 @@ shiny::shinyApp(
                          "downscale_parameters", disabled = TRUE)
       updateActionButton(session = getDefaultReactiveDomain(),
                          "generate_results", disabled = TRUE)
-      # remove any previewed rasters
+      # remove any previewed rasters and legends
       if (!is.null(vstore[["downscale_raster_preview"]])) {
         leaflet::removeImage(mp, "rast_layer")
       }
+      leaflet::clearControls(mp)
       # remove preview raster options
       show_ui(FALSE)
       
@@ -1216,9 +1219,6 @@ shiny::shinyApp(
               # preview for csv results
               DT::DTOutput("preview_table", width = "100%"),
               
-              # # options for raster preview
-              # uiOutput("preview_raster_options", width = "100%"),
-              
               shiny::downloadButton(
                 outputId = "downscale_download",
                 label = "Download Downscaled Data",
@@ -1263,16 +1263,82 @@ shiny::shinyApp(
       sg$process()
       show_ui(TRUE)
     })
-    shiny::observeEvent(input$ds_ras_prev_options, {
+    # shiny::observeEvent(input$ds_ras_prev_options, {
+    #   if (shiny::in_devmode()) cat("Event: downscale_raster_preview", sep = "\n")
+    #   if (vstore[["downscale_output"]] == "tif") {
+    #     # clear previous raster and legend
+    #     if (!is.null(vstore[["downscale_raster_preview"]])) {
+    #       leaflet::removeImage(mp, "rast_layer")
+    #       leaflet::clearControls(mp)
+    #     }
+    #     update_vstore_and_notify("downscale_raster_preview", input$ds_ras_prev_options, "Preview raster")
+    #     update_vstore_and_notify("ds_ras_prev_options", input$ds_ras_prev_options, "Preview raster")
+    #     
+    #     # set palettes
+    #     col_scheme <- if (grepl("PPT",input$ds_ras_prev_options)) {
+    #                     RColorBrewer::brewer.pal(9, "YlGnBu")
+    #                   } else {
+    #                     rev(RColorBrewer::brewer.pal(11, "RdYlBu"))
+    #                   }
+    #     pal <- colorNumeric(
+    #       palette = col_scheme,
+    #       domain = values(preview_raster[[input$ds_ras_prev_options]])
+    #     )
+    #     
+    #     # add raster image
+    #     leaflet::addRasterImage(mp, preview_raster[[input$ds_ras_prev_options]], layerId = "rast_layer", colors = pal)
+    #     
+    #     # add legend
+    #     leaflet::addLegend(mp, pal = pal, values = values(preview_raster[[input$ds_ras_prev_options]]), title = input$ds_ras_prev_options)
+    #   }
+    # })
+    shiny::observeEvent(input$ds_ras_elements, {
+      if (shiny::in_devmode()) cat("Event: ds_ras_elements", sep = "\n")
+      update_vstore_and_notify("ds_ras_elements", input$ds_ras_elements, "Raster element")
+    })
+    shiny::observeEvent(input$ds_ras_time_periods, {
+      if (shiny::in_devmode()) cat("Event: ds_ras_time_periods", sep = "\n")
+      update_vstore_and_notify("ds_ras_time_periods", input$ds_ras_time_periods, "Raster time period")
+    })
+    shiny::observeEvent(input$preview_raster, {
       if (shiny::in_devmode()) cat("Event: downscale_raster_preview", sep = "\n")
       if (vstore[["downscale_output"]] == "tif") {
+        # clear previous raster and legend
         if (!is.null(vstore[["downscale_raster_preview"]])) {
           leaflet::removeImage(mp, "rast_layer")
+          leaflet::clearControls(mp)
         }
-        update_vstore_and_notify("downscale_raster_preview", input$ds_ras_prev_options, "Preview raster")
-        update_vstore_and_notify("ds_ras_prev_options", input$ds_ras_prev_options, "Preview raster")
-        leaflet::addRasterImage(mp, preview_raster[[input$ds_ras_prev_options]], layerId = "rast_layer")
-       # leaflet::addLegend(mp, pal = colorNumeric(palette = "viridis", domain = c(0,100)))
+        
+        # concatenate raster layer preview
+        time_mapping <- c(
+          "01" = "January", "02" = "February", "03" = "March",
+          "04" = "April", "05" = "May", "06" = "June",
+          "07" = "July", "08" = "August", "09" = "September",
+          "10" = "October", "11" = "November", "12" = "December",
+          "sp" = "Spring", "sm" = "Summer", "at" = "Autumn", "wt" = "Winter"
+        )
+        time_code <- names(time_mapping)[time_mapping == vstore[["ds_ras_time_periods"]]]
+        
+        raster_layer_title <- paste(vstore[["ds_ras_elements"]], vstore[["ds_ras_time_periods"]], sep = " - ")
+        raster_layer <- paste(vstore[["ds_ras_elements"]], time_code, sep = "_")
+        update_vstore_and_notify("downscale_raster_preview", raster_layer, "Preview raster")
+
+        # set palettes
+        col_scheme <- if (grepl("PPT", raster_layer)) {
+                        RColorBrewer::brewer.pal(9, "YlGnBu")
+                      } else {
+                        rev(RColorBrewer::brewer.pal(11, "RdYlBu"))
+                      }
+        pal <- colorNumeric(
+          palette = col_scheme,
+          domain = values(preview_raster[[raster_layer]])
+        )
+
+        # add raster image
+        leaflet::addRasterImage(mp, preview_raster[[raster_layer]], layerId = "rast_layer", colors = pal)
+
+        # add legend
+        leaflet::addLegend(mp, pal = pal, values = values(preview_raster[[raster_layer]]), title = raster_layer_title)
       }
     })
     

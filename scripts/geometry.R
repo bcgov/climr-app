@@ -207,15 +207,15 @@ session_geometry <- function(sg_dt) {
       # remove file uploads
       rem((sg_dt$dt)[source %in% c("file_upload", "raster_upload")]$id)
      } 
-      else {
-      showModal(
-        modalDialog(
-          title = "Warning",
-          paste("Nothing to clear." ),
-          easyClose = TRUE
-        )
-      )
-    }
+    #   else {
+    #   showModal(
+    #     modalDialog(
+    #       title = "Warning",
+    #       paste("Nothing to clear." ),
+    #       easyClose = TRUE
+    #     )
+    #   )
+    # }
   }
   
   click_enabled <- TRUE
@@ -430,7 +430,7 @@ session_geometry <- function(sg_dt) {
     process = function() {
       vstore[["processing"]] <- TRUE
       shiny::updateActionButton(inputId = "generate_results", disabled = TRUE)
-      shiny::updateActionButton(inputId = "downscale_process_launch", disabled = TRUE)
+      #shiny::updateActionButton(inputId = "downscale_process_launch", disabled = TRUE)
       withCallingHandlers(
         message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
         warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
@@ -466,24 +466,82 @@ session_geometry <- function(sg_dt) {
             # raster previews
             output$preview_raster_options <- shiny::renderUI({
               if (show_ui()) {
+                # mapping for time periods
+                time_mapping <- c(
+                  "01" = "January", "02" = "February", "03" = "March",
+                  "04" = "April", "05" = "May", "06" = "June",
+                  "07" = "July", "08" = "August", "09" = "September",
+                  "10" = "October", "11" = "November", "12" = "December",
+                  "sp" = "Spring", "sm" = "Summer", "at" = "Autumn", "wt" = "Winter"
+                )
+                
+                # split raster previews
+                elements <- c()
+                time_periods <- c()
+                for (var in names(preview_raster)) {
+                  split_var <- strsplit(var, "_")[[1]]
+                  elements <- c(elements, split_var[1])
+                  time_periods <- c(time_periods, split_var[2])
+                }
+                
+                # remove duplicates
+                elements <- unique(elements)
+                time_periods <- unique(time_periods)
+                
+                # map to names
+                time_periods_names <- unname(time_mapping[time_periods])
+                
                 shiny::div(
-                  shiny::radioButtons(
-                    inputId = "ds_ras_prev_options",
-                    label = h5("Choose the raster layer you would like to preview:",
-                               prompter::add_prompt(
-                                 tooltipsIcon,
-                                 message = HTML(paste("Shows a list of the downscaled raster layers. Choose a layer you would like to preview on the map.")),
-                                 position = "top-left",
-                                 size = "large",
-                                 shadow = FALSE
-                               )
+                  h5("Choose raster layer to preview:"),
+                  accordion(
+                    accordion_panel(
+                      title = h5("Raster Elements:"),
+                      value = "preview_acc1",
+                      shiny::radioButtons(
+                        inputId = "ds_ras_elements",
+                        label = h5("Choose element of raster:",
+                                   prompter::add_prompt(
+                                     tooltipsIcon,
+                                     message = HTML(paste("Shows the elements for downscaled raster layers. Choose a element for the layer you would like to preview on the map.")),
+                                     position = "top",
+                                     size = "large",
+                                     shadow = FALSE
+                                   )
+                        ),
+                        width = "100%",
+                        inline = TRUE,
+                        choices = elements,
+                        selected = vstore[["ds_ras_elements"]]
+                      )
                     ),
-                    width = "100%",
-                    inline = TRUE,
-                    choices = names(preview_raster),
-                    selected = vstore[["downscale_raster_preview"]]
+                    accordion_panel(
+                      title = h5("Raster Time Periods:"),
+                      value = "preview_acc2",
+                      shiny::radioButtons(
+                        inputId = "ds_ras_time_periods",
+                        label = h5("Choose time period of raster:",
+                                   prompter::add_prompt(
+                                     tooltipsIcon,
+                                     message = HTML(paste("Shows the time periods for downscaled raster layers. Choose a time period for the layer you would like to preview on the map.")),
+                                     position = "top",
+                                     size = "large",
+                                     shadow = FALSE
+                                   )
+                        ),
+                        width = "100%",
+                        inline = TRUE,
+                        choices = time_periods_names,
+                        selected = vstore[["ds_ras_time_periods"]]
+                      )
+                    ),
                   ),
                   br(),
+                  shiny::actionButton(
+                    inputId = "preview_raster",
+                    label = "Preview Raster Layer",
+                    style = "width: 100%;"
+                    ),
+                  br(), br(),
                   shiny::downloadButton(
                     outputId = "downscale_download",
                     label = "Download Downscaled Data",
@@ -513,7 +571,7 @@ session_geometry <- function(sg_dt) {
         }
       )
       vstore[["processing"]] <- FALSE
-      shiny::updateActionButton(inputId = "downscale_process_launch", disabled = TRUE)
+      #shiny::updateActionButton(inputId = "downscale_process_launch", disabled = TRUE)
       shiny::updateActionButton(inputId = "generate_results", disabled = FALSE)
       #shiny::removeModal()
     },
