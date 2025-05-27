@@ -854,7 +854,7 @@ shiny::shinyApp(
     shiny::observe({
       vstore[["downscale_obs_periods_checkboxes"]]
       update_vstore_and_notify("downscale_obs_periods_checkboxes", input$downscale_obs_periods_checkboxes, "Obs periods", "checkboxGroupInput")
-      updateCheckboxGroupInput(session = getDefaultReactiveDomain(),
+      shiny::updateCheckboxGroupInput(session = getDefaultReactiveDomain(),
                                inputId = "downscale_obs_periods_checkboxes",
                                selected = vstore[["downscale_obs_periods_checkboxes"]]
       )
@@ -876,7 +876,7 @@ shiny::shinyApp(
     })
     shiny::observe({
       vstore[["downscale_obs_years_radio"]]
-      updateSliderInput(session = getDefaultReactiveDomain(),
+      shiny::updateSliderInput(session = getDefaultReactiveDomain(),
                         inputId = "downscale_obs_years",
                         value = c(min(vstore[["downscale_obs_years"]]), max(vstore[["downscale_obs_years"]]))
                         )
@@ -897,7 +897,7 @@ shiny::shinyApp(
     shiny::observe({
       vstore[["downscale_gcms"]]
       update_vstore_and_notify("downscale_gcms", input$downscale_gcms, "GCMs", "checkboxGroupInput")
-      updateCheckboxGroupInput(session = getDefaultReactiveDomain(),
+      shiny::updateCheckboxGroupInput(session = getDefaultReactiveDomain(),
                         inputId = "downscale_gcms",
                         selected = vstore[["downscale_gcms"]]
       )
@@ -912,7 +912,7 @@ shiny::shinyApp(
     shiny::observe({
       vstore[["downscale_ssps"]]
       update_vstore_and_notify("downscale_ssps", input$downscale_ssps, "SSPs", "checkboxGroupInput")
-      updateCheckboxGroupInput(session = getDefaultReactiveDomain(),
+      shiny::updateCheckboxGroupInput(session = getDefaultReactiveDomain(),
                                inputId = "downscale_ssps",
                                selected = vstore[["downscale_ssps"]]
       )
@@ -926,7 +926,7 @@ shiny::shinyApp(
     shiny::observe({
       vstore[["downscale_gcm_periods"]]
       update_vstore_and_notify("downscale_gcm_periods", input$downscale_gcm_periods, "GCM periods", "checkboxGroupInput")
-      updateCheckboxGroupInput(session = getDefaultReactiveDomain(),
+      shiny::updateCheckboxGroupInput(session = getDefaultReactiveDomain(),
                                inputId = "downscale_gcm_periods",
                                selected = vstore[["downscale_gcm_periods"]]
       )
@@ -963,7 +963,7 @@ shiny::shinyApp(
     })
     shiny::observe({
       vstore[["downscale_gcm_years_radio"]]
-      updateSliderInput(session = getDefaultReactiveDomain(),
+      shiny::updateSliderInput(session = getDefaultReactiveDomain(),
                         inputId = "downscale_gcm_years",
                         value = c(min(vstore[["downscale_gcm_years"]]), max(vstore[["downscale_gcm_years"]]))
       )
@@ -983,7 +983,7 @@ shiny::shinyApp(
     #   update_vstore_and_notify("downscale_run_nm", input$downscale_run_nm, "Run name")
     # })
     
-    # extra climate variables packages
+    # extra climate variables packages - still buggy, the custom variables are not resetting to when Custom is removed
     extra_var_handler <- function() {
       # get old and new selections
       old <- vstore[["downscale_extra_vars_packages"]]
@@ -1018,9 +1018,10 @@ shiny::shinyApp(
         remove_from_vstore("downscale_extra_vars", downscale_extra_vars$Annual, "Removed Annual vars")
       }
       if ("Custom" %in% removed) {
-        remove_from_vstore("downscale_extra_vars_custom_monthly", vstore[["downscale_extra_vars_custom_monthly"]], "Removed Custom vars")
-        remove_from_vstore("downscale_extra_vars_custom_seasonal", vstore[["downscale_extra_vars_custom_seasonal"]], "Removed Custom vars")
-        remove_from_vstore("downscale_extra_vars_custom_annual", vstore[["downscale_extra_vars_custom_annual"]], "Removed Custom vars")
+        # reset all vars to defaults
+        lapply(c("downscale_extra_vars_custom_monthly", "downscale_extra_vars_custom_seasonal", "downscale_extra_vars_custom_annual"), \(x) {
+          vstore[[x]] <- "NULL"
+        })
       }
     }
     shiny::observeEvent(input$downscale_extra_vars_packages, {
@@ -1030,14 +1031,14 @@ shiny::shinyApp(
     shiny::observe({
       vstore[["downscale_extra_vars_packages"]]
       extra_var_handler()
-      updateCheckboxGroupInput(session = getDefaultReactiveDomain(),
+      shiny::updateCheckboxGroupInput(session = getDefaultReactiveDomain(),
                         inputId = "downscale_extra_vars_packages",
                         selected = vstore[["downscale_extra_vars_packages"]]
                         
       )
     })
     
-    # extra climate variables custom selection - this is still buggy because the remove calls are in cycle wuth the observe calls, don't know how to fix this
+    # extra climate variables custom selection - still buggy, the custom variables are not resetting to when Custom is removed
     shiny::observeEvent(input$downscale_extra_vars_custom_monthly, {
       if (shiny::in_devmode()) cat("Event: downscale_extra_vars_custom_monthly", sep = "\n")
       update_vstore_and_notify("downscale_extra_vars_custom_monthly", input$downscale_extra_vars_custom_monthly, "Extra variables - monthly")
@@ -1045,7 +1046,7 @@ shiny::shinyApp(
     shiny::observe({
       vstore[["downscale_extra_vars_custom_monthly"]]
       update_vstore_and_notify("downscale_extra_vars_custom_monthly", input$downscale_extra_vars_custom_monthly, "Extra variables - monthly")
-      updateCheckboxGroupInput(session = getDefaultReactiveDomain(),
+      shiny::updateCheckboxGroupInput(session = getDefaultReactiveDomain(),
                                inputId = "downscale_extra_vars_custom_monthly",
                                selected = vstore[["downscale_extra_vars_custom_monthly"]]
       )
@@ -1057,7 +1058,7 @@ shiny::shinyApp(
     shiny::observe({
       vstore[["downscale_extra_vars_custom_seasonal"]]
       update_vstore_and_notify("downscale_extra_vars_custom_seasonal", input$downscale_extra_vars_custom_seasonal, "Extra variables - seasonal")
-      updateCheckboxGroupInput(session = getDefaultReactiveDomain(),
+      shiny::updateCheckboxGroupInput(session = getDefaultReactiveDomain(),
                                inputId = "downscale_extra_vars_custom_seasonal",
                                selected = vstore[["downscale_extra_vars_custom_seasonal"]]
       )
@@ -1069,7 +1070,7 @@ shiny::shinyApp(
     shiny::observe({
       vstore[["downscale_extra_vars_custom_annual"]]
       update_vstore_and_notify("downscale_extra_vars_custom_annual", input$downscale_extra_vars_custom_annual, "Extra variables - annual")
-      updateCheckboxGroupInput(session = getDefaultReactiveDomain(),
+      shiny::updateCheckboxGroupInput(session = getDefaultReactiveDomain(),
                                inputId = "downscale_extra_vars_custom_annual",
                                selected = vstore[["downscale_extra_vars_custom_annual"]]
       )
@@ -1264,6 +1265,7 @@ shiny::shinyApp(
       }
       update_vstore_and_notify("downscale_raster_preview", input$ds_ras_prev_options, "Preview raster")
       leaflet::addRasterImage(mp, preview_raster[[input$ds_ras_prev_options]], layerId = "rast_layer")
+      leaflet::addLegend(mp, pal = colorNumeric(palette = "viridis", domain = c(0,100)))
     })
     
     # reactive output for selecting Observed Years
@@ -1375,7 +1377,7 @@ shiny::shinyApp(
             )
           )
         )
-      }
+      } 
     })
   }
 )
