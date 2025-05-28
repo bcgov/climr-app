@@ -454,7 +454,7 @@ shiny::shinyApp(
           shiny::div(
             shiny::radioButtons(
               inputId = "downscale_which_refmap",
-              label = h5("Choose Reference Map:", 
+              label = h5("Choose reference map:", 
                          prompter::add_prompt(
                            tooltipsIcon,
                            message = HTML(paste("Which map of 1961-1990 climatological normals to use as the high-resolution reference climate map for downscaling.")),
@@ -463,9 +463,8 @@ shiny::shinyApp(
                            shadow = FALSE
                          )
               ),
-              choices = c(local({z <- climr::list_refmaps(); substr(z, 8L, z |> nchar()) |> tools::toTitleCase() |> setNames(object = z, nm = _)})
-              # choices = c("Climr" = "refmap_climr", "ClimateNA" = "refmap_climatena")
-              ),
+              # choices = c(local({z <- climr::list_refmaps(); substr(z, 8L, z |> nchar()) |> tools::toTitleCase() |> setNames(object = z, nm = _)})),
+              choices = c("ClimR" = "refmap_climr", "ClimateNA" = "refmap_climatena"),
               selected = vstore[["downscale_which_refmap"]],
               inline = TRUE,
               width = "100%",
@@ -723,77 +722,23 @@ shiny::shinyApp(
     
     })
     
-    # update_vstore_and_notify <- function(vstore_key, input_value, msg_format) {
-    #   vpl <- 30
-    #   current_value <- vstore[[vstore_key]]
-    #   if ("NULL" %in% input_value) {
-    #     if (length(input_value) > 1) {
-    #       if ("NULL" %in% current_value) {
-    #         shiny::updateSelectInput(inputId = vstore_key, selected = setdiff(input_value, "NULL"))
-    #       } else {
-    #         shiny::updateSelectInput(inputId = vstore_key, selected = "NULL")
-    #       }
-    #       return()
-    #     }
-    #   }
-    #   
-    #   additions <- setdiff(input_value, current_value)
-    #   deletions <- setdiff(current_value, input_value)
-    #   vstore[[vstore_key]] <- input_value
-    #   if (length(additions) > 0) {
-    #     diff_value <- substr(paste(additions, collapse = ", "), 1, vpl)
-    #     shiny::showNotification(
-    #       sprintf("%s added [%s]", msg_format, diff_value),
-    #       duration = 2
-    #     )
-    #   } else if (length(deletions) > 0) {
-    #     diff_value <- substr(paste(deletions, collapse = ", "), 1, vpl)
-    #     shiny::showNotification(
-    #       sprintf("%s removed [%s]", msg_format, diff_value),
-    #       duration = 2
-    #     )
-    #   }
-    # }
-    
-    update_vstore_and_notify <- function(vstore_key, input_value, msg_format, input_type = "selectInput") {
+    update_vstore_and_notify <- function(vstore_key, input_value, msg_format) {
       vpl <- 30
       current_value <- vstore[[vstore_key]]
       if ("NULL" %in% input_value) {
         if (length(input_value) > 1) {
           if ("NULL" %in% current_value) {
-            switch(input_type,
-                   "selectInput" = shiny::updateSelectInput(inputId = vstore_key, selected = setdiff(input_value, "NULL")),
-                   "checkboxGroupInput" = shiny::updateCheckboxGroupInput(inputId = vstore_key, selected = setdiff(input_value, "NULL")),
-                   "textInput" = shiny::updateTextInput(inputId = vstore_key, selected = setdiff(input_value, "NULL")),
-                   "numericInput" = shiny::updateNumericInput(inputId = vstore_key, selected = setdiff(input_value, "NULL")),
-                   "checkboxInput" = shiny::updateCheckboxInput(inputId = vstore_key, value = setdiff(input_value, "NULL")),
-                   "radioButtons" = shiny::updateRadioButtons(inputId = vstore_key, selected = setdiff(input_value, "NULL")),
-                   )
+            shiny::updateSelectInput(inputId = vstore_key, selected = setdiff(input_value, "NULL"))
           } else {
-            switch(input_type,
-                   "selectInput" = shiny::updateSelectInput(inputId = vstore_key, selected = "NULL"),
-                   "checkboxGroupInput" = shiny::updateCheckboxGroupInput(inputId = vstore_key, selected = "NULL"),
-                   "textInput" = shiny::updateTextInput(inputId = vstore_key, selected = "NULL"),
-                   "numericInput" = shiny::updateNumericInput(inputId = vstore_key, selected = "NULL"),
-                   "checkboxInput" = shiny::updateCheckboxInput(inputId = vstore_key, value = "NULL"),
-                   "radioButtons" = shiny::updateRadioButtons(inputId = vstore_key, selected = "NULL"),
-            )
+            shiny::updateSelectInput(inputId = vstore_key, selected = "NULL")
           }
           return()
         }
       }
-      
+
       additions <- setdiff(input_value, current_value)
       deletions <- setdiff(current_value, input_value)
       vstore[[vstore_key]] <- input_value
-      switch(input_type,
-             "selectInput" = shiny::updateSelectInput(inputId = vstore_key, selected = vstore[[vstore_key]]),
-             "checkboxGroupInput" = shiny::updateCheckboxGroupInput(inputId = vstore_key, selected = vstore[[vstore_key]]),
-             "textInput" = shiny::updateTextInput(inputId = vstore_key, selected = vstore[[vstore_key]]),
-             "numericInput" = shiny::updateNumericInput(inputId = vstore_key, selected = vstore[[vstore_key]]),
-             "checkboxInput" = shiny::updateCheckboxInput(inputId = vstore_key, value = vstore[[vstore_key]]),
-             "radioButtons" = shiny::updateRadioButtons(inputId = vstore_key, selected = vstore[[vstore_key]]),
-      )
       if (length(additions) > 0) {
         diff_value <- substr(paste(additions, collapse = ", "), 1, vpl)
         shiny::showNotification(
@@ -824,12 +769,12 @@ shiny::shinyApp(
     # refmap
     shiny::observeEvent(input$downscale_which_refmap, {
       if (shiny::in_devmode()) cat("Event: downscale_which_refmap", sep = "\n")
-      update_vstore_and_notify("downscale_which_refmap", input$downscale_which_refmap, "Ref map", "radioButtons")
+      update_vstore_and_notify("downscale_which_refmap", input$downscale_which_refmap, "Ref map")
     })
     
     # observed periods
     shiny::observeEvent(input$downscale_obs_periods_checkboxes, {
-      update_vstore_and_notify("downscale_obs_periods_checkboxes", input$downscale_obs_periods_checkboxes, "Obs periods", "checkboxGroupInput")
+      update_vstore_and_notify("downscale_obs_periods_checkboxes", input$downscale_obs_periods_checkboxes, "Obs periods")
       if (shiny::in_devmode()) cat("Event: downscale_obs_periods", sep = "\n")
       if ("1961_1990" %in% input$downscale_obs_periods_checkboxes) {
         update_vstore_and_notify("downscale_return_refperiod", TRUE, "Return ref period")
@@ -840,7 +785,7 @@ shiny::shinyApp(
     })
     shiny::observe({
       vstore[["downscale_obs_periods_checkboxes"]]
-      update_vstore_and_notify("downscale_obs_periods_checkboxes", input$downscale_obs_periods_checkboxes, "Obs periods", "checkboxGroupInput")
+      update_vstore_and_notify("downscale_obs_periods_checkboxes", input$downscale_obs_periods_checkboxes, "Obs periods")
       shiny::updateCheckboxGroupInput(session = getDefaultReactiveDomain(),
                                inputId = "downscale_obs_periods_checkboxes",
                                selected = vstore[["downscale_obs_periods_checkboxes"]]
@@ -850,7 +795,7 @@ shiny::shinyApp(
     # observed years
     shiny::observeEvent(input$observed_years_radio,{
       if (shiny::in_devmode()) cat("Event: downscale_obs_years_radio", sep = "\n")
-      update_vstore_and_notify("downscale_obs_years_radio", input$observed_years_radio, "Obs radios", "radioButtons")
+      update_vstore_and_notify("downscale_obs_years_radio", input$observed_years_radio, "Obs radios")
       
       if (input$observed_years_radio == "No") {
         update_vstore_and_notify("downscale_obs_years", "NULL", "Obs years")
@@ -858,7 +803,7 @@ shiny::shinyApp(
     })
     shiny::observeEvent(input$downscale_obs_years, {
         if (shiny::in_devmode()) cat("Event: downscale_obs_years", sep = "\n")
-        date_range <- min(input$downscale_obs_years):max(input$downscale_obs_years)
+        date_range <- c(min(input$downscale_obs_years):max(input$downscale_obs_years))
         update_vstore_and_notify("downscale_obs_years", date_range, "Obs years")
     })
     shiny::observe({
@@ -878,12 +823,12 @@ shiny::shinyApp(
     # GCMs
     shiny::observeEvent(input$downscale_gcms, {
       if (shiny::in_devmode()) cat("Event: downscale_gcms", sep = "\n")
-      update_vstore_and_notify("downscale_gcms", input$downscale_gcms, "GCMs", "checkboxGroupInput")
+      update_vstore_and_notify("downscale_gcms", input$downscale_gcms, "GCMs")
       # update_run_nm_select()
     })
     shiny::observe({
       vstore[["downscale_gcms"]]
-      update_vstore_and_notify("downscale_gcms", input$downscale_gcms, "GCMs", "checkboxGroupInput")
+      update_vstore_and_notify("downscale_gcms", input$downscale_gcms, "GCMs")
       shiny::updateCheckboxGroupInput(session = getDefaultReactiveDomain(),
                         inputId = "downscale_gcms",
                         selected = vstore[["downscale_gcms"]]
@@ -893,12 +838,12 @@ shiny::shinyApp(
     # SSPs
     shiny::observeEvent(input$downscale_ssps, {
       if (shiny::in_devmode()) cat("Event: downscale_ssps", sep = "\n")
-      update_vstore_and_notify("downscale_ssps", input$downscale_ssps, "SSPs", "checkboxGroupInput")
+      update_vstore_and_notify("downscale_ssps", input$downscale_ssps, "SSPs")
       # update_run_nm_select()
     })
     shiny::observe({
       vstore[["downscale_ssps"]]
-      update_vstore_and_notify("downscale_ssps", input$downscale_ssps, "SSPs", "checkboxGroupInput")
+      update_vstore_and_notify("downscale_ssps", input$downscale_ssps, "SSPs")
       shiny::updateCheckboxGroupInput(session = getDefaultReactiveDomain(),
                                inputId = "downscale_ssps",
                                selected = vstore[["downscale_ssps"]]
@@ -908,11 +853,11 @@ shiny::shinyApp(
     # GCM periods
     shiny::observeEvent(input$downscale_gcm_periods, {
       if (shiny::in_devmode()) cat("Event: downscale_gcm_periods", sep = "\n")
-      update_vstore_and_notify("downscale_gcm_periods", input$downscale_gcm_periods, "GCM periods", "checkboxGroupInput")
+      update_vstore_and_notify("downscale_gcm_periods", input$downscale_gcm_periods, "GCM periods")
     })
     shiny::observe({
       vstore[["downscale_gcm_periods"]]
-      update_vstore_and_notify("downscale_gcm_periods", input$downscale_gcm_periods, "GCM periods", "checkboxGroupInput")
+      update_vstore_and_notify("downscale_gcm_periods", input$downscale_gcm_periods, "GCM periods")
       shiny::updateCheckboxGroupInput(session = getDefaultReactiveDomain(),
                                inputId = "downscale_gcm_periods",
                                selected = vstore[["downscale_gcm_periods"]]
@@ -922,7 +867,7 @@ shiny::shinyApp(
     # GCM years
     shiny::observeEvent(input$gcm_years_radio, {
       if (shiny::in_devmode()) cat("Event: downscale_gcm_years_radio", sep = "\n")
-      update_vstore_and_notify("downscale_gcm_years_radio", input$gcm_years_radio, "GCM radios", "radioButtons")
+      update_vstore_and_notify("downscale_gcm_years_radio", input$gcm_years_radio, "GCM radios")
       
       if (input$gcm_years_radio == "No") {
         update_vstore_and_notify("downscale_gcm_years", "NULL", "GCM years")
@@ -981,7 +926,7 @@ shiny::shinyApp(
       removed <- setdiff(old, new)
       
       # add new variables
-      update_vstore_and_notify("downscale_extra_vars_packages", input$downscale_extra_vars_packages, "Package", "checkboxGroupInput")
+      update_vstore_and_notify("downscale_extra_vars_packages", input$downscale_extra_vars_packages, "Package")
       
       # handle added variables
       if ("Monthly" %in% added) {
@@ -1066,7 +1011,7 @@ shiny::shinyApp(
     # elev adjustment
     shiny::observeEvent(input$downscale_core_ppt_lr, {
       if (shiny::in_devmode()) cat("Event: downscale_core_ppt_lr", sep = "\n")
-      update_vstore_and_notify("downscale_core_ppt_lr", input$downscale_core_ppt_lr, "Core PPT LR", "checkboxInput")
+      update_vstore_and_notify("downscale_core_ppt_lr", input$downscale_core_ppt_lr, "Core PPT LR")
     })
 
     # reset
@@ -1319,7 +1264,7 @@ shiny::shinyApp(
     # reactive output for selecting Observed Years
     output$observed_years_radio <- shiny::renderUI({
       if (input$observed_years_radio == "Yes") {
-        if ("NULL" %in% vstore$downscale_obs_years) {
+        if ("NULL" %in% vstore[["downscale_obs_years"]]) {
           date_range_preset <- c(min(climr::list_obs_years()):max(climr::list_obs_years()))
           update_vstore_and_notify("downscale_obs_years", date_range_preset, "Obs years")
         }
@@ -1339,6 +1284,7 @@ shiny::shinyApp(
             max = max(climr::list_obs_years()),
             value = c(min(vstore[["downscale_obs_years"]]), max(vstore[["downscale_obs_years"]])),
             width = "100%",
+            step = 1,
             sep = ""
           ),
           selected = c(min(vstore[["downscale_obs_years"]]), max(vstore[["downscale_obs_years"]])),
@@ -1351,7 +1297,7 @@ shiny::shinyApp(
     # reactive output for selecting GCM Years
     output$gcm_years_radio <- shiny::renderUI({
       if (input$gcm_years_radio == "Yes") {
-        if ("NULL" %in% vstore$downscale_gcm_years) {
+        if ("NULL" %in% vstore[["downscale_gcm_years"]]) {
           date_range_preset <- c(min(climr::list_gcm_hist_years()):(max(climr::list_gcm_hist_years())-100))
           update_vstore_and_notify("downscale_gcm_years", date_range_preset, "GCM years")
           update_vstore_and_notify("downscale_gcm_hist_years", date_range_preset, "GCM hist years")
