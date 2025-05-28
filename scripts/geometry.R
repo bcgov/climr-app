@@ -477,30 +477,18 @@ session_geometry <- function(sg_dt) {
             # raster previews
             output$preview_raster_options <- shiny::renderUI({
               if (show_ui()) {
-                # mapping for time periods
-                time_mapping <- c(
-                  "01" = "January", "02" = "February", "03" = "March",
-                  "04" = "April", "05" = "May", "06" = "June",
-                  "07" = "July", "08" = "August", "09" = "September",
-                  "10" = "October", "11" = "November", "12" = "December",
-                  "sp" = "Spring", "sm" = "Summer", "at" = "Autumn", "wt" = "Winter"
-                )
                 
                 # split raster previews
                 elements <- c()
-                time_periods <- c()
+                # time_periods <- c()
                 for (var in names(preview_raster)) {
-                  split_var <- strsplit(var, "_")[[1]]
-                  elements <- c(elements, split_var[1])
-                  time_periods <- c(time_periods, split_var[2])
+                  elements <- c(elements, climr::variables[Code == var, Code_Element])
+                  # time_periods <- c(time_periods, climr::variables[Code == var, Time])
                 }
                 
                 # remove duplicates
                 elements <- unique(elements)
-                time_periods <- unique(time_periods)
-                
-                # map to names
-                time_periods_names <- unname(time_mapping[time_periods])
+                # time_periods <- unique(time_periods)
                 
                 shiny::div(
                   h5("Choose raster layer to preview:"),
@@ -528,31 +516,11 @@ session_geometry <- function(sg_dt) {
                     accordion_panel(
                       title = h5("Raster Time Periods:"),
                       value = "preview_acc2",
-                      shiny::radioButtons(
-                        inputId = "ds_ras_time_periods",
-                        label = h5("Choose time period of raster:",
-                                   prompter::add_prompt(
-                                     tooltipsIcon,
-                                     message = HTML(paste("Shows the time periods for downscaled raster layers. Choose a time period for the layer you would like to preview on the map.")),
-                                     position = "top",
-                                     size = "large",
-                                     shadow = FALSE
-                                   )
-                        ),
-                        width = "100%",
-                        inline = TRUE,
-                        choices = time_periods_names,
-                        selected = vstore[["ds_ras_time_periods"]]
-                      )
+                      uiOutput("preview_raster_periods")
                     ),
                   ),
                   shiny::div(
-                    shiny::checkboxInput(
-                      inputId = "log_scale",
-                      label = "Apply log transform to raster preview",
-                      value = vstore[["log_transform_raster"]],
-                      width = "100%"
-                    )
+                    uiOutput("log_transform")
                   ),
                   br(),
                   shiny::actionButton(
@@ -570,6 +538,59 @@ session_geometry <- function(sg_dt) {
                 )
               } else {
                 NULL
+              }
+            })
+            
+            # reactive output for selecting time period for previewed raster
+            output$preview_raster_periods <- shiny::renderUI({
+              if (show_ui() & !is.null(input$ds_ras_elements)) { 
+                
+                # match given element to valid raster layers
+                matching_layers <- grep(paste0("^", vstore[["ds_ras_elements"]]), names(preview_raster), value = TRUE)
+                
+                # extract valid time periods for given element
+                time_periods <- c()
+                for (layer in matching_layers) {
+                  time_periods <- c(time_periods, climr::variables[Code == layer, Time])
+                }
+                
+                # remove duplicates
+                time_periods <- unique(time_periods)
+                
+                shiny::radioButtons(
+                  inputId = "ds_ras_time_periods",
+                  label = h5("Choose time period of raster:",
+                             prompter::add_prompt(
+                               tooltipsIcon,
+                               message = HTML(paste("Shows the time periods for downscaled raster layers. Choose a time period for the layer you would like to preview on the map.")),
+                               position = "top",
+                               size = "large",
+                               shadow = FALSE
+                             )
+                  ),
+                  width = "100%",
+                  inline = TRUE,
+                  choices = time_periods,
+                  selected = vstore[["ds_ras_time_periods"]]
+                )
+              } else {
+                NULL
+              }
+            })
+            
+            # reactive output for log transform button
+            output$log_transform <- shiny::renderUI({
+              if (!is.null(vstore[["ds_ras_elements"]]) & !is.null(vstore[["ds_ras_time_periods"]])) {
+                raster_layer <- climr::variables[Code_Element == vstore[["ds_ras_elements"]] & Time == vstore[["ds_ras_time_periods"]], Code]
+                variable_type <- climr::variables[Code == raster_layer, Type]
+                if (show_ui() & variable_type == "ratio") {
+                  shiny::checkboxInput(
+                    inputId = "log_scale",
+                    label = "Apply log transform to raster preview",
+                    value = vstore[["log_transform_raster"]],
+                    width = "100%"
+                  )
+                }
               }
             })
           }

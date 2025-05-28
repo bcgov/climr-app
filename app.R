@@ -1260,6 +1260,7 @@ shiny::shinyApp(
     shiny::observeEvent(input$preview_raster, {
       if (shiny::in_devmode()) cat("Event: downscale_raster_preview", sep = "\n")
       if (vstore[["downscale_output"]] == "tif") {
+        
         # clear previous raster and legend
         if (!is.null(vstore[["downscale_raster_preview"]])) {
           leaflet::removeImage(mp, "rast_layer")
@@ -1267,76 +1268,56 @@ shiny::shinyApp(
         }
         
         # concatenate raster layer preview
-        time_mapping <- c(
-          "01" = "January", "02" = "February", "03" = "March",
-          "04" = "April", "05" = "May", "06" = "June",
-          "07" = "July", "08" = "August", "09" = "September",
-          "10" = "October", "11" = "November", "12" = "December",
-          "sp" = "Spring", "sm" = "Summer", "at" = "Autumn", "wt" = "Winter"
-        )
-        time_code <- names(time_mapping)[time_mapping == vstore[["ds_ras_time_periods"]]]
-        
-        raster_layer <- paste(vstore[["ds_ras_elements"]], time_code, sep = "_")
-        if (!raster_layer %in% names(preview_raster)) {
-          showModal(
-            modalDialog(
-              title = "Warning",
-              paste("Please make sure you have selected a valid raster layer." ),
-              easyClose = TRUE
-            )
-          )
-        } else {
-          update_vstore_and_notify("downscale_raster_preview", raster_layer, "Preview raster")
-  
-          # extract data for legend
-          legend_title <- climr::variables[Code == raster_layer, Variable]
-          if (grepl("\\u00b0C", legend_title)) {
-            legend_title <- stringi::stri_unescape_unicode(legend_title)
-          }
-          units <- climr::variables[Code == raster_layer, Unit]
-          if (grepl("\\u00b0C", units)) {
-            units <- stringi::stri_unescape_unicode(units)
-          }
-          ## NEED SOMETHING HERE TO FIX % UNITS
-          variable_type <- climr::variables[Code == raster_layer, Type]
-          if (variable_type == "ratio" & vstore[["log_transform_raster"]] == TRUE) {
-            # log transform
-            raster_layer_values <- log2(preview_raster[[raster_layer]] + 1)
-          } else if (vstore[["log_transform_raster"]] == TRUE) {
-            # log transform
-            raster_layer_values <- log2(preview_raster[[raster_layer]] + 1)
-          } else {
-            raster_layer_values <- preview_raster[[raster_layer]]
-          }
-          
-          # set palettes
-          col_scheme <- if (grepl("PPT", raster_layer)) {
-            RColorBrewer::brewer.pal(9, "YlGnBu")
-          } else {
-            rev(RColorBrewer::brewer.pal(11, "RdYlBu"))
-          }
-          pal <- colorNumeric(
-            palette = col_scheme,
-            domain = values(raster_layer_values)
-          )
-          
-          # add raster image
-          leaflet::addRasterImage(mp, raster_layer_values, layerId = "rast_layer", colors = pal)
-          
-          # label formatter for legend
-          inv_log2_formatter <- labelFormat(
-            transform = function(x) round((2^x) - 1),  # inverse of log2(x + 1)
-            suffix = units
-          )
-          
-          # add legend
-          leaflet::addLegend(mp, pal = pal, values = values(raster_layer_values), title = legend_title, labFormat = if (vstore[["log_transform_raster"]]) inv_log2_formatter else labelFormat(suffix = units))
+        raster_layer <- climr::variables[Code_Element == vstore[["ds_ras_elements"]] & Time == vstore[["ds_ras_time_periods"]], Code]
+      
+        update_vstore_and_notify("downscale_raster_preview", raster_layer, "Preview raster")
+
+        # extract data for legend
+        legend_title <- climr::variables[Code == raster_layer, Variable] |> tools::toTitleCase()
+        if (grepl("\\u00b0C", legend_title)) {
+          legend_title <- stringi::stri_unescape_unicode(legend_title)
         }
+        units <- climr::variables[Code == raster_layer, Unit]
+        if (grepl("\\u00b0C", units)) {
+          units <- stringi::stri_unescape_unicode(units)
+        }
+        ## NEED SOMETHING HERE TO FIX % UNITS
+        variable_type <- climr::variables[Code == raster_layer, Type]
+        if (variable_type == "ratio" & vstore[["log_transform_raster"]] == TRUE) {
+          # log transform
+          raster_layer_values <- log2(preview_raster[[raster_layer]] + 1)
+        } else {
+          raster_layer_values <- preview_raster[[raster_layer]]
+        }
+        
+        # set palettes
+        col_scheme <- if (grepl("PPT", raster_layer)) {
+          RColorBrewer::brewer.pal(9, "YlGnBu")
+        } else {
+          rev(RColorBrewer::brewer.pal(11, "RdYlBu"))
+        }
+        pal <- colorNumeric(
+          palette = col_scheme,
+          domain = values(raster_layer_values),
+          na.color = "transparent"
+        )
+        
+        # add raster image
+        leaflet::addRasterImage(mp, raster_layer_values, layerId = "rast_layer", colors = pal)
+        
+        # label formatters for legend
+        inv_log2_formatter <- labelFormat(
+          transform = function(x) round((2^x) - 1),  # inverse of log2(x + 1)
+          suffix = units
+        )
+        
+        # add legend
+        leaflet::addLegend(mp, pal = pal, values = values(raster_layer_values), title = legend_title, labFormat = if (vstore[["log_transform_raster"]] & variable_type == "ratio") inv_log2_formatter else labelFormat(suffix = units))
       }
     })
     
     # reactive output for selecting Observed Years
-    output$observed_years_radio <- renderUI({
+    output$observed_years_radio <- shiny::renderUI({
       if (input$observed_years_radio == "Yes") {
         if ("NULL" %in% vstore$downscale_obs_years) {
           date_range_preset <- c(min(climr::list_obs_years()):max(climr::list_obs_years()))
@@ -1368,7 +1349,7 @@ shiny::shinyApp(
     })
     
     # reactive output for selecting GCM Years
-    output$gcm_years_radio <- renderUI({
+    output$gcm_years_radio <- shiny::renderUI({
       if (input$gcm_years_radio == "Yes") {
         if ("NULL" %in% vstore$downscale_gcm_years) {
           date_range_preset <- c(min(climr::list_gcm_hist_years()):(max(climr::list_gcm_hist_years())-100))
@@ -1403,7 +1384,7 @@ shiny::shinyApp(
     })
     
     # reactive output for selecting a custom package for extra climate variables
-    output$downscale_extra_vars_custom <- renderUI({
+    output$downscale_extra_vars_custom <- shiny::renderUI({
       if ("Custom" %in% input$downscale_extra_vars_packages) {
         accordion(
           id = "climate_vars_acc",
