@@ -582,14 +582,16 @@ session_geometry <- function(sg_dt) {
             output$log_transform <- shiny::renderUI({
               if (!is.null(vstore[["ds_ras_elements"]]) & !is.null(vstore[["ds_ras_time_periods"]])) {
                 raster_layer <- climr::variables[Code_Element == vstore[["ds_ras_elements"]] & Time == vstore[["ds_ras_time_periods"]], Code]
-                variable_type <- climr::variables[Code == raster_layer, Type]
-                if (show_ui() & variable_type == "ratio") {
-                  shiny::checkboxInput(
-                    inputId = "log_scale",
-                    label = "Apply log transform to raster preview",
-                    value = vstore[["log_transform_raster"]],
-                    width = "100%"
-                  )
+                variable_type <- climr::variables[Code %in% raster_layer, Type]
+                if (length(variable_type) != 0) {
+                  if (show_ui() & variable_type == "ratio") {
+                    shiny::checkboxInput(
+                      inputId = "log_scale",
+                      label = "Apply log transform to raster preview",
+                      value = vstore[["log_transform_raster"]],
+                      width = "100%"
+                    )
+                  }
                 }
               }
             })
