@@ -904,7 +904,7 @@ shiny::shinyApp(
     # max model runs
     shiny::observeEvent(input$downscale_ensemble_mean, {
       if (shiny::in_devmode()) cat("Event: downscale_ensemble_mean", sep = "\n")
-      update_vstore_and_notify("downscale_ensemble_mean", input$downscale_ensemble_mean, "Ensemble mean")
+      update_vstore_and_notify("downscale_ensemble_mean", as.logical(input$downscale_ensemble_mean), "Ensemble mean")
     })
     shiny::observeEvent(input$downscale_max_run, {
       if (shiny::in_devmode()) cat("Event: downscale_max_run", sep = "\n")
@@ -1095,6 +1095,7 @@ shiny::shinyApp(
             shiny::modalDialog(
               title = "Preferences for Downscale Processing", size = "l",
               shiny::div(
+                # uiOutput("downscale_output_buttons")
                 shiny::radioButtons(
                   inputId = "downscale_output",
                   label = h5("Choose downscale output format:",
@@ -1114,7 +1115,7 @@ shiny::shinyApp(
               shiny::div(
                 shiny::sliderInput(
                   inputId = "downscale_resolution",
-                  label = h5("Downscale Resolution (m)",
+                  label = h5("Choose downscale resolution (m):",
                              prompter::add_prompt(
                                tooltipsIcon,
                                message = HTML(paste("Target resolution for shapes drawn on map or added using file upload. Does not apply to points, raster or csv files.")),
@@ -1373,6 +1374,44 @@ shiny::shinyApp(
         )
       }
     })
+    
+    # # reactive output for outputs options
+    # output$downscale_output_buttons <- shiny::renderUI({
+    #   if ("marker" %in% (sg_dt$dt)$group) {
+    #     shiny::radioButtons(
+    #       inputId = "downscale_output",
+    #       label = h5("Choose downscale output format:",
+    #                  prompter::add_prompt(
+    #                    tooltipsIcon,
+    #                    message = HTML(paste("tif: Shapes/rasters are returned as GeoTIFF. csv: all points are returned in csv.")),
+    #                    position = "top",
+    #                    size = "large",
+    #                    shadow = FALSE
+    #                  )
+    #       ),
+    #       choices = c("Comma Separated Value (csv)" = "csv"),
+    #       inline = TRUE,
+    #       selected = vstore[["downscale_output"]]
+    #     )
+    #   } if ("shape" %in% (sg_dt$dt)$group) {
+    #     shiny::radioButtons(
+    #       inputId = "downscale_output",
+    #       label = h5("Choose downscale output format:",
+    #                  prompter::add_prompt(
+    #                    tooltipsIcon,
+    #                    message = HTML(paste("tif: Shapes/rasters are returned as GeoTIFF. csv: all points are returned in csv.")),
+    #                    position = "top",
+    #                    size = "large",
+    #                    shadow = FALSE
+    #                  )
+    #       ),
+    #       choices = c("Geographic Tag Image File Format (GeoTIFF)" = "tif", "Comma Separated Value (csv)" = "csv"),
+    #       inline = TRUE,
+    #       selected = vstore[["downscale_output"]]
+    #     )
+    #   }
+    # })
+    
   }
 )
 
