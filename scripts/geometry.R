@@ -481,11 +481,7 @@ session_geometry <- function(sg_dt) {
               if (show_ui()) {
                 
                 # split raster previews
-                elements <- c()
-                # time_periods <- c()
-                for (var in names(preview_raster)) {
-                  elements <- c(elements, climr::variables[Code == var, Code_Element])
-                }
+                elements <- climr::variables[Code %in% names(preview_raster), Code_Element] |> as.character()
                 
                 # remove duplicates
                 elements <- unique(elements)
@@ -508,33 +504,6 @@ session_geometry <- function(sg_dt) {
                     selected = vstore[["ds_ras_elements"]]
                   ),
                   uiOutput("preview_raster_periods"),
-                  # accordion(
-                  #   accordion_panel(
-                  #     title = h5("Raster Elements:"),
-                  #     value = "preview_acc1",
-                  #     shiny::radioButtons(
-                  #       inputId = "ds_ras_elements",
-                  #       label = h5("Choose element of raster:",
-                  #                  prompter::add_prompt(
-                  #                    tooltipsIcon,
-                  #                    message = HTML(paste("Shows the elements for downscaled raster layers. Choose a element for the layer you would like to preview on the map.")),
-                  #                    position = "top",
-                  #                    size = "large",
-                  #                    shadow = FALSE
-                  #                  )
-                  #       ),
-                  #       width = "100%",
-                  #       inline = TRUE,
-                  #       choices = elements,
-                  #       selected = vstore[["ds_ras_elements"]]
-                  #     )
-                  #   ),
-                  #   accordion_panel(
-                  #     title = h5("Raster Time Periods:"),
-                  #     value = "preview_acc2",
-                  #     uiOutput("preview_raster_periods")
-                  #   ),
-                  # ),
                   shiny::div(
                     uiOutput("log_transform")
                   ),
@@ -565,10 +534,7 @@ session_geometry <- function(sg_dt) {
                 matching_layers <- grep(paste0("^", vstore[["ds_ras_elements"]]), names(preview_raster), value = TRUE)
                 
                 # extract valid time periods for given element
-                time_periods <- c()
-                for (layer in matching_layers) {
-                  time_periods <- c(time_periods, climr::variables[Code == layer & Time %in% vstore[["downscale_custom_time_periods"]], Time])
-                }
+                time_periods <- climr::variables[Code %in% matching_layers & Time %in% vstore[["downscale_custom_time_periods"]], Time]
                 
                 # remove duplicates
                 time_periods <- unique(time_periods)
