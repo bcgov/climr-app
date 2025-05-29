@@ -341,7 +341,6 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
       obs_years  = vstore[["downscale_obs_years"]] |> n(),
       obs_ts_dataset = vstore[["downscale_obs_ts_dataset"]] |> n(),
       return_refperiod = vstore[["downscale_return_refperiod"]],
-      # return_refperiod = FALSE, # use for debugging with old app script
       gcms = vstore[["downscale_gcms"]] |> n(),
       ssps = vstore[["downscale_ssps"]] |> n(),
       gcm_periods = vstore[["downscale_gcm_periods"]] |> n(),
@@ -350,7 +349,8 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
       ensemble_mean = vstore[["downscale_ensemble_mean"]] |> n(),
       max_run = vstore[["downscale_max_run"]] |> n() |> as.integer(),
       run_nm = vstore[["downscale_run_nm"]] |> n(),
-      vars = c(downscale_core_vars, vstore[["downscale_extra_vars"]] |> n(), vstore[["downscale_extra_vars_custom_monthly"]] |> n(), vstore[["downscale_extra_vars_custom_seasonal"]] |> n(), vstore[["downscale_extra_vars_custom_annual"]] |> n()),
+      # vars = c(downscale_core_vars, vstore[["downscale_extra_vars"]] |> n(), vstore[["downscale_extra_vars_custom_monthly"]] |> n(), vstore[["downscale_extra_vars_custom_seasonal"]] |> n(), vstore[["downscale_extra_vars_custom_annual"]] |> n()),
+      vars = c(vstore[["downscale_extra_vars"]] |> n()),
       ppt_lr = vstore[["downscale_core_ppt_lr"]]
     )
   }

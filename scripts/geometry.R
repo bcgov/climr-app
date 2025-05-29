@@ -465,10 +465,11 @@ session_geometry <- function(sg_dt) {
               
               dt <- head(read.csv(output_files))
               
-              # NEED TO FIGURE OUT HOW TO HAVE CAPTION AT TOP LIKE A TITLE
-              
               DT::datatable(dt, rownames = FALSE, escape = FALSE, options = list(
-                dom = 't', scrollX = TRUE), caption = "Preview of Downscaled Data")
+                dom = 't', scrollX = TRUE),   caption = htmltools::tags$caption(
+                  style = 'caption-side: top; text-align: left; color: black; font-weight: bold;',
+                  'Preview of Downscaled Data:'
+                ))
             })
           } else if (tools::file_ext(output_files) == "tif") {
             
@@ -484,41 +485,56 @@ session_geometry <- function(sg_dt) {
                 # time_periods <- c()
                 for (var in names(preview_raster)) {
                   elements <- c(elements, climr::variables[Code == var, Code_Element])
-                  # time_periods <- c(time_periods, climr::variables[Code == var, Time])
                 }
                 
                 # remove duplicates
                 elements <- unique(elements)
                 
                 shiny::div(
-                  h5("Choose raster layer to preview:"),
-                  accordion(
-                    accordion_panel(
-                      title = h5("Raster Elements:"),
-                      value = "preview_acc1",
-                      shiny::radioButtons(
-                        inputId = "ds_ras_elements",
-                        label = h5("Choose element of raster:",
-                                   prompter::add_prompt(
-                                     tooltipsIcon,
-                                     message = HTML(paste("Shows the elements for downscaled raster layers. Choose a element for the layer you would like to preview on the map.")),
-                                     position = "top",
-                                     size = "large",
-                                     shadow = FALSE
-                                   )
-                        ),
-                        width = "100%",
-                        inline = TRUE,
-                        choices = elements,
-                        selected = vstore[["ds_ras_elements"]]
-                      )
+                  shiny::radioButtons(
+                    inputId = "ds_ras_elements",
+                    label = h5("Choose element of raster to preview:",
+                               prompter::add_prompt(
+                                 tooltipsIcon,
+                                 message = HTML(paste("Shows the elements for downscaled raster layers. Choose a element for the layer you would like to preview on the map.")),
+                                 position = "top",
+                                 size = "large",
+                                 shadow = FALSE
+                               )
                     ),
-                    accordion_panel(
-                      title = h5("Raster Time Periods:"),
-                      value = "preview_acc2",
-                      uiOutput("preview_raster_periods")
-                    ),
+                    width = "100%",
+                    inline = TRUE,
+                    choices = elements,
+                    selected = vstore[["ds_ras_elements"]]
                   ),
+                  uiOutput("preview_raster_periods"),
+                  # accordion(
+                  #   accordion_panel(
+                  #     title = h5("Raster Elements:"),
+                  #     value = "preview_acc1",
+                  #     shiny::radioButtons(
+                  #       inputId = "ds_ras_elements",
+                  #       label = h5("Choose element of raster:",
+                  #                  prompter::add_prompt(
+                  #                    tooltipsIcon,
+                  #                    message = HTML(paste("Shows the elements for downscaled raster layers. Choose a element for the layer you would like to preview on the map.")),
+                  #                    position = "top",
+                  #                    size = "large",
+                  #                    shadow = FALSE
+                  #                  )
+                  #       ),
+                  #       width = "100%",
+                  #       inline = TRUE,
+                  #       choices = elements,
+                  #       selected = vstore[["ds_ras_elements"]]
+                  #     )
+                  #   ),
+                  #   accordion_panel(
+                  #     title = h5("Raster Time Periods:"),
+                  #     value = "preview_acc2",
+                  #     uiOutput("preview_raster_periods")
+                  #   ),
+                  # ),
                   shiny::div(
                     uiOutput("log_transform")
                   ),
@@ -551,7 +567,7 @@ session_geometry <- function(sg_dt) {
                 # extract valid time periods for given element
                 time_periods <- c()
                 for (layer in matching_layers) {
-                  time_periods <- c(time_periods, climr::variables[Code == layer, Time])
+                  time_periods <- c(time_periods, climr::variables[Code == layer & Time %in% vstore[["downscale_custom_time_periods"]], Time])
                 }
                 
                 # remove duplicates
@@ -559,7 +575,7 @@ session_geometry <- function(sg_dt) {
                 
                 shiny::radioButtons(
                   inputId = "ds_ras_time_periods",
-                  label = h5("Choose time period of raster:",
+                  label = h5("Choose time period of raster to preview:",
                              prompter::add_prompt(
                                tooltipsIcon,
                                message = HTML(paste("Shows the time periods for downscaled raster layers. Choose a time period for the layer you would like to preview on the map.")),

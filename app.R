@@ -15,6 +15,7 @@ suppressPackageStartupMessages({
   library(climr)
   library(zip)
   library(plotly)
+  library(dplyr)
   source("scripts/utils.R", local = TRUE)
 })
 
@@ -207,7 +208,7 @@ shiny::shinyApp(
             ),
             br(),
             shiny::actionButton("downscale_parameters", "Choose Downscale Parameters",
-                                style = "width:100%", disabled = TRUE),
+                                disabled = TRUE, icon = icon("sliders-h"), style = "width:100%; align:center;"),
             
             br(), br(),
             
@@ -295,8 +296,8 @@ shiny::shinyApp(
     
     downscale_default <- list(
       downscale_which_refmap = "refmap_climr",
-      downscale_obs_periods_checkboxes = "2001_2020",
-      downscale_obs_periods = "2001_2020",
+      downscale_obs_periods_checkboxes = "1961_1990",
+      downscale_obs_periods = "NULL", ## BUGGY - NEED TO SELECT 2001_2020 TO RUN ##
       downscale_obs_years_checkbox = FALSE,
       downscale_obs_years = "NULL",
       downscale_obs_ts_dataset = "NULL",
@@ -310,13 +311,12 @@ shiny::shinyApp(
       downscale_ensemble_mean = TRUE,
       downscale_max_run = 0,
       downscale_run_nm = "NULL",
-      downscale_extra_vars_packages = "NULL",
-      downscale_extra_vars = "NULL",
-      downscale_extra_vars_custom_monthly = "NULL",
-      downscale_extra_vars_custom_seasonal = "NULL",
-      downscale_extra_vars_custom_annual = "NULL",
+      downscale_extra_vars = downscale_core_vars,
+      downscale_extra_vars_sets = "NULL",
+      downscale_custom_elements = "NULL",
+      downscale_custom_time_periods = "NULL",
       downscale_core_ppt_lr = FALSE,
-      downscale_return_refperiod = FALSE
+      downscale_return_refperiod = TRUE
     )
     
     vstore <- reactiveValues(
@@ -340,11 +340,10 @@ shiny::shinyApp(
       downscale_ensemble_mean = downscale_default[["downscale_ensemble_mean"]],
       downscale_max_run = downscale_default[["downscale_max_run"]],
       downscale_run_nm = downscale_default[["downscale_run_nm"]],
-      downscale_extra_vars_packages = downscale_default[["downscale_extra_vars_packages"]],
+      downscale_extra_vars_sets = downscale_default[["downscale_extra_vars_sets"]],
+      downscale_custom_elements = downscale_default[["downscale_custom_elements"]],
+      downscale_custom_time_periods = downscale_default[["downscale_custom_time_periods"]],
       downscale_extra_vars = downscale_default[["downscale_extra_vars"]],
-      downscale_extra_vars_custom_monthly = downscale_default[["downscale_extra_vars_custom_monthly"]],
-      downscale_extra_vars_custom_seasonal = downscale_default[["downscale_extra_vars_custom_seasonal"]],
-      downscale_extra_vars_custom_annual = downscale_default[["downscale_extra_vars_custom_annual"]],
       downscale_core_ppt_lr = downscale_default[["downscale_core_ppt_lr"]],
       downscale_return_refperiod = downscale_default[["downscale_return_refperiod"]],
       downscale_output = "csv",
@@ -504,7 +503,7 @@ shiny::shinyApp(
               shiny::div(
                 shiny::checkboxInput(
                   inputId = "observed_years_checkbox",
-                  label = tags$span("Specify Observed Years", style = "font-size: 0.9em; font-weight: bold;"),
+                  label = tags$span("Specify Observed Years", style = "font-size: 0.85em; font-weight: bold;"),
                   value = vstore[["downscale_obs_years_checkbox"]],
                   width = "100%"
                 )
@@ -573,17 +572,11 @@ shiny::shinyApp(
                   selected = vstore[["downscale_gcm_periods"]]
                 )
               ),
+              br(),
               shiny::div(
-                # shiny::radioButtons(
-                #   inputId = "gcm_years_radio",
-                #   label = h5("Would you like to specify GCM years?"),
-                #   choices = c("Yes", "No"),
-                #   selected = vstore[["downscale_gcm_years_radio"]],
-                #   width = "100%"
-                # ),
                 shiny::checkboxInput(
                   inputId = "gcm_years_checkbox",
-                  label = tags$span("Specify GCM Years", style = "font-size: 0.9em; font-weight: bold;"),
+                  label = tags$span("Specify GCM Years", style = "font-size: 0.85em; font-weight: bold;"),
                   value = vstore[["downscale_gcm_years_checkbox"]],
                   width = "100%"
                 )
@@ -593,19 +586,33 @@ shiny::shinyApp(
               uiOutput("gcm_years_checkbox"),
               
               shiny::div(
-                shiny::radioButtons(
+                shiny::checkboxInput(
                   inputId = "downscale_ensemble_mean",
-                  label = h5("Use ensemble mean for maxinum number of model runs to include?"),
-                  width = "100%",
-                  choices = c("Yes" = TRUE, "No" = FALSE),
-                  inline = TRUE,
-                  selected = vstore[["downscale_ensemble_mean"]]
+                  label = tags$span("Use ensemble mean", style = "font-size: 0.85em; font-weight: bold;",
+                                    prompter::add_prompt(
+                                      tooltipsIcon,
+                                      message = HTML(paste("Something helpful about ensemble mean.")),
+                                      position = "top",
+                                      size = "large",
+                                      shadow = FALSE
+                                    )
+                  ),
+                  value = vstore[["downscale_ensemble_mean"]],
+                  width = "100%"
                 )
               ),
               shiny::div(
                 shiny::numericInput(
                   inputId = "downscale_max_run",
-                  label = h5("Choose maximum number of model runs:"),
+                  label = h5("Choose maximum number of model runs:",
+                             prompter::add_prompt(
+                               tooltipsIcon,
+                               message = HTML(paste("More helpful things about model runs... Make sure to mention that 0 defaults to using ensemble mean.")),
+                               position = "top",
+                               size = "large",
+                               shadow = FALSE
+                             )
+                  ),
                   value = vstore[["downscale_max_run"]],
                   width = "100%",
                   min = 0,
@@ -641,11 +648,11 @@ shiny::shinyApp(
           
           shiny::div(
             shiny::checkboxGroupInput(
-              inputId = "downscale_extra_vars_packages",
+              inputId = "downscale_extra_vars_sets",
               label = h5("Choose extra climate variables:",
                          prompter::add_prompt(
                            tooltipsIcon,
-                           message = HTML(paste("Extra climate variables to compute. Select a package which contains all variables of that category, and/or create a custom package. Defaults to monthly PPT, Tmax, Tmin if not specified.")),
+                           message = HTML(paste("Extra climate variables to compute. Select a set which contains all variables of that category, and/or create a custom set. Defaults to monthly PPT, Tmax, Tmin if not specified.")),
                            position = "top",
                            size = "large",
                            shadow = FALSE
@@ -653,7 +660,7 @@ shiny::shinyApp(
               ),
               width = "100%",
               choices = c("Monthly", "Seasonal", "Annual", "Custom"),
-              selected = vstore[["downscale_extra_vars_packages"]],
+              selected = vstore[["downscale_extra_vars_sets"]],
               inline = TRUE
               ),
             uiOutput("downscale_extra_vars_custom")
@@ -663,7 +670,15 @@ shiny::shinyApp(
           shiny::div(
             shiny::checkboxInput(
               inputId = "downscale_core_ppt_lr",
-              label = "Apply elevation adjustment to precipitation values during downscaling",
+              label = tags$span("Apply elevation adjustment to precipitation values during downscaling", style = "font-size: 0.85em; font-weight: bold;",
+                          prompter::add_prompt(
+                            tooltipsIcon,
+                            message = HTML(paste("Elevation adjustments are cool, but why??")),
+                            position = "top",
+                            size = "large",
+                            shadow = FALSE
+                          )
+              ),
               value = vstore[["downscale_core_ppt_lr"]],
               width = "100%"
             )
@@ -671,11 +686,16 @@ shiny::shinyApp(
           footer = shiny::tagList(
             shiny::actionButton(
               inputId = "downscale_reset",
-              label = "Reset",
-              class = "btn btn-warning"
+              label = "Reset"
             ),           
-            shiny::modalButton("Close")
-          )
+            shiny::actionButton(
+              inputId = "downscale_apply",
+              label = "Apply",
+              style = "background-color:#1d8f0e; color: #FFF",
+              icon = icon("check")
+            ), 
+          ),
+          easyClose = TRUE
         )
       )
     }
@@ -709,6 +729,11 @@ shiny::shinyApp(
         )
       }
     
+    })
+    
+    # roll all downscale params updates into this observe???
+    shiny::observeEvent(input$downscale_apply, {
+      removeModal()
     })
     
     update_vstore_and_notify <- function(vstore_key, input_value, msg_format) {
@@ -784,9 +809,9 @@ shiny::shinyApp(
     # observed years
     shiny::observeEvent(input$observed_years_checkbox,{
       if (shiny::in_devmode()) cat("Event: downscale_obs_years_checkbox", sep = "\n")
-      update_vstore_and_notify("downscale_obs_years_checkbox", input$observed_years_checkbox, "Obs radios")
+      update_vstore_and_notify("downscale_obs_years_checkbox", input$observed_years_checkbox, "Obs checkbox")
       
-      if (input$observed_years_checkbox == "No") {
+      if (input$observed_years_checkbox == FALSE) {
         update_vstore_and_notify("downscale_obs_years", "NULL", "Obs years")
       }
     })
@@ -856,9 +881,9 @@ shiny::shinyApp(
     # GCM years
     shiny::observeEvent(input$gcm_years_checkbox, {
       if (shiny::in_devmode()) cat("Event: downscale_gcm_years_checkbox", sep = "\n")
-      update_vstore_and_notify("downscale_gcm_years_checkbox", input$gcm_years_checkbox, "GCM radios")
+      update_vstore_and_notify("downscale_gcm_years_checkbox", input$gcm_years_checkbox, "GCM checkbox")
       
-      if (input$gcm_years_checkbox == "No") {
+      if (input$gcm_years_checkbox == FALSE) {
         update_vstore_and_notify("downscale_gcm_years", "NULL", "GCM years")
         update_vstore_and_notify("downscale_gcm_hist_years", "NULL", "GCM hist years")
         update_vstore_and_notify("downscale_gcm_ssp_years", "NULL", "GCM SSP years")
@@ -904,39 +929,52 @@ shiny::shinyApp(
     #   update_vstore_and_notify("downscale_run_nm", input$downscale_run_nm, "Run name")
     # })
     
-    # extra climate variables packages - still buggy, the custom variables are not resetting to when Custom is removed
+    # extra climate variables sets - still buggy, the custom variables are not resetting to when Custom is removed
     extra_var_handler <- function() {
       # get old and new selections
-      old <- vstore[["downscale_extra_vars_packages"]]
-      new <- input$downscale_extra_vars_packages
+      old <- vstore[["downscale_extra_vars_sets"]]
+      new <- input$downscale_extra_vars_sets
       
       # determine what was added and what was removed
       added <- setdiff(new, old)
       removed <- setdiff(old, new)
       
       # add new variables
-      update_vstore_and_notify("downscale_extra_vars_packages", input$downscale_extra_vars_packages, "Package")
+      update_vstore_and_notify("downscale_extra_vars_sets", input$downscale_extra_vars_sets, "Set")
       
+      # default core variables handling - SOMETHING WEIRD HERE, THEY'RE BEING REMOVED 3 TIMES
+      if (!is.null(input$downscale_extra_vars_sets)) {
+        remove_from_vstore("downscale_extra_vars", downscale_core_vars, "Removed default core vars")
+      } else {
+        update_vstore_and_notify("downscale_extra_vars", downscale_core_vars, "Core variables")
+      }
+
       # handle added variables
       if ("Monthly" %in% added) {
-        update_vstore_and_notify("downscale_extra_vars", downscale_extra_vars$Monthly, "Monthly vars")
+        monthly_vars <- climr::variables %>% filter(Category == "Monthly") %>% pull(Code)
+        update_vstore_and_notify("downscale_extra_vars", monthly_vars, "Monthly vars")
       }
       if ("Seasonal" %in% added) {
-        update_vstore_and_notify("downscale_extra_vars", downscale_extra_vars$Seasonal, "Seasonal vars")
+        seasonal_vars <- climr::variables %>% filter(Category == "Seasonal") %>% pull(Code)
+        update_vstore_and_notify("downscale_extra_vars", seasonal_vars, "Seasonal vars")
       }
       if ("Annual" %in% added) {
-        update_vstore_and_notify("downscale_extra_vars", downscale_extra_vars$Annual, "Annual vars")
+        annual_vars <- climr::variables %>% filter(Category == "Annual") %>% pull(Code)
+        update_vstore_and_notify("downscale_extra_vars", annual_vars, "Annual vars")
       }
       
       # handle removed variables
       if ("Monthly" %in% removed) {
-        remove_from_vstore("downscale_extra_vars", downscale_extra_vars$Monthly, "Removed Monthly vars")
+        monthly_vars <- climr::variables %>% filter(Category == "Monthly") %>% pull(Code)
+        remove_from_vstore("downscale_extra_vars", monthly_vars, "Removed Monthly vars")
       }
       if ("Seasonal" %in% removed) {
-        remove_from_vstore("downscale_extra_vars", downscale_extra_vars$Seasonal, "Removed Seasonal vars")
+        seasonal_vars <- climr::variables %>% filter(Category == "Seasonal") %>% pull(Code)
+        remove_from_vstore("downscale_extra_vars", seasonal_vars, "Removed Seasonal vars")
       }
       if ("Annual" %in% removed) {
-        remove_from_vstore("downscale_extra_vars", downscale_extra_vars$Annual, "Removed Annual vars")
+        annual_vars <- climr::variables %>% filter(Category == "Annual") %>% pull(Code)
+        remove_from_vstore("downscale_extra_vars", annual_vars, "Removed Annual vars")
       }
       if ("Custom" %in% removed) {
         # reset all vars to defaults
@@ -944,56 +982,45 @@ shiny::shinyApp(
           vstore[[x]] <- "NULL"
         })
       }
+      
     }
-    shiny::observeEvent(input$downscale_extra_vars_packages, {
-      if (shiny::in_devmode()) cat("Event: downscale_extra_vars_packages", sep = "\n")
-      extra_var_handler()
-    })
+    # shiny::observeEvent(input$downscale_extra_vars_sets, {
+    #   if (shiny::in_devmode()) cat("Event: downscale_extra_vars_sets", sep = "\n")
+    #   extra_var_handler()
+    # })
     shiny::observe({
-      vstore[["downscale_extra_vars_packages"]]
+      vstore[["downscale_extra_vars_sets"]]
       extra_var_handler()
-      shiny::updateCheckboxGroupInput(session = getDefaultReactiveDomain(),
-                        inputId = "downscale_extra_vars_packages",
-                        selected = vstore[["downscale_extra_vars_packages"]]
-                        
-      )
+      # shiny::updateCheckboxGroupInput(session = getDefaultReactiveDomain(),
+      #                   inputId = "downscale_extra_vars_sets",
+      #                   selected = vstore[["downscale_extra_vars_sets"]]
+      # 
+      # )
     })
     
     # extra climate variables custom selection - still buggy, the custom variables are not resetting to when Custom is removed
-    shiny::observeEvent(input$downscale_extra_vars_custom_monthly, {
-      if (shiny::in_devmode()) cat("Event: downscale_extra_vars_custom_monthly", sep = "\n")
-      update_vstore_and_notify("downscale_extra_vars_custom_monthly", input$downscale_extra_vars_custom_monthly, "Extra variables - monthly")
+    shiny::observeEvent(input$downscale_custom_elements, {
+      if (shiny::in_devmode()) cat("Event: downscale_custom_elements", sep = "\n")
+      update_vstore_and_notify("downscale_custom_elements", input$downscale_custom_elements, "Extra variables custom elements")
     })
     shiny::observe({
-      vstore[["downscale_extra_vars_custom_monthly"]]
-      update_vstore_and_notify("downscale_extra_vars_custom_monthly", input$downscale_extra_vars_custom_monthly, "Extra variables - monthly")
+      vstore[["downscale_custom_elements"]]
+      update_vstore_and_notify("downscale_custom_elements", input$downscale_custom_elements, "Extra variables custom elements")
       shiny::updateCheckboxGroupInput(session = getDefaultReactiveDomain(),
-                               inputId = "downscale_extra_vars_custom_monthly",
-                               selected = vstore[["downscale_extra_vars_custom_monthly"]]
+                               inputId = "downscale_custom_elements",
+                               selected = vstore[["downscale_custom_elements"]]
       )
     })
-    shiny::observeEvent(input$downscale_extra_vars_custom_seasonal, {
-      if (shiny::in_devmode()) cat("Event: downscale_extra_vars_custom_seasonal", sep = "\n")
-      update_vstore_and_notify("downscale_extra_vars_custom_seasonal", input$downscale_extra_vars_custom_seasonal, "Extra variables - seasonal")
+    shiny::observeEvent(input$downscale_custom_time_periods, {
+      if (shiny::in_devmode()) cat("Event: downscale_custom_time_periods", sep = "\n")
+      update_vstore_and_notify("downscale_custom_time_periods", input$downscale_custom_time_periods, "Extra variables custom time periods")
     })
     shiny::observe({
-      vstore[["downscale_extra_vars_custom_seasonal"]]
-      update_vstore_and_notify("downscale_extra_vars_custom_seasonal", input$downscale_extra_vars_custom_seasonal, "Extra variables - seasonal")
+      vstore[["downscale_custom_time_periods"]]
+      update_vstore_and_notify("downscale_custom_time_periods", input$downscale_custom_time_periods, "Extra variables custom time periods")
       shiny::updateCheckboxGroupInput(session = getDefaultReactiveDomain(),
-                               inputId = "downscale_extra_vars_custom_seasonal",
-                               selected = vstore[["downscale_extra_vars_custom_seasonal"]]
-      )
-    })
-    shiny::observeEvent(input$downscale_extra_vars_custom_annual, {
-      if (shiny::in_devmode()) cat("Event: downscale_extra_vars_custom_annual", sep = "\n")
-      update_vstore_and_notify("downscale_extra_vars_custom_annual", input$downscale_extra_vars_custom_annual, "Extra variables - annual")
-    })
-    shiny::observe({
-      vstore[["downscale_extra_vars_custom_annual"]]
-      update_vstore_and_notify("downscale_extra_vars_custom_annual", input$downscale_extra_vars_custom_annual, "Extra variables - annual")
-      shiny::updateCheckboxGroupInput(session = getDefaultReactiveDomain(),
-                               inputId = "downscale_extra_vars_custom_annual",
-                               selected = vstore[["downscale_extra_vars_custom_annual"]]
+                                      inputId = "downscale_custom_time_periods",
+                                      selected = vstore[["downscale_custom_time_periods"]]
       )
     })
     
@@ -1083,63 +1110,24 @@ shiny::shinyApp(
           shiny::showModal(
             shiny::modalDialog(
               title = "Preferences for Downscale Processing", size = "l",
-              shiny::div(
-                uiOutput("downscale_output_buttons")
-                # shiny::radioButtons(
-                #   inputId = "downscale_output",
-                #   label = h5("Choose downscale output format:",
-                #              prompter::add_prompt(
-                #                tooltipsIcon,
-                #                message = HTML(paste("tif: Shapes/rasters are returned as GeoTIFF. csv: all points are returned in csv.")),
-                #                position = "top",
-                #                size = "large",
-                #                shadow = FALSE
-                #              )
-                #   ),
-                #   choices = c("Geographic Tag Image File Format (GeoTIFF)" = "tif", "Comma Separated Value (csv)" = "csv"),
-                #   inline = TRUE,
-                #   selected = vstore[["downscale_output"]]
-                # )
-              ),
-              shiny::div(
-                shiny::sliderInput(
-                  inputId = "downscale_resolution",
-                  label = h5("Choose downscale resolution (m):",
-                             prompter::add_prompt(
-                               tooltipsIcon,
-                               message = HTML(paste("Target resolution for shapes drawn on map or added using file upload. Does not apply to points, raster or csv files.")),
-                               position = "top",
-                               size = "large",
-                               shadow = FALSE
-                             )
-                  ),
-                  value = vstore[["downscale_resolution"]],
-                  width = "100%",
-                  min = 250,
-                  max = 10000,
-                  step = 50,
-                  post = "m",
-                  ticks = FALSE
-                )
-              ),
+              shiny::uiOutput("downscale_output_buttons"),
               shiny::uiOutput("downscale_points_count_estimate"),
               shiny::actionButton(
                 inputId = "downscale_process_launch",
                 label = "Launch Downscale Process",
-                title = "Trigger a downscale processing run. At the end of the run, the download button on the main control panel will be enabled.",
                 class = "btn btn-primary btn-lg",
                 icon = shiny::icon("play"),
                 width = "100%"
               ),
-              br(), br(),
               
               # preview for csv results
               DT::DTOutput("preview_table", width = "100%"),
               
+              br(),
+              
               shiny::downloadButton(
                 outputId = "downscale_download",
                 label = "Download Downscaled Data",
-                title = "Download downscaled geographies archive",
                 style = "width: 100%;"
               ),
             )
@@ -1177,6 +1165,11 @@ shiny::shinyApp(
     shiny::observeEvent(input$downscale_process_launch, {
       if (shiny::in_devmode()) cat("Event: downscale_process_launch", sep = "\n")
       if (vstore[["processing"]]) return()
+      
+      # concatenate custom extra climate variables
+      codes <- climr::variables[Code_Element %in% vstore[["downscale_custom_elements"]] & Time %in% vstore[["downscale_custom_time_periods"]], Code]
+      vstore[["downscale_extra_vars"]] <- unique(c(vstore[["downscale_extra_vars"]], codes))
+      
       sg$process()
       show_ui(TRUE)
     })
@@ -1212,7 +1205,7 @@ shiny::shinyApp(
         if (grepl("\\u00b0C", legend_title)) {
           legend_title <- stringi::stri_unescape_unicode(legend_title)
         }
-        units <- climr::variables[Code == raster_layer, Unit]
+        units <- paste0(" ", climr::variables[Code == raster_layer, Unit])
         if (grepl("\\u00b0C", units)) {
           units <- stringi::stri_unescape_unicode(units)
         }
@@ -1303,7 +1296,7 @@ shiny::shinyApp(
     output$gcm_years_checkbox <- shiny::renderUI({
       if (input$gcm_years_checkbox == TRUE) {
         if ("NULL" %in% vstore[["downscale_gcm_years"]]) {
-          date_range_preset <- c(min(climr::list_gcm_hist_years()):(max(climr::list_gcm_hist_years())-100))
+          date_range_preset <- c(1951:2100)
           update_vstore_and_notify("downscale_gcm_years", date_range_preset, "GCM years")
           update_vstore_and_notify("downscale_gcm_hist_years", date_range_preset, "GCM hist years")
           
@@ -1334,46 +1327,30 @@ shiny::shinyApp(
       }
     })
     
-    # reactive output for selecting a custom package for extra climate variables
+    # reactive output for selecting a custom set for extra climate variables
     output$downscale_extra_vars_custom <- shiny::renderUI({
-      if ("Custom" %in% input$downscale_extra_vars_packages) {
-        accordion(
-          id = "climate_vars_acc",
-          accordion_panel(
-            title = h5("Monthly Variables"),
-            value = "monthly_acc",
-            shiny::checkboxGroupInput(
-              inputId = "downscale_extra_vars_custom_monthly",
-              label = h5("Choose monthly variables:"),
-              width = "100%",
-              inline = TRUE,
-              choices = c(downscale_extra_vars$Monthly),
-              selected = vstore[["downscale_extra_vars_custom_monthly"]]
-            )
+      if ("Custom" %in% input$downscale_extra_vars_sets) {
+        
+        # extract variable names and time periods
+        elements <- unique(climr::variables %>% pull(Code_Element))
+        time_periods <- unique(climr::variables %>% pull(Time)) ## BUG - some annuals are showing up as ANY ##
+        
+        shiny::div(
+          shiny::checkboxGroupInput(
+            inputId = "downscale_custom_elements",
+            label = h5("Choose elements:"),
+            width = "100%",
+            inline = TRUE,
+            choices = elements,
+            selected = vstore[["downscale_custom_elements"]]
           ),
-          accordion_panel(
-            title = h5("Seasonal Variables"),
-            value = "seasonal_acc",
-            shiny::checkboxGroupInput(
-              inputId = "downscale_extra_vars_custom_seasonal",
-              label = h5("Choose seasonal variables:"),
-              width = "100%",
-              inline = TRUE,
-              choices = c(downscale_extra_vars$Seasonal),
-              selected = vstore[["downscale_extra_vars_custom_seasonal"]]
-            )
-          ),
-          accordion_panel(
-            title = h5("Annual Variables"),
-            value = "annual_acc",
-            shiny::checkboxGroupInput(
-              inputId = "downscale_extra_vars_custom_annual",
-              label = h5("Choose annual variables:"),
-              width = "100%",
-              inline = TRUE,
-              choices = c(downscale_extra_vars$Annual),
-              selected = vstore[["downscale_extra_vars_custom_annual"]]
-            )
+          shiny::checkboxGroupInput(
+            inputId = "downscale_custom_time_periods",
+            label = h5("Choose time periods:"),
+            width = "100%",
+            inline = TRUE,
+            choices = time_periods,
+            selected = vstore[["downscale_custom_time_periods"]]
           )
         )
       }
@@ -1387,7 +1364,7 @@ shiny::shinyApp(
           label = h5("Choose downscale output format:",
                      prompter::add_prompt(
                        tooltipsIcon,
-                       message = HTML(paste("tif: Shapes/rasters are returned as GeoTIFF. csv: all points are returned in csv.")),
+                       message = HTML(paste("Shapes/rasters can be returned as csv or GeoTIFF. All points are returned in csv.")),
                        position = "top",
                        size = "large",
                        shadow = FALSE
@@ -1395,23 +1372,44 @@ shiny::shinyApp(
           ),
           choices = c("Comma Separated Value (csv)" = "csv"),
           inline = TRUE,
-          selected = vstore[["downscale_output"]]
+          selected = "csv"
         )
       } else if ("shape" %in% (sg_dt$dt)$group) {
-        shiny::radioButtons(
-          inputId = "downscale_output",
-          label = h5("Choose downscale output format:",
-                     prompter::add_prompt(
-                       tooltipsIcon,
-                       message = HTML(paste("tif: Shapes/rasters are returned as GeoTIFF. csv: all points are returned in csv.")),
-                       position = "top",
-                       size = "large",
-                       shadow = FALSE
-                     )
+        shiny::div(
+          shiny::radioButtons(
+            inputId = "downscale_output",
+            label = h5("Choose downscale output format:",
+                       prompter::add_prompt(
+                         tooltipsIcon,
+                         message = HTML(paste("tif: Shapes/rasters are returned as GeoTIFF. csv: all points are returned in csv.")),
+                         position = "top",
+                         size = "large",
+                         shadow = FALSE
+                       )
+            ),
+            choices = c("Geographic Tag Image File Format (GeoTIFF)" = "tif", "Comma Separated Value (csv)" = "csv"),
+            inline = TRUE,
+            selected = "tif"
           ),
-          choices = c("Geographic Tag Image File Format (GeoTIFF)" = "tif", "Comma Separated Value (csv)" = "csv"),
-          inline = TRUE,
-          selected = vstore[["downscale_output"]]
+          shiny::sliderInput(
+            inputId = "downscale_resolution",
+            label = h5("Choose downscale resolution (m):",
+                       prompter::add_prompt(
+                         tooltipsIcon,
+                         message = HTML(paste("Target resolution for shapes drawn on map or added using file upload. Does not apply to points, raster or csv files.")),
+                         position = "top",
+                         size = "large",
+                         shadow = FALSE
+                       )
+            ),
+            value = vstore[["downscale_resolution"]],
+            width = "100%",
+            min = 250,
+            max = 10000,
+            step = 50,
+            post = "m",
+            ticks = FALSE
+          )
         )
       } else {
         NULL
