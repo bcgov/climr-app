@@ -61,7 +61,8 @@ session_geometry <- function(sg_dt) {
             }
           }
         ")
-      ))
+        )
+      )
       } else {
         NULL
       }
@@ -488,7 +489,6 @@ session_geometry <- function(sg_dt) {
                 
                 # remove duplicates
                 elements <- unique(elements)
-                # time_periods <- unique(time_periods)
                 
                 shiny::div(
                   h5("Choose raster layer to preview:"),

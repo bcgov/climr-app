@@ -134,10 +134,10 @@ shiny::shinyApp(
           height = "35px",
           alt = "British Columbia"
         ),
-        "ClimR"
+        "climr"
       ),
       shiny::tabPanel(
-        title = "Map",
+        title = "Get Data",
         prompter::use_prompt(),
         shiny::sidebarLayout(
           shiny::sidebarPanel(
@@ -167,8 +167,9 @@ shiny::shinyApp(
             
             strong("Add Sites Using One of the 2 Methods Below:"),
             accordion(
-              # need to add help icons to each of the methods
               multiple = FALSE,
+              open = FALSE,
+              id = "acc_methods",
               
               accordion_panel(
                 title = h5("Method 1: By selection on map",
@@ -180,10 +181,9 @@ shiny::shinyApp(
                               shadow = FALSE
                             )
                 ),
-                p("Click on map to add points or draw an area-of-interest using shape tools."),
                 DT::DTOutput("geom_dt", width = "100%"),
                 shiny::actionButton("delete_button", "Delete Selected", icon("trash-alt")),
-                value = "acc1"
+                value = "acc_method1"
               ),
               
               accordion_panel(
@@ -199,10 +199,10 @@ shiny::shinyApp(
                 shiny::div(
                   shiny::fileInput(
                     inputId = "upload",
-                    label = "Upload a csv, a raster or a shape file to add geographies"
+                    label = "Upload a file:"
                   )
                 ),
-                value = "acc2"
+                value = "acc_method2"
               )
             ),
             br(),
@@ -297,7 +297,7 @@ shiny::shinyApp(
       downscale_which_refmap = "refmap_climr",
       downscale_obs_periods_checkboxes = "2001_2020",
       downscale_obs_periods = "2001_2020",
-      downscale_obs_years_radio = "No",
+      downscale_obs_years_checkbox = FALSE,
       downscale_obs_years = "NULL",
       downscale_obs_ts_dataset = "NULL",
       downscale_gcms = "NULL",
@@ -305,7 +305,7 @@ shiny::shinyApp(
       downscale_gcm_periods = "NULL",
       downscale_gcm_ssp_years = "NULL",
       downscale_gcm_hist_years = "NULL",
-      downscale_gcm_years_radio = "No",
+      downscale_gcm_years_checkbox = FALSE,
       downscale_gcm_years = "NULL",
       downscale_ensemble_mean = TRUE,
       downscale_max_run = 0,
@@ -327,7 +327,7 @@ shiny::shinyApp(
       downscale_which_refmap = downscale_default[["downscale_which_refmap"]],
       downscale_obs_periods_checkboxes = downscale_default[["downscale_obs_periods_checkboxes"]],
       downscale_obs_periods = downscale_default[["downscale_obs_periods"]],
-      downscale_obs_years_radio = downscale_default[["downscale_obs_years_radio"]],
+      downscale_obs_years_checkbox = downscale_default[["downscale_obs_years_checkbox"]],
       downscale_obs_years = downscale_default[["downscale_obs_years"]],
       downscale_obs_ts_dataset = downscale_default[["downscale_obs_ts_dataset"]],
       downscale_gcms = downscale_default[["downscale_gcms"]],
@@ -335,7 +335,7 @@ shiny::shinyApp(
       downscale_gcm_periods = downscale_default[["downscale_gcm_periods"]],
       downscale_gcm_ssp_years = downscale_default[["downscale_gcm_ssp_years"]],
       downscale_gcm_hist_years = downscale_default[["downscale_gcm_hist_years"]],
-      downscale_gcm_years_radio = downscale_default[["downscale_gcm_years_radio"]],
+      downscale_gcm_years_checkbox = downscale_default[["downscale_gcm_years_checkbox"]],
       downscale_gcm_years = downscale_default[["downscale_gcm_years"]],
       downscale_ensemble_mean = downscale_default[["downscale_ensemble_mean"]],
       downscale_max_run = downscale_default[["downscale_max_run"]],
@@ -379,6 +379,7 @@ shiny::shinyApp(
     shiny::observeEvent(input$climr_draw_new_feature, {
       if (shiny::in_devmode()) cat("Event: climr_draw_new_feature", sep = "\n")
       sg$add_draw_poly(input$climr_draw_new_feature)
+      bslib::accordion_panel_open("acc_methods", "acc_method1")
     })
     shiny::observeEvent(input$climr_click, {
       if (shiny::in_devmode()) cat("Event: climr_click", sep = "\n")
@@ -387,6 +388,7 @@ shiny::shinyApp(
                          "downscale_parameters", disabled = FALSE)
       updateActionButton(session = getDefaultReactiveDomain(),
                          "generate_results", disabled = FALSE)
+      bslib::accordion_panel_open("acc_methods", "acc_method1")
     })
     
     # upload a file
@@ -464,7 +466,7 @@ shiny::shinyApp(
                          )
               ),
               # choices = c(local({z <- climr::list_refmaps(); substr(z, 8L, z |> nchar()) |> tools::toTitleCase() |> setNames(object = z, nm = _)})),
-              choices = c("ClimR" = "refmap_climr", "ClimateNA" = "refmap_climatena"),
+              choices = c("climr" = "refmap_climr", "ClimateNA" = "refmap_climatena"),
               selected = vstore[["downscale_which_refmap"]],
               inline = TRUE,
               width = "100%",
@@ -498,37 +500,18 @@ shiny::shinyApp(
                   selected = vstore[["downscale_obs_periods_checkboxes"]]
                 )
               ),
+              br(),
               shiny::div(
-                shiny::radioButtons(
-                  inputId = "observed_years_radio",
-                  label = h5("Would you like to specify observed years?"),
-                  choices = c("Yes", "No"),
-                  selected = vstore[["downscale_obs_years_radio"]],
+                shiny::checkboxInput(
+                  inputId = "observed_years_checkbox",
+                  label = tags$span("Specify Observed Years", style = "font-size: 0.9em; font-weight: bold;"),
+                  value = vstore[["downscale_obs_years_checkbox"]],
                   width = "100%"
-                ),
-              ),
-              
-              # reactive output for selecting Observed Years
-              uiOutput("observed_years_radio"),
-              
-              shiny::div(
-                title = "Dataset for observational time series data. Options: 'climatena' for ClimateNA gridded time series, 'cru.gpcc' for CRU TS (temperature) and GPCC (precipitation), or 'Null' for none.",
-                shiny::radioButtons(
-                  inputId = "downscale_obs_ts_dataset",
-                  label = h5("Choose observation time-series data:",
-                             prompter::add_prompt(
-                               tooltipsIcon,
-                               message = HTML(paste("Dataset for observational time series data. ClimateNA gridded time series, CRU/GPCC for CRU TS (temperature) and GPCC (precipitation),")),
-                               position = "top",
-                               size = "large",
-                               shadow = FALSE
-                             )
-                  ),
-                  width = "100%",
-                  selected = vstore[["downscale_obs_ts_dataset"]],
-                  choices = c("ClimateNA" = "climatena", "Climatic Research Unit / Global Precipitation Climatology Centre" = "cru.gpcc")
                 )
               ),
+              
+              # reactive output for selecting Observed Years and Time Series Dataset
+              uiOutput("observed_years_checkbox"),
             ),
             
             # Simulated climate data parameters
@@ -591,17 +574,23 @@ shiny::shinyApp(
                 )
               ),
               shiny::div(
-                shiny::radioButtons(
-                  inputId = "gcm_years_radio",
-                  label = h5("Would you like to specify GCM years?"),
-                  choices = c("Yes", "No"),
-                  selected = vstore[["downscale_gcm_years_radio"]],
+                # shiny::radioButtons(
+                #   inputId = "gcm_years_radio",
+                #   label = h5("Would you like to specify GCM years?"),
+                #   choices = c("Yes", "No"),
+                #   selected = vstore[["downscale_gcm_years_radio"]],
+                #   width = "100%"
+                # ),
+                shiny::checkboxInput(
+                  inputId = "gcm_years_checkbox",
+                  label = tags$span("Specify GCM Years", style = "font-size: 0.9em; font-weight: bold;"),
+                  value = vstore[["downscale_gcm_years_checkbox"]],
                   width = "100%"
-                ),
+                )
               ),
               
               # reactive output for selecting GCM Years
-              uiOutput("gcm_years_radio"),
+              uiOutput("gcm_years_checkbox"),
               
               shiny::div(
                 shiny::radioButtons(
@@ -793,11 +782,11 @@ shiny::shinyApp(
     })
     
     # observed years
-    shiny::observeEvent(input$observed_years_radio,{
-      if (shiny::in_devmode()) cat("Event: downscale_obs_years_radio", sep = "\n")
-      update_vstore_and_notify("downscale_obs_years_radio", input$observed_years_radio, "Obs radios")
+    shiny::observeEvent(input$observed_years_checkbox,{
+      if (shiny::in_devmode()) cat("Event: downscale_obs_years_checkbox", sep = "\n")
+      update_vstore_and_notify("downscale_obs_years_checkbox", input$observed_years_checkbox, "Obs radios")
       
-      if (input$observed_years_radio == "No") {
+      if (input$observed_years_checkbox == "No") {
         update_vstore_and_notify("downscale_obs_years", "NULL", "Obs years")
       }
     })
@@ -807,7 +796,7 @@ shiny::shinyApp(
         update_vstore_and_notify("downscale_obs_years", date_range, "Obs years")
     })
     shiny::observe({
-      vstore[["downscale_obs_years_radio"]]
+      vstore[["downscale_obs_years_checkbox"]]
       shiny::updateSliderInput(session = getDefaultReactiveDomain(),
                         inputId = "downscale_obs_years",
                         value = c(min(vstore[["downscale_obs_years"]]), max(vstore[["downscale_obs_years"]]))
@@ -865,11 +854,11 @@ shiny::shinyApp(
     })
     
     # GCM years
-    shiny::observeEvent(input$gcm_years_radio, {
-      if (shiny::in_devmode()) cat("Event: downscale_gcm_years_radio", sep = "\n")
-      update_vstore_and_notify("downscale_gcm_years_radio", input$gcm_years_radio, "GCM radios")
+    shiny::observeEvent(input$gcm_years_checkbox, {
+      if (shiny::in_devmode()) cat("Event: downscale_gcm_years_checkbox", sep = "\n")
+      update_vstore_and_notify("downscale_gcm_years_checkbox", input$gcm_years_checkbox, "GCM radios")
       
-      if (input$gcm_years_radio == "No") {
+      if (input$gcm_years_checkbox == "No") {
         update_vstore_and_notify("downscale_gcm_years", "NULL", "GCM years")
         update_vstore_and_notify("downscale_gcm_hist_years", "NULL", "GCM hist years")
         update_vstore_and_notify("downscale_gcm_ssp_years", "NULL", "GCM SSP years")
@@ -894,7 +883,7 @@ shiny::shinyApp(
         update_vstore_and_notify("downscale_gcm_ssp_years", ssp_range, "GCM SSP years")
     })
     shiny::observe({
-      vstore[["downscale_gcm_years_radio"]]
+      vstore[["downscale_gcm_years_checkbox"]]
       shiny::updateSliderInput(session = getDefaultReactiveDomain(),
                         inputId = "downscale_gcm_years",
                         value = c(min(vstore[["downscale_gcm_years"]]), max(vstore[["downscale_gcm_years"]]))
@@ -1263,10 +1252,10 @@ shiny::shinyApp(
     })
     
     # reactive output for selecting Observed Years
-    output$observed_years_radio <- shiny::renderUI({
-      if (input$observed_years_radio == "Yes") {
+    output$observed_years_checkbox <- shiny::renderUI({
+      if (input$observed_years_checkbox == TRUE) {
         if ("NULL" %in% vstore[["downscale_obs_years"]]) {
-          date_range_preset <- c(min(climr::list_obs_years()):max(climr::list_obs_years()))
+          date_range_preset <- c(1951:2024)
           update_vstore_and_notify("downscale_obs_years", date_range_preset, "Obs years")
         }
         shiny::div(
@@ -1289,6 +1278,21 @@ shiny::shinyApp(
             sep = ""
           ),
           selected = c(min(vstore[["downscale_obs_years"]]), max(vstore[["downscale_obs_years"]])),
+          shiny::radioButtons(
+            inputId = "downscale_obs_ts_dataset",
+            label = h5("Choose observation time-series data:",
+                       prompter::add_prompt(
+                         tooltipsIcon,
+                         message = HTML(paste("Dataset for observational time series data. ClimateNA gridded time series, CRU/GPCC for CRU TS (temperature) and GPCC (precipitation),")),
+                         position = "top",
+                         size = "large",
+                         shadow = FALSE
+                       )
+            ),
+            width = "100%",
+            selected = vstore[["downscale_obs_ts_dataset"]],
+            choices = c("ClimateNA" = "climatena", "Climatic Research Unit / Global Precipitation Climatology Centre" = "cru.gpcc")
+          )
         )
       } else {
         NULL
@@ -1296,8 +1300,8 @@ shiny::shinyApp(
     })
     
     # reactive output for selecting GCM Years
-    output$gcm_years_radio <- shiny::renderUI({
-      if (input$gcm_years_radio == "Yes") {
+    output$gcm_years_checkbox <- shiny::renderUI({
+      if (input$gcm_years_checkbox == TRUE) {
         if ("NULL" %in% vstore[["downscale_gcm_years"]]) {
           date_range_preset <- c(min(climr::list_gcm_hist_years()):(max(climr::list_gcm_hist_years())-100))
           update_vstore_and_notify("downscale_gcm_years", date_range_preset, "GCM years")
