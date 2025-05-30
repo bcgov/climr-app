@@ -476,8 +476,10 @@ session_geometry <- function(sg_dt) {
             # close Downscale Processing window
             shiny::removeModal()
             
-            # raster previews
-            output$preview_raster_options <- shiny::renderUI({
+            # raster previews - BUGS
+            output$preview_raster_elements <- shiny::renderUI({
+              
+              browser()
               if (show_ui()) {
                 
                 # split raster previews

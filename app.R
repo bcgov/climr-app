@@ -213,7 +213,7 @@ shiny::shinyApp(
             br(), br(),
             
             # options for raster preview
-            uiOutput("preview_raster_options", width = "100%"),
+            uiOutput("preview_raster_elements", width = "100%"),
           ),
           shiny::mainPanel(
             # create map as UI element
@@ -297,17 +297,17 @@ shiny::shinyApp(
     downscale_default <- list(
       downscale_which_refmap = "refmap_climr",
       downscale_obs_periods_checkboxes = "1961_1990",
-      downscale_obs_periods = "NULL", ## BUGGY - NEED TO SELECT 2001_2020 TO RUN ##
+      downscale_obs_periods = "NULL", ## BUGGY - NEED TO SELECT 2001_2020 TO RUN DOWNSCALE WITH OUTPUT AS TIF ##
       downscale_obs_years_checkbox = FALSE,
-      downscale_obs_years = "NULL",
+      downscale_obs_years = c(1951:2024),
       downscale_obs_ts_dataset = "NULL",
       downscale_gcms = "NULL",
       downscale_ssps = "NULL",
       downscale_gcm_periods = "NULL",
-      downscale_gcm_ssp_years = "NULL",
-      downscale_gcm_hist_years = "NULL",
+      downscale_gcm_ssp_years = c(2015:2100),
+      downscale_gcm_hist_years = c(1951:2014),
       downscale_gcm_years_checkbox = FALSE,
-      downscale_gcm_years = "NULL",
+      downscale_gcm_years = c(1951:2100),
       downscale_ensemble_mean = TRUE,
       downscale_max_run = 0,
       downscale_run_nm = "NULL",
@@ -508,9 +508,45 @@ shiny::shinyApp(
                   width = "100%"
                 )
               ),
-              
-              # reactive output for selecting Observed Years and Time Series Dataset
-              uiOutput("observed_years_checkbox"),
+              shiny::conditionalPanel(
+                condition = "input.observed_years_checkbox == true",
+                shiny::div(
+                  shiny::sliderInput(
+                    inputId = "downscale_obs_years",
+                    label = h5("Choose observed years range:",
+                               prompter::add_prompt(
+                                 tooltipsIcon,
+                                 message = HTML(paste("Choose years to obtain individual years or time series of observational climate data.")),
+                                 position = "top",
+                                 size = "large",
+                                 shadow = FALSE
+                               )
+                    ),
+                    min = min(climr::list_obs_years()),
+                    max = max(climr::list_obs_years()),
+                    value = c(min(vstore[["downscale_obs_years"]]), max(vstore[["downscale_obs_years"]])),
+                    width = "100%",
+                    step = 1,
+                    sep = ""
+                  ),
+                  selected = c(min(vstore[["downscale_obs_years"]]), max(vstore[["downscale_obs_years"]])),
+                  shiny::radioButtons(
+                    inputId = "downscale_obs_ts_dataset",
+                    label = h5("Choose observation time-series data:",
+                               prompter::add_prompt(
+                                 tooltipsIcon,
+                                 message = HTML(paste("Dataset for observational time series data. ClimateNA gridded time series, CRU/GPCC for CRU TS (temperature) and GPCC (precipitation),")),
+                                 position = "top",
+                                 size = "large",
+                                 shadow = FALSE
+                               )
+                    ),
+                    width = "100%",
+                    selected = vstore[["downscale_obs_ts_dataset"]],
+                    choices = c("ClimateNA" = "climatena", "Climatic Research Unit / Global Precipitation Climatology Centre" = "cru.gpcc")
+                  )
+                )
+              )
             ),
             
             # Simulated climate data parameters
@@ -581,9 +617,30 @@ shiny::shinyApp(
                   width = "100%"
                 )
               ),
-              
-              # reactive output for selecting GCM Years
-              uiOutput("gcm_years_checkbox"),
+              shiny::conditionalPanel(
+                condition = "input.gcm_years_checkbox == true",
+                shiny::div(
+                  shiny::sliderInput(
+                    inputId = "downscale_gcm_years",
+                    label = h5("Choose GCM years:",
+                               prompter::add_prompt(
+                                 tooltipsIcon,
+                                 message = HTML(paste("Choose time series years for GCM simulations of the historical scenario and future SSP scenarios.")),
+                                 position = "top",
+                                 size = "large",
+                                 shadow = FALSE
+                               )
+                    ),
+                    width = "100%",
+                    min = min(climr::list_gcm_hist_years()),
+                    max = max(climr::list_gcm_ssp_years()),
+                    value = c(min(vstore[["downscale_gcm_years"]]), max(vstore[["downscale_gcm_years"]])),
+                    step = 1,
+                    sep = ""
+                  ),
+                  #selected = c(min(vstore[["downscale_gcm_years"]]), max(vstore[["downscale_gcm_years"]])),
+                )
+              ),
               
               shiny::div(
                 shiny::checkboxInput(
@@ -663,7 +720,27 @@ shiny::shinyApp(
               selected = vstore[["downscale_extra_vars_sets"]],
               inline = TRUE
               ),
-            uiOutput("downscale_extra_vars_custom")
+            shiny::conditionalPanel(
+              condition = "input.downscale_extra_vars_sets && input.downscale_extra_vars_sets.includes('Custom')",
+              shiny::div(
+                shiny::checkboxGroupInput(
+                  inputId = "downscale_custom_elements",
+                  label = h5("Choose elements:"),
+                  width = "100%",
+                  inline = TRUE,
+                  choices = unique(climr::variables %>% pull(Code_Element)),
+                  selected = vstore[["downscale_custom_elements"]]
+                ),
+                shiny::checkboxGroupInput(
+                  inputId = "downscale_custom_time_periods",
+                  label = h5("Choose time periods:"),
+                  width = "100%",
+                  inline = TRUE,
+                  choices = unique(climr::variables %>% pull(Time)), ## BUG - some annuals are showing up as ANY ##
+                  selected = vstore[["downscale_custom_time_periods"]]
+                )
+              )
+            )
           ),
           br(),
           
@@ -731,8 +808,91 @@ shiny::shinyApp(
     
     })
     
-    # roll all downscale params updates into this observe???
+    # applies all user specified downscale parameters
     shiny::observeEvent(input$downscale_apply, {
+      
+      ## refmap ##
+      vstore[["downscale_which_refmap"]] <- input$downscale_which_refmap
+      # update_vstore_and_notify("downscale_which_refmap", input$downscale_which_refmap, "Ref map")
+      
+      ## observed periods ##
+      # update_vstore_and_notify("downscale_obs_periods_checkboxes", input$downscale_obs_periods_checkboxes, "Obs periods")
+      vstore[["downscale_obs_periods_checkboxes"]] <- input$downscale_obs_periods_checkboxes
+      if ("1961_1990" %in% vstore[["downscale_obs_periods_checkboxes"]]) {
+        # update_vstore_and_notify("downscale_return_refperiod", TRUE, "Return ref period")
+        vstore[["downscale_return_refperiod"]] <- TRUE
+      } 
+      # update_vstore_and_notify("downscale_obs_periods", input$downscale_obs_periods_checkboxes[input$downscale_obs_periods_checkboxes != "1961_1990"], "Obs periods")
+      vstore[["downscale_obs_periods"]] <- input$downscale_obs_periods_checkboxes[input$downscale_obs_periods_checkboxes != "1961_1990"]
+      
+      ## observed years ##
+      vstore[["downscale_obs_years_checkbox"]] <- input$observed_years_checkbox
+      # update_vstore_and_notify("downscale_obs_years_checkbox", input$observed_years_checkbox, "Obs checkbox")
+      if (vstore[["downscale_obs_years_checkbox"]] == TRUE) {
+        date_range <- c(min(input$downscale_obs_years):max(input$downscale_obs_years))
+        # update_vstore_and_notify("downscale_obs_years", date_range, "Obs years")
+        vstore[["downscale_obs_years"]] <- date_range
+      }
+      
+      ## time series dataset ##
+      # update_vstore_and_notify("downscale_obs_ts_dataset", input$downscale_obs_ts_dataset, "Obs dataset")
+      vstore[["downscale_obs_ts_dataset"]] <- input$downscale_obs_ts_dataset
+      
+      ## GCMs ##
+      # update_vstore_and_notify("downscale_gcms", input$downscale_gcms, "GCMs")
+      vstore[["downscale_gcms"]] <- input$downscale_gcms
+      
+      ## SSPs ##
+      # update_vstore_and_notify("downscale_ssps", input$downscale_ssps, "SSPs")
+      vstore[["downscale_ssps"]] <- input$downscale_ssps
+      
+      ## GCM periods ##
+      # update_vstore_and_notify("downscale_gcm_periods", input$downscale_gcm_periods, "GCM periods")
+      vstore[["downscale_gcm_periods"]] <- input$downscale_gcm_periods
+      
+      ## GCM years ##
+      # update_vstore_and_notify("downscale_gcm_years_checkbox", input$gcm_years_checkbox, "GCM checkbox")
+      vstore[["downscale_gcm_years_checkbox"]] <- input$gcm_years_checkbox
+      if (vstore[["downscale_gcm_years_checkbox"]] == TRUE) {
+        # add selected range
+        date_range <- (min(input$downscale_gcm_years):max(input$downscale_gcm_years))
+        if (2015 %in% date_range & (min(date_range) != 2015)) {
+          hist_range <- (min(input$downscale_gcm_years):2014)
+          ssp_range <- (2015:max(input$downscale_gcm_years))
+        } else if (min(date_range) >= 2015) {
+          hist_range <- "NULL"
+          ssp_range <- (min(input$downscale_gcm_years):max(input$downscale_gcm_years))
+        } else {
+          hist_range <- (min(input$downscale_gcm_years):max(input$downscale_gcm_years))
+          ssp_range <- NULL
+        }
+        # update_vstore_and_notify("downscale_gcm_hist_years", hist_range, "GCM hist years")
+        # update_vstore_and_notify("downscale_gcm_ssp_years", ssp_range, "GCM SSP years")
+        vstore[["downscale_gcm_years"]] <- input$downscale_gcm_years
+        vstore[["downscale_gcm_hist_years"]] <- hist_range
+        vstore[["downscale_gcm_ssp_years"]] <- ssp_range
+      }
+      
+      ## ensemble mean / max model runs ##
+      # update_vstore_and_notify("downscale_ensemble_mean", as.logical(input$downscale_ensemble_mean), "Ensemble mean")
+      # update_vstore_and_notify("downscale_max_run", input$downscale_max_run, "Max run")
+      vstore[["downscale_ensemble_mean"]] <- as.logical(input$downscale_ensemble_mean)
+      vstore[["downscale_max_run"]] <- input$downscale_max_run
+      
+      ## extra climate variables ##
+      # handle sets
+      extra_var_handler()
+      
+      # handle custom
+      # update_vstore_and_notify("downscale_custom_elements", input$downscale_custom_elements, "Extra variables custom elements")
+      # update_vstore_and_notify("downscale_custom_time_periods", input$downscale_custom_time_periods, "Extra variables custom time periods")
+      vstore[["downscale_custom_elements"]] <- input$downscale_custom_elements
+      vstore[["downscale_custom_time_periods"]] <- input$downscale_custom_time_periods
+      
+      ## elev adjustment ##
+      # update_vstore_and_notify("downscale_core_ppt_lr", input$downscale_core_ppt_lr, "Core PPT LR")
+      vstore[["downscale_core_ppt_lr"]] <- input$downscale_core_ppt_lr
+      
       removeModal()
     })
     
@@ -780,255 +940,31 @@ shiny::shinyApp(
       )
     }
     
-    # refmap
-    shiny::observeEvent(input$downscale_which_refmap, {
-      if (shiny::in_devmode()) cat("Event: downscale_which_refmap", sep = "\n")
-      update_vstore_and_notify("downscale_which_refmap", input$downscale_which_refmap, "Ref map")
-    })
-    
-    # observed periods
-    shiny::observeEvent(input$downscale_obs_periods_checkboxes, {
-      update_vstore_and_notify("downscale_obs_periods_checkboxes", input$downscale_obs_periods_checkboxes, "Obs periods")
-      if (shiny::in_devmode()) cat("Event: downscale_obs_periods", sep = "\n")
-      if ("1961_1990" %in% input$downscale_obs_periods_checkboxes) {
-        update_vstore_and_notify("downscale_return_refperiod", TRUE, "Return ref period")
-      } else {
-        update_vstore_and_notify("downscale_return_refperiod", FALSE, "Return ref period")
-      }
-      update_vstore_and_notify("downscale_obs_periods", input$downscale_obs_periods_checkboxes[input$downscale_obs_periods_checkboxes != "1961_1990"], "Obs periods")
-    })
-    shiny::observe({
-      vstore[["downscale_obs_periods_checkboxes"]]
-      update_vstore_and_notify("downscale_obs_periods_checkboxes", input$downscale_obs_periods_checkboxes, "Obs periods")
-      shiny::updateCheckboxGroupInput(session = getDefaultReactiveDomain(),
-                               inputId = "downscale_obs_periods_checkboxes",
-                               selected = vstore[["downscale_obs_periods_checkboxes"]]
-      )
-    })
-    
-    # observed years
-    shiny::observeEvent(input$observed_years_checkbox,{
-      if (shiny::in_devmode()) cat("Event: downscale_obs_years_checkbox", sep = "\n")
-      update_vstore_and_notify("downscale_obs_years_checkbox", input$observed_years_checkbox, "Obs checkbox")
-      
-      if (input$observed_years_checkbox == FALSE) {
-        update_vstore_and_notify("downscale_obs_years", "NULL", "Obs years")
-      }
-    })
-    shiny::observeEvent(input$downscale_obs_years, {
-        if (shiny::in_devmode()) cat("Event: downscale_obs_years", sep = "\n")
-        date_range <- c(min(input$downscale_obs_years):max(input$downscale_obs_years))
-        update_vstore_and_notify("downscale_obs_years", date_range, "Obs years")
-    })
-    shiny::observe({
-      vstore[["downscale_obs_years_checkbox"]]
-      shiny::updateSliderInput(session = getDefaultReactiveDomain(),
-                        inputId = "downscale_obs_years",
-                        value = c(min(vstore[["downscale_obs_years"]]), max(vstore[["downscale_obs_years"]]))
-                        )
-    })
-    
-    # time series dataset
-    shiny::observeEvent(input$downscale_obs_ts_dataset, {
-      if (shiny::in_devmode()) cat("Event: downscale_obs_ts_dataset", sep = "\n")
-      update_vstore_and_notify("downscale_obs_ts_dataset", input$downscale_obs_ts_dataset, "Obs dataset")
-    })
-    
-    # GCMs
-    shiny::observeEvent(input$downscale_gcms, {
-      if (shiny::in_devmode()) cat("Event: downscale_gcms", sep = "\n")
-      update_vstore_and_notify("downscale_gcms", input$downscale_gcms, "GCMs")
-      # update_run_nm_select()
-    })
-    shiny::observe({
-      vstore[["downscale_gcms"]]
-      update_vstore_and_notify("downscale_gcms", input$downscale_gcms, "GCMs")
-      shiny::updateCheckboxGroupInput(session = getDefaultReactiveDomain(),
-                        inputId = "downscale_gcms",
-                        selected = vstore[["downscale_gcms"]]
-      )
-    })
-    
-    # SSPs
-    shiny::observeEvent(input$downscale_ssps, {
-      if (shiny::in_devmode()) cat("Event: downscale_ssps", sep = "\n")
-      update_vstore_and_notify("downscale_ssps", input$downscale_ssps, "SSPs")
-      # update_run_nm_select()
-    })
-    shiny::observe({
-      vstore[["downscale_ssps"]]
-      update_vstore_and_notify("downscale_ssps", input$downscale_ssps, "SSPs")
-      shiny::updateCheckboxGroupInput(session = getDefaultReactiveDomain(),
-                               inputId = "downscale_ssps",
-                               selected = vstore[["downscale_ssps"]]
-      )
-    })
-    
-    # GCM periods
-    shiny::observeEvent(input$downscale_gcm_periods, {
-      if (shiny::in_devmode()) cat("Event: downscale_gcm_periods", sep = "\n")
-      update_vstore_and_notify("downscale_gcm_periods", input$downscale_gcm_periods, "GCM periods")
-    })
-    shiny::observe({
-      vstore[["downscale_gcm_periods"]]
-      update_vstore_and_notify("downscale_gcm_periods", input$downscale_gcm_periods, "GCM periods")
-      shiny::updateCheckboxGroupInput(session = getDefaultReactiveDomain(),
-                               inputId = "downscale_gcm_periods",
-                               selected = vstore[["downscale_gcm_periods"]]
-      )
-    })
-    
-    # GCM years
-    shiny::observeEvent(input$gcm_years_checkbox, {
-      if (shiny::in_devmode()) cat("Event: downscale_gcm_years_checkbox", sep = "\n")
-      update_vstore_and_notify("downscale_gcm_years_checkbox", input$gcm_years_checkbox, "GCM checkbox")
-      
-      if (input$gcm_years_checkbox == FALSE) {
-        update_vstore_and_notify("downscale_gcm_years", "NULL", "GCM years")
-        update_vstore_and_notify("downscale_gcm_hist_years", "NULL", "GCM hist years")
-        update_vstore_and_notify("downscale_gcm_ssp_years", "NULL", "GCM SSP years")
-      }
-    })
-    shiny::observeEvent(input$downscale_gcm_years, {
-      if (shiny::in_devmode()) cat("Event: downscale_gcm_years", sep = "\n")
-      
-      # add selected range
-      date_range <- (min(input$downscale_gcm_years):max(input$downscale_gcm_years))
-      if (2015 %in% date_range & (min(date_range) != 2015)) {
-        hist_range <- (min(input$downscale_gcm_years):2014)
-        ssp_range <- (2015:max(input$downscale_gcm_years))
-      } else if (min(date_range) >= 2015) {
-        hist_range <- "NULL"
-        ssp_range <- (min(input$downscale_gcm_years):max(input$downscale_gcm_years))
-      } else {
-        hist_range <- (min(input$downscale_gcm_years):max(input$downscale_gcm_years))
-        ssp_range <- NULL
-      }
-        update_vstore_and_notify("downscale_gcm_hist_years", hist_range, "GCM hist years")
-        update_vstore_and_notify("downscale_gcm_ssp_years", ssp_range, "GCM SSP years")
-    })
-    shiny::observe({
-      vstore[["downscale_gcm_years_checkbox"]]
-      shiny::updateSliderInput(session = getDefaultReactiveDomain(),
-                        inputId = "downscale_gcm_years",
-                        value = c(min(vstore[["downscale_gcm_years"]]), max(vstore[["downscale_gcm_years"]]))
-      )
-    })
-    
-    # max model runs
-    shiny::observeEvent(input$downscale_ensemble_mean, {
-      if (shiny::in_devmode()) cat("Event: downscale_ensemble_mean", sep = "\n")
-      update_vstore_and_notify("downscale_ensemble_mean", as.logical(input$downscale_ensemble_mean), "Ensemble mean")
-    })
-    shiny::observeEvent(input$downscale_max_run, {
-      if (shiny::in_devmode()) cat("Event: downscale_max_run", sep = "\n")
-      update_vstore_and_notify("downscale_max_run", input$downscale_max_run, "Max run")
-    })
-    # shiny::observeEvent(input$downscale_run_nm, {
-    #   if (shiny::in_devmode()) cat("Event: downscale_run_nm", sep = "\n")
-    #   update_vstore_and_notify("downscale_run_nm", input$downscale_run_nm, "Run name")
-    # })
-    
-    # extra climate variables sets - still buggy, the custom variables are not resetting to when Custom is removed
+    # handler for extra climate variable sets
     extra_var_handler <- function() {
-      # get old and new selections
-      old <- vstore[["downscale_extra_vars_sets"]]
-      new <- input$downscale_extra_vars_sets
-      
-      # determine what was added and what was removed
-      added <- setdiff(new, old)
-      removed <- setdiff(old, new)
-      
       # add new variables
-      update_vstore_and_notify("downscale_extra_vars_sets", input$downscale_extra_vars_sets, "Set")
+      # update_vstore_and_notify("downscale_extra_vars_sets", input$downscale_extra_vars_sets, "Set")
+      vstore[["downscale_extra_vars_sets"]] <- input$downscale_extra_vars_sets
       
-      # default core variables handling - SOMETHING WEIRD HERE, THEY'RE BEING REMOVED 3 TIMES
+      # remove core vars if sets selected
       if (!is.null(input$downscale_extra_vars_sets)) {
-        remove_from_vstore("downscale_extra_vars", downscale_core_vars, "Removed default core vars")
-      } else {
-        update_vstore_and_notify("downscale_extra_vars", downscale_core_vars, "Core variables")
+        vstore[["downscale_extra_vars"]] <- NULL
       }
 
       # handle added variables
-      if ("Monthly" %in% added) {
+      if ("Monthly" %in% vstore[["downscale_extra_vars_sets"]]) {
         monthly_vars <- climr::variables %>% filter(Category == "Monthly") %>% pull(Code)
         update_vstore_and_notify("downscale_extra_vars", monthly_vars, "Monthly vars")
       }
-      if ("Seasonal" %in% added) {
+      if ("Seasonal" %in% vstore[["downscale_extra_vars_sets"]]) {
         seasonal_vars <- climr::variables %>% filter(Category == "Seasonal") %>% pull(Code)
         update_vstore_and_notify("downscale_extra_vars", seasonal_vars, "Seasonal vars")
       }
-      if ("Annual" %in% added) {
+      if ("Annual" %in% vstore[["downscale_extra_vars_sets"]]) {
         annual_vars <- climr::variables %>% filter(Category == "Annual") %>% pull(Code)
         update_vstore_and_notify("downscale_extra_vars", annual_vars, "Annual vars")
       }
-      
-      # handle removed variables
-      if ("Monthly" %in% removed) {
-        monthly_vars <- climr::variables %>% filter(Category == "Monthly") %>% pull(Code)
-        remove_from_vstore("downscale_extra_vars", monthly_vars, "Removed Monthly vars")
-      }
-      if ("Seasonal" %in% removed) {
-        seasonal_vars <- climr::variables %>% filter(Category == "Seasonal") %>% pull(Code)
-        remove_from_vstore("downscale_extra_vars", seasonal_vars, "Removed Seasonal vars")
-      }
-      if ("Annual" %in% removed) {
-        annual_vars <- climr::variables %>% filter(Category == "Annual") %>% pull(Code)
-        remove_from_vstore("downscale_extra_vars", annual_vars, "Removed Annual vars")
-      }
-      if ("Custom" %in% removed) {
-        # reset all vars to defaults
-        lapply(c("downscale_extra_vars_custom_monthly", "downscale_extra_vars_custom_seasonal", "downscale_extra_vars_custom_annual"), \(x) {
-          vstore[[x]] <- "NULL"
-        })
-      }
-      
     }
-    # shiny::observeEvent(input$downscale_extra_vars_sets, {
-    #   if (shiny::in_devmode()) cat("Event: downscale_extra_vars_sets", sep = "\n")
-    #   extra_var_handler()
-    # })
-    shiny::observe({
-      vstore[["downscale_extra_vars_sets"]]
-      extra_var_handler()
-      # shiny::updateCheckboxGroupInput(session = getDefaultReactiveDomain(),
-      #                   inputId = "downscale_extra_vars_sets",
-      #                   selected = vstore[["downscale_extra_vars_sets"]]
-      # 
-      # )
-    })
-    
-    # extra climate variables custom selection - still buggy, the custom variables are not resetting to when Custom is removed
-    shiny::observeEvent(input$downscale_custom_elements, {
-      if (shiny::in_devmode()) cat("Event: downscale_custom_elements", sep = "\n")
-      update_vstore_and_notify("downscale_custom_elements", input$downscale_custom_elements, "Extra variables custom elements")
-    })
-    shiny::observe({
-      vstore[["downscale_custom_elements"]]
-      update_vstore_and_notify("downscale_custom_elements", input$downscale_custom_elements, "Extra variables custom elements")
-      shiny::updateCheckboxGroupInput(session = getDefaultReactiveDomain(),
-                               inputId = "downscale_custom_elements",
-                               selected = vstore[["downscale_custom_elements"]]
-      )
-    })
-    shiny::observeEvent(input$downscale_custom_time_periods, {
-      if (shiny::in_devmode()) cat("Event: downscale_custom_time_periods", sep = "\n")
-      update_vstore_and_notify("downscale_custom_time_periods", input$downscale_custom_time_periods, "Extra variables custom time periods")
-    })
-    shiny::observe({
-      vstore[["downscale_custom_time_periods"]]
-      update_vstore_and_notify("downscale_custom_time_periods", input$downscale_custom_time_periods, "Extra variables custom time periods")
-      shiny::updateCheckboxGroupInput(session = getDefaultReactiveDomain(),
-                                      inputId = "downscale_custom_time_periods",
-                                      selected = vstore[["downscale_custom_time_periods"]]
-      )
-    })
-    
-    # elev adjustment
-    shiny::observeEvent(input$downscale_core_ppt_lr, {
-      if (shiny::in_devmode()) cat("Event: downscale_core_ppt_lr", sep = "\n")
-      update_vstore_and_notify("downscale_core_ppt_lr", input$downscale_core_ppt_lr, "Core PPT LR")
-    })
 
     # reset
     shiny::observeEvent(input$downscale_reset, {
@@ -1167,8 +1103,19 @@ shiny::shinyApp(
       if (vstore[["processing"]]) return()
       
       # concatenate custom extra climate variables
-      codes <- climr::variables[Code_Element %in% vstore[["downscale_custom_elements"]] & Time %in% vstore[["downscale_custom_time_periods"]], Code]
-      vstore[["downscale_extra_vars"]] <- unique(c(vstore[["downscale_extra_vars"]], codes))
+      if (!is.null(vstore[["downscale_custom_elements"]]) & !is.null(vstore[["downscale_custom_time_periods"]])) {
+        codes <- climr::variables[Code_Element %in% vstore[["downscale_custom_elements"]] & Time %in% vstore[["downscale_custom_time_periods"]], Code]
+        vstore[["downscale_extra_vars"]] <- unique(c(vstore[["downscale_extra_vars"]], codes))
+      }
+      
+      # set GCM years to null if not selected
+      if (vstore[["downscale_obs_years_checkbox"]] == FALSE) {
+        vstore[["downscale_obs_years"]] <- NULL
+      }
+      if (vstore[["downscale_gcm_years_checkbox"]] == FALSE) {
+        vstore[["downscale_gcm_hist_years"]] <- NULL
+        vstore[["downscale_gcm_ssp_years"]] <- NULL
+      }
       
       sg$process()
       show_ui(TRUE)
@@ -1241,118 +1188,6 @@ shiny::shinyApp(
         
         # add legend
         leaflet::addLegend(mp, pal = pal, values = values(raster_layer_values), title = legend_title, labFormat = if (vstore[["log_transform_raster"]] & variable_type == "ratio") inv_log2_formatter else labelFormat(suffix = units))
-      }
-    })
-    
-    # reactive output for selecting Observed Years
-    output$observed_years_checkbox <- shiny::renderUI({
-      if (input$observed_years_checkbox == TRUE) {
-        if ("NULL" %in% vstore[["downscale_obs_years"]]) {
-          date_range_preset <- c(1951:2024)
-          update_vstore_and_notify("downscale_obs_years", date_range_preset, "Obs years")
-        }
-        shiny::div(
-          shiny::sliderInput(
-            inputId = "downscale_obs_years",
-            label = h5("Choose observed years range:",
-                       prompter::add_prompt(
-                         tooltipsIcon,
-                         message = HTML(paste("Choose years to obtain individual years or time series of observational climate data.")),
-                         position = "top",
-                         size = "large",
-                         shadow = FALSE
-                       )
-            ),
-            min = min(climr::list_obs_years()),
-            max = max(climr::list_obs_years()),
-            value = c(min(vstore[["downscale_obs_years"]]), max(vstore[["downscale_obs_years"]])),
-            width = "100%",
-            step = 1,
-            sep = ""
-          ),
-          selected = c(min(vstore[["downscale_obs_years"]]), max(vstore[["downscale_obs_years"]])),
-          shiny::radioButtons(
-            inputId = "downscale_obs_ts_dataset",
-            label = h5("Choose observation time-series data:",
-                       prompter::add_prompt(
-                         tooltipsIcon,
-                         message = HTML(paste("Dataset for observational time series data. ClimateNA gridded time series, CRU/GPCC for CRU TS (temperature) and GPCC (precipitation),")),
-                         position = "top",
-                         size = "large",
-                         shadow = FALSE
-                       )
-            ),
-            width = "100%",
-            selected = vstore[["downscale_obs_ts_dataset"]],
-            choices = c("ClimateNA" = "climatena", "Climatic Research Unit / Global Precipitation Climatology Centre" = "cru.gpcc")
-          )
-        )
-      } else {
-        NULL
-      }
-    })
-    
-    # reactive output for selecting GCM Years
-    output$gcm_years_checkbox <- shiny::renderUI({
-      if (input$gcm_years_checkbox == TRUE) {
-        if ("NULL" %in% vstore[["downscale_gcm_years"]]) {
-          date_range_preset <- c(1951:2100)
-          update_vstore_and_notify("downscale_gcm_years", date_range_preset, "GCM years")
-          update_vstore_and_notify("downscale_gcm_hist_years", date_range_preset, "GCM hist years")
-          
-        }
-        shiny::div(
-          shiny::sliderInput(
-            inputId = "downscale_gcm_years",
-            label = h5("Choose GCM years:",
-                       prompter::add_prompt(
-                         tooltipsIcon,
-                         message = HTML(paste("Choose time series years for GCM simulations of the historical scenario and future SSP scenarios.")),
-                         position = "top",
-                         size = "large",
-                         shadow = FALSE
-                       )
-            ),
-            width = "100%",
-            min = min(climr::list_gcm_hist_years()),
-            max = max(climr::list_gcm_ssp_years()),
-            value = c(min(vstore[["downscale_gcm_years"]]), max(vstore[["downscale_gcm_years"]])),
-            step = 1,
-            sep = ""
-          ),
-          selected = c(min(vstore[["downscale_gcm_years"]]), max(vstore[["downscale_gcm_years"]])),
-        )
-      } else {
-        NULL
-      }
-    })
-    
-    # reactive output for selecting a custom set for extra climate variables
-    output$downscale_extra_vars_custom <- shiny::renderUI({
-      if ("Custom" %in% input$downscale_extra_vars_sets) {
-        
-        # extract variable names and time periods
-        elements <- unique(climr::variables %>% pull(Code_Element))
-        time_periods <- unique(climr::variables %>% pull(Time)) ## BUG - some annuals are showing up as ANY ##
-        
-        shiny::div(
-          shiny::checkboxGroupInput(
-            inputId = "downscale_custom_elements",
-            label = h5("Choose elements:"),
-            width = "100%",
-            inline = TRUE,
-            choices = elements,
-            selected = vstore[["downscale_custom_elements"]]
-          ),
-          shiny::checkboxGroupInput(
-            inputId = "downscale_custom_time_periods",
-            label = h5("Choose time periods:"),
-            width = "100%",
-            inline = TRUE,
-            choices = time_periods,
-            selected = vstore[["downscale_custom_time_periods"]]
-          )
-        )
       }
     })
     
