@@ -297,7 +297,7 @@ shiny::shinyApp(
     downscale_default <- list(
       downscale_which_refmap = "refmap_climr",
       downscale_obs_periods_checkboxes = "1961_1990",
-      downscale_obs_periods = "NULL", ## BUGGY - NEED TO SELECT 2001_2020 TO RUN DOWNSCALE WITH OUTPUT AS TIF ##
+      downscale_obs_periods = "NULL",
       downscale_obs_years_checkbox = FALSE,
       downscale_obs_years = c(1951:2024),
       downscale_obs_ts_dataset = "NULL",
@@ -313,8 +313,8 @@ shiny::shinyApp(
       downscale_run_nm = "NULL",
       downscale_extra_vars = downscale_core_vars,
       downscale_extra_vars_sets = "NULL",
-      downscale_custom_elements = "NULL",
-      downscale_custom_time_periods = "NULL",
+      downscale_custom_elements = NULL,
+      downscale_custom_time_periods = NULL,
       downscale_core_ppt_lr = FALSE,
       downscale_return_refperiod = TRUE
     )
@@ -1108,7 +1108,7 @@ shiny::shinyApp(
         vstore[["downscale_extra_vars"]] <- unique(c(vstore[["downscale_extra_vars"]], codes))
       }
       
-      # set GCM years to null if not selected
+      # set obs and GCM years to null if not selected
       if (vstore[["downscale_obs_years_checkbox"]] == FALSE) {
         vstore[["downscale_obs_years"]] <- NULL
       }

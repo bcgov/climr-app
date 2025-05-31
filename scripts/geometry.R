@@ -482,11 +482,13 @@ session_geometry <- function(sg_dt) {
               browser()
               if (show_ui()) {
                 
-                # split raster previews
-                elements <- climr::variables[Code %in% names(preview_raster), Code_Element] |> as.character()
+                # possible raster elements
+                elements <- unique(c(vstore[["downscale_extra_vars"]], vstore[["downscale_custom_elements"]]))
+                raster_layers <- climr::variables[Code %in% elements]
                 
-                # remove duplicates
-                elements <- unique(elements)
+                # raster_layers is a datatable of all possible raster layer variables and their info. Use this to have radio buttons of 
+                # variable and time period (use to ensure the time period picked is available). Then have to somehow pull out the ref_period/gcm/period/year
+                # of the raster layers, then concatenate it together to show which raster layer to preview
                 
                 shiny::div(
                   shiny::radioButtons(
@@ -505,10 +507,10 @@ session_geometry <- function(sg_dt) {
                     choices = elements,
                     selected = vstore[["ds_ras_elements"]]
                   ),
-                  uiOutput("preview_raster_periods"),
-                  shiny::div(
-                    uiOutput("log_transform")
-                  ),
+                  # uiOutput("preview_raster_periods"),
+                  # shiny::div(
+                  #   uiOutput("log_transform")
+                  # ),
                   br(),
                   shiny::actionButton(
                     inputId = "preview_raster",
