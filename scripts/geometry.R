@@ -638,7 +638,7 @@ session_geometry <- function(sg_dt) {
                       label = h5("Choose period to preview:",
                                  prompter::add_prompt(
                                    tooltipsIcon,
-                                   message = HTML(paste("Shows the elements for downscaled raster layers. Choose a element for the layer you would like to preview on the map.")),
+                                   message = HTML(paste("I feel like we don't need these here?")),
                                    position = "top-left",
                                    size = "large",
                                    shadow = FALSE
@@ -658,7 +658,7 @@ session_geometry <- function(sg_dt) {
                       label = h5("Choose GCM to preview:",
                                  prompter::add_prompt(
                                    tooltipsIcon,
-                                   message = HTML(paste("Shows the elements for downscaled raster layers. Choose a element for the layer you would like to preview on the map.")),
+                                   message = HTML(paste("helpful things")),
                                    position = "top-left",
                                    size = "large",
                                    shadow = FALSE
@@ -674,7 +674,7 @@ session_geometry <- function(sg_dt) {
                       label = h5("Choose SSP to preview:",
                                  prompter::add_prompt(
                                    tooltipsIcon,
-                                   message = HTML(paste("Shows the elements for downscaled raster layers. Choose a element for the layer you would like to preview on the map.")),
+                                   message = HTML(paste("please not ssp 585")),
                                    position = "top-left",
                                    size = "large",
                                    shadow = FALSE
@@ -690,7 +690,7 @@ session_geometry <- function(sg_dt) {
                       label = h5("Choose run to preview:",
                                  prompter::add_prompt(
                                    tooltipsIcon,
-                                   message = HTML(paste("Shows the elements for downscaled raster layers. Choose a element for the layer you would like to preview on the map.")),
+                                   message = HTML(paste("blah blah de blah")),
                                    position = "top-left",
                                    size = "large",
                                    shadow = FALSE
@@ -706,7 +706,7 @@ session_geometry <- function(sg_dt) {
                       label = h5("Choose period run to preview:",
                                  prompter::add_prompt(
                                    tooltipsIcon,
-                                   message = HTML(paste("Shows the elements for downscaled raster layers. Choose a element for the layer you would like to preview on the map.")),
+                                   message = HTML(paste("bleep bloop")),
                                    position = "top-left",
                                    size = "large",
                                    shadow = FALSE
