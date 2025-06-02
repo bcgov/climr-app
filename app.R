@@ -299,13 +299,16 @@ shiny::shinyApp(
       downscale_obs_periods_checkboxes = "1961_1990",
       downscale_obs_periods = "NULL",
       downscale_obs_years_checkbox = FALSE,
-      downscale_obs_years = c(1951:2024),
+      # downscale_obs_years = c(1951:2024),
+      downscale_obs_years = NULL,
       downscale_obs_ts_dataset = "NULL",
       downscale_gcms = "NULL",
       downscale_ssps = "NULL",
       downscale_gcm_periods = "NULL",
-      downscale_gcm_ssp_years = c(2015:2100),
-      downscale_gcm_hist_years = c(1951:2014),
+      # downscale_gcm_ssp_years = c(2015:2100),
+      # downscale_gcm_hist_years = c(1951:2014),
+      downscale_gcm_ssp_years = NULL,
+      downscale_gcm_hist_years = NULL,
       downscale_gcm_years_checkbox = FALSE,
       downscale_gcm_years = c(1951:2100),
       downscale_ensemble_mean = TRUE,
@@ -525,12 +528,12 @@ shiny::shinyApp(
                     ),
                     min = min(climr::list_obs_years()),
                     max = max(climr::list_obs_years()),
-                    value = c(min(vstore[["downscale_obs_years"]]), max(vstore[["downscale_obs_years"]])),
+                    value = c(1951,2024),
                     width = "100%",
                     step = 1,
                     sep = ""
                   ),
-                  selected = c(min(vstore[["downscale_obs_years"]]), max(vstore[["downscale_obs_years"]])),
+                  # selected = c(min(vstore[["downscale_obs_years"]]), max(vstore[["downscale_obs_years"]])),
                   shiny::radioButtons(
                     inputId = "downscale_obs_ts_dataset",
                     label = h5("Choose observation time-series data:",
@@ -635,7 +638,7 @@ shiny::shinyApp(
                     width = "100%",
                     min = min(climr::list_gcm_hist_years()),
                     max = max(climr::list_gcm_ssp_years()),
-                    value = c(min(vstore[["downscale_gcm_years"]]), max(vstore[["downscale_gcm_years"]])),
+                    value = c(1951, 2100),
                     step = 1,
                     sep = ""
                   ),
@@ -1112,6 +1115,7 @@ shiny::shinyApp(
       # set obs and GCM years to null if not selected
       if (vstore[["downscale_obs_years_checkbox"]] == FALSE) {
         vstore[["downscale_obs_years"]] <- NULL
+        vstore[["downscale_obs_ts_dataset"]] <- NULL
       }
       if (vstore[["downscale_gcm_years_checkbox"]] == FALSE) {
         vstore[["downscale_gcm_hist_years"]] <- NULL
