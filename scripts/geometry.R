@@ -489,10 +489,6 @@ session_geometry <- function(sg_dt) {
                 # extract all variables
                 variables <- unique(raster_layers[, Code_Element])
                 
-                # raster_layers is a datatable of all possible raster layer variables and their info. Use this to have radio buttons of 
-                # variable and time period (use to ensure the time period picked is available). Then have to somehow pull out the ref_period/gcm/period/year
-                # of the raster layers, then concatenate it together to show which raster layer to preview
-                
                 shiny::div(
                   shiny::radioButtons(
                     inputId = "ds_ras_elements",
@@ -511,6 +507,26 @@ session_geometry <- function(sg_dt) {
                     selected = vstore[["ds_ras_elements"]]
                   ),
                   uiOutput("preview_raster_time_periods"),
+                  uiOutput("preview_raster_obs_sim"),
+                  # shiny::conditionalPanel(
+                  #   condition = "input.ds_ras_obs_sim == 'Observed'",
+                  #   shiny::radioButtons(
+                  #     inputId = "ds_ras_obs_periods",
+                  #     label = h5("Choose element of raster to preview:",
+                  #                prompter::add_prompt(
+                  #                  tooltipsIcon,
+                  #                  message = HTML(paste("Shows the elements for downscaled raster layers. Choose a element for the layer you would like to preview on the map.")),
+                  #                  position = "top-left",
+                  #                  size = "large",
+                  #                  shadow = FALSE
+                  #                )
+                  #     ),
+                  #     width = "100%",
+                  #     inline = TRUE,
+                  #     choices = vstore[["downscale_obs_periods"]],
+                  #     selected = vstore[["ds_ras_obs_periods"]]
+                  #   ),
+                  # ),
                   uiOutput("preview_raster_ref_periods"),
                   shiny::div(
                     uiOutput("log_transform")
@@ -565,22 +581,15 @@ session_geometry <- function(sg_dt) {
               }
             })
             
-            # reactive output for selecting ref periods 
-            output$preview_raster_ref_periods <- shiny::renderUI({
+            # reactive output for selecting observed or simulated data
+            output$preview_raster_obs_sim <- shiny::renderUI({
               if (show_ui() & !is.null(input$ds_ras_elements) & !is.null(input$ds_ras_time_periods)) {
-                code <- raster_layers[Code_Element == vstore[["ds_ras_elements"]] & Time == vstore[["ds_ras_time_periods"]], Code]
-                
-                # extract ref/GCM/SSP periods
-                layers <- names(preview_raster)[grepl(code, names(preview_raster))]
-                cleaned_names <- gsub(paste0("_?", code, "_?"), "_", layers)
-                
-                
                 shiny::radioButtons(
-                  inputId = "ds_ras_ref_periods",
-                  label = h5("Choose reference period of raster to preview:",
+                  inputId = "ds_ras_obs_sim",
+                  label = h5("Preview observed or simulated data?",
                              prompter::add_prompt(
                                tooltipsIcon,
-                               message = HTML(paste("Shows the reference/GCM/SSP periods for downscaled raster layers. Choose a period for the layer you would like to preview on the map.")),
+                               message = HTML(paste("Please write something helpful!")),
                                position = "top-left",
                                size = "large",
                                shadow = FALSE
@@ -588,8 +597,127 @@ session_geometry <- function(sg_dt) {
                   ),
                   width = "100%",
                   inline = TRUE,
-                  choices = cleaned_names,
-                  selected = vstore[["ds_ras_ref_periods"]]
+                  choices = c("Observed", "Simulated"),
+                  selected = vstore[["ds_ras_obs_sim"]]
+                )
+              }
+            })
+            
+            # reactive output for selecting ref periods 
+            output$preview_raster_ref_periods <- shiny::renderUI({
+              #browser()
+              if (show_ui() & !is.null(input$ds_ras_elements) & !is.null(input$ds_ras_time_periods)) {
+                code <- raster_layers[Code_Element == input$ds_ras_elements & Time == input$ds_ras_time_periods, Code]
+                
+                # # extract ref/GCM/SSP periods
+                # layers <- names(preview_raster)[grepl(code, names(preview_raster))]
+                # cleaned_names <- gsub(paste0("_?", code, "_?"), "_", layers)
+                
+                shiny::div(
+                  # shiny::radioButtons(
+                  #   inputId = "ds_ras_ref_periods",
+                  #   label = h5("Choose reference period of raster to preview:",
+                  #              prompter::add_prompt(
+                  #                tooltipsIcon,
+                  #                message = HTML(paste("Shows the reference/GCM/SSP periods for downscaled raster layers. Choose a period for the layer you would like to preview on the map.")),
+                  #                position = "top-left",
+                  #                size = "large",
+                  #                shadow = FALSE
+                  #              )
+                  #   ),
+                  #   width = "100%",
+                  #   inline = TRUE,
+                  #   choices = cleaned_names,
+                  #   selected = vstore[["ds_ras_ref_periods"]]
+                  # ),
+                  
+                  shiny::conditionalPanel(
+                    condition = "input.ds_ras_obs_sim == 'Observed'",
+                    shiny::radioButtons(
+                      inputId = "ds_ras_obs_periods",
+                      label = h5("Choose period to preview:",
+                                 prompter::add_prompt(
+                                   tooltipsIcon,
+                                   message = HTML(paste("Shows the elements for downscaled raster layers. Choose a element for the layer you would like to preview on the map.")),
+                                   position = "top-left",
+                                   size = "large",
+                                   shadow = FALSE
+                                 )
+                      ),
+                      width = "100%",
+                      inline = TRUE,
+                      choices = vstore[["downscale_obs_periods_checkboxes"]],
+                      selected = vstore[["ds_ras_obs_periods"]]
+                    )
+                  ),
+                  
+                  shiny::conditionalPanel(
+                    condition = "input.ds_ras_obs_sim == 'Simulated'",
+                    shiny::radioButtons(
+                      inputId = "ds_ras_gcms",
+                      label = h5("Choose GCM to preview:",
+                                 prompter::add_prompt(
+                                   tooltipsIcon,
+                                   message = HTML(paste("Shows the elements for downscaled raster layers. Choose a element for the layer you would like to preview on the map.")),
+                                   position = "top-left",
+                                   size = "large",
+                                   shadow = FALSE
+                                 )
+                      ),
+                      width = "100%",
+                      inline = TRUE,
+                      choices = vstore[["downscale_gcms"]],
+                      selected = vstore[["ds_ras_gcms"]]
+                    ),
+                    shiny::radioButtons(
+                      inputId = "ds_ras_ssps",
+                      label = h5("Choose SSP to preview:",
+                                 prompter::add_prompt(
+                                   tooltipsIcon,
+                                   message = HTML(paste("Shows the elements for downscaled raster layers. Choose a element for the layer you would like to preview on the map.")),
+                                   position = "top-left",
+                                   size = "large",
+                                   shadow = FALSE
+                                 )
+                      ),
+                      width = "100%",
+                      inline = TRUE,
+                      choices = vstore[["downscale_ssps"]],
+                      selected = vstore[["ds_ras_ssps"]]
+                    ),  
+                    shiny::radioButtons(
+                      inputId = "ds_ras_run",
+                      label = h5("Choose run to preview:",
+                                 prompter::add_prompt(
+                                   tooltipsIcon,
+                                   message = HTML(paste("Shows the elements for downscaled raster layers. Choose a element for the layer you would like to preview on the map.")),
+                                   position = "top-left",
+                                   size = "large",
+                                   shadow = FALSE
+                                 )
+                      ),
+                      width = "100%",
+                      inline = TRUE,
+                      choices = c("Ensemble Mean", vstore[["downscale_max_run"]]), # THIS WILL BE BUGGY NEED ERROR HANDLING FOR ENSEMBLE MEAN
+                      selected = vstore[["ds_ras_run"]]
+                    ),  
+                    shiny::radioButtons(
+                      inputId = "ds_ras_gcm_period",
+                      label = h5("Choose period run to preview:",
+                                 prompter::add_prompt(
+                                   tooltipsIcon,
+                                   message = HTML(paste("Shows the elements for downscaled raster layers. Choose a element for the layer you would like to preview on the map.")),
+                                   position = "top-left",
+                                   size = "large",
+                                   shadow = FALSE
+                                 )
+                      ),
+                      width = "100%",
+                      inline = TRUE,
+                      choices = vstore[["downscale_gcm_periods"]],
+                      selected = vstore[["ds_ras_gcm_period"]]
+                    )
+                  )
                 )
               } else {
                 NULL

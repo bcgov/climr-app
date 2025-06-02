@@ -355,7 +355,13 @@ shiny::shinyApp(
       processing = FALSE,
       ds_ras_elements = NULL,
       ds_ras_time_periods = NULL,
-      ds_ras_ref_periods = NULL,
+      ds_ras_obs_sim = NULL,
+      ds_ras_obs_periods = NULL,
+      ds_ras_gcms = NULL,
+      ds_ras_ssps = NULL,
+      ds_ras_run = NULL,
+      ds_ras_gcm_period = NULL,
+      # ds_ras_ref_periods = NULL,
       log_transform_raster = TRUE,
       downscale_raster_preview = NULL
     )
@@ -897,7 +903,18 @@ shiny::shinyApp(
       # update_vstore_and_notify("downscale_core_ppt_lr", input$downscale_core_ppt_lr, "Core PPT LR")
       vstore[["downscale_core_ppt_lr"]] <- input$downscale_core_ppt_lr
       
-      removeModal()
+      compatible_periods <- climr::variables[Code_Element %in% vstore[["downscale_custom_elements"]] & Time %in% vstore[["downscale_custom_time_periods"]]]
+      if (nrow(compatible_periods) != 0) {
+        removeModal()
+      } else {
+        showModal(
+          modalDialog(
+            title = "Warning",
+            paste("Please select valid time period(s) for selected variable(s)." ),
+            easyClose = TRUE
+          )
+        )
+      }
     })
     
     update_vstore_and_notify <- function(vstore_key, input_value, msg_format) {
@@ -1112,7 +1129,7 @@ shiny::shinyApp(
         vstore[["downscale_extra_vars"]] <- unique(c(vstore[["downscale_extra_vars"]], codes))
       }
       
-      # set obs and GCM years to null if not selected
+      # set obs and GCM years, TS dataset to null if not selected
       if (vstore[["downscale_obs_years_checkbox"]] == FALSE) {
         vstore[["downscale_obs_years"]] <- NULL
         vstore[["downscale_obs_ts_dataset"]] <- NULL
@@ -1151,7 +1168,7 @@ shiny::shinyApp(
           leaflet::clearControls(mp)
         }
         
-        # browser()
+        browser()
         ## concatenate raster layer preview
         code <- raster_layers[Code_Element == vstore[["ds_ras_elements"]] & Time == vstore[["ds_ras_time_periods"]], Code]
         ref_period <- vstore[["ds_ras_ref_periods"]] 
@@ -1178,7 +1195,10 @@ shiny::shinyApp(
         if (grepl("\\u00b0C", units)) {
           units <- stringi::stri_unescape_unicode(units)
         }
-        ## NEED SOMETHING HERE TO FIX % UNITS
+        if (units == "%") {
+          units <- "\\%"
+        }
+        
         variable_type <- climr::variables[Code == code, Type]
         if (variable_type == "ratio" & vstore[["log_transform_raster"]] == TRUE) {
           # log transform
