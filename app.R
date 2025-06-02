@@ -352,6 +352,7 @@ shiny::shinyApp(
       processing = FALSE,
       ds_ras_elements = NULL,
       ds_ras_time_periods = NULL,
+      ds_ras_ref_periods = NULL,
       log_transform_raster = TRUE,
       downscale_raster_preview = NULL
     )
@@ -1128,6 +1129,10 @@ shiny::shinyApp(
       if (shiny::in_devmode()) cat("Event: ds_ras_time_periods", sep = "\n")
       update_vstore_and_notify("ds_ras_time_periods", input$ds_ras_time_periods, "Raster time period")
     })
+    shiny::observeEvent(input$ds_ras_ref_periods, {
+      if (shiny::in_devmode()) cat("Event: ds_ras_ref_periods", sep = "\n")
+      update_vstore_and_notify("ds_ras_ref_periods", input$ds_ras_ref_periods, "Raster ref/GCM/SSP period")
+    })
     shiny::observeEvent(input$log_scale, {
       if (shiny::in_devmode()) cat("Event: log_transform_raster", sep = "\n")
       update_vstore_and_notify("log_transform_raster", input$log_scale, "Log transform")
@@ -1142,31 +1147,44 @@ shiny::shinyApp(
           leaflet::clearControls(mp)
         }
         
-        # concatenate raster layer preview
-        raster_layer <- climr::variables[Code_Element == vstore[["ds_ras_elements"]] & Time == vstore[["ds_ras_time_periods"]], Code]
+        # browser()
+        ## concatenate raster layer preview
+        code <- raster_layers[Code_Element == vstore[["ds_ras_elements"]] & Time == vstore[["ds_ras_time_periods"]], Code]
+        ref_period <- vstore[["ds_ras_ref_periods"]] 
+        
+        # split ref period into components
+        ref_parts <- unlist(strsplit(ref_period, "_"))
+        
+        # match all parts of the ref_period and the code
+        layer_match <- names(preview_raster)[
+          grepl(code, names(preview_raster)) &
+            sapply(names(preview_raster), function(name) {
+              all(sapply(ref_parts, function(part) grepl(part, name)))
+            })
+        ]
       
-        update_vstore_and_notify("downscale_raster_preview", raster_layer, "Preview raster")
+        update_vstore_and_notify("downscale_raster_preview", layer_match, "Preview raster")
 
         # extract data for legend
-        legend_title <- climr::variables[Code == raster_layer, Variable] |> tools::toTitleCase()
+        legend_title <- climr::variables[Code == code, Variable] |> tools::toTitleCase()
         if (grepl("\\u00b0C", legend_title)) {
           legend_title <- stringi::stri_unescape_unicode(legend_title)
         }
-        units <- paste0(" ", climr::variables[Code == raster_layer, Unit])
+        units <- paste0(" ", climr::variables[Code == code, Unit])
         if (grepl("\\u00b0C", units)) {
           units <- stringi::stri_unescape_unicode(units)
         }
         ## NEED SOMETHING HERE TO FIX % UNITS
-        variable_type <- climr::variables[Code == raster_layer, Type]
+        variable_type <- climr::variables[Code == code, Type]
         if (variable_type == "ratio" & vstore[["log_transform_raster"]] == TRUE) {
           # log transform
-          raster_layer_values <- log2(preview_raster[[raster_layer]] + 1)
+          raster_layer_values <- log2(preview_raster[[layer_match]] + 1)
         } else {
-          raster_layer_values <- preview_raster[[raster_layer]]
+          raster_layer_values <- preview_raster[[layer_match]]
         }
-        
+
         # set palettes
-        col_scheme <- if (grepl("PPT", raster_layer)) {
+        col_scheme <- if (grepl("PPT", layer_match)) {
           RColorBrewer::brewer.pal(9, "YlGnBu")
         } else {
           rev(RColorBrewer::brewer.pal(11, "RdYlBu"))
@@ -1176,16 +1194,16 @@ shiny::shinyApp(
           domain = values(raster_layer_values),
           na.color = "transparent"
         )
-        
+
         # add raster image
         leaflet::addRasterImage(mp, raster_layer_values, layerId = "rast_layer", colors = pal)
-        
+
         # label formatters for legend
         inv_log2_formatter <- labelFormat(
           transform = function(x) round((2^x) - 1),  # inverse of log2(x + 1)
           suffix = units
         )
-        
+
         # add legend
         leaflet::addLegend(mp, pal = pal, values = values(raster_layer_values), title = legend_title, labFormat = if (vstore[["log_transform_raster"]] & variable_type == "ratio") inv_log2_formatter else labelFormat(suffix = units))
       }

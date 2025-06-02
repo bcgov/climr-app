@@ -479,12 +479,15 @@ session_geometry <- function(sg_dt) {
             # raster previews - BUGS
             output$preview_raster_elements <- shiny::renderUI({
               
-              browser()
+              # browser()
               if (show_ui()) {
                 
                 # possible raster elements
                 elements <- unique(c(vstore[["downscale_extra_vars"]], vstore[["downscale_custom_elements"]]))
-                raster_layers <- climr::variables[Code %in% elements]
+                raster_layers <<- climr::variables[Code %in% elements]
+                
+                # extract all variables
+                variables <- unique(raster_layers[, Code_Element])
                 
                 # raster_layers is a datatable of all possible raster layer variables and their info. Use this to have radio buttons of 
                 # variable and time period (use to ensure the time period picked is available). Then have to somehow pull out the ref_period/gcm/period/year
@@ -497,20 +500,21 @@ session_geometry <- function(sg_dt) {
                                prompter::add_prompt(
                                  tooltipsIcon,
                                  message = HTML(paste("Shows the elements for downscaled raster layers. Choose a element for the layer you would like to preview on the map.")),
-                                 position = "top",
+                                 position = "top-left",
                                  size = "large",
                                  shadow = FALSE
                                )
                     ),
                     width = "100%",
                     inline = TRUE,
-                    choices = elements,
+                    choices = variables,
                     selected = vstore[["ds_ras_elements"]]
                   ),
-                  # uiOutput("preview_raster_periods"),
-                  # shiny::div(
-                  #   uiOutput("log_transform")
-                  # ),
+                  uiOutput("preview_raster_time_periods"),
+                  uiOutput("preview_raster_ref_periods"),
+                  shiny::div(
+                    uiOutput("log_transform")
+                  ),
                   br(),
                   shiny::actionButton(
                     inputId = "preview_raster",
@@ -531,14 +535,11 @@ session_geometry <- function(sg_dt) {
             })
             
             # reactive output for selecting time period for previewed raster
-            output$preview_raster_periods <- shiny::renderUI({
+            output$preview_raster_time_periods <- shiny::renderUI({
               if (show_ui() & !is.null(input$ds_ras_elements)) { 
                 
-                # match given element to valid raster layers
-                matching_layers <- grep(paste0("^", vstore[["ds_ras_elements"]]), names(preview_raster), value = TRUE)
-                
                 # extract valid time periods for given element
-                time_periods <- climr::variables[Code %in% matching_layers & Time %in% vstore[["downscale_custom_time_periods"]], Time]
+                time_periods <- raster_layers[Code_Element == input$ds_ras_elements, Time]
                 
                 # remove duplicates
                 time_periods <- unique(time_periods)
@@ -549,7 +550,7 @@ session_geometry <- function(sg_dt) {
                              prompter::add_prompt(
                                tooltipsIcon,
                                message = HTML(paste("Shows the time periods for downscaled raster layers. Choose a time period for the layer you would like to preview on the map.")),
-                               position = "top",
+                               position = "top-left",
                                size = "large",
                                shadow = FALSE
                              )
@@ -564,11 +565,41 @@ session_geometry <- function(sg_dt) {
               }
             })
             
+            # reactive output for selecting ref periods 
+            output$preview_raster_ref_periods <- shiny::renderUI({
+              if (show_ui() & !is.null(input$ds_ras_elements) & !is.null(input$ds_ras_time_periods)) {
+                code <- raster_layers[Code_Element == vstore[["ds_ras_elements"]] & Time == vstore[["ds_ras_time_periods"]], Code]
+                
+                # extract ref/GCM/SSP periods
+                layers <- names(preview_raster)[grepl(code, names(preview_raster))]
+                cleaned_names <- gsub(paste0("_?", code, "_?"), "_", layers)
+                
+                
+                shiny::radioButtons(
+                  inputId = "ds_ras_ref_periods",
+                  label = h5("Choose reference period of raster to preview:",
+                             prompter::add_prompt(
+                               tooltipsIcon,
+                               message = HTML(paste("Shows the reference/GCM/SSP periods for downscaled raster layers. Choose a period for the layer you would like to preview on the map.")),
+                               position = "top-left",
+                               size = "large",
+                               shadow = FALSE
+                             )
+                  ),
+                  width = "100%",
+                  inline = TRUE,
+                  choices = cleaned_names,
+                  selected = vstore[["ds_ras_ref_periods"]]
+                )
+              } else {
+                NULL
+              }
+            })
+            
             # reactive output for log transform button
             output$log_transform <- shiny::renderUI({
               if (!is.null(vstore[["ds_ras_elements"]]) & !is.null(vstore[["ds_ras_time_periods"]])) {
-                raster_layer <- climr::variables[Code_Element == vstore[["ds_ras_elements"]] & Time == vstore[["ds_ras_time_periods"]], Code]
-                variable_type <- climr::variables[Code %in% raster_layer, Type]
+                variable_type <- raster_layers[Code_Element == vstore[["ds_ras_elements"]] & Time == vstore[["ds_ras_time_periods"]], Type]
                 if (length(variable_type) != 0) {
                   if (show_ui() & variable_type == "ratio") {
                     shiny::checkboxInput(
