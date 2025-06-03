@@ -647,11 +647,11 @@ session_geometry <- function(sg_dt) {
                     vstore[["ds_ras_run_choices"]] <- c("ensembleMean")
                   } else {
                     matching_rasters <- names(preview_raster)[stringr::str_detect(names(preview_raster), input$ds_ras_gcms)]
-                    run_names <- na.omit(stringr::str_extract(matching_rasters, "r[^_]*"))
+                    run_names <- na.omit(stringr::str_extract(matching_rasters, "(?<=_)r[^_]*"))
                     vstore[["ds_ras_run_choices"]] <- c("ensembleMean", unique(run_names))
                   }
                 } else {
-                  run_names <- na.omit(stringr::str_extract(names(preview_raster), "r[^_]*"))
+                  run_names <- na.omit(stringr::str_extract(names(preview_raster), "(?<=_)r[^_]*"))
                   vstore[["ds_ras_run_choices"]] <- unique(run_names)
                 }
                 shiny::radioButtons(
