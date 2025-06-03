@@ -359,9 +359,9 @@ shiny::shinyApp(
       ds_ras_obs_periods = NULL,
       ds_ras_gcms = NULL,
       ds_ras_ssps = NULL,
+      ds_ras_run_choices = NULL,
       ds_ras_run = NULL,
       ds_ras_gcm_period = NULL,
-      # ds_ras_ref_periods = NULL,
       log_transform_raster = TRUE,
       downscale_raster_preview = NULL
     )
@@ -889,6 +889,17 @@ shiny::shinyApp(
       vstore[["downscale_ensemble_mean"]] <- as.logical(input$downscale_ensemble_mean)
       vstore[["downscale_max_run"]] <- input$downscale_max_run
       
+      # choices for ensemble mean / max runs
+      vstore[["ds_ras_run_choices"]] <- if (vstore[["downscale_ensemble_mean"]]) {
+        if (vstore[["downscale_max_run"]] == 0) {
+          c("Ensemble Mean")
+        } else {
+          c("Ensemble Mean", vstore[["downscale_max_run"]])
+        }
+      } else {
+        vstore[["downscale_max_run"]]
+      }
+      
       ## extra climate variables ##
       # handle sets
       extra_var_handler()
@@ -904,9 +915,7 @@ shiny::shinyApp(
       vstore[["downscale_core_ppt_lr"]] <- input$downscale_core_ppt_lr
       
       compatible_periods <- climr::variables[Code_Element %in% vstore[["downscale_custom_elements"]] & Time %in% vstore[["downscale_custom_time_periods"]]]
-      if (nrow(compatible_periods) != 0) {
-        removeModal()
-      } else {
+      if (nrow(compatible_periods) == 0 && !is.null(input$downscale_custom_elements) && !is.null(input$downscale_custom_time_periods)) {
         showModal(
           modalDialog(
             title = "Warning",
@@ -914,6 +923,8 @@ shiny::shinyApp(
             easyClose = TRUE
           )
         )
+      } else {
+        removeModal()
       }
     })
     

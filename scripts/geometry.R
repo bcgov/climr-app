@@ -609,10 +609,6 @@ session_geometry <- function(sg_dt) {
               if (show_ui() & !is.null(input$ds_ras_elements) & !is.null(input$ds_ras_time_periods)) {
                 code <- raster_layers[Code_Element == input$ds_ras_elements & Time == input$ds_ras_time_periods, Code]
                 
-                # # extract ref/GCM/SSP periods
-                # layers <- names(preview_raster)[grepl(code, names(preview_raster))]
-                # cleaned_names <- gsub(paste0("_?", code, "_?"), "_", layers)
-                
                 shiny::div(
                   shiny::conditionalPanel(
                     condition = "input.ds_ras_obs_sim == 'Observed'",
@@ -622,7 +618,7 @@ session_geometry <- function(sg_dt) {
                                  prompter::add_prompt(
                                    tooltipsIcon,
                                    message = HTML(paste("I feel like we don't need these here?")),
-                                   position = "top-left",
+                                   position = "top",
                                    size = "large",
                                    shadow = FALSE
                                  )
@@ -642,7 +638,7 @@ session_geometry <- function(sg_dt) {
                                  prompter::add_prompt(
                                    tooltipsIcon,
                                    message = HTML(paste("helpful things")),
-                                   position = "top-left",
+                                   position = "top",
                                    size = "large",
                                    shadow = FALSE
                                  )
@@ -658,7 +654,7 @@ session_geometry <- function(sg_dt) {
                                  prompter::add_prompt(
                                    tooltipsIcon,
                                    message = HTML(paste("please not ssp 585")),
-                                   position = "top-left",
+                                   position = "top",
                                    size = "large",
                                    shadow = FALSE
                                  )
@@ -674,23 +670,23 @@ session_geometry <- function(sg_dt) {
                                  prompter::add_prompt(
                                    tooltipsIcon,
                                    message = HTML(paste("blah blah de blah")),
-                                   position = "top-left",
+                                   position = "top",
                                    size = "large",
                                    shadow = FALSE
                                  )
                       ),
                       width = "100%",
                       inline = TRUE,
-                      choices = c("Ensemble Mean", vstore[["downscale_max_run"]]), # THIS WILL BE BUGGY NEED ERROR HANDLING FOR ENSEMBLE MEAN
+                      choices = vstore[["ds_ras_run_choices"]],
                       selected = vstore[["ds_ras_run"]]
-                    ),  
+                    ),
                     shiny::radioButtons(
                       inputId = "ds_ras_gcm_period",
-                      label = h5("Choose period run to preview:",
+                      label = h5("Choose period to preview:",
                                  prompter::add_prompt(
                                    tooltipsIcon,
                                    message = HTML(paste("bleep bloop")),
-                                   position = "top-left",
+                                   position = "top",
                                    size = "large",
                                    shadow = FALSE
                                  )
