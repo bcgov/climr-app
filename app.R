@@ -823,45 +823,34 @@ shiny::shinyApp(
       
       ## refmap ##
       vstore[["downscale_which_refmap"]] <- input$downscale_which_refmap
-      # update_vstore_and_notify("downscale_which_refmap", input$downscale_which_refmap, "Ref map")
       
       ## observed periods ##
-      # update_vstore_and_notify("downscale_obs_periods_checkbox", input$downscale_obs_periods_checkbox, "Obs periods")
       vstore[["downscale_obs_periods_checkbox"]] <- input$downscale_obs_periods_checkbox
       if ("1961_1990" %in% vstore[["downscale_obs_periods_checkbox"]]) {
-        # update_vstore_and_notify("downscale_return_refperiod", TRUE, "Return ref period")
         vstore[["downscale_return_refperiod"]] <- TRUE
       } 
-      # update_vstore_and_notify("downscale_obs_periods", input$downscale_obs_periods_checkbox[input$downscale_obs_periods_checkbox != "1961_1990"], "Obs periods")
       vstore[["downscale_obs_periods"]] <- input$downscale_obs_periods_checkbox[input$downscale_obs_periods_checkbox != "1961_1990"]
       
       ## observed years ##
       vstore[["downscale_obs_years_checkbox"]] <- input$observed_years_checkbox
-      # update_vstore_and_notify("downscale_obs_years_checkbox", input$observed_years_checkbox, "Obs checkbox")
       if (vstore[["downscale_obs_years_checkbox"]] == TRUE) {
         date_range <- c(min(input$downscale_obs_years):max(input$downscale_obs_years))
-        # update_vstore_and_notify("downscale_obs_years", date_range, "Obs years")
         vstore[["downscale_obs_years"]] <- date_range
       }
       
       ## time series dataset ##
-      # update_vstore_and_notify("downscale_obs_ts_dataset", input$downscale_obs_ts_dataset, "Obs dataset")
       vstore[["downscale_obs_ts_dataset"]] <- input$downscale_obs_ts_dataset
       
       ## GCMs ##
-      # update_vstore_and_notify("downscale_gcms", input$downscale_gcms, "GCMs")
       vstore[["downscale_gcms"]] <- input$downscale_gcms
       
       ## SSPs ##
-      # update_vstore_and_notify("downscale_ssps", input$downscale_ssps, "SSPs")
       vstore[["downscale_ssps"]] <- input$downscale_ssps
       
       ## GCM periods ##
-      # update_vstore_and_notify("downscale_gcm_periods", input$downscale_gcm_periods, "GCM periods")
       vstore[["downscale_gcm_periods"]] <- input$downscale_gcm_periods
       
       ## GCM years ##
-      # update_vstore_and_notify("downscale_gcm_years_checkbox", input$gcm_years_checkbox, "GCM checkbox")
       vstore[["downscale_gcm_years_checkbox"]] <- input$gcm_years_checkbox
       if (vstore[["downscale_gcm_years_checkbox"]] == TRUE) {
         # add selected range
@@ -876,44 +865,27 @@ shiny::shinyApp(
           hist_range <- (min(input$downscale_gcm_years):max(input$downscale_gcm_years))
           ssp_range <- NULL
         }
-        # update_vstore_and_notify("downscale_gcm_hist_years", hist_range, "GCM hist years")
-        # update_vstore_and_notify("downscale_gcm_ssp_years", ssp_range, "GCM SSP years")
         vstore[["downscale_gcm_years"]] <- input$downscale_gcm_years
         vstore[["downscale_gcm_hist_years"]] <- hist_range
         vstore[["downscale_gcm_ssp_years"]] <- ssp_range
       }
       
       ## ensemble mean / max model runs ##
-      # update_vstore_and_notify("downscale_ensemble_mean", as.logical(input$downscale_ensemble_mean), "Ensemble mean")
-      # update_vstore_and_notify("downscale_max_run", input$downscale_max_run, "Max run")
       vstore[["downscale_ensemble_mean"]] <- as.logical(input$downscale_ensemble_mean)
       vstore[["downscale_max_run"]] <- input$downscale_max_run
-      
-      # choices for ensemble mean / max runs
-      vstore[["ds_ras_run_choices"]] <- if (vstore[["downscale_ensemble_mean"]]) {
-        if (vstore[["downscale_max_run"]] == 0) {
-          c("Ensemble Mean" = "ensembleMean")
-        } else {
-          c("Ensemble Mean" = "ensembleMean", vstore[["downscale_max_run"]])
-        }
-      } else {
-        vstore[["downscale_max_run"]]
-      }
       
       ## extra climate variables ##
       # handle sets
       extra_var_handler()
       
       # handle custom
-      # update_vstore_and_notify("downscale_custom_elements", input$downscale_custom_elements, "Extra variables custom elements")
-      # update_vstore_and_notify("downscale_custom_time_periods", input$downscale_custom_time_periods, "Extra variables custom time periods")
       vstore[["downscale_custom_elements"]] <- input$downscale_custom_elements
       vstore[["downscale_custom_time_periods"]] <- input$downscale_custom_time_periods
       
       ## elev adjustment ##
-      # update_vstore_and_notify("downscale_core_ppt_lr", input$downscale_core_ppt_lr, "Core PPT LR")
       vstore[["downscale_core_ppt_lr"]] <- input$downscale_core_ppt_lr
       
+      # ensure there are valid element/time period matches selected
       compatible_periods <- climr::variables[Code_Element %in% vstore[["downscale_custom_elements"]] & Time %in% vstore[["downscale_custom_time_periods"]]]
       
       # collect simulated inputs
@@ -988,7 +960,6 @@ shiny::shinyApp(
     # handler for extra climate variable sets
     extra_var_handler <- function() {
       # add new variables
-      # update_vstore_and_notify("downscale_extra_vars_sets", input$downscale_extra_vars_sets, "Set")
       vstore[["downscale_extra_vars_sets"]] <- input$downscale_extra_vars_sets
       
       # remove core vars if sets selected
@@ -1164,6 +1135,7 @@ shiny::shinyApp(
       }
       
       sg$process()
+      
       show_ui(TRUE)
     })
     shiny::observeEvent(input$ds_ras_elements, {

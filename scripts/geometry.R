@@ -667,14 +667,31 @@ session_geometry <- function(sg_dt) {
                         choices = vstore[["downscale_ssps"]],
                         selected = vstore[["ds_ras_ssps"]]
                       ),
+                      shiny::uiOutput("preview_model_run"),
+                        # shiny::radioButtons(
+                        #   inputId = "ds_ras_run",
+                        #   label = h5("Choose model run to preview:",
+                        #              prompter::add_prompt(
+                        #                tooltipsIcon,
+                        #                message = HTML(paste("blah blah de blah")),
+                        #                position = "top",
+                        #                size = "large",
+                        #                shadow = FALSE
+                        #              )
+                        #   ),
+                        #   width = "100%",
+                        #   inline = TRUE,
+                        #   choices = vstore[["ds_ras_run_choices"]],
+                        #   selected = vstore[["ds_ras_run"]]
+                        # ),
                       shiny::conditionalPanel(
-                        condition = "input.ds_ras_run != null",
+                        condition = "input.ds_ras_gcm_period != null",
                         shiny::radioButtons(
-                          inputId = "ds_ras_run",
-                          label = h5("Choose number of model runs to preview:",
+                          inputId = "ds_ras_gcm_period",
+                          label = h5("Choose period to preview:",
                                      prompter::add_prompt(
                                        tooltipsIcon,
-                                       message = HTML(paste("blah blah de blah")),
+                                       message = HTML(paste("bleep bloop")),
                                        position = "top",
                                        size = "large",
                                        shadow = FALSE
@@ -682,27 +699,8 @@ session_geometry <- function(sg_dt) {
                           ),
                           width = "100%",
                           inline = TRUE,
-                          choices = vstore[["ds_ras_run_choices"]],
-                          selected = vstore[["ds_ras_run"]]
-                        ),
-                        shiny::conditionalPanel(
-                          condition = "input.ds_ras_gcm_period != null",
-                          shiny::radioButtons(
-                            inputId = "ds_ras_gcm_period",
-                            label = h5("Choose period to preview:",
-                                       prompter::add_prompt(
-                                         tooltipsIcon,
-                                         message = HTML(paste("bleep bloop")),
-                                         position = "top",
-                                         size = "large",
-                                         shadow = FALSE
-                                       )
-                            ),
-                            width = "100%",
-                            inline = TRUE,
-                            choices = vstore[["downscale_gcm_periods"]],
-                            selected = vstore[["ds_ras_gcm_period"]]
-                          )
+                          choices = vstore[["downscale_gcm_periods"]],
+                          selected = vstore[["ds_ras_gcm_period"]]
                         )
                       )
                     )
@@ -710,6 +708,41 @@ session_geometry <- function(sg_dt) {
                 )
               } else {
                 NULL
+              }
+            })
+            
+            # reactive output for model run names
+            output$preview_model_run <- shiny::renderUI({
+              if (!is.null(input$ds_ras_gcms)) {
+                # choices for ensemble mean / max runs
+                if (vstore[["downscale_ensemble_mean"]]) {
+                  if (vstore[["downscale_max_run"]] == 0) {
+                    vstore[["ds_ras_run_choices"]] <- c("ensembleMean")
+                  } else {
+                    matching_rasters <- names(preview_raster)[stringr::str_detect(names(preview_raster), input$ds_ras_gcms)]
+                    run_names <- na.omit(stringr::str_extract(matching_rasters, "r[^_]*"))
+                    vstore[["ds_ras_run_choices"]] <- c("ensembleMean", unique(run_names))
+                  }
+                } else {
+                  run_names <- na.omit(stringr::str_extract(names(preview_raster), "r[^_]*"))
+                  vstore[["ds_ras_run_choices"]] <- unique(run_names)
+                }
+                shiny::radioButtons(
+                  inputId = "ds_ras_run",
+                  label = h5("Choose model run to preview:",
+                             prompter::add_prompt(
+                               tooltipsIcon,
+                               message = HTML(paste("blah blah de blah")),
+                               position = "top",
+                               size = "large",
+                               shadow = FALSE
+                             )
+                  ),
+                  width = "100%",
+                  inline = TRUE,
+                  choices = vstore[["ds_ras_run_choices"]],
+                  selected = vstore[["ds_ras_run"]]
+                )
               }
             })
             
