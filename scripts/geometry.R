@@ -614,23 +614,6 @@ session_geometry <- function(sg_dt) {
                 # cleaned_names <- gsub(paste0("_?", code, "_?"), "_", layers)
                 
                 shiny::div(
-                  # shiny::radioButtons(
-                  #   inputId = "ds_ras_ref_periods",
-                  #   label = h5("Choose reference period of raster to preview:",
-                  #              prompter::add_prompt(
-                  #                tooltipsIcon,
-                  #                message = HTML(paste("Shows the reference/GCM/SSP periods for downscaled raster layers. Choose a period for the layer you would like to preview on the map.")),
-                  #                position = "top-left",
-                  #                size = "large",
-                  #                shadow = FALSE
-                  #              )
-                  #   ),
-                  #   width = "100%",
-                  #   inline = TRUE,
-                  #   choices = cleaned_names,
-                  #   selected = vstore[["ds_ras_ref_periods"]]
-                  # ),
-                  
                   shiny::conditionalPanel(
                     condition = "input.ds_ras_obs_sim == 'Observed'",
                     shiny::radioButtons(

@@ -1171,18 +1171,26 @@ shiny::shinyApp(
         browser()
         ## concatenate raster layer preview
         code <- raster_layers[Code_Element == vstore[["ds_ras_elements"]] & Time == vstore[["ds_ras_time_periods"]], Code]
-        ref_period <- vstore[["ds_ras_ref_periods"]] 
         
-        # split ref period into components
-        ref_parts <- unlist(strsplit(ref_period, "_"))
+        if (input$ds_ras_obs_sim == "Observed") {
+          time_period <- input$ds_ras_obs_periods
+          keywords <- c(code, time_period)
+          
+          layer_match <- raster_names[
+            Reduce(`&`, lapply(keywords, function(k) grepl(k, raster_names)))
+          ]
+        }
         
-        # match all parts of the ref_period and the code
-        layer_match <- names(preview_raster)[
-          grepl(code, names(preview_raster)) &
-            sapply(names(preview_raster), function(name) {
-              all(sapply(ref_parts, function(part) grepl(part, name)))
-            })
-        ]
+        # # split ref period into components
+        # ref_parts <- unlist(strsplit(ref_period, "_"))
+        # 
+        # # match all parts of the ref_period and the code
+        # layer_match <- names(preview_raster)[
+        #   grepl(code, names(preview_raster)) &
+        #     sapply(names(preview_raster), function(name) {
+        #       all(sapply(ref_parts, function(part) grepl(part, name)))
+        #     })
+        # ]
       
         update_vstore_and_notify("downscale_raster_preview", layer_match, "Preview raster")
 
