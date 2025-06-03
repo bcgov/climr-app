@@ -918,7 +918,7 @@ shiny::shinyApp(
       
       # collect simulated inputs
       selections <- list(input$downscale_gcms, input$downscale_ssps, input$downscale_gcm_periods)
-      selected_count <- sum(sapply(selections, function(x) !is.null(x) && x != ""))
+      lengths <- sapply(selections, length)
       
       if (nrow(compatible_periods) == 0 && !is.null(input$downscale_custom_elements) && !is.null(input$downscale_custom_time_periods)) {
         showModal(
@@ -928,7 +928,7 @@ shiny::shinyApp(
             easyClose = TRUE
           )
         )
-      } else if (selected_count != 0 && selected_count != 3) {
+      } else if (!(all(lengths == 0) || all(lengths > 0))) {
         showModal(
           modalDialog(
             title = "Warning",
