@@ -492,15 +492,7 @@ session_geometry <- function(sg_dt) {
                 shiny::div(
                   shiny::radioButtons(
                     inputId = "ds_ras_elements",
-                    label = h5("Choose element of raster to preview:",
-                               prompter::add_prompt(
-                                 tooltipsIcon,
-                                 message = HTML(paste("Shows the elements for downscaled raster layers. Choose a element for the layer you would like to preview on the map.")),
-                                 position = "top-left",
-                                 size = "large",
-                                 shadow = FALSE
-                               )
-                    ),
+                    label = h5("Choose element of raster to preview:"),
                     width = "100%",
                     inline = TRUE,
                     choices = variables,
@@ -508,25 +500,6 @@ session_geometry <- function(sg_dt) {
                   ),
                   uiOutput("preview_raster_time_periods"),
                   uiOutput("preview_raster_obs_sim"),
-                  # shiny::conditionalPanel(
-                  #   condition = "input.ds_ras_obs_sim == 'Observed'",
-                  #   shiny::radioButtons(
-                  #     inputId = "ds_ras_obs_periods",
-                  #     label = h5("Choose element of raster to preview:",
-                  #                prompter::add_prompt(
-                  #                  tooltipsIcon,
-                  #                  message = HTML(paste("Shows the elements for downscaled raster layers. Choose a element for the layer you would like to preview on the map.")),
-                  #                  position = "top-left",
-                  #                  size = "large",
-                  #                  shadow = FALSE
-                  #                )
-                  #     ),
-                  #     width = "100%",
-                  #     inline = TRUE,
-                  #     choices = vstore[["downscale_obs_periods"]],
-                  #     selected = vstore[["ds_ras_obs_periods"]]
-                  #   ),
-                  # ),
                   uiOutput("preview_raster_ref_periods"),
                   shiny::div(
                     uiOutput("log_transform")
@@ -562,15 +535,7 @@ session_geometry <- function(sg_dt) {
                 
                 shiny::radioButtons(
                   inputId = "ds_ras_time_periods",
-                  label = h5("Choose time period of raster to preview:",
-                             prompter::add_prompt(
-                               tooltipsIcon,
-                               message = HTML(paste("Shows the time periods for downscaled raster layers. Choose a time period for the layer you would like to preview on the map.")),
-                               position = "top-left",
-                               size = "large",
-                               shadow = FALSE
-                             )
-                  ),
+                  label = h5("Choose time period of raster to preview:"),
                   width = "100%",
                   inline = TRUE,
                   choices = time_periods,
@@ -583,21 +548,31 @@ session_geometry <- function(sg_dt) {
             
             # reactive output for selecting observed or simulated data
             output$preview_raster_obs_sim <- shiny::renderUI({
+              # collect observed inputs
+              #browser()
+              selections_obs <- list(vstore[["downscale_obs_periods_checkbox"]])
+              lengths_obs <- sapply(selections_obs, length)
+              
+              # collect simulated inputs
+              selections_sim <- list(input$downscale_gcms, input$downscale_ssps, input$downscale_gcm_periods)
+              lengths_sim <- sapply(selections_sim, length)
+              choices <- c()
+              if (all(lengths_obs == 0) && all(lengths_sim == 0)) {
+                NULL
+              } else if (all(lengths_obs == 0)) {
+                choices <- c("Simulated")
+              } else if (all(lengths_sim == 0)) {
+                choices <- c("Observed")
+              } else {
+                choices <- c("Observed", "Simulated")
+              }
               if (show_ui() & !is.null(input$ds_ras_elements) & !is.null(input$ds_ras_time_periods)) {
                 shiny::radioButtons(
                   inputId = "ds_ras_obs_sim",
-                  label = h5("Preview observed or simulated data?",
-                             prompter::add_prompt(
-                               tooltipsIcon,
-                               message = HTML(paste("Please write something helpful!")),
-                               position = "top-left",
-                               size = "large",
-                               shadow = FALSE
-                             )
-                  ),
+                  label = h5("Preview observed or simulated data?"),
                   width = "100%",
                   inline = TRUE,
-                  choices = c("Observed", "Simulated"),
+                  choices = choices,
                   selected = vstore[["ds_ras_obs_sim"]]
                 )
               }
@@ -614,15 +589,7 @@ session_geometry <- function(sg_dt) {
                     condition = "input.ds_ras_obs_sim == 'Observed' && input.downscale_obs_periods_checkbox != null",
                     shiny::radioButtons(
                       inputId = "ds_ras_obs_periods",
-                      label = h5("Choose period to preview:",
-                                 prompter::add_prompt(
-                                   tooltipsIcon,
-                                   message = HTML(paste("I feel like we don't need these here?")),
-                                   position = "top",
-                                   size = "large",
-                                   shadow = FALSE
-                                 )
-                      ),
+                      label = h5("Choose period to preview:"),
                       width = "100%",
                       inline = TRUE,
                       choices = vstore[["downscale_obs_periods_checkbox"]],
@@ -634,15 +601,7 @@ session_geometry <- function(sg_dt) {
                     condition = "input.ds_ras_obs_sim == 'Simulated' && input.downscale_gcms != null",
                     shiny::radioButtons(
                       inputId = "ds_ras_gcms",
-                      label = h5("Choose GCM to preview:",
-                                 prompter::add_prompt(
-                                   tooltipsIcon,
-                                   message = HTML(paste("helpful things")),
-                                   position = "top",
-                                   size = "large",
-                                   shadow = FALSE
-                                 )
-                      ),
+                      label = h5("Choose GCM to preview:"),
                       width = "100%",
                       inline = TRUE,
                       choices = vstore[["downscale_gcms"]],
@@ -653,50 +612,18 @@ session_geometry <- function(sg_dt) {
                       condition = "input.downscale_ssps != null",
                       shiny::radioButtons(
                         inputId = "ds_ras_ssps",
-                        label = h5("Choose SSP to preview:",
-                                   prompter::add_prompt(
-                                     tooltipsIcon,
-                                     message = HTML(paste("please not ssp 585")),
-                                     position = "top",
-                                     size = "large",
-                                     shadow = FALSE
-                                   )
-                        ),
+                        label = h5("Choose SSP to preview:"),
                         width = "100%",
                         inline = TRUE,
                         choices = vstore[["downscale_ssps"]],
                         selected = vstore[["ds_ras_ssps"]]
                       ),
                       shiny::uiOutput("preview_model_run"),
-                        # shiny::radioButtons(
-                        #   inputId = "ds_ras_run",
-                        #   label = h5("Choose model run to preview:",
-                        #              prompter::add_prompt(
-                        #                tooltipsIcon,
-                        #                message = HTML(paste("blah blah de blah")),
-                        #                position = "top",
-                        #                size = "large",
-                        #                shadow = FALSE
-                        #              )
-                        #   ),
-                        #   width = "100%",
-                        #   inline = TRUE,
-                        #   choices = vstore[["ds_ras_run_choices"]],
-                        #   selected = vstore[["ds_ras_run"]]
-                        # ),
                       shiny::conditionalPanel(
                         condition = "input.ds_ras_gcm_period != null",
                         shiny::radioButtons(
                           inputId = "ds_ras_gcm_period",
-                          label = h5("Choose period to preview:",
-                                     prompter::add_prompt(
-                                       tooltipsIcon,
-                                       message = HTML(paste("bleep bloop")),
-                                       position = "top",
-                                       size = "large",
-                                       shadow = FALSE
-                                     )
-                          ),
+                          label = h5("Choose period to preview:"),
                           width = "100%",
                           inline = TRUE,
                           choices = vstore[["downscale_gcm_periods"]],
@@ -729,15 +656,7 @@ session_geometry <- function(sg_dt) {
                 }
                 shiny::radioButtons(
                   inputId = "ds_ras_run",
-                  label = h5("Choose model run to preview:",
-                             prompter::add_prompt(
-                               tooltipsIcon,
-                               message = HTML(paste("blah blah de blah")),
-                               position = "top",
-                               size = "large",
-                               shadow = FALSE
-                             )
-                  ),
+                  label = h5("Choose model run to preview:"),
                   width = "100%",
                   inline = TRUE,
                   choices = vstore[["ds_ras_run_choices"]],
