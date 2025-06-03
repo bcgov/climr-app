@@ -335,7 +335,7 @@ session_geometry <- function(sg_dt) {
               shiny::showNotification("Uploaded point geometry has more than 100 points. Displaying convex hull.", type = "message")
               new_p <- shape |>
                 terra::aggregate() |>
-                terra::convHull() |>
+                terra::hull(type = "convex") |>
                 terra::geom(wkt = TRUE)
             }
             push(new_p, "marker", "file_upload", d0)
@@ -368,7 +368,7 @@ session_geometry <- function(sg_dt) {
           shiny::showNotification("Uploaded point csv has more than 100 points. Displaying convex hull.", type = "message")
           new_p <- terra::vect(new_p, "EPSG:4326") |>
             terra::aggregate() |>
-            terra::convHull() |>
+            terra::hull(type = "convex") |>
             terra::geom(wkt = TRUE)
         }
         push(new_p, "marker", "file_upload", d0)

@@ -532,7 +532,7 @@ downscale_extra_vars <- local({
 })
 
 rastmakerg <- function(g, resolution) {
-  hull <- terra::minRect(g)
+  hull <- terra::hill(type = "rectangle")(g)
   lat <- mean(c(terra::ymin(hull), terra::ymax(hull)))
   y_res <- resolution / 111319  # Latitude resolution
   x_res <- resolution / (111319 * cos(lat * pi / 180))  # Longitude resolution adjusted for latitude
