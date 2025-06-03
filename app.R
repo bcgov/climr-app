@@ -1192,7 +1192,7 @@ shiny::shinyApp(
           leaflet::clearControls(mp)
         }
         
-        browser()
+        # browser()
         ## concatenate raster layer preview
         code <- raster_layers[Code_Element == vstore[["ds_ras_elements"]] & Time == vstore[["ds_ras_time_periods"]], Code]
         
@@ -1223,7 +1223,7 @@ shiny::shinyApp(
 
         # extract data for legend
         legend_title <- climr::variables[Code == code, Variable] |> tools::toTitleCase()
-        if (grepl("\\u00b0C", legend_title)) {
+        if (grepl("\\u00b0C", legend_title) | grepl("\\u00b0c", legend_title)) {
           legend_title <- stringi::stri_unescape_unicode(legend_title)
         }
         units <- paste0(" ", climr::variables[Code == code, Unit])
