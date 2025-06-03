@@ -299,15 +299,12 @@ shiny::shinyApp(
       downscale_obs_periods_checkbox = "1961_1990",
       downscale_obs_periods = "NULL",
       downscale_obs_years_checkbox = FALSE,
-      # downscale_obs_years = c(1951:2024),
       downscale_obs_years = NULL,
       downscale_obs_ts_dataset = "NULL",
       downscale_sim_recommended = FALSE,
       downscale_gcms = "NULL",
       downscale_ssps = "NULL",
       downscale_gcm_periods = "NULL",
-      # downscale_gcm_ssp_years = c(2015:2100),
-      # downscale_gcm_hist_years = c(1951:2014),
       downscale_gcm_ssp_years = NULL,
       downscale_gcm_hist_years = NULL,
       downscale_gcm_years_checkbox = FALSE,
@@ -541,7 +538,6 @@ shiny::shinyApp(
                     step = 1,
                     sep = ""
                   ),
-                  # selected = c(min(vstore[["downscale_obs_years"]]), max(vstore[["downscale_obs_years"]])),
                   shiny::radioButtons(
                     inputId = "downscale_obs_ts_dataset",
                     label = h5("Choose observation time-series data:",
@@ -656,7 +652,6 @@ shiny::shinyApp(
                     step = 1,
                     sep = ""
                   ),
-                  #selected = c(min(vstore[["downscale_gcm_years"]]), max(vstore[["downscale_gcm_years"]])),
                 )
               ),
               
@@ -1195,6 +1190,9 @@ shiny::shinyApp(
     shiny::observeEvent(input$log_scale, {
       if (shiny::in_devmode()) cat("Event: log_transform_raster", sep = "\n")
       update_vstore_and_notify("log_transform_raster", input$log_scale, "Log transform")
+    })
+    shiny::observeEvent(input$calculate_diff, {
+      if (shiny::in_devmode()) cat("Event: log_transform_raster", sep = "\n")
     })
     shiny::observeEvent(input$preview_raster, {
       if (shiny::in_devmode()) cat("Event: downscale_raster_preview", sep = "\n")

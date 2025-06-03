@@ -502,6 +502,10 @@ session_geometry <- function(sg_dt) {
                   uiOutput("preview_raster_obs_sim"),
                   uiOutput("preview_raster_ref_periods"),
                   shiny::div(
+                    shiny::checkboxInput(
+                      inputId = "calculate_diff",
+                      label = "Show difference between selected raster and reference period"
+                    ),
                     uiOutput("log_transform")
                   ),
                   br(),
@@ -556,7 +560,7 @@ session_geometry <- function(sg_dt) {
               # collect simulated inputs
               selections_sim <- list(input$downscale_gcms, input$downscale_ssps, input$downscale_gcm_periods)
               lengths_sim <- sapply(selections_sim, length)
-              choices <- c()
+
               if (all(lengths_obs == 0) && all(lengths_sim == 0)) {
                 NULL
               } else if (all(lengths_obs == 0)) {
