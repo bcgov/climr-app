@@ -302,6 +302,7 @@ shiny::shinyApp(
       # downscale_obs_years = c(1951:2024),
       downscale_obs_years = NULL,
       downscale_obs_ts_dataset = "NULL",
+      downscale_sim_recommended = FALSE,
       downscale_gcms = "NULL",
       downscale_ssps = "NULL",
       downscale_gcm_periods = "NULL",
@@ -333,6 +334,7 @@ shiny::shinyApp(
       downscale_obs_years_checkbox = downscale_default[["downscale_obs_years_checkbox"]],
       downscale_obs_years = downscale_default[["downscale_obs_years"]],
       downscale_obs_ts_dataset = downscale_default[["downscale_obs_ts_dataset"]],
+      downscale_sim_recommended = downscale_default[["downscale_sim_recommended"]],
       downscale_gcms = downscale_default[["downscale_gcms"]],
       downscale_ssps = downscale_default[["downscale_ssps"]],
       downscale_gcm_periods = downscale_default[["downscale_gcm_periods"]],
@@ -565,6 +567,12 @@ shiny::shinyApp(
               value = "acc_simulated",
               
               shiny::div(
+                shiny::checkboxInput(
+                  inputId = "sim_data_default",
+                  label = "Use recommended default settings for Simulated Climate Data",
+                  value = vstore[["downscale_sim_recommended"]],
+                  width = "100%"
+                ),
                 shiny::checkboxGroupInput(
                   inputId = "downscale_gcms",
                   label = h5("Choose Global Climate Model (GCM):",
@@ -786,6 +794,40 @@ shiny::shinyApp(
         )
       )
     }
+    shiny::observeEvent(input$sim_data_default, {
+      if (shiny::in_devmode()) cat("Event: downscale_sim_recommended", sep = "\n")
+      vstore[["downscale_sim_recommended"]] <- input$sim_data_default
+    })
+    shiny::observe(
+      if (vstore[["downscale_sim_recommended"]] == TRUE) {
+        # GCMs
+        vstore[["downscale_gcms"]] <- climr::list_gcms()[c(1,4:7,10:12)]
+        shiny::updateCheckboxGroupInput(
+          inputId = "downscale_gcms",
+          choices = climr::list_gcms() |> sn(),
+          selected = vstore[["downscale_gcms"]],
+          inline = TRUE
+        )
+        
+        # SSPs
+        vstore[["downscale_ssps"]] <- climr::list_ssps()[c(1:3)]
+        shiny::updateCheckboxGroupInput(
+          inputId = "downscale_ssps",
+          choices = climr::list_ssps() |> sn(),
+          selected = vstore[["downscale_ssps"]],
+          inline = TRUE
+        )
+        
+        # GCM periods
+        vstore[["downscale_gcm_periods"]] <- climr::list_gcm_periods()[c(1:5)]
+        shiny::updateCheckboxGroupInput(
+          inputId = "downscale_gcm_periods",
+          choices = c(climr::list_gcm_periods() |> sn()),
+          selected = vstore[["downscale_gcm_periods"]],
+          inline = TRUE
+        )
+      }
+    )
     
     shiny::observeEvent(input$downscale_parameters, {
       if (shiny::in_devmode()) cat("Event: downscale_parameters", sep = "\n")
