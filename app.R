@@ -296,7 +296,7 @@ shiny::shinyApp(
     
     downscale_default <- list(
       downscale_which_refmap = "refmap_climr",
-      downscale_obs_periods_checkboxes = "1961_1990",
+      downscale_obs_periods_checkbox = "1961_1990",
       downscale_obs_periods = "NULL",
       downscale_obs_years_checkbox = FALSE,
       # downscale_obs_years = c(1951:2024),
@@ -328,7 +328,7 @@ shiny::shinyApp(
       element = NULL,
       climatevar = "NONE",
       downscale_which_refmap = downscale_default[["downscale_which_refmap"]],
-      downscale_obs_periods_checkboxes = downscale_default[["downscale_obs_periods_checkboxes"]],
+      downscale_obs_periods_checkbox = downscale_default[["downscale_obs_periods_checkbox"]],
       downscale_obs_periods = downscale_default[["downscale_obs_periods"]],
       downscale_obs_years_checkbox = downscale_default[["downscale_obs_years_checkbox"]],
       downscale_obs_years = downscale_default[["downscale_obs_years"]],
@@ -493,7 +493,7 @@ shiny::shinyApp(
               
               shiny::div(
                 shiny::checkboxGroupInput(
-                  inputId = "downscale_obs_periods_checkboxes",
+                  inputId = "downscale_obs_periods_checkbox",
                   label = h5("Choose observed periods:",
                              prompter::add_prompt(
                                tooltipsIcon,
@@ -506,7 +506,7 @@ shiny::shinyApp(
                   inline = TRUE,
                   width = "100%",
                   choices = c("1961_1990", climr::list_obs_periods() |> sn()),
-                  selected = vstore[["downscale_obs_periods_checkboxes"]]
+                  selected = vstore[["downscale_obs_periods_checkbox"]]
                 )
               ),
               br(),
@@ -826,14 +826,14 @@ shiny::shinyApp(
       # update_vstore_and_notify("downscale_which_refmap", input$downscale_which_refmap, "Ref map")
       
       ## observed periods ##
-      # update_vstore_and_notify("downscale_obs_periods_checkboxes", input$downscale_obs_periods_checkboxes, "Obs periods")
-      vstore[["downscale_obs_periods_checkboxes"]] <- input$downscale_obs_periods_checkboxes
-      if ("1961_1990" %in% vstore[["downscale_obs_periods_checkboxes"]]) {
+      # update_vstore_and_notify("downscale_obs_periods_checkbox", input$downscale_obs_periods_checkbox, "Obs periods")
+      vstore[["downscale_obs_periods_checkbox"]] <- input$downscale_obs_periods_checkbox
+      if ("1961_1990" %in% vstore[["downscale_obs_periods_checkbox"]]) {
         # update_vstore_and_notify("downscale_return_refperiod", TRUE, "Return ref period")
         vstore[["downscale_return_refperiod"]] <- TRUE
       } 
-      # update_vstore_and_notify("downscale_obs_periods", input$downscale_obs_periods_checkboxes[input$downscale_obs_periods_checkboxes != "1961_1990"], "Obs periods")
-      vstore[["downscale_obs_periods"]] <- input$downscale_obs_periods_checkboxes[input$downscale_obs_periods_checkboxes != "1961_1990"]
+      # update_vstore_and_notify("downscale_obs_periods", input$downscale_obs_periods_checkbox[input$downscale_obs_periods_checkbox != "1961_1990"], "Obs periods")
+      vstore[["downscale_obs_periods"]] <- input$downscale_obs_periods_checkbox[input$downscale_obs_periods_checkbox != "1961_1990"]
       
       ## observed years ##
       vstore[["downscale_obs_years_checkbox"]] <- input$observed_years_checkbox
@@ -915,11 +915,24 @@ shiny::shinyApp(
       vstore[["downscale_core_ppt_lr"]] <- input$downscale_core_ppt_lr
       
       compatible_periods <- climr::variables[Code_Element %in% vstore[["downscale_custom_elements"]] & Time %in% vstore[["downscale_custom_time_periods"]]]
+      
+      # collect simulated inputs
+      selections <- list(input$downscale_gcms, input$downscale_ssps, input$downscale_gcm_periods)
+      selected_count <- sum(sapply(selections, function(x) !is.null(x) && x != ""))
+      
       if (nrow(compatible_periods) == 0 && !is.null(input$downscale_custom_elements) && !is.null(input$downscale_custom_time_periods)) {
         showModal(
           modalDialog(
             title = "Warning",
             paste("Please select valid time period(s) for selected variable(s)." ),
+            easyClose = TRUE
+          )
+        )
+      } else if (selected_count != 0 && selected_count != 3) {
+        showModal(
+          modalDialog(
+            title = "Warning",
+            paste("Please select a GCM AND an SSP AND a GCM period." ),
             easyClose = TRUE
           )
         )
@@ -1179,7 +1192,7 @@ shiny::shinyApp(
           leaflet::clearControls(mp)
         }
         
-        #browser()
+        browser()
         ## concatenate raster layer preview
         code <- raster_layers[Code_Element == vstore[["ds_ras_elements"]] & Time == vstore[["ds_ras_time_periods"]], Code]
         

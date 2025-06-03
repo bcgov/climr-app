@@ -611,7 +611,7 @@ session_geometry <- function(sg_dt) {
                 
                 shiny::div(
                   shiny::conditionalPanel(
-                    condition = "input.ds_ras_obs_sim == 'Observed'",
+                    condition = "input.ds_ras_obs_sim == 'Observed' && input.downscale_obs_periods_checkbox != null",
                     shiny::radioButtons(
                       inputId = "ds_ras_obs_periods",
                       label = h5("Choose period to preview:",
@@ -625,13 +625,13 @@ session_geometry <- function(sg_dt) {
                       ),
                       width = "100%",
                       inline = TRUE,
-                      choices = vstore[["downscale_obs_periods_checkboxes"]],
+                      choices = vstore[["downscale_obs_periods_checkbox"]],
                       selected = vstore[["ds_ras_obs_periods"]]
                     )
                   ),
                   
                   shiny::conditionalPanel(
-                    condition = "input.ds_ras_obs_sim == 'Simulated'",
+                    condition = "input.ds_ras_obs_sim == 'Simulated' && input.downscale_gcms != null",
                     shiny::radioButtons(
                       inputId = "ds_ras_gcms",
                       label = h5("Choose GCM to preview:",
@@ -648,53 +648,63 @@ session_geometry <- function(sg_dt) {
                       choices = vstore[["downscale_gcms"]],
                       selected = vstore[["ds_ras_gcms"]]
                     ),
-                    shiny::radioButtons(
-                      inputId = "ds_ras_ssps",
-                      label = h5("Choose SSP to preview:",
-                                 prompter::add_prompt(
-                                   tooltipsIcon,
-                                   message = HTML(paste("please not ssp 585")),
-                                   position = "top",
-                                   size = "large",
-                                   shadow = FALSE
-                                 )
+                    
+                    shiny::conditionalPanel(
+                      condition = "input.downscale_ssps != null",
+                      shiny::radioButtons(
+                        inputId = "ds_ras_ssps",
+                        label = h5("Choose SSP to preview:",
+                                   prompter::add_prompt(
+                                     tooltipsIcon,
+                                     message = HTML(paste("please not ssp 585")),
+                                     position = "top",
+                                     size = "large",
+                                     shadow = FALSE
+                                   )
+                        ),
+                        width = "100%",
+                        inline = TRUE,
+                        choices = vstore[["downscale_ssps"]],
+                        selected = vstore[["ds_ras_ssps"]]
                       ),
-                      width = "100%",
-                      inline = TRUE,
-                      choices = vstore[["downscale_ssps"]],
-                      selected = vstore[["ds_ras_ssps"]]
-                    ),  
-                    shiny::radioButtons(
-                      inputId = "ds_ras_run",
-                      label = h5("Choose number of model runs to preview:",
-                                 prompter::add_prompt(
-                                   tooltipsIcon,
-                                   message = HTML(paste("blah blah de blah")),
-                                   position = "top",
-                                   size = "large",
-                                   shadow = FALSE
-                                 )
-                      ),
-                      width = "100%",
-                      inline = TRUE,
-                      choices = vstore[["ds_ras_run_choices"]],
-                      selected = vstore[["ds_ras_run"]]
-                    ),
-                    shiny::radioButtons(
-                      inputId = "ds_ras_gcm_period",
-                      label = h5("Choose period to preview:",
-                                 prompter::add_prompt(
-                                   tooltipsIcon,
-                                   message = HTML(paste("bleep bloop")),
-                                   position = "top",
-                                   size = "large",
-                                   shadow = FALSE
-                                 )
-                      ),
-                      width = "100%",
-                      inline = TRUE,
-                      choices = vstore[["downscale_gcm_periods"]],
-                      selected = vstore[["ds_ras_gcm_period"]]
+                      shiny::conditionalPanel(
+                        condition = "input.ds_ras_run != null",
+                        shiny::radioButtons(
+                          inputId = "ds_ras_run",
+                          label = h5("Choose number of model runs to preview:",
+                                     prompter::add_prompt(
+                                       tooltipsIcon,
+                                       message = HTML(paste("blah blah de blah")),
+                                       position = "top",
+                                       size = "large",
+                                       shadow = FALSE
+                                     )
+                          ),
+                          width = "100%",
+                          inline = TRUE,
+                          choices = vstore[["ds_ras_run_choices"]],
+                          selected = vstore[["ds_ras_run"]]
+                        ),
+                        shiny::conditionalPanel(
+                          condition = "input.ds_ras_gcm_period != null",
+                          shiny::radioButtons(
+                            inputId = "ds_ras_gcm_period",
+                            label = h5("Choose period to preview:",
+                                       prompter::add_prompt(
+                                         tooltipsIcon,
+                                         message = HTML(paste("bleep bloop")),
+                                         position = "top",
+                                         size = "large",
+                                         shadow = FALSE
+                                       )
+                            ),
+                            width = "100%",
+                            inline = TRUE,
+                            choices = vstore[["downscale_gcm_periods"]],
+                            selected = vstore[["ds_ras_gcm_period"]]
+                          )
+                        )
+                      )
                     )
                   )
                 )
