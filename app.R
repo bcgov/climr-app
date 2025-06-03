@@ -892,9 +892,9 @@ shiny::shinyApp(
       # choices for ensemble mean / max runs
       vstore[["ds_ras_run_choices"]] <- if (vstore[["downscale_ensemble_mean"]]) {
         if (vstore[["downscale_max_run"]] == 0) {
-          c("Ensemble Mean")
+          c("Ensemble Mean" = "ensembleMean")
         } else {
-          c("Ensemble Mean", vstore[["downscale_max_run"]])
+          c("Ensemble Mean" = "ensembleMean", vstore[["downscale_max_run"]])
         }
       } else {
         vstore[["downscale_max_run"]]
@@ -1179,29 +1179,32 @@ shiny::shinyApp(
           leaflet::clearControls(mp)
         }
         
-        browser()
+        #browser()
         ## concatenate raster layer preview
         code <- raster_layers[Code_Element == vstore[["ds_ras_elements"]] & Time == vstore[["ds_ras_time_periods"]], Code]
         
         if (input$ds_ras_obs_sim == "Observed") {
           time_period <- input$ds_ras_obs_periods
           keywords <- c(code, time_period)
+          raster_names <- names(preview_raster)
           
           layer_match <- raster_names[
             Reduce(`&`, lapply(keywords, function(k) grepl(k, raster_names)))
           ]
         }
         
-        # # split ref period into components
-        # ref_parts <- unlist(strsplit(ref_period, "_"))
-        # 
-        # # match all parts of the ref_period and the code
-        # layer_match <- names(preview_raster)[
-        #   grepl(code, names(preview_raster)) &
-        #     sapply(names(preview_raster), function(name) {
-        #       all(sapply(ref_parts, function(part) grepl(part, name)))
-        #     })
-        # ]
+        if (input$ds_ras_obs_sim == "Simulated") {
+          gcm <- input$ds_ras_gcms
+          ssp <- input$ds_ras_ssps
+          run <- input$ds_ras_run
+          time_period <- input$ds_ras_gcm_period
+          keywords <- c(code, gcm, ssp, run, time_period)
+          raster_names <- names(preview_raster)
+          
+          layer_match <- raster_names[
+            Reduce(`&`, lapply(keywords, function(k) grepl(k, raster_names)))
+          ]
+        }
       
         update_vstore_and_notify("downscale_raster_preview", layer_match, "Preview raster")
 

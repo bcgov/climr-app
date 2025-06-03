@@ -666,7 +666,7 @@ session_geometry <- function(sg_dt) {
                     ),  
                     shiny::radioButtons(
                       inputId = "ds_ras_run",
-                      label = h5("Choose run to preview:",
+                      label = h5("Choose number of model runs to preview:",
                                  prompter::add_prompt(
                                    tooltipsIcon,
                                    message = HTML(paste("blah blah de blah")),
