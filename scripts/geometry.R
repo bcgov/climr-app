@@ -476,7 +476,7 @@ session_geometry <- function(sg_dt) {
             # close Downscale Processing window
             shiny::removeModal()
             
-            # raster previews - BUGS
+            # raster previews
             output$preview_raster_elements <- shiny::renderUI({
               
               # browser()
@@ -500,8 +500,9 @@ session_geometry <- function(sg_dt) {
                   ),
                   uiOutput("preview_raster_time_periods"),
                   uiOutput("preview_raster_obs_sim"),
-                  uiOutput("preview_raster_ref_periods"),
+                  uiOutput("preview_raster_options"),
                   shiny::div(
+                    # this needs to be a UI because showing it will depend if the period selected is the ref period
                     shiny::checkboxInput(
                       inputId = "calculate_diff",
                       label = "Show difference between selected raster and reference period"
@@ -583,68 +584,66 @@ session_geometry <- function(sg_dt) {
             })
             
             # reactive output for selecting ref periods 
-            output$preview_raster_ref_periods <- shiny::renderUI({
+            output$preview_raster_options <- shiny::renderUI({
               #browser()
               if (show_ui() & !is.null(input$ds_ras_elements) & !is.null(input$ds_ras_time_periods)) {
                 code <- raster_layers[Code_Element == input$ds_ras_elements & Time == input$ds_ras_time_periods, Code]
                 
                 shiny::div(
-                  shiny::conditionalPanel(
-                    condition = "input.ds_ras_obs_sim == 'Observed' && input.downscale_obs_periods_checkbox != null",
-                    shiny::radioButtons(
-                      inputId = "ds_ras_obs_periods",
-                      label = h5("Choose period to preview:"),
-                      width = "100%",
-                      inline = TRUE,
-                      choices = vstore[["downscale_obs_periods_checkbox"]],
-                      selected = vstore[["ds_ras_obs_periods"]]
-                    )
-                  ),
-                  
-                  shiny::conditionalPanel(
-                    condition = "input.ds_ras_obs_sim == 'Simulated' && input.downscale_gcms != null",
-                    shiny::radioButtons(
-                      inputId = "ds_ras_gcms",
-                      label = h5("Choose GCM to preview:"),
-                      width = "100%",
-                      inline = TRUE,
-                      choices = vstore[["downscale_gcms"]],
-                      selected = vstore[["ds_ras_gcms"]]
-                    ),
-                    
-                    shiny::conditionalPanel(
-                      condition = "input.downscale_ssps != null",
-                      shiny::radioButtons(
-                        inputId = "ds_ras_ssps",
-                        label = h5("Choose SSP to preview:"),
-                        width = "100%",
-                        inline = TRUE,
-                        choices = vstore[["downscale_ssps"]],
-                        selected = vstore[["ds_ras_ssps"]]
-                      ),
-                      shiny::uiOutput("preview_model_run"),
-                      shiny::conditionalPanel(
-                        condition = "input.ds_ras_gcm_period != null",
-                        shiny::radioButtons(
-                          inputId = "ds_ras_gcm_period",
-                          label = h5("Choose period to preview:"),
-                          width = "100%",
-                          inline = TRUE,
-                          choices = vstore[["downscale_gcm_periods"]],
-                          selected = vstore[["ds_ras_gcm_period"]]
-                        )
-                      )
-                    )
-                  )
+                  shiny::uiOutput("preview_obs_periods"),
+                  shiny::uiOutput("preview_gcms"),
+                  shiny::uiOutput("preview_ssps"),
+                  shiny::uiOutput("preview_model_run"),
+                  shiny::uiOutput("preview_gcm_periods")
                 )
-              } else {
-                NULL
+              }
+            })
+            
+            # reactive output for obs periods
+            output$preview_obs_periods <- shiny::renderUI({
+              if (input$ds_ras_obs_sim == 'Observed' && !is.null(input$downscale_obs_periods_checkbox)) {
+                shiny::radioButtons(
+                  inputId = "ds_ras_obs_periods",
+                  label = h5("Choose period to preview:"),
+                  width = "100%",
+                  inline = TRUE,
+                  choices = vstore[["downscale_obs_periods_checkbox"]],
+                  selected = vstore[["ds_ras_obs_periods"]]
+                )
+              }
+            })
+            
+            # reactive output for GCMs
+            output$preview_gcms <- shiny::renderUI({
+              if (input$ds_ras_obs_sim == 'Simulated' && !is.null(input$downscale_gcms)) {
+                shiny::radioButtons(
+                  inputId = "ds_ras_gcms",
+                  label = h5("Choose GCM to preview:"),
+                  width = "100%",
+                  inline = TRUE,
+                  choices = vstore[["downscale_gcms"]],
+                  selected = vstore[["ds_ras_gcms"]]
+                )
+              }
+            })
+            
+            # reactive output for SSPs
+            output$preview_ssps <- shiny::renderUI({
+              if (input$ds_ras_obs_sim == 'Simulated' && !is.null(input$downscale_ssps)) {
+                shiny::radioButtons(
+                  inputId = "ds_ras_ssps",
+                  label = h5("Choose SSP to preview:"),
+                  width = "100%",
+                  inline = TRUE,
+                  choices = vstore[["downscale_ssps"]],
+                  selected = vstore[["ds_ras_ssps"]]
+                )
               }
             })
             
             # reactive output for model run names
             output$preview_model_run <- shiny::renderUI({
-              if (!is.null(input$ds_ras_gcms)) {
+              if (input$ds_ras_obs_sim == 'Simulated' && !is.null(input$ds_ras_gcms)) {
                 # choices for ensemble mean / max runs
                 if (vstore[["downscale_ensemble_mean"]]) {
                   if (vstore[["downscale_max_run"]] == 0) {
@@ -669,9 +668,23 @@ session_geometry <- function(sg_dt) {
               }
             })
             
+            # reactive output for GCM periods
+            output$preview_gcm_periods <- shiny::renderUI({
+              if (input$ds_ras_obs_sim == 'Simulated' && !is.null(input$ds_ras_run)) {
+                shiny::radioButtons(
+                  inputId = "ds_ras_gcm_period",
+                  label = h5("Choose period to preview:"),
+                  width = "100%",
+                  inline = TRUE,
+                  choices = vstore[["downscale_gcm_periods"]],
+                  selected = vstore[["ds_ras_gcm_period"]]
+                )
+              }
+            })
+            
             # reactive output for log transform button
             output$log_transform <- shiny::renderUI({
-              if (!is.null(vstore[["ds_ras_elements"]]) & !is.null(vstore[["ds_ras_time_periods"]])) {
+              if (!is.null(vstore[["ds_ras_elements"]]) & !is.null(vstore[["ds_ras_time_periods"]]) & !(vstore[["calculate_diff"]])) {
                 variable_type <- raster_layers[Code_Element == vstore[["ds_ras_elements"]] & Time == vstore[["ds_ras_time_periods"]], Type]
                 if (length(variable_type) != 0) {
                   if (show_ui() & variable_type == "ratio") {

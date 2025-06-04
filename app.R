@@ -158,7 +158,7 @@ shiny::shinyApp(
                             style = "width:100%; height:70px; background-color:#c21104; color: #FFF"),
               actionButton(
                 "generate_results",
-                label = "Generate results",
+                label = "Generate Results",
                 icon = icon("plus-square"),
                 style = "width:100%; height:70px; background-color:#003366; color: #FFF",
                 disabled = TRUE
@@ -361,6 +361,7 @@ shiny::shinyApp(
       ds_ras_run_choices = NULL,
       ds_ras_run = NULL,
       ds_ras_gcm_period = NULL,
+      calculate_diff = FALSE,
       log_transform_raster = TRUE,
       downscale_raster_preview = NULL
     )
@@ -1111,7 +1112,6 @@ shiny::shinyApp(
               
               # preview for csv results
               DT::DTOutput("preview_table", width = "100%"),
-              
               br(),
               
               shiny::downloadButton(
@@ -1192,7 +1192,8 @@ shiny::shinyApp(
       update_vstore_and_notify("log_transform_raster", input$log_scale, "Log transform")
     })
     shiny::observeEvent(input$calculate_diff, {
-      if (shiny::in_devmode()) cat("Event: log_transform_raster", sep = "\n")
+      if (shiny::in_devmode()) cat("Event: calculate_diff", sep = "\n")
+      update_vstore_and_notify("calculate_diff", input$calculate_diff, "Calculate change")
     })
     shiny::observeEvent(input$preview_raster, {
       if (shiny::in_devmode()) cat("Event: downscale_raster_preview", sep = "\n")
@@ -1205,13 +1206,19 @@ shiny::shinyApp(
         }
         
         # browser()
-        ## concatenate raster layer preview
+        # concatenate raster layer preview
         code <- raster_layers[Code_Element == vstore[["ds_ras_elements"]] & Time == vstore[["ds_ras_time_periods"]], Code]
+        raster_names <- names(preview_raster)
         
         if (input$ds_ras_obs_sim == "Observed") {
+          #browser()
+          if (input$ds_ras_obs_periods == "1961_1990") {
+            period <- "REFPERIOD"
+          } else {
+            period <- "OBS"
+          }
           time_period <- input$ds_ras_obs_periods
-          keywords <- c(code, time_period)
-          raster_names <- names(preview_raster)
+          keywords <- c(code, period, time_period)
           
           layer_match <- raster_names[
             Reduce(`&`, lapply(keywords, function(k) grepl(k, raster_names)))
@@ -1224,7 +1231,6 @@ shiny::shinyApp(
           run <- input$ds_ras_run
           time_period <- input$ds_ras_gcm_period
           keywords <- c(code, gcm, ssp, run, time_period)
-          raster_names <- names(preview_raster)
           
           layer_match <- raster_names[
             Reduce(`&`, lapply(keywords, function(k) grepl(k, raster_names)))
@@ -1232,52 +1238,89 @@ shiny::shinyApp(
         }
       
         update_vstore_and_notify("downscale_raster_preview", layer_match, "Preview raster")
-
-        # extract data for legend
-        legend_title <- climr::variables[Code == code, Variable] |> tools::toTitleCase()
-        if (grepl("\\u00b0C", legend_title) | grepl("\\u00b0c", legend_title)) {
-          legend_title <- stringi::stri_unescape_unicode(legend_title)
-        }
-        units <- paste0(" ", climr::variables[Code == code, Unit])
-        if (grepl("\\u00b0C", units)) {
-          units <- stringi::stri_unescape_unicode(units)
-        }
-        if (units == "%") {
-          units <- "\\%"
-        }
         
-        variable_type <- climr::variables[Code == code, Type]
-        if (variable_type == "ratio" & vstore[["log_transform_raster"]] == TRUE) {
-          # log transform
-          raster_layer_values <- log2(preview_raster[[layer_match]] + 1)
+        # to display calculated difference if selected
+        if (vstore[["calculate_diff"]]) {
+          #browser()
+          type <- raster_layers[Code_Element == vstore[["ds_ras_elements"]] & Time == vstore[["ds_ras_time_periods"]], Type]
+          keywords <- c("REFPERIOD", code)
+          ref_period_raster <- raster_names[
+            Reduce(`&`, lapply(keywords, function(k) grepl(k, raster_names)))
+          ]
+          
+          # set palettes
+          col_scheme <- if (grepl("PPT", layer_match)) {
+            rev(hcl.colors(5,"Blue-Red 3"))
+          } else {
+            hcl.colors(5,"Blue-Red 3")
+          }
+          
+          if (type == "interval") {
+            display_raster <- preview_raster[[layer_match]] - preview_raster[[ref_period_raster]]
+            pal <- colorNumeric(
+              palette = col_scheme,
+              domain = values(display_raster),
+              na.color = "transparent"
+            )
+            leaflet::addRasterImage(mp, display_raster, layerId = "rast_layer", colors = pal)
+          }
+          if (type == "ratio") {
+            display_raster <- preview_raster[[layer_match]]/preview_raster[[ref_period_raster]]
+            pal <- colorNumeric(
+              palette = col_scheme,
+              domain = values(display_raster),
+              na.color = "transparent"
+            )
+            leaflet::addRasterImage(mp, display_raster, layerId = "rast_layer", colors = pal)
+          }
         } else {
-          raster_layer_values <- preview_raster[[layer_match]]
-        }
-
-        # set palettes
-        col_scheme <- if (grepl("PPT", layer_match)) {
-          RColorBrewer::brewer.pal(9, "YlGnBu")
-        } else {
-          rev(RColorBrewer::brewer.pal(11, "RdYlBu"))
-        }
-        pal <- colorNumeric(
-          palette = col_scheme,
-          domain = values(raster_layer_values),
-          na.color = "transparent"
-        )
-
-        # add raster image
-        leaflet::addRasterImage(mp, raster_layer_values, layerId = "rast_layer", colors = pal)
-
-        # label formatters for legend
-        inv_log2_formatter <- labelFormat(
-          transform = function(x) round((2^x) - 1),  # inverse of log2(x + 1)
-          suffix = units
-        )
-
-        # add legend
-        leaflet::addLegend(mp, pal = pal, values = values(raster_layer_values), title = legend_title, labFormat = if (vstore[["log_transform_raster"]] & variable_type == "ratio") inv_log2_formatter else labelFormat(suffix = units))
-      }
+          # extract data for legend
+          legend_title <- climr::variables[Code == code, Variable] |> tools::toTitleCase()
+          if (grepl("\\u00b0C", legend_title) | grepl("\\u00b0c", legend_title)) {
+            legend_title <- stringi::stri_unescape_unicode(legend_title)
+          }
+          units <- paste0(" ", climr::variables[Code == code, Unit])
+          if (grepl("\\u00b0C", units)) {
+            units <- stringi::stri_unescape_unicode(units)
+          }
+          if (units == "%") {
+            units <- "\\%"
+          }
+          
+          variable_type <- climr::variables[Code == code, Type]
+          if (variable_type == "ratio" & vstore[["log_transform_raster"]] == TRUE) {
+            # log transform
+            raster_layer_values <- log2(preview_raster[[layer_match]] + 1)
+          } else {
+            raster_layer_values <- preview_raster[[layer_match]]
+          }
+  
+          # set palettes
+          #browser()
+          col_scheme <- if (grepl("PPT", layer_match)) {
+            RColorBrewer::brewer.pal(9, "YlGnBu")
+          } else {
+            rev(RColorBrewer::brewer.pal(11, "RdYlBu"))
+          }
+          pal <- colorNumeric(
+            palette = col_scheme,
+            domain = values(raster_layer_values),
+            na.color = "transparent"
+          )
+  
+          # add raster image
+          leaflet::addRasterImage(mp, raster_layer_values, layerId = "rast_layer", colors = pal)
+  
+          # label formatters for legend
+          inv_log2_formatter <- labelFormat(
+            transform = function(x) round((2^x) - 1),  # inverse of log2(x + 1)
+            suffix = units
+          )
+  
+          # add legend
+          leaflet::addLegend(mp, pal = pal, values = values(raster_layer_values), title = legend_title, labFormat = if (vstore[["log_transform_raster"]] & variable_type == "ratio") inv_log2_formatter else labelFormat(suffix = units))
+          }
+        }  
     })
     
     # reactive output for outputs options
