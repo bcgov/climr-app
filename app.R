@@ -1187,9 +1187,9 @@ shiny::shinyApp(
       if (shiny::in_devmode()) cat("Event: ds_ras_ref_periods", sep = "\n")
       update_vstore_and_notify("ds_ras_ref_periods", input$ds_ras_ref_periods, "Raster ref/GCM/SSP period")
     })
-    shiny::observeEvent(input$log_scale, {
+    shiny::observeEvent(input$log_transform_raster, {
       if (shiny::in_devmode()) cat("Event: log_transform_raster", sep = "\n")
-      update_vstore_and_notify("log_transform_raster", input$log_scale, "Log transform")
+      update_vstore_and_notify("log_transform_raster", input$log_transform_raster, "Log transform")
     })
     shiny::observeEvent(input$calculate_diff, {
       if (shiny::in_devmode()) cat("Event: calculate_diff", sep = "\n")
@@ -1199,19 +1199,29 @@ shiny::shinyApp(
       if (shiny::in_devmode()) cat("Event: downscale_raster_preview", sep = "\n")
       if (vstore[["downscale_output"]] == "tif") {
         
+        # update all preview options in vstore
+        vstore[["ds_ras_elements"]] = input$ds_ras_elements
+        vstore[["ds_ras_time_periods"]] = input$ds_ras_time_periods
+        vstore[["ds_ras_obs_sim"]] = input$ds_ras_obs_sim
+        vstore[["ds_ras_obs_periods"]] = input$ds_ras_obs_periods
+        vstore[["ds_ras_gcms"]] = input$ds_ras_gcms
+        vstore[["ds_ras_ssps"]] = input$ds_ras_ssps
+        vstore[["ds_ras_run"]] = input$ds_ras_run
+        vstore[["ds_ras_gcm_periods"]] = input$ds_ras_gcm_periods
+        vstore[["calculate_diff"]] = input$calculate_diff
+        vstore[["log_transform_raster"]] = input$log_transform_raster
+        
         # clear previous raster and legend
         if (!is.null(vstore[["downscale_raster_preview"]])) {
           leaflet::removeImage(mp, "rast_layer")
           leaflet::clearControls(mp)
         }
         
-        # browser()
         # concatenate raster layer preview
         code <- raster_layers[Code_Element == vstore[["ds_ras_elements"]] & Time == vstore[["ds_ras_time_periods"]], Code]
         raster_names <- names(preview_raster)
         
         if (input$ds_ras_obs_sim == "Observed") {
-          #browser()
           if (input$ds_ras_obs_periods == "1961_1990") {
             period <- "REFPERIOD"
           } else {
@@ -1256,7 +1266,6 @@ shiny::shinyApp(
         
         # to display calculated difference if selected
         if (vstore[["calculate_diff"]]) {
-          #browser()
           type <- raster_layers[Code_Element == vstore[["ds_ras_elements"]] & Time == vstore[["ds_ras_time_periods"]], Type]
           keywords <- c("REFPERIOD", code)
           ref_period_raster <- raster_names[
@@ -1280,14 +1289,12 @@ shiny::shinyApp(
             )
             
             # update legend title
-            # browser()
             legend_title <- glue::glue("Change in {legend_title} from 1961_1990 to {years}")
             
             leaflet::addRasterImage(mp, display_raster, layerId = "rast_layer", colors = pal)
             leaflet::addLegend(mp, pal = pal, values = values(display_raster), title = legend_title, labFormat = labelFormat(suffix = units))
           }
           if (type == "ratio") {
-            # browser()
             display_raster <- preview_raster[[layer_match]]/preview_raster[[ref_period_raster]]
             pal <- colorNumeric(
               palette = col_scheme,
@@ -1302,18 +1309,6 @@ shiny::shinyApp(
             leaflet::addLegend(mp, pal = pal, values = values(display_raster), title = legend_title, labFormat = labelFormat(suffix = units))
           }
         } else {
-          # # extract data for legend
-          # legend_title <- climr::variables[Code == code, Variable] |> tools::toTitleCase()
-          # if (grepl("\\u00b0C", legend_title) | grepl("\\u00b0c", legend_title)) {
-          #   legend_title <- stringi::stri_unescape_unicode(legend_title)
-          # }
-          # units <- paste0(" ", climr::variables[Code == code, Unit])
-          # if (grepl("\\u00b0C", units)) {
-          #   units <- stringi::stri_unescape_unicode(units)
-          # }
-          # if (units == "%") {
-          #   units <- "\\%"
-          # }
           
           variable_type <- climr::variables[Code == code, Type]
           if (variable_type == "ratio" & vstore[["log_transform_raster"]] == TRUE) {
@@ -1324,7 +1319,6 @@ shiny::shinyApp(
           }
   
           # set palettes
-          #browser()
           col_scheme <- if (grepl("PPT", layer_match)) {
             RColorBrewer::brewer.pal(9, "YlGnBu")
           } else {

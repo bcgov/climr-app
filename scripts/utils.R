@@ -324,8 +324,6 @@ generate_run_id <- function() {
 albers_crs <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m"
 
 process_downscale <- function(sg, cec, vstore, fg, run_id) {
-  
-  # browser()
 
   output_files <- c()
   n <- \(x) if (length(x) && !"NULL" %in% x) x

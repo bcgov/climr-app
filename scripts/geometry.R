@@ -479,7 +479,6 @@ session_geometry <- function(sg_dt) {
             # raster previews
             output$preview_raster_elements <- shiny::renderUI({
               
-              # browser()
               if (show_ui()) {
                 
                 # possible raster elements
@@ -556,7 +555,6 @@ session_geometry <- function(sg_dt) {
             # reactive output for selecting observed or simulated data
             output$preview_raster_obs_sim <- shiny::renderUI({
               # collect observed inputs
-              #browser()
               selections_obs <- list(vstore[["downscale_obs_periods_checkbox"]])
               lengths_obs <- sapply(selections_obs, length)
               
@@ -587,7 +585,6 @@ session_geometry <- function(sg_dt) {
             
             # reactive output for selecting ref periods 
             output$preview_raster_options <- shiny::renderUI({
-              #browser()
               if (show_ui() & !is.null(input$ds_ras_elements) & !is.null(input$ds_ras_time_periods)) {
                 code <- raster_layers[Code_Element == input$ds_ras_elements & Time == input$ds_ras_time_periods, Code]
                 
@@ -691,7 +688,7 @@ session_geometry <- function(sg_dt) {
                 if (length(variable_type) != 0) {
                   if (show_ui() & variable_type == "ratio") {
                     shiny::checkboxInput(
-                      inputId = "log_scale",
+                      inputId = "log_transform_raster",
                       label = "Apply log transform to raster preview",
                       value = vstore[["log_transform_raster"]],
                       width = "100%"
