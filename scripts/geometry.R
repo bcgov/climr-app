@@ -502,10 +502,12 @@ session_geometry <- function(sg_dt) {
                   uiOutput("preview_raster_obs_sim"),
                   uiOutput("preview_raster_options"),
                   shiny::div(
-                    # this needs to be a UI because showing it will depend if the period selected is the ref period
-                    shiny::checkboxInput(
-                      inputId = "calculate_diff",
-                      label = "Show difference between selected raster and reference period"
+                    shiny::conditionalPanel(
+                      condition = "input.ds_ras_obs_periods != '1961_1990' | input.ds_ras_obs_sim == 'Simulated'",
+                      shiny::checkboxInput(
+                        inputId = "calculate_diff",
+                        label = "Show difference between selected raster and reference period"
+                      )
                     ),
                     uiOutput("log_transform")
                   ),
