@@ -674,12 +674,12 @@ session_geometry <- function(sg_dt) {
             output$preview_gcm_periods <- shiny::renderUI({
               if (input$ds_ras_obs_sim == 'Simulated' && !is.null(input$ds_ras_run)) {
                 shiny::radioButtons(
-                  inputId = "ds_ras_gcm_period",
+                  inputId = "ds_ras_gcm_periods",
                   label = h5("Choose period to preview:"),
                   width = "100%",
                   inline = TRUE,
                   choices = vstore[["downscale_gcm_periods"]],
-                  selected = vstore[["ds_ras_gcm_period"]]
+                  selected = vstore[["ds_ras_gcm_periods"]]
                 )
               }
             })

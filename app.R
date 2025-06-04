@@ -360,7 +360,7 @@ shiny::shinyApp(
       ds_ras_ssps = NULL,
       ds_ras_run_choices = NULL,
       ds_ras_run = NULL,
-      ds_ras_gcm_period = NULL,
+      ds_ras_gcm_periods = NULL,
       calculate_diff = FALSE,
       log_transform_raster = TRUE,
       downscale_raster_preview = NULL
@@ -1218,6 +1218,7 @@ shiny::shinyApp(
             period <- "OBS"
           }
           time_period <- input$ds_ras_obs_periods
+          years <- input$ds_ras_obs_periods
           keywords <- c(code, period, time_period)
           
           layer_match <- raster_names[
@@ -1229,12 +1230,26 @@ shiny::shinyApp(
           gcm <- input$ds_ras_gcms
           ssp <- input$ds_ras_ssps
           run <- input$ds_ras_run
-          time_period <- input$ds_ras_gcm_period
+          time_period <- input$ds_ras_gcm_periods
+          years <- input$ds_ras_gcm_periods
           keywords <- c(code, gcm, ssp, run, time_period)
           
           layer_match <- raster_names[
             Reduce(`&`, lapply(keywords, function(k) grepl(k, raster_names)))
           ]
+        }
+        
+        # extract data for legend
+        legend_title <- climr::variables[Code == code, Variable] |> tools::toTitleCase()
+        if (grepl("\\u00b0C", legend_title) | grepl("\\u00b0c", legend_title)) {
+          legend_title <- stringi::stri_unescape_unicode(legend_title)
+        }
+        units <- paste0(" ", climr::variables[Code == code, Unit])
+        if (grepl("\\u00b0C", units)) {
+          units <- stringi::stri_unescape_unicode(units)
+        }
+        if (units == "%") {
+          units <- "\\%"
         }
       
         update_vstore_and_notify("downscale_raster_preview", layer_match, "Preview raster")
@@ -1255,6 +1270,7 @@ shiny::shinyApp(
             hcl.colors(5,"Blue-Red 3")
           }
           
+          # display raster and legend
           if (type == "interval") {
             display_raster <- preview_raster[[layer_match]] - preview_raster[[ref_period_raster]]
             pal <- colorNumeric(
@@ -1262,30 +1278,42 @@ shiny::shinyApp(
               domain = values(display_raster),
               na.color = "transparent"
             )
+            
+            # update legend title
+            # browser()
+            legend_title <- glue::glue("Change in {legend_title} from 1961_1990 to {years}")
+            
             leaflet::addRasterImage(mp, display_raster, layerId = "rast_layer", colors = pal)
+            leaflet::addLegend(mp, pal = pal, values = values(display_raster), title = legend_title, labFormat = labelFormat(suffix = units))
           }
           if (type == "ratio") {
+            # browser()
             display_raster <- preview_raster[[layer_match]]/preview_raster[[ref_period_raster]]
             pal <- colorNumeric(
               palette = col_scheme,
               domain = values(display_raster),
               na.color = "transparent"
             )
+            
+            # update legend title
+            legend_title <- glue::glue("Change in {legend_title} from 1961_1990 to {years}")
+            
             leaflet::addRasterImage(mp, display_raster, layerId = "rast_layer", colors = pal)
+            leaflet::addLegend(mp, pal = pal, values = values(display_raster), title = legend_title, labFormat = labelFormat(suffix = units))
           }
         } else {
-          # extract data for legend
-          legend_title <- climr::variables[Code == code, Variable] |> tools::toTitleCase()
-          if (grepl("\\u00b0C", legend_title) | grepl("\\u00b0c", legend_title)) {
-            legend_title <- stringi::stri_unescape_unicode(legend_title)
-          }
-          units <- paste0(" ", climr::variables[Code == code, Unit])
-          if (grepl("\\u00b0C", units)) {
-            units <- stringi::stri_unescape_unicode(units)
-          }
-          if (units == "%") {
-            units <- "\\%"
-          }
+          # # extract data for legend
+          # legend_title <- climr::variables[Code == code, Variable] |> tools::toTitleCase()
+          # if (grepl("\\u00b0C", legend_title) | grepl("\\u00b0c", legend_title)) {
+          #   legend_title <- stringi::stri_unescape_unicode(legend_title)
+          # }
+          # units <- paste0(" ", climr::variables[Code == code, Unit])
+          # if (grepl("\\u00b0C", units)) {
+          #   units <- stringi::stri_unescape_unicode(units)
+          # }
+          # if (units == "%") {
+          #   units <- "\\%"
+          # }
           
           variable_type <- climr::variables[Code == code, Type]
           if (variable_type == "ratio" & vstore[["log_transform_raster"]] == TRUE) {
