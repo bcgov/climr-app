@@ -554,7 +554,7 @@ session_geometry <- function(sg_dt) {
               lengths_obs <- sapply(selections_obs, length)
               
               # collect simulated inputs
-              selections_sim <- list(input$downscale_gcms, input$downscale_ssps, input$downscale_gcm_periods)
+              selections_sim <- list(vstore[["downscale_gcms"]], vstore[["downscale_ssps"]], vstore[["downscale_gcm_periods"]])
               lengths_sim <- sapply(selections_sim, length)
 
               if (all(lengths_obs == 0) & all(lengths_sim == 0)) {

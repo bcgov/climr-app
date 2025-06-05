@@ -142,7 +142,7 @@ shiny::shinyApp(
         prompter::use_prompt(),
         shiny::sidebarLayout(
           shiny::sidebarPanel(
-            style = "height: 84vh; overflow-y: auto; overflow-x: auto;", 
+            style = "height: 85vh; overflow-y: auto; overflow-x: auto;", # FIX HEIGHT TO BE ADAPTIVE
             
             # create the link!!!
             shiny::div(
@@ -217,8 +217,17 @@ shiny::shinyApp(
           ),
           shiny::mainPanel(
             # create map as UI element
-            leaflet::leafletOutput("climr", width = "100%", height = "84vh") #height needs to be fixed to be adaptive
+            leaflet::leafletOutput("getdata_map", width = "100%", height = "85vh") # FIX HEIGHT TO BE ADAPTIVE
           )
+        )
+      ),
+      
+      shiny::tabPanel(
+        title = "Visualization",
+        prompter::use_prompt(),
+        shiny::mainPanel(
+          # create map as UI element
+          leaflet::leafletOutput("visualization_map", width = "100%", height = "85vh") # FIX HEIGHT TO BE ADAPTIVE
         )
       ),
      
@@ -292,32 +301,46 @@ shiny::shinyApp(
     show_raster_ui <<- reactiveVal(TRUE)
     
     # ---- Modal input storage
-    output$climr <- leaflet::renderLeaflet(l)
+    output$getdata_map <- leaflet::renderLeaflet(l)
+    output$visualization_map <- leaflet::renderLeaflet(l)
     
     downscale_default <- list(
       downscale_which_refmap = "refmap_climr",
       downscale_obs_periods_checkbox = "1961_1990",
-      downscale_obs_periods = "NULL",
+      downscale_obs_periods = NULL,
       downscale_obs_years_checkbox = FALSE,
       downscale_obs_years = NULL,
-      downscale_obs_ts_dataset = "NULL",
+      downscale_obs_ts_dataset = NULL,
       downscale_sim_recommended = FALSE,
-      downscale_gcms = "NULL",
-      downscale_ssps = "NULL",
-      downscale_gcm_periods = "NULL",
+      downscale_gcms = NULL,
+      downscale_ssps = NULL,
+      downscale_gcm_periods = NULL,
       downscale_gcm_ssp_years = NULL,
       downscale_gcm_hist_years = NULL,
       downscale_gcm_years_checkbox = FALSE,
       downscale_gcm_years = c(1951:2100),
       downscale_ensemble_mean = TRUE,
       downscale_max_run = 0,
-      downscale_run_nm = "NULL",
+      downscale_run_nm = NULL,
       downscale_extra_vars = downscale_core_vars,
-      downscale_extra_vars_sets = "NULL",
+      downscale_extra_vars_sets = NULL,
       downscale_custom_elements = NULL,
       downscale_custom_time_periods = NULL,
       downscale_core_ppt_lr = FALSE,
-      downscale_return_refperiod = TRUE
+      downscale_return_refperiod = TRUE,
+      ds_ras_elements = NULL,
+      ds_ras_time_periods = NULL,
+      ds_ras_obs_sim = NULL,
+      ds_ras_obs_periods = NULL,
+      ds_ras_gcms = NULL,
+      ds_ras_ssps = NULL,
+      ds_ras_run_choices = NULL,
+      ds_ras_run = NULL,
+      ds_ras_gcm_periods = NULL,
+      calculate_diff = FALSE,
+      calculate_percent_diff = FALSE,
+      log_transform_raster = TRUE,
+      downscale_raster_preview = NULL
     )
     
     vstore <- reactiveValues(
@@ -348,23 +371,23 @@ shiny::shinyApp(
       downscale_extra_vars = downscale_default[["downscale_extra_vars"]],
       downscale_core_ppt_lr = downscale_default[["downscale_core_ppt_lr"]],
       downscale_return_refperiod = downscale_default[["downscale_return_refperiod"]],
+      ds_ras_elements = downscale_default[["ds_ras_elements"]],
+      ds_ras_time_periods = downscale_default[["ds_ras_time_periods"]],
+      ds_ras_obs_sim = downscale_default[["ds_ras_obs_sim"]],
+      ds_ras_obs_periods = downscale_default[["ds_ras_obs_periods"]],
+      ds_ras_gcms = downscale_default[["ds_ras_gcms"]],
+      ds_ras_ssps = downscale_default[["ds_ras_ssps"]],
+      ds_ras_run_choices = downscale_default[["ds_ras_run_choices"]],
+      ds_ras_run = downscale_default[["ds_ras_run"]],
+      ds_ras_gcm_periods = downscale_default[["ds_ras_gcm_periods"]],
+      calculate_diff = downscale_default[["calculate_diff"]],
+      calculate_percent_diff = downscale_default[["calculate_percent_diff"]],
+      log_transform_raster = downscale_default[["log_transform_raster"]],
+      downscale_raster_preview = downscale_default[["downscale_raster_preview"]],
       downscale_output = "csv",
       downscale_resolution = 2500,
       vscale = "none",
-      processing = FALSE,
-      ds_ras_elements = NULL,
-      ds_ras_time_periods = NULL,
-      ds_ras_obs_sim = NULL,
-      ds_ras_obs_periods = NULL,
-      ds_ras_gcms = NULL,
-      ds_ras_ssps = NULL,
-      ds_ras_run_choices = NULL,
-      ds_ras_run = NULL,
-      ds_ras_gcm_periods = NULL,
-      calculate_diff = FALSE,
-      calculate_percent_diff = FALSE,
-      log_transform_raster = TRUE,
-      downscale_raster_preview = NULL
+      processing = FALSE
     )
     
     # ---- Geometry
