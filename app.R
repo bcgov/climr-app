@@ -1221,14 +1221,13 @@ shiny::shinyApp(
         code <- raster_layers[Code_Element == vstore[["ds_ras_elements"]] & Time == vstore[["ds_ras_time_periods"]], Code]
         raster_names <- names(preview_raster)
         
-        if (input$ds_ras_obs_sim == "Observed") {
-          if (input$ds_ras_obs_periods == "1961_1990") {
+        if (vstore[["ds_ras_obs_sim"]] == "Observed") {
+          if (vstore[["ds_ras_obs_periods"]] == "1961_1990") {
             period <- "REFPERIOD"
           } else {
             period <- "OBS"
           }
-          time_period <- input$ds_ras_obs_periods
-          years <- input$ds_ras_obs_periods
+          time_period <- vstore[["ds_ras_obs_periods"]]
           keywords <- c(code, period, time_period)
           
           layer_match <- raster_names[
@@ -1236,12 +1235,11 @@ shiny::shinyApp(
           ]
         }
         
-        if (input$ds_ras_obs_sim == "Simulated") {
-          gcm <- input$ds_ras_gcms
-          ssp <- input$ds_ras_ssps
-          run <- input$ds_ras_run
-          time_period <- input$ds_ras_gcm_periods
-          years <- input$ds_ras_gcm_periods
+        if (vstore[["ds_ras_obs_sim"]] == "Simulated") {
+          gcm <- vstore[["ds_ras_gcms"]]
+          ssp <- vstore[["ds_ras_ssps"]]
+          run <- vstore[["ds_ras_run"]]
+          time_period <- vstore[["ds_ras_gcm_periods"]]
           keywords <- c(code, gcm, ssp, run, time_period)
           
           layer_match <- raster_names[
@@ -1264,6 +1262,10 @@ shiny::shinyApp(
       
         update_vstore_and_notify("downscale_raster_preview", layer_match, "Preview raster")
         
+        # error handling for comparing ref period against itself
+        if (vstore[["ds_ras_obs_periods"]] == "1961_1990" && vstore[["ds_ras_obs_sim"]] == "Observed") {
+          vstore[["calculate_diff"]] = FALSE
+        }
         # to display calculated difference if selected
         if (vstore[["calculate_diff"]]) {
           type <- raster_layers[Code_Element == vstore[["ds_ras_elements"]] & Time == vstore[["ds_ras_time_periods"]], Type]
@@ -1289,7 +1291,7 @@ shiny::shinyApp(
             )
             
             # update legend title
-            legend_title <- glue::glue("Change in {legend_title} from 1961_1990 to {years}")
+            legend_title <- glue::glue("Change in {legend_title} from 1961_1990 to {time_period}")
             
             leaflet::addRasterImage(mp, display_raster, layerId = "rast_layer", colors = pal)
             leaflet::addLegend(mp, pal = pal, values = values(display_raster), title = legend_title, labFormat = labelFormat(suffix = units))
@@ -1303,7 +1305,7 @@ shiny::shinyApp(
             )
             
             # update legend title
-            legend_title <- glue::glue("Change in {legend_title} from 1961_1990 to {years}")
+            legend_title <- glue::glue("Change in {legend_title} from 1961_1990 to {time_period}")
             
             leaflet::addRasterImage(mp, display_raster, layerId = "rast_layer", colors = pal)
             leaflet::addLegend(mp, pal = pal, values = values(display_raster), title = legend_title, labFormat = labelFormat(suffix = units))
