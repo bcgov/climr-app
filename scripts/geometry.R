@@ -557,7 +557,7 @@ session_geometry <- function(sg_dt) {
               selections_sim <- list(input$downscale_gcms, input$downscale_ssps, input$downscale_gcm_periods)
               lengths_sim <- sapply(selections_sim, length)
 
-              if (all(lengths_obs == 0) && all(lengths_sim == 0)) {
+              if (all(lengths_obs == 0) & all(lengths_sim == 0)) {
                 NULL
               } else if (all(lengths_obs == 0)) {
                 choices <- c("Simulated")
@@ -594,7 +594,7 @@ session_geometry <- function(sg_dt) {
             
             # reactive output for obs periods
             output$preview_obs_periods <- shiny::renderUI({
-              if (input$ds_ras_obs_sim == 'Observed' && !is.null(vstore[["downscale_obs_periods_checkbox"]])) {
+              if (input$ds_ras_obs_sim == 'Observed' & !is.null(vstore[["downscale_obs_periods_checkbox"]])) {
                 shiny::radioButtons(
                   inputId = "ds_ras_obs_periods",
                   label = h5("Choose period to preview:"),
@@ -608,7 +608,7 @@ session_geometry <- function(sg_dt) {
             
             # reactive output for GCMs
             output$preview_gcms <- shiny::renderUI({
-              if (input$ds_ras_obs_sim == 'Simulated' && !is.null(vstore[["downscale_gcms"]])) {
+              if (input$ds_ras_obs_sim == 'Simulated' & !is.null(vstore[["downscale_gcms"]])) {
                 shiny::radioButtons(
                   inputId = "ds_ras_gcms",
                   label = h5("Choose GCM to preview:"),
@@ -622,7 +622,7 @@ session_geometry <- function(sg_dt) {
             
             # reactive output for SSPs
             output$preview_ssps <- shiny::renderUI({
-              if (input$ds_ras_obs_sim == 'Simulated' && !is.null(vstore[["downscale_ssps"]])) {
+              if (input$ds_ras_obs_sim == 'Simulated' & !is.null(vstore[["downscale_ssps"]])) {
                 shiny::radioButtons(
                   inputId = "ds_ras_ssps",
                   label = h5("Choose SSP to preview:"),
@@ -636,7 +636,7 @@ session_geometry <- function(sg_dt) {
             
             # reactive output for model run names
             output$preview_model_run <- shiny::renderUI({
-              if (input$ds_ras_obs_sim == 'Simulated' && !is.null(input$ds_ras_gcms)) {
+              if (input$ds_ras_obs_sim == 'Simulated' & !is.null(input$ds_ras_gcms)) {
                 # choices for ensemble mean / max runs
                 if (vstore[["downscale_ensemble_mean"]]) {
                   if (vstore[["downscale_max_run"]] == 0) {
@@ -663,7 +663,7 @@ session_geometry <- function(sg_dt) {
             
             # reactive output for GCM periods
             output$preview_gcm_periods <- shiny::renderUI({
-              if (input$ds_ras_obs_sim == 'Simulated' && !is.null(input$ds_ras_run)) {
+              if (input$ds_ras_obs_sim == 'Simulated' & !is.null(input$ds_ras_run)) {
                 shiny::radioButtons(
                   inputId = "ds_ras_gcm_periods",
                   label = h5("Choose period to preview:"),
@@ -678,7 +678,7 @@ session_geometry <- function(sg_dt) {
             # reactive output for percent change button
             output$calculate_percent_diff_checkbox <- shiny::renderUI({
               variable_type <- raster_layers[Code_Element == vstore[["ds_ras_elements"]] & Time == vstore[["ds_ras_time_periods"]], Type]
-              if (vstore[["calculate_diff"]] && variable_type == "ratio") {
+              if (vstore[["calculate_diff"]] & variable_type == "ratio") {
                 shiny::checkboxInput(
                   inputId = "calculate_percent_diff",
                   label = "Show percent change from reference period"
