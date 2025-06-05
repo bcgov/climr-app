@@ -362,6 +362,7 @@ shiny::shinyApp(
       ds_ras_run = NULL,
       ds_ras_gcm_periods = NULL,
       calculate_diff = FALSE,
+      calculate_percent_diff = FALSE,
       log_transform_raster = TRUE,
       downscale_raster_preview = NULL
     )
@@ -1171,6 +1172,11 @@ shiny::shinyApp(
         vstore[["downscale_gcm_ssp_years"]] <- NULL
       }
       
+      # set obs period as ref period if none selected
+      if (is.null(vstore[["downscale_obs_periods_checkbox"]])) {
+        vstore[["downscale_obs_periods_checkbox"]] <- "1961_2020"
+      }
+      
       sg$process()
       
       show_raster_ui(TRUE)
@@ -1193,7 +1199,11 @@ shiny::shinyApp(
     })
     shiny::observeEvent(input$calculate_diff, {
       if (shiny::in_devmode()) cat("Event: calculate_diff", sep = "\n")
-      update_vstore_and_notify("calculate_diff", input$calculate_diff, "Calculate change")
+      update_vstore_and_notify("calculate_diff", input$calculate_diff, "Calculate difference")
+    })
+    shiny::observeEvent(input$calculate_percent_diff, {
+      if (shiny::in_devmode()) cat("Event: calculate_percent_diff", sep = "\n")
+      update_vstore_and_notify("calculate_percent_diff", input$calculate_percent_diff, "Calculate percent change")
     })
     shiny::observeEvent(input$preview_raster, {
       if (shiny::in_devmode()) cat("Event: downscale_raster_preview", sep = "\n")
@@ -1308,17 +1318,33 @@ shiny::shinyApp(
                 )
               )
             } else {
-              pal <- colorNumeric(
-                palette = col_scheme,
-                domain = values(display_raster),
-                na.color = "transparent"
-              )
-              
-              # update legend title
-              legend_title <- glue::glue("Change in {legend_title} from 1961_1990 to {time_period}")
-              
-              leaflet::addRasterImage(mp, display_raster, layerId = "rast_layer", colors = pal)
-              leaflet::addLegend(mp, pal = pal, values = values(display_raster), title = legend_title, labFormat = labelFormat(suffix = units))
+              if (vstore[["calculate_percent_diff"]]) {
+                display_raster <- display_raster*100
+                
+                pal <- colorNumeric(
+                  palette = col_scheme,
+                  domain = values(display_raster),
+                  na.color = "transparent"
+                )
+                
+                # update legend title
+                legend_title <- glue::glue("Percent change in {legend_title} from 1961_1990 to {time_period}")
+                
+                leaflet::addRasterImage(mp, display_raster, layerId = "rast_layer", colors = pal)
+                leaflet::addLegend(mp, pal = pal, values = values(display_raster), title = legend_title, labFormat = labelFormat(suffix = "%"))
+              } else {
+                pal <- colorNumeric(
+                  palette = col_scheme,
+                  domain = values(display_raster),
+                  na.color = "transparent"
+                )
+                
+                # update legend title
+                legend_title <- glue::glue("Change in {legend_title} from 1961_1990 to {time_period}")
+                
+                leaflet::addRasterImage(mp, display_raster, layerId = "rast_layer", colors = pal)
+                leaflet::addLegend(mp, pal = pal, values = values(display_raster), title = legend_title, labFormat = labelFormat(suffix = units))
+              }
             }
           }
         } else {

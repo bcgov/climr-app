@@ -503,9 +503,10 @@ session_geometry <- function(sg_dt) {
                       condition = "input.ds_ras_obs_periods != '1961_1990' | input.ds_ras_obs_sim == 'Simulated'",
                       shiny::checkboxInput(
                         inputId = "calculate_diff",
-                        label = "Show difference between selected raster and reference period"
+                        label = "Show calculated difference from reference period"
                       )
                     ),
+                    uiOutput("calculate_percent_diff_checkbox"),
                     uiOutput("log_transform")
                   ),
                   br(),
@@ -593,7 +594,7 @@ session_geometry <- function(sg_dt) {
             
             # reactive output for obs periods
             output$preview_obs_periods <- shiny::renderUI({
-              if (input$ds_ras_obs_sim == 'Observed' && !is.null(input$downscale_obs_periods_checkbox)) {
+              if (input$ds_ras_obs_sim == 'Observed' && !is.null(vstore[["downscale_obs_periods_checkbox"]])) {
                 shiny::radioButtons(
                   inputId = "ds_ras_obs_periods",
                   label = h5("Choose period to preview:"),
@@ -607,7 +608,7 @@ session_geometry <- function(sg_dt) {
             
             # reactive output for GCMs
             output$preview_gcms <- shiny::renderUI({
-              if (input$ds_ras_obs_sim == 'Simulated' && !is.null(input$downscale_gcms)) {
+              if (input$ds_ras_obs_sim == 'Simulated' && !is.null(vstore[["downscale_gcms"]])) {
                 shiny::radioButtons(
                   inputId = "ds_ras_gcms",
                   label = h5("Choose GCM to preview:"),
@@ -621,7 +622,7 @@ session_geometry <- function(sg_dt) {
             
             # reactive output for SSPs
             output$preview_ssps <- shiny::renderUI({
-              if (input$ds_ras_obs_sim == 'Simulated' && !is.null(input$downscale_ssps)) {
+              if (input$ds_ras_obs_sim == 'Simulated' && !is.null(vstore[["downscale_ssps"]])) {
                 shiny::radioButtons(
                   inputId = "ds_ras_ssps",
                   label = h5("Choose SSP to preview:"),
@@ -670,6 +671,17 @@ session_geometry <- function(sg_dt) {
                   inline = TRUE,
                   choices = vstore[["downscale_gcm_periods"]],
                   selected = vstore[["ds_ras_gcm_periods"]]
+                )
+              }
+            })
+            
+            # reactive output for percent change button
+            output$calculate_percent_diff_checkbox <- shiny::renderUI({
+              variable_type <- raster_layers[Code_Element == vstore[["ds_ras_elements"]] & Time == vstore[["ds_ras_time_periods"]], Type]
+              if (vstore[["calculate_diff"]] && variable_type == "ratio") {
+                shiny::checkboxInput(
+                  inputId = "calculate_percent_diff",
+                  label = "Show percent change from reference period"
                 )
               }
             })
