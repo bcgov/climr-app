@@ -222,7 +222,7 @@ session_geometry <- function(sg_dt) {
     leaflet::clearControls(mp)
     
     # remove preview raster accordion
-    show_ui(FALSE)
+    show_raster_ui(FALSE)
     
     # reset all parameters to defaults
     lapply(names(downscale_default), \(x) {
@@ -442,7 +442,6 @@ session_geometry <- function(sg_dt) {
     process = function() {
       vstore[["processing"]] <- TRUE
       shiny::updateActionButton(inputId = "generate_results", disabled = TRUE)
-      #shiny::updateActionButton(inputId = "downscale_process_launch", disabled = TRUE)
       withCallingHandlers(
         message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
         warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
@@ -456,7 +455,6 @@ session_geometry <- function(sg_dt) {
           if (!length(output_files)) {
             vstore[["processing"]] <- FALSE
             shiny::updateActionButton(inputId = "generate_results", disabled = FALSE)
-            #shiny::removeModal()
             shiny::showNotification("No output generated.", type = "warning")
             return()
           } else if (tools::file_ext(output_files) == "csv") {
@@ -479,7 +477,7 @@ session_geometry <- function(sg_dt) {
             # raster previews
             output$preview_raster_elements <- shiny::renderUI({
               
-              if (show_ui()) {
+              if (show_raster_ui()) {
                 
                 # possible raster elements
                 elements <- unique(c(vstore[["downscale_extra_vars"]], vstore[["downscale_custom_elements"]]))
@@ -524,14 +522,12 @@ session_geometry <- function(sg_dt) {
                     style = "width: 100%;"
                   )
                 )
-              } else {
-                NULL
               }
             })
             
             # reactive output for selecting time period for previewed raster
             output$preview_raster_time_periods <- shiny::renderUI({
-              if (show_ui() & !is.null(input$ds_ras_elements)) { 
+              if (show_raster_ui() & !is.null(input$ds_ras_elements)) { 
                 
                 # extract valid time periods for given element
                 time_periods <- raster_layers[Code_Element == input$ds_ras_elements, Time]
@@ -547,8 +543,6 @@ session_geometry <- function(sg_dt) {
                   choices = time_periods,
                   selected = vstore[["ds_ras_time_periods"]]
                 )
-              } else {
-                NULL
               }
             })
             
@@ -571,7 +565,7 @@ session_geometry <- function(sg_dt) {
               } else {
                 choices <- c("Observed", "Simulated")
               }
-              if (show_ui() & !is.null(input$ds_ras_elements) & !is.null(input$ds_ras_time_periods)) {
+              if (show_raster_ui() & !is.null(input$ds_ras_elements) & !is.null(input$ds_ras_time_periods)) {
                 shiny::radioButtons(
                   inputId = "ds_ras_obs_sim",
                   label = h5("Preview observed or simulated data?"),
@@ -585,9 +579,8 @@ session_geometry <- function(sg_dt) {
             
             # reactive output for selecting ref periods 
             output$preview_raster_options <- shiny::renderUI({
-              if (show_ui() & !is.null(input$ds_ras_elements) & !is.null(input$ds_ras_time_periods)) {
+              if (show_raster_ui() & !is.null(input$ds_ras_elements) & !is.null(input$ds_ras_time_periods)) {
                 code <- raster_layers[Code_Element == input$ds_ras_elements & Time == input$ds_ras_time_periods, Code]
-                
                 shiny::div(
                   shiny::uiOutput("preview_obs_periods"),
                   shiny::uiOutput("preview_gcms"),
@@ -686,7 +679,7 @@ session_geometry <- function(sg_dt) {
               if (!is.null(vstore[["ds_ras_elements"]]) & !is.null(vstore[["ds_ras_time_periods"]]) & !(vstore[["calculate_diff"]])) {
                 variable_type <- raster_layers[Code_Element == vstore[["ds_ras_elements"]] & Time == vstore[["ds_ras_time_periods"]], Type]
                 if (length(variable_type) != 0) {
-                  if (show_ui() & variable_type == "ratio") {
+                  if (show_raster_ui() & variable_type == "ratio") {
                     shiny::checkboxInput(
                       inputId = "log_transform_raster",
                       label = "Apply log transform to raster preview",
@@ -715,9 +708,7 @@ session_geometry <- function(sg_dt) {
         }
       )
       vstore[["processing"]] <- FALSE
-      #shiny::updateActionButton(inputId = "downscale_process_launch", disabled = TRUE)
       shiny::updateActionButton(inputId = "generate_results", disabled = FALSE)
-      #shiny::removeModal()
     },
     get = function() {
       return(sg_dt$dt)

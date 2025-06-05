@@ -289,7 +289,7 @@ shiny::shinyApp(
     )
     
     # reactive state for raster preview
-    show_ui <<- reactiveVal(TRUE)
+    show_raster_ui <<- reactiveVal(TRUE)
     
     # ---- Modal input storage
     output$climr <- leaflet::renderLeaflet(l)
@@ -795,7 +795,7 @@ shiny::shinyApp(
       vstore[["downscale_sim_recommended"]] <- input$sim_data_default
     })
     shiny::observe(
-      if (vstore[["downscale_sim_recommended"]] == TRUE) {
+      if (vstore[["downscale_sim_recommended"]]) {
         # GCMs
         vstore[["downscale_gcms"]] <- climr::list_gcms()[c(1,4:7,10:12)]
         shiny::updateCheckboxGroupInput(
@@ -871,7 +871,7 @@ shiny::shinyApp(
       
       ## observed years ##
       vstore[["downscale_obs_years_checkbox"]] <- input$observed_years_checkbox
-      if (vstore[["downscale_obs_years_checkbox"]] == TRUE) {
+      if (vstore[["downscale_obs_years_checkbox"]]) {
         date_range <- c(min(input$downscale_obs_years):max(input$downscale_obs_years))
         vstore[["downscale_obs_years"]] <- date_range
       }
@@ -890,7 +890,7 @@ shiny::shinyApp(
       
       ## GCM years ##
       vstore[["downscale_gcm_years_checkbox"]] <- input$gcm_years_checkbox
-      if (vstore[["downscale_gcm_years_checkbox"]] == TRUE) {
+      if (vstore[["downscale_gcm_years_checkbox"]]) {
         # add selected range
         date_range <- (min(input$downscale_gcm_years):max(input$downscale_gcm_years))
         if (2015 %in% date_range & (min(date_range) != 2015)) {
@@ -1144,7 +1144,7 @@ shiny::shinyApp(
       if (shiny::in_devmode()) cat("Event: downscale_output", sep = "\n")
       vstore[["downscale_output"]] <- input$downscale_output
       if (input$downscale_output == "csv") {
-        show_ui(FALSE)
+        show_raster_ui(FALSE)
       }
     })
     shiny::observeEvent(input$downscale_resolution, {
@@ -1173,7 +1173,7 @@ shiny::shinyApp(
       
       sg$process()
       
-      show_ui(TRUE)
+      show_raster_ui(TRUE)
     })
     shiny::observeEvent(input$ds_ras_elements, {
       if (shiny::in_devmode()) cat("Event: ds_ras_elements", sep = "\n")
@@ -1280,7 +1280,7 @@ shiny::shinyApp(
           } else {
             hcl.colors(5,"Blue-Red 3")
           }
-          
+
           # display raster and legend
           if (type == "interval") {
             display_raster <- preview_raster[[layer_match]] - preview_raster[[ref_period_raster]]
@@ -1298,23 +1298,34 @@ shiny::shinyApp(
           }
           if (type == "ratio") {
             display_raster <- preview_raster[[layer_match]]/preview_raster[[ref_period_raster]]
-            pal <- colorNumeric(
-              palette = col_scheme,
-              domain = values(display_raster),
-              na.color = "transparent"
-            )
-            
-            # update legend title
-            legend_title <- glue::glue("Change in {legend_title} from 1961_1990 to {time_period}")
-            
-            leaflet::addRasterImage(mp, display_raster, layerId = "rast_layer", colors = pal)
-            leaflet::addLegend(mp, pal = pal, values = values(display_raster), title = legend_title, labFormat = labelFormat(suffix = units))
+            # error handling for division by 0
+            if (all(is.na(values(display_raster)))) {
+              showModal(
+                modalDialog(
+                  title = "Warning",
+                  paste("Selected raster is not valid, ratio contains division by zero."),
+                  easyClose = TRUE
+                )
+              )
+            } else {
+              pal <- colorNumeric(
+                palette = col_scheme,
+                domain = values(display_raster),
+                na.color = "transparent"
+              )
+              
+              # update legend title
+              legend_title <- glue::glue("Change in {legend_title} from 1961_1990 to {time_period}")
+              
+              leaflet::addRasterImage(mp, display_raster, layerId = "rast_layer", colors = pal)
+              leaflet::addLegend(mp, pal = pal, values = values(display_raster), title = legend_title, labFormat = labelFormat(suffix = units))
+            }
           }
         } else {
           
           variable_type <- climr::variables[Code == code, Type]
-          if (variable_type == "ratio" & vstore[["log_transform_raster"]] == TRUE) {
-            # log transform
+          if (variable_type == "ratio" & vstore[["log_transform_raster"]]) {
+            # log transform - this may need more error handling for negative numbers?
             raster_layer_values <- log2(preview_raster[[layer_match]] + 1)
           } else {
             raster_layer_values <- preview_raster[[layer_match]]
@@ -1340,6 +1351,8 @@ shiny::shinyApp(
             transform = function(x) round((2^x) - 1),  # inverse of log2(x + 1)
             suffix = units
           )
+          
+          # if log-transformed, set legend steps - need to do this!
   
           # add legend
           leaflet::addLegend(mp, pal = pal, values = values(raster_layer_values), title = legend_title, labFormat = if (vstore[["log_transform_raster"]] & variable_type == "ratio") inv_log2_formatter else labelFormat(suffix = units))
@@ -1402,8 +1415,6 @@ shiny::shinyApp(
             ticks = FALSE
           )
         )
-      } else {
-        NULL
       }
     })
     
