@@ -1304,12 +1304,14 @@ shiny::shinyApp(
             legend_title <- glue::glue("Change in {legend_title} from 1961_1990 to {time_period}")
             
             leaflet::addRasterImage(mp, display_raster, layerId = "rast_layer", colors = pal)
-            leaflet::addLegend(mp, pal = pal, values = values(display_raster), title = legend_title, labFormat = labelFormat(suffix = units))
+            leaflet::addLegend(mp, pal = pal, values = values(display_raster), title = HTML(sprintf("<div style='width: 200px;'>%s</div>", legend_title)), labFormat = labelFormat(suffix = units))
           }
           if (type == "ratio") {
-            display_raster <- preview_raster[[layer_match]]/preview_raster[[ref_period_raster]]
+            browser()
             # error handling for division by 0
-            if (all(is.na(values(display_raster)))) {
+            display_raster <- terra::ifel(preview_raster[[ref_period_raster]] != 0, preview_raster[[layer_match]]/preview_raster[[ref_period_raster]], 0)
+
+            if (all(values(display_raster) == 0, na.rm = TRUE)) {
               showModal(
                 modalDialog(
                   title = "Warning",
@@ -1331,7 +1333,7 @@ shiny::shinyApp(
                 legend_title <- glue::glue("Percent change in {legend_title} from 1961_1990 to {time_period}")
                 
                 leaflet::addRasterImage(mp, display_raster, layerId = "rast_layer", colors = pal)
-                leaflet::addLegend(mp, pal = pal, values = values(display_raster), title = legend_title, labFormat = labelFormat(suffix = "%"))
+                leaflet::addLegend(mp, pal = pal, values = values(display_raster), title = HTML(sprintf("<div style='width: 200px;'>%s</div>", legend_title)), labFormat = labelFormat(suffix = "%"))
               } else {
                 pal <- colorNumeric(
                   palette = col_scheme,
@@ -1343,7 +1345,7 @@ shiny::shinyApp(
                 legend_title <- glue::glue("Change in {legend_title} from 1961_1990 to {time_period}")
                 
                 leaflet::addRasterImage(mp, display_raster, layerId = "rast_layer", colors = pal)
-                leaflet::addLegend(mp, pal = pal, values = values(display_raster), title = legend_title, labFormat = labelFormat(suffix = units))
+                leaflet::addLegend(mp, pal = pal, values = values(display_raster), title = HTML(sprintf("<div style='width: 200px;'>%s</div>", legend_title)), labFormat = labelFormat(suffix = units))
               }
             }
           }
@@ -1381,7 +1383,7 @@ shiny::shinyApp(
           # if log-transformed, set legend steps - need to do this!
   
           # add legend
-          leaflet::addLegend(mp, pal = pal, values = values(raster_layer_values), title = legend_title, labFormat = if (vstore[["log_transform_raster"]] & variable_type == "ratio") inv_log2_formatter else labelFormat(suffix = units))
+          leaflet::addLegend(mp, pal = pal, values = values(raster_layer_values), title = HTML(sprintf("<div style='width: 200px;'>%s</div>", legend_title)), labFormat = if (vstore[["log_transform_raster"]] & variable_type == "ratio") inv_log2_formatter else labelFormat(suffix = units))
           }
         }  
     })
