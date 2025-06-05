@@ -830,7 +830,7 @@ shiny::shinyApp(
       if (shiny::in_devmode()) cat("Event: downscale_parameters", sep = "\n")
       temp_dt <- sg_dt$dt
       
-      if (!is.null(temp_dt) && nrow(temp_dt) > 0) {
+      if (!is.null(temp_dt) & nrow(temp_dt) > 0) {
         sources <- unique(na.omit(temp_dt$source))
         
         # ensure all data sources are the same before opening Downscale Parameters
@@ -931,7 +931,7 @@ shiny::shinyApp(
       selections <- list(input$downscale_gcms, input$downscale_ssps, input$downscale_gcm_periods)
       lengths <- sapply(selections, length)
       
-      if (nrow(compatible_periods) == 0 && !is.null(input$downscale_custom_elements) && !is.null(input$downscale_custom_time_periods)) {
+      if (nrow(compatible_periods) == 0 & !is.null(input$downscale_custom_elements) & !is.null(input$downscale_custom_time_periods)) {
         showModal(
           modalDialog(
             title = "Warning",
@@ -1075,7 +1075,7 @@ shiny::shinyApp(
       # check that it is possible to downscale the data 
       temp_dt <- sg_dt$dt
       
-      if (!is.null(temp_dt) && nrow(temp_dt) > 0) {
+      if (!is.null(temp_dt) & nrow(temp_dt) > 0) {
         sources <- unique(na.omit(temp_dt$source))
         
         # ensure all data sources are the same before opening Downscale Launch window
@@ -1219,7 +1219,9 @@ shiny::shinyApp(
         vstore[["ds_ras_run"]] = input$ds_ras_run
         vstore[["ds_ras_gcm_periods"]] = input$ds_ras_gcm_periods
         vstore[["calculate_diff"]] = input$calculate_diff
-        vstore[["log_transform_raster"]] = input$log_transform_raster
+        if (!is.null(input$log_transform_raster)) {
+          vstore[["log_transform_raster"]] = input$log_transform_raster
+        }
         
         # clear previous raster and legend
         if (!is.null(vstore[["downscale_raster_preview"]])) {
@@ -1273,7 +1275,7 @@ shiny::shinyApp(
         update_vstore_and_notify("downscale_raster_preview", layer_match, "Preview raster")
         
         # error handling for comparing ref period against itself
-        if (vstore[["ds_ras_obs_periods"]] == "1961_1990" && vstore[["ds_ras_obs_sim"]] == "Observed") {
+        if (vstore[["ds_ras_obs_periods"]] == "1961_1990" & vstore[["ds_ras_obs_sim"]] == "Observed") {
           vstore[["calculate_diff"]] = FALSE
         }
         # to display calculated difference if selected
@@ -1307,20 +1309,21 @@ shiny::shinyApp(
             leaflet::addLegend(mp, pal = pal, values = values(display_raster), title = HTML(sprintf("<div style='width: 200px;'>%s</div>", legend_title)), labFormat = labelFormat(suffix = units))
           }
           if (type == "ratio") {
-            browser()
-            # error handling for division by 0
-            display_raster <- terra::ifel(preview_raster[[ref_period_raster]] != 0, preview_raster[[layer_match]]/preview_raster[[ref_period_raster]], 0)
-
-            if (all(values(display_raster) == 0, na.rm = TRUE)) {
-              showModal(
-                modalDialog(
-                  title = "Warning",
-                  paste("Selected raster is not valid, ratio contains division by zero."),
-                  easyClose = TRUE
+            display_raster <- preview_raster[[layer_match]] - preview_raster[[ref_period_raster]]
+            
+            if (vstore[["calculate_percent_diff"]]) {
+              # error handling for division by 0
+              display_raster <- terra::ifel(preview_raster[[ref_period_raster]] != 0, (preview_raster[[layer_match]]-preview_raster[[ref_period_raster]])/preview_raster[[ref_period_raster]], 0)
+              
+              if (all(values(display_raster) == 0, na.rm = TRUE)) {
+                showModal(
+                  modalDialog(
+                    title = "Warning",
+                    paste("Selected raster is not valid, ratio contains division by zero."),
+                    easyClose = TRUE
+                  )
                 )
-              )
-            } else {
-              if (vstore[["calculate_percent_diff"]]) {
+              } else {
                 display_raster <- display_raster*100
                 
                 pal <- colorNumeric(
@@ -1334,23 +1337,63 @@ shiny::shinyApp(
                 
                 leaflet::addRasterImage(mp, display_raster, layerId = "rast_layer", colors = pal)
                 leaflet::addLegend(mp, pal = pal, values = values(display_raster), title = HTML(sprintf("<div style='width: 200px;'>%s</div>", legend_title)), labFormat = labelFormat(suffix = "%"))
+                }
               } else {
-                pal <- colorNumeric(
-                  palette = col_scheme,
-                  domain = values(display_raster),
-                  na.color = "transparent"
-                )
-                
-                # update legend title
-                legend_title <- glue::glue("Change in {legend_title} from 1961_1990 to {time_period}")
-                
-                leaflet::addRasterImage(mp, display_raster, layerId = "rast_layer", colors = pal)
-                leaflet::addLegend(mp, pal = pal, values = values(display_raster), title = HTML(sprintf("<div style='width: 200px;'>%s</div>", legend_title)), labFormat = labelFormat(suffix = units))
-              }
+              pal <- colorNumeric(
+                palette = col_scheme,
+                domain = values(display_raster),
+                na.color = "transparent"
+              )
+              
+              # update legend title
+              legend_title <- glue::glue("Change in {legend_title} from 1961_1990 to {time_period}")
+              
+              leaflet::addRasterImage(mp, display_raster, layerId = "rast_layer", colors = pal)
+              leaflet::addLegend(mp, pal = pal, values = values(display_raster), title = HTML(sprintf("<div style='width: 200px;'>%s</div>", legend_title)), labFormat = labelFormat(suffix = units))
             }
+            
+            # # error handling for division by 0
+            # display_raster <- terra::ifel(preview_raster[[ref_period_raster]] != 0, preview_raster[[layer_match]]/preview_raster[[ref_period_raster]], 0)
+            # 
+            # if (all(values(display_raster) == 0, na.rm = TRUE)) {
+            #   showModal(
+            #     modalDialog(
+            #       title = "Warning",
+            #       paste("Selected raster is not valid, ratio contains division by zero."),
+            #       easyClose = TRUE
+            #     )
+            #   )
+            # } else {
+              # if (vstore[["calculate_percent_diff"]]) {
+              #   display_raster <- display_raster*100
+              # 
+              #   pal <- colorNumeric(
+              #     palette = col_scheme,
+              #     domain = values(display_raster),
+              #     na.color = "transparent"
+              #   )
+              # 
+              #   # update legend title
+              #   legend_title <- glue::glue("Percent change in {legend_title} from 1961_1990 to {time_period}")
+              # 
+              #   leaflet::addRasterImage(mp, display_raster, layerId = "rast_layer", colors = pal)
+              #   leaflet::addLegend(mp, pal = pal, values = values(display_raster), title = HTML(sprintf("<div style='width: 200px;'>%s</div>", legend_title)), labFormat = labelFormat(suffix = "%"))
+              # } else {
+              #   pal <- colorNumeric(
+              #     palette = col_scheme,
+              #     domain = values(display_raster),
+              #     na.color = "transparent"
+              #   )
+              # 
+              #   # update legend title
+              #   legend_title <- glue::glue("Change in {legend_title} from 1961_1990 to {time_period}")
+              # 
+              #   leaflet::addRasterImage(mp, display_raster, layerId = "rast_layer", colors = pal)
+              #   leaflet::addLegend(mp, pal = pal, values = values(display_raster), title = HTML(sprintf("<div style='width: 200px;'>%s</div>", legend_title)), labFormat = labelFormat(suffix = units))
+              # }
+            # }
           }
         } else {
-          
           variable_type <- climr::variables[Code == code, Type]
           if (variable_type == "ratio" & vstore[["log_transform_raster"]]) {
             # log transform - this may need more error handling for negative numbers?
