@@ -338,14 +338,17 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
       obs_periods = vstore[["downscale_obs_periods"]] |> n(),
       obs_years  = vstore[["downscale_obs_years"]] |> n(),
       obs_ts_dataset = vstore[["downscale_obs_ts_dataset"]] |> n(),
+      # return_refperiod = vstore[["downscale_return_refperiod"]],
+      return_refperiod = TRUE, # have this hard coded in as true as we need it for calculating difference in rasters - different solution for this?
       gcms = vstore[["downscale_gcms"]] |> n(),
       ssps = vstore[["downscale_ssps"]] |> n(),
       gcm_periods = vstore[["downscale_gcm_periods"]] |> n(),
       gcm_ssp_years = vstore[["downscale_gcm_ssp_years"]] |> n(),
       gcm_hist_years = vstore[["downscale_gcm_hist_years"]] |> n(),
+      ensemble_mean = vstore[["downscale_ensemble_mean"]] |> n(),
       max_run = vstore[["downscale_max_run"]] |> n() |> as.integer(),
       run_nm = vstore[["downscale_run_nm"]] |> n(),
-      vars = c(downscale_core_vars, vstore[["downscale_extra_vars"]] |> n()),
+      vars = c(vstore[["downscale_extra_vars"]] |> n()),
       ppt_lr = vstore[["downscale_core_ppt_lr"]]
     )
   }
@@ -415,6 +418,10 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
     }
 
     res <- ds(xyz)
+    
+    # keep a copy of res for previewing raster
+    preview_raster <<- res
+    
     # Write the current res to CSV using the same run_id
     csv_file <- file.path(temp_dir, paste0("downscale_", run_id, ".csv"))
     data.table::fwrite(x = res, file = csv_file, row.names = FALSE)
@@ -434,6 +441,9 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
       # Write the current res to tif using the same run_id
       out_file <- file.path(temp_dir, paste0("downscale_", run_id, "_raster_",i,".%s" |> sprintf(vstore[["downscale_output"]])))
       if (vstore[["downscale_output"]] %in% "tif") {
+        # keep a copy of res for previewing raster
+        preview_raster <<- res
+        
         terra::writeRaster(x = res, filename = out_file, gdal=c("PREDICTOR=2"), datatype="FLT4S", overwrite = TRUE)
       } else {
         data.table::as.data.table(res) |> data.table::fwrite(file = out_file, row.names = TRUE)
@@ -460,9 +470,13 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
       xyz <- g |> rastmaker()
       res <- ds(xyz)
       res <- terra::mask(res, g)
+      
       # Write the current res to tif using the same run_id
       out_file <- file.path(temp_dir, paste0("downscale_", run_id, "_map_draw_",i,".%s" |> sprintf(vstore[["downscale_output"]])))
       if (vstore[["downscale_output"]] %in% "tif") {
+        # keep a copy of res for previewing raster
+        preview_raster <<- res
+        
         terra::writeRaster(x = res, filename = out_file, gdal=c("PREDICTOR=2"), datatype="FLT4S", overwrite = TRUE)
       } else {
         data.table::as.data.table(res) |> data.table::fwrite(file = out_file, row.names = TRUE)
@@ -478,15 +492,19 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
         xyz <- g |> rastmaker()
         res <- ds(xyz)
         res <- terra::mask(res, g)
+        
         # Write the current res to tif using the same run_id
         out_file <- file.path(temp_dir, paste0("downscale_", run_id, "_file_upload_", i,"_shape_", j, ".%s" |> sprintf(vstore[["downscale_output"]])))
         if (vstore[["downscale_output"]] %in% "tif") {
+          # keep a copy of res for previewing raster
+          preview_raster <<- res
+          
           terra::writeRaster(x = res, filename = out_file, gdal=c("PREDICTOR=2"), datatype="FLT4S", overwrite = TRUE)
         } else {
           data.table::as.data.table(res) |> data.table::fwrite(file = out_file, row.names = TRUE)
         }      
         output_files <- c(output_files, out_file)
-        rm(xyz, res, g)
+        rm(xyz, res, g) 
       }
     }
 
@@ -512,7 +530,7 @@ downscale_extra_vars <- local({
 })
 
 rastmakerg <- function(g, resolution) {
-  hull <- terra::minRect(g)
+  hull <- terra::hull(g, type = "rectangle")
   lat <- mean(c(terra::ymin(hull), terra::ymax(hull)))
   y_res <- resolution / 111319  # Latitude resolution
   x_res <- resolution / (111319 * cos(lat * pi / 180))  # Longitude resolution adjusted for latitude
