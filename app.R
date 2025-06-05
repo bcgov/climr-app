@@ -142,7 +142,7 @@ shiny::shinyApp(
         prompter::use_prompt(),
         shiny::sidebarLayout(
           shiny::sidebarPanel(
-            style = "height: 85vh; overflow-y: auto; overflow-x: auto;", # FIX HEIGHT TO BE ADAPTIVE
+            style = "height: 84vh; overflow-y: auto; overflow-x: auto;", 
             
             # create the link!!!
             shiny::div(
@@ -217,17 +217,8 @@ shiny::shinyApp(
           ),
           shiny::mainPanel(
             # create map as UI element
-            leaflet::leafletOutput("getdata_map", width = "100%", height = "85vh") # FIX HEIGHT TO BE ADAPTIVE
+            leaflet::leafletOutput("climr", width = "100%", height = "84vh") #height needs to be fixed to be adaptive
           )
-        )
-      ),
-      
-      shiny::tabPanel(
-        title = "Visualization",
-        prompter::use_prompt(),
-        shiny::mainPanel(
-          # create map as UI element
-          leaflet::leafletOutput("visualization_map", width = "100%", height = "85vh") # FIX HEIGHT TO BE ADAPTIVE
         )
       ),
      
@@ -301,8 +292,7 @@ shiny::shinyApp(
     show_raster_ui <<- reactiveVal(TRUE)
     
     # ---- Modal input storage
-    output$getdata_map <- leaflet::renderLeaflet(l)
-    output$visualization_map <- leaflet::renderLeaflet(l)
+    output$climr <- leaflet::renderLeaflet(l)
     
     downscale_default <- list(
       downscale_which_refmap = "refmap_climr",
