@@ -739,7 +739,7 @@ shiny::shinyApp(
                 ),
                 shiny::checkboxGroupInput(
                   inputId = "downscale_custom_time_periods",
-                  label = h5("Choose time periods:"),
+                  label = h5("Choose seasons/months:"),
                   width = "100%",
                   inline = TRUE,
                   choices = unique(climr::variables %>% pull(Time)), ## BUG - some annuals are showing up as ANY ##
