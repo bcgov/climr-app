@@ -50,7 +50,7 @@ if (!length(felev <- which(file.exists(elevtif)))) {
   cec <- terra::rast(elevtif[felev])
 }
 
-# Base maps ---- 
+# Base map ---- 
 l <- leaflet::leaflet(
   options = leaflet::leafletOptions(maxZoom = 25)
 ) |>
@@ -217,53 +217,8 @@ shiny::shinyApp(
           ),
           shiny::mainPanel(
             # create map as UI element
-            leaflet::leafletOutput("getdata_map", width = "100%", height = "85vh") # FIX HEIGHT TO BE ADAPTIVE
+            leaflet::leafletOutput("climr", width = "100%", height = "84vh") #height needs to be fixed to be adaptive
           )
-        )
-      ),
-      
-      shiny::tabPanel(
-        title = "Visualization",
-        prompter::use_prompt(),
-        shiny::mainPanel(width = "100%",
-                         shinyjs::useShinyjs(),
-                         tags$head(
-                           tags$style(HTML("
-                              #map-container {
-                                width: 100%;
-                                height: 100vh;
-                                transition: width 0.5s ease-in-out;
-                              }
-                              .half-map {
-                                width: 60% !important;
-                                float: left;
-                              }
-                              #plot-container {
-                                width: 35%;
-                                float: right;
-                              }
-                            "))
-                         ),
-                         # Map container
-                         div(id = "map-container",
-                             leaflet::leafletOutput("visualization_map", width = "100%", height = "85vh") # FIX HEIGHT TO BE ADAPTIVE
-                         ),
-                         shiny::absolutePanel(
-                           top = 90,
-                           left = 60,
-                           width = "200px",
-                           style = "opacity: 0.9; background-color: white;",
-                           class = "input-control",
-                           shiny::div(
-                             class = "input-control-body",
-                             shiny::radioButtons(
-                               inputId = "visualization_input",
-                               label = h5("Choose input type:"),
-                               choices = c("Map Point", "Ecoregion", "FLP Area"),
-                               selected = "Map Point"
-                             )
-                           )
-                         ),
         )
       ),
      
@@ -320,7 +275,7 @@ shiny::shinyApp(
   server = function(input, output, session) {
     session$allowReconnect("force")
 
-    # initialize sg_dt as reactive for Get Data map
+    # initialize sg_dt as reactive
     sg_dt <- reactiveValues(dt = data.table::data.table(
       id = integer(),
       lat = character(),
@@ -333,25 +288,11 @@ shiny::shinyApp(
       filtered_dt = NULL
     )
     
-    # initialize sgvis_dt as reactive for Visualization map
-    sgvis_dt <- reactiveValues(dt = data.table::data.table(
-      id = integer(),
-      lat = character(),
-      long = character(),
-      wkt = character(),
-      group = character(),
-      source = character(),
-      datapath = character()
-      ),
-      filtered_dt = NULL
-    )
-    
     # reactive state for raster preview
     show_raster_ui <<- reactiveVal(TRUE)
     
     # ---- Modal input storage
-    output$getdata_map <- leaflet::renderLeaflet(l)
-    output$visualization_map <- leaflet::renderLeaflet(l)
+    output$climr <- leaflet::renderLeaflet(l)
     
     downscale_default <- list(
       downscale_which_refmap = "refmap_climr",
@@ -442,31 +383,30 @@ shiny::shinyApp(
     # ---- Geometry
     source("scripts/geometry.R", local = TRUE)
     sg <- session_geometry(sg_dt)
-    sgvis <- session_geometry(sgvis_dt)
     
-    # ---- Get Data Map events
+    # ---- Map events
     
     # add map points and drawing map shapes logic
-    shiny::observeEvent(input$getdata_map_draw_start, {
-      if (shiny::in_devmode()) cat("Event: getdata_map_draw_start", sep = "\n")
+    shiny::observeEvent(input$climr_draw_start, {
+      if (shiny::in_devmode()) cat("Event: climr_draw_start", sep = "\n")
       sg$add_point_enabled(FALSE)
       updateActionButton(session = getDefaultReactiveDomain(),
                          "downscale_parameters", disabled = FALSE)
       updateActionButton(session = getDefaultReactiveDomain(),
                          "generate_results", disabled = FALSE)
     })
-    shiny::observeEvent(input$getdata_map_draw_stop, {
-      if (shiny::in_devmode()) cat("Event: getdata_map_draw_stop", sep = "\n")
+    shiny::observeEvent(input$climr_draw_stop, {
+      if (shiny::in_devmode()) cat("Event: climr_draw_stop", sep = "\n")
       sg$add_point_enabled(TRUE)
     })
-    shiny::observeEvent(input$getdata_map_draw_new_feature, {
-      if (shiny::in_devmode()) cat("Event: getdata_map_draw_new_feature", sep = "\n")
-      sg$add_draw_poly(input$getdata_map_draw_new_feature)
+    shiny::observeEvent(input$climr_draw_new_feature, {
+      if (shiny::in_devmode()) cat("Event: climr_draw_new_feature", sep = "\n")
+      sg$add_draw_poly(input$climr_draw_new_feature)
       bslib::accordion_panel_open("acc_methods", "acc_method1")
     })
-    shiny::observeEvent(input$getdata_map_click, {
-      if (shiny::in_devmode()) cat("Event: getdata_map_click", sep = "\n")
-      sg$add_point(input$getdata_map_click$lat, input$getdata_map_click$lng)
+    shiny::observeEvent(input$climr_click, {
+      if (shiny::in_devmode()) cat("Event: climr_click", sep = "\n")
+      sg$add_point(input$climr_click$lat, input$climr_click$lng)
       updateActionButton(session = getDefaultReactiveDomain(),
                          "downscale_parameters", disabled = FALSE)
       updateActionButton(session = getDefaultReactiveDomain(),
@@ -494,32 +434,6 @@ shiny::shinyApp(
         updateActionButton(session = getDefaultReactiveDomain(),
                            "generate_results", disabled = TRUE)
       }
-    })
-    
-    # ---- Visualization Map events
-    
-    # add map points and drawing map shapes logic
-    shiny::observeEvent(input$visualization_map_draw_start, {
-      if (shiny::in_devmode()) cat("Event: visualization_map_draw_start", sep = "\n")
-      # sgvis$add_point_enabled(FALSE)
-    })
-    shiny::observeEvent(input$visualization_map_draw_stop, {
-      if (shiny::in_devmode()) cat("Event: visualization_map_draw_stop", sep = "\n")
-      # sgvis$add_point_enabled(TRUE)
-    })
-    shiny::observeEvent(input$visualization_map_draw_new_feature, {
-      if (shiny::in_devmode()) cat("Event: visualization_map_draw_new_feature", sep = "\n")
-      # sgvis$add_draw_poly(input$visualization_map_draw_new_feature)
-    })
-    shiny::observeEvent(input$visualization_map_click, {
-      if (shiny::in_devmode()) cat("Event: visualization_map_click", sep = "\n")
-      # sgvis$add_point(input$visualization_map_click$lat, input$visualization_map_click$lng)
-    })
-    
-    # pop-up remove button for map points
-    shiny::observeEvent(input$sgvis_remove, {
-      if (shiny::in_devmode()) cat("Event: sgvis_remove", sep = "\n")
-      # sgvis$rm(input$sgvis_remove)
     })
     
     # ---- Data table events
