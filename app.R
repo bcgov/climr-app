@@ -536,7 +536,7 @@ shiny::shinyApp(
                     label = h5("Choose observation time-series data:",
                                prompter::add_prompt(
                                  tooltipsIcon,
-                                 message = HTML(paste("Dataset for observational time series data. ClimateNA gridded time series, CRU/GPCC for CRU TS (temperature) and GPCC (precipitation),")),
+                                 message = HTML(paste("Dataset for observational time series data. What is MSWX?? ClimateNA gridded time series, CRU/GPCC for CRU TS (temperature) and GPCC (precipitation),")),
                                  position = "top",
                                  size = "large",
                                  shadow = FALSE
@@ -544,7 +544,7 @@ shiny::shinyApp(
                     ),
                     width = "100%",
                     selected = vstore[["downscale_obs_ts_dataset"]],
-                    choices = c("ClimateNA" = "climatena", "Climatic Research Unit / Global Precipitation Climatology Centre" = "cru.gpcc")
+                    choices = c("MSWX Blend" = "mswx.blend", "ClimateNA" = "climatena", "Climatic Research Unit / Global Precipitation Climatology Centre" = "cru.gpcc")
                   )
                 )
               )
