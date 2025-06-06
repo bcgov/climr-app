@@ -475,28 +475,6 @@ shiny::shinyApp(
         shiny::modalDialog(
           title = "Downscale Parameters", size = "l", fade = FALSE, class = "modal-dialog-scrollable",
           
-          # Reference map selection
-          shiny::div(
-            shiny::radioButtons(
-              inputId = "downscale_which_refmap",
-              label = h5("Choose reference map:", 
-                         prompter::add_prompt(
-                           tooltipsIcon,
-                           message = HTML(paste("Which map of 1961-1990 climatological normals to use as the high-resolution reference climate map for downscaling.")),
-                           position = "top",
-                           size = "large",
-                           shadow = FALSE
-                         )
-              ),
-              # choices = c(local({z <- climr::list_refmaps(); substr(z, 8L, z |> nchar()) |> tools::toTitleCase() |> setNames(object = z, nm = _)})),
-              choices = c("climr" = "refmap_climr", "ClimateNA" = "refmap_climatena"),
-              selected = vstore[["downscale_which_refmap"]],
-              inline = TRUE,
-              width = "100%",
-            )
-          ),
-          br(),
-          
           accordion(
             open = FALSE,
             
@@ -872,9 +850,6 @@ shiny::shinyApp(
     
     # applies all user specified downscale parameters
     shiny::observeEvent(input$downscale_apply, {
-      
-      ## refmap ##
-      vstore[["downscale_which_refmap"]] <- input$downscale_which_refmap
       
       ## observed periods ##
       vstore[["downscale_obs_periods_checkbox"]] <- input$downscale_obs_periods_checkbox
