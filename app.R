@@ -288,7 +288,8 @@ shiny::shinyApp(
       filtered_dt = NULL
     )
     
-    # reactive state for raster preview
+    # reactive state for csv/raster preview
+    show_csv_dt <<- reactiveVal(TRUE)
     show_raster_ui <<- reactiveVal(TRUE)
     
     # ---- Modal input storage
@@ -1105,8 +1106,10 @@ shiny::shinyApp(
                 width = "100%"
               ),
               
+              
               # preview for csv results
-              DT::DTOutput("preview_table", width = "100%"),
+              # DT::DTOutput("preview_table", width = "100%"),
+              shiny::uiOutput("preview_table_ui"),
               br(),
               
               shiny::downloadButton(
@@ -1140,6 +1143,8 @@ shiny::shinyApp(
       vstore[["downscale_output"]] <- input$downscale_output
       if (input$downscale_output == "csv") {
         show_raster_ui(FALSE)
+      } else {
+        show_csv_dt(FALSE)
       }
     })
     shiny::observeEvent(input$downscale_resolution, {
@@ -1147,8 +1152,13 @@ shiny::shinyApp(
       vstore[["downscale_resolution"]] <- input$downscale_resolution
     })
     shiny::observeEvent(input$downscale_process_launch, {
+
       if (shiny::in_devmode()) cat("Event: downscale_process_launch", sep = "\n")
       if (vstore[["processing"]]) return()
+      
+      if (input$downscale_output == "csv") {
+        show_csv_dt(TRUE)
+      }
       
       # concatenate custom extra climate variables
       if (!is.null(vstore[["downscale_custom_elements"]]) & !is.null(vstore[["downscale_custom_time_periods"]])) {
@@ -1173,7 +1183,7 @@ shiny::shinyApp(
       
       sg$process()
       
-      show_raster_ui(TRUE)
+      show_raster_ui(FALSE)
     })
     shiny::observeEvent(input$ds_ras_elements, {
       if (shiny::in_devmode()) cat("Event: ds_ras_elements", sep = "\n")
@@ -1480,6 +1490,13 @@ shiny::shinyApp(
             ticks = FALSE
           )
         )
+      }
+    })
+    
+    # reactive output for csv preview
+    output$preview_table_ui <- shiny::renderUI({
+      if(show_csv_dt()) {
+        DT::DTOutput("preview_table", width = "100%")
       }
     })
     
