@@ -1,5 +1,5 @@
 # Geometry input logic ----
-session_geometry <- function(sg_dt) {
+session_geometry <- function(sg_dt, mp) {
   
   observe ({
     req(sg_dt$dt)
@@ -17,9 +17,6 @@ session_geometry <- function(sg_dt) {
     fg[[d0]] <<- list(...)
     return()
   }
-  
-  # allow map to be modified instead of re-rendering
-  mp <<- leaflet::leafletProxy("climr")
   
   # pop-up remove button on map clicks
   rem_popup <- function(id) {
@@ -70,7 +67,7 @@ session_geometry <- function(sg_dt) {
   }
   refresh_DT()
   
-  update_map_marker <- function() {
+  update_map_marker <- function(mp) {
     mg <- sg_dt$dt[group == "marker" & grepl("POINT", wkt)]
     mp |> leaflet::clearGroup("sg_marker")
     if (nrow(mg)) {
@@ -83,7 +80,7 @@ session_geometry <- function(sg_dt) {
     }
   }
   
-  update_map_shape <- function() {
+  update_map_shape <- function(mp) {
     mg <- sg_dt$dt[group == "shape" | grepl("POLYGON", wkt)]
     mp |> leaflet::clearGroup("sg_shape") |>
       leaflet.extras::removeDrawToolbar(clearFeatures = TRUE) |>
@@ -129,8 +126,8 @@ session_geometry <- function(sg_dt) {
   refresh <- function(g) {
     refresh_DT()
     shiny::updateActionButton(inputId = "generate_results", disabled = {nrow(sg_dt$dt) <= 0})
-    if ("marker" %in% g) update_map_marker()
-    if ("shape" %in% g) update_map_shape()
+    if ("marker" %in% g) update_map_marker(mp)
+    if ("shape" %in% g) update_map_shape(mp)
   }
   
   # add new geometries to sg_dt$dt
@@ -170,7 +167,6 @@ session_geometry <- function(sg_dt) {
     # To show hull when npoints > 100
     if (!grepl("POINT", new)) g <- "shape"
     refresh(g)
-    #refresh_DT()
     session$sendCustomMessage(type="jsCode", list(code = "$('.input-control-body a.shiny-download-link').removeClass('btn-success');"))
   }
   
@@ -194,12 +190,11 @@ session_geometry <- function(sg_dt) {
     sg_dt$dt <- (sg_dt$dt)[!id %in% rid]
     
     # refresh reactive DT in sidebar
-    #refresh_DT()
     refresh(g)
   }
   
   # clear all map point/shapes & files
-  clear <- function() {
+  clear <- function(mp) {
     # remove points and drawn AOIs
     if ((nrow(sg_dt$dt) > 0) | (length(fg) != 0)) {
       for (id in ((sg_dt$dt)$id)) {
@@ -730,7 +725,7 @@ session_geometry <- function(sg_dt) {
         rem(rid)
     },
     clear_all = function() {
-      clear()
+      clear(mp)
     },
     # view = function(rid) {
     #   view_map(rid)

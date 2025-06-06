@@ -142,7 +142,7 @@ shiny::shinyApp(
         prompter::use_prompt(),
         shiny::sidebarLayout(
           shiny::sidebarPanel(
-            style = "height: 85vh; overflow-y: auto; overflow-x: auto;", # FIX HEIGHT TO BE ADAPTIVE
+            style = "height: 84vh; overflow-y: auto; overflow-x: auto;", # FIX HEIGHT TO BE ADAPTIVE
             
             # create the link!!!
             shiny::div(
@@ -217,8 +217,37 @@ shiny::shinyApp(
           ),
           shiny::mainPanel(
             # create map as UI element
-            leaflet::leafletOutput("climr", width = "100%", height = "84vh") #height needs to be fixed to be adaptive
+            leaflet::leafletOutput("getdata_map", width = "100%", height = "84vh") #height needs to be fixed to be adaptive
           )
+        )
+      ),
+      
+      shiny::tabPanel(
+        title = "Visualization",
+        prompter::use_prompt(),
+        mainPanel(width = "100%",
+                  shinyjs::useShinyjs(),
+                  tags$head(
+                    tags$style(HTML("
+                              #map-container {
+                                width: 100%;
+                                height: 100vh;
+                                transition: width 0.5s ease-in-out;
+                              }
+                              .half-map {
+                                width: 60% !important;
+                                float: left;
+                              }
+                              #plot-container {
+                                width: 35%;
+                                float: right;
+                              }
+                            "))
+                  ),
+                  # Map container
+                  div(id = "map-container",
+                      leafletOutput("vis_map", width = "100%", height = "84vh")
+                  ),
         )
       ),
      
@@ -275,8 +304,8 @@ shiny::shinyApp(
   server = function(input, output, session) {
     session$allowReconnect("force")
 
-    # initialize sg_dt as reactive
-    sg_dt <- reactiveValues(dt = data.table::data.table(
+    # initialize getdata_sg_dt as reactive
+    getdata_sg_dt <- reactiveValues(dt = data.table::data.table(
       id = integer(),
       lat = character(),
       long = character(),
@@ -288,12 +317,30 @@ shiny::shinyApp(
       filtered_dt = NULL
     )
     
+    # initialize vis_sg_dt as reactive
+    vis_sg_dt <- reactiveValues(dt = data.table::data.table(
+      id = integer(),
+      lat = character(),
+      long = character(),
+      wkt = character(),
+      group = character(),
+      source = character(),
+      datapath = character()
+    ),
+    filtered_dt = NULL
+    )
+    
     # reactive state for csv/raster preview
     show_csv_dt <<- reactiveVal(TRUE)
     show_raster_ui <<- reactiveVal(TRUE)
     
     # ---- Modal input storage
-    output$climr <- leaflet::renderLeaflet(l)
+    output$getdata_map <- leaflet::renderLeaflet(l)
+    output$vis_map <- leaflet::renderLeaflet(l)
+    
+    # allow map to be modified instead of re-rendering
+    getdata_mp <- leaflet::leafletProxy("getdata_map")
+    vis_mp <- leaflet::leafletProxy("vis_map")
     
     downscale_default <- list(
       downscale_which_refmap = "refmap_climr",
@@ -383,31 +430,32 @@ shiny::shinyApp(
     
     # ---- Geometry
     source("scripts/geometry.R", local = TRUE)
-    sg <- session_geometry(sg_dt)
+    getdata_sg <- session_geometry(getdata_sg_dt, getdata_mp)
+    vis_sg <- session_geometry(vis_sg_dt, vis_mp)
     
-    # ---- Map events
+    # ---- Get Data Map events
     
     # add map points and drawing map shapes logic
-    shiny::observeEvent(input$climr_draw_start, {
-      if (shiny::in_devmode()) cat("Event: climr_draw_start", sep = "\n")
-      sg$add_point_enabled(FALSE)
+    shiny::observeEvent(input$getdata_map_draw_start, {
+      if (shiny::in_devmode()) cat("Event: getdata_map_draw_start", sep = "\n")
+      getdata_sg$add_point_enabled(FALSE)
       updateActionButton(session = getDefaultReactiveDomain(),
                          "downscale_parameters", disabled = FALSE)
       updateActionButton(session = getDefaultReactiveDomain(),
                          "generate_results", disabled = FALSE)
     })
-    shiny::observeEvent(input$climr_draw_stop, {
-      if (shiny::in_devmode()) cat("Event: climr_draw_stop", sep = "\n")
-      sg$add_point_enabled(TRUE)
+    shiny::observeEvent(input$getdata_map_draw_stop, {
+      if (shiny::in_devmode()) cat("Event: getdata_map_draw_stop", sep = "\n")
+      getdata_sg$add_point_enabled(TRUE)
     })
-    shiny::observeEvent(input$climr_draw_new_feature, {
-      if (shiny::in_devmode()) cat("Event: climr_draw_new_feature", sep = "\n")
-      sg$add_draw_poly(input$climr_draw_new_feature)
+    shiny::observeEvent(input$getdata_map_draw_new_feature, {
+      if (shiny::in_devmode()) cat("Event: getdata_map_draw_new_feature", sep = "\n")
+      getdata_sg$add_draw_poly(input$getdata_map_draw_new_feature)
       bslib::accordion_panel_open("acc_methods", "acc_method1")
     })
-    shiny::observeEvent(input$climr_click, {
-      if (shiny::in_devmode()) cat("Event: climr_click", sep = "\n")
-      sg$add_point(input$climr_click$lat, input$climr_click$lng)
+    shiny::observeEvent(input$getdata_map_click, {
+      if (shiny::in_devmode()) cat("Event: getdata_map_click", sep = "\n")
+      getdata_sg$add_point(input$getdata_map_click$lat, input$getdata_map_click$lng)
       updateActionButton(session = getDefaultReactiveDomain(),
                          "downscale_parameters", disabled = FALSE)
       updateActionButton(session = getDefaultReactiveDomain(),
@@ -418,7 +466,7 @@ shiny::shinyApp(
     # upload a file
     shiny::observeEvent(input$upload, {
       if (shiny::in_devmode()) cat("Event: upload", sep = "\n")
-      sg$add_file(input$upload)
+      getdata_sg$add_file(input$upload)
       updateActionButton(session = getDefaultReactiveDomain(),
                          "downscale_parameters", disabled = FALSE)
       updateActionButton(session = getDefaultReactiveDomain(),
@@ -428,8 +476,8 @@ shiny::shinyApp(
     # pop-up remove button for map points
     shiny::observeEvent(input$sg_remove, {
       if (shiny::in_devmode()) cat("Event: sg_remove", sep = "\n")
-      sg$rm(input$sg_remove)
-      if (nrow(sg_dt$dt) < 1) {
+      getdata_sg$rm(input$sg_remove)
+      if (nrow(getdata_sg_dt$dt) < 1) {
         updateActionButton(session = getDefaultReactiveDomain(),
                           "downscale_parameters", disabled = TRUE)
         updateActionButton(session = getDefaultReactiveDomain(),
@@ -437,16 +485,42 @@ shiny::shinyApp(
       }
     })
     
-    # ---- Data table events
+    # ---- Visualization Map events
+    
+    # add map points and drawing map shapes logic
+    shiny::observeEvent(input$vis_map_draw_start, {
+      if (shiny::in_devmode()) cat("Event: vis_map_draw_start", sep = "\n")
+      vis_sg$add_point_enabled(FALSE)
+    })
+    shiny::observeEvent(input$vis_map_draw_stop, {
+      if (shiny::in_devmode()) cat("Event: vis_map_draw_stop", sep = "\n")
+      vis_sg$add_point_enabled(TRUE)
+    })
+    shiny::observeEvent(input$vis_map_draw_new_feature, {
+      if (shiny::in_devmode()) cat("Event: vis_map_draw_new_feature", sep = "\n")
+      vis_sg$add_draw_poly(input$vis_map_draw_new_feature)
+    })
+    shiny::observeEvent(input$vis_map_click, {
+      if (shiny::in_devmode()) cat("Event: vis_map_click", sep = "\n")
+      vis_sg$add_point(input$vis_map_click$lat, input$vis_map_click$lng)
+    })
+    
+    # pop-up remove button for map points
+    shiny::observeEvent(input$sg_remove, {
+      if (shiny::in_devmode()) cat("Event: sg_remove", sep = "\n")
+      vis_sg$rm(input$sg_remove)
+    })
+    
+    # ---- Get Data - Data table events
     
     # delete a map point via data table
     shiny::observeEvent(input$delete_button, {
       if (shiny::in_devmode()) cat("Event: sg_remove", sep = "\n")
       row_num <- input$geom_dt_rows_selected
-      point_id <- sg_dt$filtered_dt[row_num,1] 
+      point_id <- getdata_sg_dt$filtered_dt[row_num,1] 
       if (length(point_id) != 0) {
-        sg$rm(point_id)
-        if (nrow(sg_dt$dt) < 1) {
+        getdata_sg$rm(point_id)
+        if (nrow(getdata_sg_dt$dt) < 1) {
         updateActionButton(session = getDefaultReactiveDomain(),
                           "downscale_parameters", disabled = TRUE)
         updateActionButton(session = getDefaultReactiveDomain(),
@@ -465,7 +539,7 @@ shiny::shinyApp(
     
     # clear all selections (map and file) logic
     shiny::observeEvent(input$clear_selections, {
-      sg$clear_all()
+      getdata_sg$clear_all()
     })
 
     sn <- \(j) setNames(j,j)
@@ -820,7 +894,7 @@ shiny::shinyApp(
     
     shiny::observeEvent(input$downscale_parameters, {
       if (shiny::in_devmode()) cat("Event: downscale_parameters", sep = "\n")
-      temp_dt <- sg_dt$dt
+      temp_dt <- getdata_sg_dt$dt
       
       if (!is.null(temp_dt) & nrow(temp_dt) > 0) {
         sources <- unique(na.omit(temp_dt$source))
@@ -1068,7 +1142,7 @@ shiny::shinyApp(
       if (shiny::in_devmode()) cat("Event: generate_results", sep = "\n")
       
       # check that it is possible to downscale the data 
-      temp_dt <- sg_dt$dt
+      temp_dt <- getdata_sg_dt$dt
       
       if (!is.null(temp_dt) & nrow(temp_dt) > 0) {
         sources <- unique(na.omit(temp_dt$source))
@@ -1077,7 +1151,7 @@ shiny::shinyApp(
         if (length(unique((sources))) == 1) {
           vstore[["processing"]] <- FALSE
           output$downscale_points_count_estimate <- shiny::renderUI({
-            pce <- sg$process_count(vstore[["downscale_resolution"]])
+            pce <- getdata_sg$process_count(vstore[["downscale_resolution"]])
             bslib::card(
               full_screen = FALSE,
               height = "auto",
@@ -1108,7 +1182,6 @@ shiny::shinyApp(
               
               
               # preview for csv results
-              # DT::DTOutput("preview_table", width = "100%"),
               shiny::uiOutput("preview_table_ui"),
               br(),
               
@@ -1183,7 +1256,7 @@ shiny::shinyApp(
         vstore[["downscale_obs_periods_checkbox"]] <- "1961_2020"
       }
       
-      sg$process()
+      getdata_sg$process()
       
     })
     shiny::observeEvent(input$ds_ras_elements, {
@@ -1230,8 +1303,8 @@ shiny::shinyApp(
         
         # clear previous raster and legend
         if (!is.null(vstore[["downscale_raster_preview"]])) {
-          leaflet::removeImage(mp, "rast_layer")
-          leaflet::clearControls(mp)
+          leaflet::removeImage(getdata_mp, "rast_layer")
+          leaflet::clearControls(getdata_mp)
         }
         
         # concatenate raster layer preview
@@ -1310,8 +1383,8 @@ shiny::shinyApp(
             # update legend title
             legend_title <- glue::glue("Change in {legend_title} from 1961_1990 to {time_period}")
             
-            leaflet::addRasterImage(mp, display_raster, layerId = "rast_layer", colors = pal)
-            leaflet::addLegend(mp, pal = pal, values = values(display_raster), title = HTML(sprintf("<div style='width: 200px;'>%s</div>", legend_title)), labFormat = labelFormat(suffix = units))
+            leaflet::addRasterImage(getdata_mp, display_raster, layerId = "rast_layer", colors = pal)
+            leaflet::addLegend(getdata_mp, pal = pal, values = values(display_raster), title = HTML(sprintf("<div style='width: 200px;'>%s</div>", legend_title)), labFormat = labelFormat(suffix = units))
           }
           if (type == "ratio") {
             display_raster <- preview_raster[[layer_match]] - preview_raster[[ref_period_raster]]
@@ -1340,8 +1413,8 @@ shiny::shinyApp(
                 # update legend title
                 legend_title <- glue::glue("Percent change in {legend_title} from 1961_1990 to {time_period}")
                 
-                leaflet::addRasterImage(mp, display_raster, layerId = "rast_layer", colors = pal)
-                leaflet::addLegend(mp, pal = pal, values = values(display_raster), title = HTML(sprintf("<div style='width: 200px;'>%s</div>", legend_title)), labFormat = labelFormat(suffix = "%"))
+                leaflet::addRasterImage(getdata_mp, display_raster, layerId = "rast_layer", colors = pal)
+                leaflet::addLegend(getdata_mp, pal = pal, values = values(display_raster), title = HTML(sprintf("<div style='width: 200px;'>%s</div>", legend_title)), labFormat = labelFormat(suffix = "%"))
                 }
               } else {
               pal <- colorNumeric(
@@ -1353,50 +1426,9 @@ shiny::shinyApp(
               # update legend title
               legend_title <- glue::glue("Change in {legend_title} from 1961_1990 to {time_period}")
               
-              leaflet::addRasterImage(mp, display_raster, layerId = "rast_layer", colors = pal)
-              leaflet::addLegend(mp, pal = pal, values = values(display_raster), title = HTML(sprintf("<div style='width: 200px;'>%s</div>", legend_title)), labFormat = labelFormat(suffix = units))
+              leaflet::addRasterImage(getdata_mp, display_raster, layerId = "rast_layer", colors = pal)
+              leaflet::addLegend(getdata_mp, pal = pal, values = values(display_raster), title = HTML(sprintf("<div style='width: 200px;'>%s</div>", legend_title)), labFormat = labelFormat(suffix = units))
             }
-            
-            # # error handling for division by 0
-            # display_raster <- terra::ifel(preview_raster[[ref_period_raster]] != 0, preview_raster[[layer_match]]/preview_raster[[ref_period_raster]], 0)
-            # 
-            # if (all(values(display_raster) == 0, na.rm = TRUE)) {
-            #   showModal(
-            #     modalDialog(
-            #       title = "Warning",
-            #       paste("Selected raster is not valid, ratio contains division by zero."),
-            #       easyClose = TRUE
-            #     )
-            #   )
-            # } else {
-              # if (vstore[["calculate_percent_diff"]]) {
-              #   display_raster <- display_raster*100
-              # 
-              #   pal <- colorNumeric(
-              #     palette = col_scheme,
-              #     domain = values(display_raster),
-              #     na.color = "transparent"
-              #   )
-              # 
-              #   # update legend title
-              #   legend_title <- glue::glue("Percent change in {legend_title} from 1961_1990 to {time_period}")
-              # 
-              #   leaflet::addRasterImage(mp, display_raster, layerId = "rast_layer", colors = pal)
-              #   leaflet::addLegend(mp, pal = pal, values = values(display_raster), title = HTML(sprintf("<div style='width: 200px;'>%s</div>", legend_title)), labFormat = labelFormat(suffix = "%"))
-              # } else {
-              #   pal <- colorNumeric(
-              #     palette = col_scheme,
-              #     domain = values(display_raster),
-              #     na.color = "transparent"
-              #   )
-              # 
-              #   # update legend title
-              #   legend_title <- glue::glue("Change in {legend_title} from 1961_1990 to {time_period}")
-              # 
-              #   leaflet::addRasterImage(mp, display_raster, layerId = "rast_layer", colors = pal)
-              #   leaflet::addLegend(mp, pal = pal, values = values(display_raster), title = HTML(sprintf("<div style='width: 200px;'>%s</div>", legend_title)), labFormat = labelFormat(suffix = units))
-              # }
-            # }
           }
         } else {
           variable_type <- climr::variables[Code == code, Type]
@@ -1420,7 +1452,7 @@ shiny::shinyApp(
           )
   
           # add raster image
-          leaflet::addRasterImage(mp, raster_layer_values, layerId = "rast_layer", colors = pal)
+          leaflet::addRasterImage(getdata_mp, raster_layer_values, layerId = "rast_layer", colors = pal)
   
           # label formatters for legend
           inv_log2_formatter <- labelFormat(
@@ -1431,14 +1463,14 @@ shiny::shinyApp(
           # if log-transformed, set legend steps - need to do this!
   
           # add legend
-          leaflet::addLegend(mp, pal = pal, values = values(raster_layer_values), title = HTML(sprintf("<div style='width: 200px;'>%s</div>", legend_title)), labFormat = if (vstore[["log_transform_raster"]] & variable_type == "ratio") inv_log2_formatter else labelFormat(suffix = units))
+          leaflet::addLegend(getdata_mp, pal = pal, values = values(raster_layer_values), title = HTML(sprintf("<div style='width: 200px;'>%s</div>", legend_title)), labFormat = if (vstore[["log_transform_raster"]] & variable_type == "ratio") inv_log2_formatter else labelFormat(suffix = units))
           }
         }  
     })
     
     # reactive output for outputs options
     output$downscale_output_buttons <- shiny::renderUI({
-      if ("marker" %in% (sg_dt$dt)$group) {
+      if ("marker" %in% (getdata_sg_dt$dt)$group) {
         shiny::radioButtons(
           inputId = "downscale_output",
           label = h5("Choose downscale output format:",
@@ -1454,7 +1486,7 @@ shiny::shinyApp(
           inline = TRUE,
           selected = "csv"
         )
-      } else if ("shape" %in% (sg_dt$dt)$group) {
+      } else if ("shape" %in% (getdata_sg_dt$dt)$group) {
         shiny::div(
           shiny::radioButtons(
             inputId = "downscale_output",
