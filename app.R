@@ -225,29 +225,74 @@ shiny::shinyApp(
       shiny::tabPanel(
         title = "Visualization",
         prompter::use_prompt(),
-        mainPanel(width = "100%",
+        shiny::mainPanel(
+                  id = "main-panel-container",
+                  width = "100%",
                   shinyjs::useShinyjs(),
                   tags$head(
                     tags$style(HTML("
                               #map-container {
                                 width: 100%;
-                                height: 100vh;
+                                height: 85vh;
+                                float: left;
                                 transition: width 0.5s ease-in-out;
                               }
-                              .half-map {
-                                width: 60% !important;
-                                float: left;
+                              
+                              .show-plot #map-container {
+                                width: 60%;
                               }
+                              
                               #plot-container {
-                                width: 35%;
+                                width: 39%;
                                 float: right;
+                                height: 85vh;
+                                overflow-y: auto;
+                                display: none;
+                              }
+                              
+                              .show-plot #plot-container {
+                                display: block;
                               }
                             "))
                   ),
                   # Map container
-                  div(id = "map-container",
-                      leafletOutput("vis_map", width = "100%", height = "84vh")
+                  shiny::div(id = "map-container",
+                      leaflet::leafletOutput("vis_map", width = "100%", height = "84vh"),
+                      shiny::absolutePanel(
+                        class = "input-control",
+                        top = 90,            
+                        left = 60,           
+                        width = 160,
+                        style = "padding: 10px;",
+                        shiny::radioButtons(
+                          inputId = "input_type",
+                          label = h4("Visualize by:",
+                                     prompter::add_prompt(
+                                       tooltipsIcon,
+                                       message = HTML(paste("info about cool visualizations!")),
+                                       position = "top",
+                                       size = "large",
+                                       shadow = FALSE
+                                     )
+                          ),
+                          width = "100%",
+                          choices = c("Map point", "Ecoregion", "FLP Area"),
+                          selected = character(0)
+                        ),
+                        shiny::actionButton("clear_map", "Clear Map",
+                                            style = "width:100%; height:40px; background-color:#c21104; color: #FFF"
+                        )
+                      ),
                   ),
+                  
+                  # Plot container (initially hidden)
+                  shiny::conditionalPanel(
+                    condition = "input.input_type != ''",
+                    shiny::div(id = "plot-container",
+                      shiny::wellPanel( "plots will go here"
+                      )
+                    )
+                  )
         )
       ),
      
@@ -543,6 +588,16 @@ shiny::shinyApp(
     })
 
     sn <- \(j) setNames(j,j)
+    
+    # ---- Visualization data events
+    shiny::observeEvent(input$input_type, {
+      if (input$input_type != "") {
+        shinyjs::addClass(selector = "#main-panel-container", class = "show-plot")
+      } else {
+        shinyjs::removeClass(selector = "#main-panel-container", class = "show-plot")
+      }
+    })
+    
     
     # ---- Downscale events
     downscale_modal <- function() {
