@@ -1158,6 +1158,8 @@ shiny::shinyApp(
       
       if (input$downscale_output == "csv") {
         show_csv_dt(TRUE)
+      } else {
+        show_raster_ui(TRUE)
       }
       
       # concatenate custom extra climate variables
@@ -1183,7 +1185,6 @@ shiny::shinyApp(
       
       sg$process()
       
-      show_raster_ui(FALSE)
     })
     shiny::observeEvent(input$ds_ras_elements, {
       if (shiny::in_devmode()) cat("Event: ds_ras_elements", sep = "\n")
