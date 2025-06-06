@@ -288,7 +288,8 @@ shiny::shinyApp(
       filtered_dt = NULL
     )
     
-    # reactive state for raster preview
+    # reactive state for csv/raster preview
+    show_csv_dt <<- reactiveVal(TRUE)
     show_raster_ui <<- reactiveVal(TRUE)
     
     # ---- Modal input storage
@@ -475,28 +476,6 @@ shiny::shinyApp(
         shiny::modalDialog(
           title = "Downscale Parameters", size = "l", fade = FALSE, class = "modal-dialog-scrollable",
           
-          # Reference map selection
-          shiny::div(
-            shiny::radioButtons(
-              inputId = "downscale_which_refmap",
-              label = h5("Choose reference map:", 
-                         prompter::add_prompt(
-                           tooltipsIcon,
-                           message = HTML(paste("Which map of 1961-1990 climatological normals to use as the high-resolution reference climate map for downscaling.")),
-                           position = "top",
-                           size = "large",
-                           shadow = FALSE
-                         )
-              ),
-              # choices = c(local({z <- climr::list_refmaps(); substr(z, 8L, z |> nchar()) |> tools::toTitleCase() |> setNames(object = z, nm = _)})),
-              choices = c("climr" = "refmap_climr", "ClimateNA" = "refmap_climatena"),
-              selected = vstore[["downscale_which_refmap"]],
-              inline = TRUE,
-              width = "100%",
-            )
-          ),
-          br(),
-          
           accordion(
             open = FALSE,
             
@@ -558,7 +537,7 @@ shiny::shinyApp(
                     label = h5("Choose observation time-series data:",
                                prompter::add_prompt(
                                  tooltipsIcon,
-                                 message = HTML(paste("Dataset for observational time series data. ClimateNA gridded time series, CRU/GPCC for CRU TS (temperature) and GPCC (precipitation),")),
+                                 message = HTML(paste("Dataset for observational time series data. What is MSWX?? ClimateNA gridded time series, CRU/GPCC for CRU TS (temperature) and GPCC (precipitation),")),
                                  position = "top",
                                  size = "large",
                                  shadow = FALSE
@@ -566,7 +545,7 @@ shiny::shinyApp(
                     ),
                     width = "100%",
                     selected = vstore[["downscale_obs_ts_dataset"]],
-                    choices = c("ClimateNA" = "climatena", "Climatic Research Unit / Global Precipitation Climatology Centre" = "cru.gpcc")
+                    choices = c("MSWX Blend" = "mswx.blend", "ClimateNA" = "climatena", "Climatic Research Unit / Global Precipitation Climatology Centre" = "cru.gpcc")
                   )
                 )
               )
@@ -761,7 +740,7 @@ shiny::shinyApp(
                 ),
                 shiny::checkboxGroupInput(
                   inputId = "downscale_custom_time_periods",
-                  label = h5("Choose time periods:"),
+                  label = h5("Choose seasons/months:"),
                   width = "100%",
                   inline = TRUE,
                   choices = unique(climr::variables %>% pull(Time)), ## BUG - some annuals are showing up as ANY ##
@@ -873,9 +852,6 @@ shiny::shinyApp(
     # applies all user specified downscale parameters
     shiny::observeEvent(input$downscale_apply, {
       
-      ## refmap ##
-      vstore[["downscale_which_refmap"]] <- input$downscale_which_refmap
-      
       ## observed periods ##
       vstore[["downscale_obs_periods_checkbox"]] <- input$downscale_obs_periods_checkbox
       if ("1961_1990" %in% vstore[["downscale_obs_periods_checkbox"]]) {
@@ -936,6 +912,12 @@ shiny::shinyApp(
       
       ## elev adjustment ##
       vstore[["downscale_core_ppt_lr"]] <- input$downscale_core_ppt_lr
+      
+      # ensure inherently annual variables are always displayed if selected
+      annual_vars <- climr::variables[Code == Code_Element & Time == "Annual", Code]
+      if (any(annual_vars %in% vstore[["downscale_custom_elements"]])) {
+        vstore[["downscale_custom_time_periods"]] <- c(vstore[["downscale_custom_time_periods"]], "Annual")
+      }
       
       # ensure there are valid element/time period matches selected
       compatible_periods <- climr::variables[Code_Element %in% vstore[["downscale_custom_elements"]] & Time %in% vstore[["downscale_custom_time_periods"]]]
@@ -1124,8 +1106,10 @@ shiny::shinyApp(
                 width = "100%"
               ),
               
+              
               # preview for csv results
-              DT::DTOutput("preview_table", width = "100%"),
+              # DT::DTOutput("preview_table", width = "100%"),
+              shiny::uiOutput("preview_table_ui"),
               br(),
               
               shiny::downloadButton(
@@ -1159,6 +1143,8 @@ shiny::shinyApp(
       vstore[["downscale_output"]] <- input$downscale_output
       if (input$downscale_output == "csv") {
         show_raster_ui(FALSE)
+      } else {
+        show_csv_dt(FALSE)
       }
     })
     shiny::observeEvent(input$downscale_resolution, {
@@ -1166,8 +1152,15 @@ shiny::shinyApp(
       vstore[["downscale_resolution"]] <- input$downscale_resolution
     })
     shiny::observeEvent(input$downscale_process_launch, {
+
       if (shiny::in_devmode()) cat("Event: downscale_process_launch", sep = "\n")
       if (vstore[["processing"]]) return()
+      
+      if (input$downscale_output == "csv") {
+        show_csv_dt(TRUE)
+      } else {
+        show_raster_ui(TRUE)
+      }
       
       # concatenate custom extra climate variables
       if (!is.null(vstore[["downscale_custom_elements"]]) & !is.null(vstore[["downscale_custom_time_periods"]])) {
@@ -1192,7 +1185,6 @@ shiny::shinyApp(
       
       sg$process()
       
-      show_raster_ui(TRUE)
     })
     shiny::observeEvent(input$ds_ras_elements, {
       if (shiny::in_devmode()) cat("Event: ds_ras_elements", sep = "\n")
@@ -1499,6 +1491,13 @@ shiny::shinyApp(
             ticks = FALSE
           )
         )
+      }
+    })
+    
+    # reactive output for csv preview
+    output$preview_table_ui <- shiny::renderUI({
+      if(show_csv_dt()) {
+        DT::DTOutput("preview_table", width = "100%")
       }
     })
     

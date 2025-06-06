@@ -221,7 +221,8 @@ session_geometry <- function(sg_dt) {
     }
     leaflet::clearControls(mp)
     
-    # remove preview raster accordion
+    # remove csv/raster preview
+    show_csv_dt(FALSE)
     show_raster_ui(FALSE)
     
     # reset all parameters to defaults
