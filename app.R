@@ -1356,47 +1356,6 @@ shiny::shinyApp(
               leaflet::addRasterImage(mp, display_raster, layerId = "rast_layer", colors = pal)
               leaflet::addLegend(mp, pal = pal, values = values(display_raster), title = HTML(sprintf("<div style='width: 200px;'>%s</div>", legend_title)), labFormat = labelFormat(suffix = units))
             }
-            
-            # # error handling for division by 0
-            # display_raster <- terra::ifel(preview_raster[[ref_period_raster]] != 0, preview_raster[[layer_match]]/preview_raster[[ref_period_raster]], 0)
-            # 
-            # if (all(values(display_raster) == 0, na.rm = TRUE)) {
-            #   showModal(
-            #     modalDialog(
-            #       title = "Warning",
-            #       paste("Selected raster is not valid, ratio contains division by zero."),
-            #       easyClose = TRUE
-            #     )
-            #   )
-            # } else {
-              # if (vstore[["calculate_percent_diff"]]) {
-              #   display_raster <- display_raster*100
-              # 
-              #   pal <- colorNumeric(
-              #     palette = col_scheme,
-              #     domain = values(display_raster),
-              #     na.color = "transparent"
-              #   )
-              # 
-              #   # update legend title
-              #   legend_title <- glue::glue("Percent change in {legend_title} from 1961_1990 to {time_period}")
-              # 
-              #   leaflet::addRasterImage(mp, display_raster, layerId = "rast_layer", colors = pal)
-              #   leaflet::addLegend(mp, pal = pal, values = values(display_raster), title = HTML(sprintf("<div style='width: 200px;'>%s</div>", legend_title)), labFormat = labelFormat(suffix = "%"))
-              # } else {
-              #   pal <- colorNumeric(
-              #     palette = col_scheme,
-              #     domain = values(display_raster),
-              #     na.color = "transparent"
-              #   )
-              # 
-              #   # update legend title
-              #   legend_title <- glue::glue("Change in {legend_title} from 1961_1990 to {time_period}")
-              # 
-              #   leaflet::addRasterImage(mp, display_raster, layerId = "rast_layer", colors = pal)
-              #   leaflet::addLegend(mp, pal = pal, values = values(display_raster), title = HTML(sprintf("<div style='width: 200px;'>%s</div>", legend_title)), labFormat = labelFormat(suffix = units))
-              # }
-            # }
           }
         } else {
           variable_type <- climr::variables[Code == code, Type]

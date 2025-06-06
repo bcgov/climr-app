@@ -170,7 +170,6 @@ session_geometry <- function(sg_dt) {
     # To show hull when npoints > 100
     if (!grepl("POINT", new)) g <- "shape"
     refresh(g)
-    #refresh_DT()
     session$sendCustomMessage(type="jsCode", list(code = "$('.input-control-body a.shiny-download-link').removeClass('btn-success');"))
   }
   
@@ -194,7 +193,6 @@ session_geometry <- function(sg_dt) {
     sg_dt$dt <- (sg_dt$dt)[!id %in% rid]
     
     # refresh reactive DT in sidebar
-    #refresh_DT()
     refresh(g)
   }
   
