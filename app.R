@@ -937,6 +937,12 @@ shiny::shinyApp(
       ## elev adjustment ##
       vstore[["downscale_core_ppt_lr"]] <- input$downscale_core_ppt_lr
       
+      # ensure inherently annual variables are always displayed if selected
+      annual_vars <- climr::variables[Code == Code_Element & Time == "Annual", Code]
+      if (any(annual_vars %in% vstore[["downscale_custom_elements"]])) {
+        vstore[["downscale_custom_time_periods"]] <- c(vstore[["downscale_custom_time_periods"]], "Annual")
+      }
+      
       # ensure there are valid element/time period matches selected
       compatible_periods <- climr::variables[Code_Element %in% vstore[["downscale_custom_elements"]] & Time %in% vstore[["downscale_custom_time_periods"]]]
       

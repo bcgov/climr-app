@@ -416,7 +416,7 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
       warning("Duplicated ids found in points. Replacing.")
       xyz$id <- seq_len(nrow(xyz))
     }
-
+    browser()
     res <- ds(xyz)
     
     # keep a copy of res for previewing raster
