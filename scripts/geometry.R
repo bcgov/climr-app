@@ -727,24 +727,24 @@ session_geometry <- function(sg_dt, mp) {
     clear_all = function() {
       clear(mp)
     },
-    # view = function(rid) {
-    #   view_map(rid)
-    # },
-    # bivariate = function(rid) {
-    #   plot_bivariate(rid)
-    # },
-    # timeseries = function(rid) {
-    #   plot_timeseries(rid)
-    # },
-    # climate_diagram = function(rid) {
-    #   plot_climate_diagram(rid)
-    # },
-    # boxplot = function(rid) {
-    #   plot_boxplot(rid)
-    # },
-    # climate_stripes = function(rid) {
-    #   plot_climate_stripes(rid)
-    # },
+    view = function(rid) {
+      view_map(rid)
+    },
+    bivariate = function(rid) {
+      plot_bivariate(rid)
+    },
+    timeseries = function(rid) {
+      plot_timeseries(rid)
+    },
+    climate_diagram = function(rid) {
+      plot_climate_diagram(rid)
+    },
+    boxplot = function(rid) {
+      plot_boxplot(rid)
+    },
+    climate_stripes = function(rid) {
+      plot_climate_stripes(rid)
+    },
     add_point_enabled = function(val) {
       if (missing(val)) return(click_enabled)
       else click_enabled <<- val

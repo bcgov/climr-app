@@ -253,6 +253,17 @@ shiny::shinyApp(
                               .show-plot #plot-container {
                                 display: block;
                               }
+                              
+                              #plot-tabs .nav {
+                                display: flex !important;
+                                flex-wrap: nowrap !important;
+                              }
+                              
+                              #plot-tabs .nav-item {
+                                flex: 1 1 0 !important;
+                                min-width: 0 !important;
+                                text-align: center;
+                              }
                             "))
                   ),
                   # Map container
@@ -289,7 +300,15 @@ shiny::shinyApp(
                   shiny::conditionalPanel(
                     condition = "input.input_type != ''",
                     shiny::div(id = "plot-container",
-                      shiny::wellPanel( "plots will go here"
+                      shiny::wellPanel(
+                        bslib::navset_underline(
+                          id = "plot-tabs",
+                          bslib::nav_panel("Bivariate"),
+                          bslib::nav_panel("Climate Diagram"),
+                          bslib::nav_panel("Climate Stripes"),
+                          bslib::nav_panel("Boxplot"),
+                          bslib::nav_panel("Time Series")
+                        )
                       )
                     )
                   )
