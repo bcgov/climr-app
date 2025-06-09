@@ -229,6 +229,38 @@ session_geometry <- function(sg_dt, mp) {
   click_enabled <- TRUE
   click_ignore_next <- FALSE
   
+  # plot_bivariate <- function(rid) {
+  #   output$bivariate_plot <- plotly::renderPlotly({
+  #     if (nrow(vis_sg_dt$dt) > 0) {
+  #       g <- terra::vect((vis_sg_dt$dt)[id == rid][["wkt"]], crs = "EPSG:4326")
+  #       coords <- terra::crds(g)
+  #       elevs <- terra::extract(cec, g, method = "bilinear", ID = FALSE, raw = TRUE)[,1]
+  #       xyz <- data.table::data.table(
+  #         id = 1,
+  #         lon = coords[, 1],
+  #         lat = coords[, 2],
+  #         elev = elevs
+  #       )
+  #       withCallingHandlers(
+  #         message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+  #         warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+  #         error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+  #         {
+  #           climr::plot_bivariate(
+  #             xyz = xyz,
+  #             xvar = input$bivariate_element_x,
+  #             yvar = input$bivariate_element_y,
+  #             period_focal = input$bivariate_period,
+  #             gcms = list_gcms()[1],
+  #             ssp = list_ssps()[2],
+  #             interactive = TRUE
+  #           )
+  #         }
+  #       )
+  #     }
+  #   })
+  # }
+  
   sg_methods <- list(
     add_point = function(lat,lng) {
       if (!click_enabled) return()
@@ -718,33 +750,33 @@ session_geometry <- function(sg_dt, mp) {
       vstore[["processing"]] <- FALSE
       shiny::updateActionButton(inputId = "generate_results", disabled = FALSE)
     },
-    get = function() {
-      return(sg_dt$dt)
-    },
-    rm = function(rid) {
-        rem(rid)
-    },
-    clear_all = function() {
-      clear(mp)
-    },
-    view = function(rid) {
-      view_map(rid)
-    },
-    bivariate = function(rid) {
-      plot_bivariate(rid)
-    },
-    timeseries = function(rid) {
-      plot_timeseries(rid)
-    },
-    climate_diagram = function(rid) {
-      plot_climate_diagram(rid)
-    },
-    boxplot = function(rid) {
-      plot_boxplot(rid)
-    },
-    climate_stripes = function(rid) {
-      plot_climate_stripes(rid)
-    },
+    # get = function() {
+    #   return(sg_dt$dt)
+    # },
+    # rm = function(rid) {
+    #     rem(rid)
+    # },
+    # clear_all = function() {
+    #   clear(mp)
+    # },
+    # view = function(rid) {
+    #   view_map(rid)
+    # },
+    # bivariate = function(rid) {
+    #   plot_bivariate(rid)
+    # },
+    # timeseries = function(rid) {
+    #   plot_timeseries(rid)
+    # },
+    # climate_diagram = function(rid) {
+    #   plot_climate_diagram(rid)
+    # },
+    # boxplot = function(rid) {
+    #   plot_boxplot(rid)
+    # },
+    # climate_stripes = function(rid) {
+    #   plot_climate_stripes(rid)
+    # },
     add_point_enabled = function(val) {
       if (missing(val)) return(click_enabled)
       else click_enabled <<- val

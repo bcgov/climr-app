@@ -230,6 +230,15 @@ shiny::shinyApp(
                   width = "100%",
                   shinyjs::useShinyjs(),
                   tags$head(
+                    tags$script(HTML("
+                                Shiny.addCustomMessageHandler('toggle-plot', function(show) {
+                                  if (show) {
+                                    document.body.classList.add('show-plot');
+                                  } else {
+                                    document.body.classList.remove('show-plot');
+                                  }
+                                });
+                              ")),
                     tags$style(HTML("
                               #map-container {
                                 width: 100%;
@@ -239,11 +248,11 @@ shiny::shinyApp(
                               }
                               
                               .show-plot #map-container {
-                                width: 60%;
+                                width: 30%;
                               }
                               
                               #plot-container {
-                                width: 39%;
+                                width: 69%;
                                 float: right;
                                 height: 85vh;
                                 overflow-y: auto;
@@ -287,7 +296,7 @@ shiny::shinyApp(
                                      )
                           ),
                           width = "100%",
-                          choices = c("Map point", "Ecoregion", "FLP Area"),
+                          choices = c("Map point", "Ecoregion", "FLP Area", "Overlay"),
                           selected = character(0)
                         ),
                         shiny::actionButton("clear_map", "Clear Map",
@@ -298,17 +307,64 @@ shiny::shinyApp(
                   
                   # Plot container (initially hidden)
                   shiny::conditionalPanel(
-                    condition = "input.input_type != ''",
+                    condition = "input.input_type !== '' && input.input_type !== 'Overlay'",
                     shiny::div(id = "plot-container",
-                      shiny::wellPanel(
-                        bslib::navset_underline(
-                          id = "plot-tabs",
-                          bslib::nav_panel("Bivariate"),
-                          bslib::nav_panel("Climate Diagram"),
-                          bslib::nav_panel("Climate Stripes"),
-                          bslib::nav_panel("Boxplot"),
-                          bslib::nav_panel("Time Series")
-                        )
+                               style = "height: 85vh; display: flex; flex-direction: column;",
+                      bslib::navset_card_underline(
+                        id = "plot-tabs",
+                        bslib::nav_panel("Bivariate",
+                                         shiny::fluidRow(
+                                           column(
+                                             width = 3,
+                                             style = "height: 75vh;", 
+                                             bslib::card(
+                                               title = "Bivariate Plot Variables",
+                                               style = "height: 99%; overflow-y: auto;",
+                                               shiny::radioButtons(
+                                                 inputId = "bivariate_element_x",
+                                                 label = h5("Choose x-axis element:"),
+                                                 width = "100%",
+                                                 inline = TRUE,
+                                                 choices = unique(climr::variables %>% pull(Code_Element))
+                                               ),
+                                               shiny::uiOutput("bivariate_valid_time_x"),
+                                               shiny::radioButtons(
+                                                 inputId = "bivariate_element_y",
+                                                 label = h5("Choose y-axis element:"),
+                                                 width = "100%",
+                                                 inline = TRUE,
+                                                 choices = unique(climr::variables %>% pull(Code_Element))
+                                               ),
+                                               shiny::uiOutput("bivariate_valid_time_y"),
+                                               shiny::radioButtons(
+                                                 inputId = "bivariate_period",
+                                                 label = h5("Choose time period:"),
+                                                 width = "100%",
+                                                 inline = TRUE,
+                                                 choices = climr::list_gcm_periods()
+                                               ),
+                                               shiny::checkboxInput(
+                                                 inputId = "relative_scale_checkbox",
+                                                 label = tags$span("Relative (%) scale for ratio variables", style = "font-size: 0.85em; font-weight: bold;"),
+                                                 value = FALSE
+                                               ),
+                                               shiny::actionButton(
+                                                 inputId = "bivariate_plot",
+                                                 label = "Plot!",
+                                                 icon = icon("chart-simple")
+                                               )
+                                             )
+                                           ),
+                                           column(
+                                             width = 9,
+                                             style = "height: 75vh;", 
+                                             plotly::plotlyOutput("bivariate_plot", height = "600px")
+                                           )
+                                         )),
+                        bslib::nav_panel("Climate Diagram"),
+                        bslib::nav_panel("Climate Stripes"),
+                        bslib::nav_panel("Boxplot"),
+                        bslib::nav_panel("Time Series")
                       )
                     )
                   )
@@ -610,15 +666,12 @@ shiny::shinyApp(
     
     # ---- Visualization data events
     shiny::observeEvent(input$input_type, {
-      if (input$input_type != "") {
-        shinyjs::addClass(selector = "#main-panel-container", class = "show-plot")
-      } else {
-        shinyjs::removeClass(selector = "#main-panel-container", class = "show-plot")
-      }
+      show_plot <- input$input_type != "" && input$input_type != "Overlay"
+      session$sendCustomMessage("toggle-plot", show_plot)
     })
     
     
-    # ---- Downscale events
+    # ---- Get Data Downscale events
     downscale_modal <- function() {
       shiny::showModal(
         shiny::modalDialog(
@@ -831,29 +884,7 @@ shiny::shinyApp(
                   max = 10,
                   step = 1
                 )
-              ),
-              # # leave out for now -- too technical for app
-              # shiny::div(
-              #   title = "Names of specific runs to return instead of using max_run. Overrides max_run if specified.",
-              #   shiny::selectInput(
-              #     inputId = "downscale_run_nm",
-              #     label = "Name of specified runs",
-              #     width = "100%",
-              #     choices = list("Options" = {
-              #       gcms <- vstore[["downscale_gcms"]]
-              #       ssps <- vstore[["downscale_ssps"]]
-              #       if (!length(gcms) && !length(ssps)) {
-              #         c()
-              #       } else if (length(gcms) && !length(ssps)) {
-              #         climr::list_runs_historic(gcm = gcms) |> sn()
-              #       } else if (length(gcms) && length(ssps)) {
-              #         climr::list_runs_ssp(gcm = gcms, ssp = ssps) |> sn()
-              #       }
-              #     }, "Remove all" = c("null" = "NULL")),
-              #     multiple = TRUE,
-              #     selected = vstore[["downscale_run_nm"]]
-              #   )
-              # ),
+              )
             )
           ),
           br(),
@@ -1192,25 +1223,6 @@ shiny::shinyApp(
       if (shiny::in_devmode()) cat("Event: confirm_reset_no", sep = "\n")
       downscale_modal()
     })
-    
-    # update_run_nm_select <- function() {
-    #   gcms <- vstore[["downscale_gcms"]]
-    #   ssps <- vstore[["downscale_ssps"]]
-    #   if (!length(gcms) && !length(ssps)) {
-    #     opt_choices <- c()
-    #   } else if (length(gcms) && !length(ssps)) {
-    #     opt_choices <- climr::list_runs_historic(gcm = gcms) |> sn()
-    #   } else if (length(gcms) && length(ssps)) {
-    #     opt_choices <- climr::list_runs_ssp(gcm = gcms, ssp = ssps) |> sn()
-    #   }
-    #   choices <- list("Options" = opt_choices, "Remove all" = c("null" = "NULL"))
-    #   if (all(vstore[["downscale_run_nm"]] %in% unlist(choices))) {
-    #     select <- vstore[["downscale_run_nm"]]
-    #   } else {
-    #     select <- NULL
-    #   }
-    #   shiny::updateSelectInput(inputId = "downscale_run_nm", choices = choices, selected = select)
-    # }
     
     shiny::observeEvent(input$generate_results, {
       if (shiny::in_devmode()) cat("Event: generate_results", sep = "\n")
@@ -1604,6 +1616,80 @@ shiny::shinyApp(
     output$preview_table_ui <- shiny::renderUI({
       if(show_csv_dt()) {
         DT::DTOutput("preview_table", width = "100%")
+      }
+    })
+    
+    # ---- Visualization Plot events
+    
+    shiny::observeEvent(input$bivariate_element_x, {
+      if (shiny::in_devmode()) cat("Event: bivariate_element_x", sep = "\n")
+    })
+    shiny::observeEvent(input$bivariate_time_x, {
+      if (shiny::in_devmode()) cat("Event: bivariate_time_x", sep = "\n")
+    })
+    shiny::observeEvent(input$bivariate_element_y, {
+      if (shiny::in_devmode()) cat("Event: bivariate_element_y", sep = "\n")
+    })
+    shiny::observeEvent(input$bivariate_time_y, {
+      if (shiny::in_devmode()) cat("Event: bivariate_time_y", sep = "\n")
+    })
+    shiny::observeEvent(input$relative_scale_checkbox, {
+      if (shiny::in_devmode()) cat("Event: relative_scale_checkbox", sep = "\n")
+    })
+    shiny::observeEvent(input$bivariate_plot, {
+      output$bivariate_plot <- plotly::renderPlotly({
+        if (nrow(vis_sg_dt$dt) > 0) {
+          g <- terra::vect((vis_sg_dt$dt)[1,][["wkt"]], crs = "EPSG:4326")
+          coords <- terra::crds(g)
+          elevs <- terra::extract(cec, g, method = "bilinear", ID = FALSE, raw = TRUE)[,1]
+          xyz <- data.table::data.table(
+            id = 1,
+            lon = coords[, 1],
+            lat = coords[, 2],
+            elev = elevs
+          )
+          withCallingHandlers(
+            message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+            warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+            error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+            {
+              climr::plot_bivariate(
+                xyz = xyz,
+                xvar = input$bivariate_element_x,
+                yvar = input$bivariate_element_y,
+                period_focal = input$bivariate_period,
+                gcms = list_gcms()[1],
+                ssp = list_ssps()[2],
+                interactive = TRUE
+              )
+            }
+          )
+        }
+      })
+    })
+    
+    # reactive outputs
+    output$bivariate_valid_time_x <- shiny::renderUI({
+      if (!is.null(input$bivariate_element_x)) {
+        shiny::radioButtons(
+          inputId = "bivariate_time_x",
+          label = h5("Choose x-axis season/month:"),
+          width = "100%",
+          inline = TRUE,
+          choices = c(climr::variables[Code_Element == input$bivariate_element_x,] %>% pull(Time))
+        )
+      }
+    })
+    
+    output$bivariate_valid_time_y <- shiny::renderUI({
+      if (!is.null(input$bivariate_element_y)) {
+        shiny::radioButtons(
+          inputId = "bivariate_time_y",
+          label = h5("Choose y-axis season/month:"),
+          width = "100%",
+          inline = TRUE,
+          choices = c(climr::variables[Code_Element == input$bivariate_element_y,] %>% pull(Time))
+        )
       }
     })
     
