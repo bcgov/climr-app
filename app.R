@@ -320,6 +320,10 @@ shiny::shinyApp(
                                              bslib::card(
                                                title = "Bivariate Plot Variables",
                                                style = "height: 99%; overflow-y: auto;",
+                                               shiny::actionButton(
+                                                 inputId = "downscale_data",
+                                                 label = "Downscale Data"
+                                               ),
                                                shiny::radioButtons(
                                                  inputId = "bivariate_element_x",
                                                  label = h5("Choose x-axis element:"),
@@ -347,11 +351,6 @@ shiny::shinyApp(
                                                  inputId = "relative_scale_checkbox",
                                                  label = tags$span("Relative (%) scale for ratio variables", style = "font-size: 0.85em; font-weight: bold;"),
                                                  value = FALSE
-                                               ),
-                                               shiny::actionButton(
-                                                 inputId = "bivariate_plot",
-                                                 label = "Plot!",
-                                                 icon = icon("chart-simple")
                                                )
                                              )
                                            ),
@@ -457,6 +456,9 @@ shiny::shinyApp(
     # ---- Modal input storage
     output$getdata_map <- leaflet::renderLeaflet(l)
     output$vis_map <- leaflet::renderLeaflet(l)
+    
+    # ---- Plot data storage
+    bivariate_data <- c()
     
     # allow map to be modified instead of re-rendering
     getdata_mp <- leaflet::leafletProxy("getdata_map")
@@ -1623,49 +1625,47 @@ shiny::shinyApp(
     
     shiny::observeEvent(input$bivariate_element_x, {
       if (shiny::in_devmode()) cat("Event: bivariate_element_x", sep = "\n")
+      if (!is.null(bivariate_data)) {
+        vis_sg$bivariate(bivariate_data)
+      }
     })
     shiny::observeEvent(input$bivariate_time_x, {
       if (shiny::in_devmode()) cat("Event: bivariate_time_x", sep = "\n")
+      if (!is.null(bivariate_data)) {
+        vis_sg$bivariate(bivariate_data)
+      }    
     })
     shiny::observeEvent(input$bivariate_element_y, {
       if (shiny::in_devmode()) cat("Event: bivariate_element_y", sep = "\n")
+      if (!is.null(bivariate_data)) {
+        vis_sg$bivariate(bivariate_data)
+      }    
     })
     shiny::observeEvent(input$bivariate_time_y, {
       if (shiny::in_devmode()) cat("Event: bivariate_time_y", sep = "\n")
+      if (!is.null(bivariate_data)) {
+        vis_sg$bivariate(bivariate_data)
+      }    
     })
     shiny::observeEvent(input$relative_scale_checkbox, {
       if (shiny::in_devmode()) cat("Event: relative_scale_checkbox", sep = "\n")
+      if (!is.null(bivariate_data)) {
+        vis_sg$bivariate(bivariate_data)
+      }    
     })
-    shiny::observeEvent(input$bivariate_plot, {
-      output$bivariate_plot <- plotly::renderPlotly({
-        if (nrow(vis_sg_dt$dt) > 0) {
-          g <- terra::vect((vis_sg_dt$dt)[1,][["wkt"]], crs = "EPSG:4326")
-          coords <- terra::crds(g)
-          elevs <- terra::extract(cec, g, method = "bilinear", ID = FALSE, raw = TRUE)[,1]
-          xyz <- data.table::data.table(
-            id = 1,
-            lon = coords[, 1],
-            lat = coords[, 2],
-            elev = elevs
-          )
-          withCallingHandlers(
-            message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
-            warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
-            error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
-            {
-              climr::plot_bivariate(
-                xyz = xyz,
-                xvar = input$bivariate_element_x,
-                yvar = input$bivariate_element_y,
-                period_focal = input$bivariate_period,
-                gcms = list_gcms()[1],
-                ssp = list_ssps()[2],
-                interactive = TRUE
-              )
-            }
-          )
-        }
-      })
+    shiny::observeEvent(input$downscale_data, {
+      if (shiny::in_devmode()) cat("Event: downscale_data", sep = "\n")
+      g <- terra::vect((vis_sg_dt$dt)[1,][["wkt"]], crs = "EPSG:4326")
+      coords <- terra::crds(g)
+      elevs <- terra::extract(cec, g, method = "bilinear", ID = FALSE, raw = TRUE)[,1]
+      xyz <- data.table::data.table(
+        id = 1,
+        lon = coords[, 1],
+        lat = coords[, 2],
+        elev = elevs
+      )
+      bivariate_data <- climr::plot_bivariate_input(xyz)
+      vis_sg$bivariate(bivariate_data)
     })
     
     # reactive outputs

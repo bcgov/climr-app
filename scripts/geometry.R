@@ -229,37 +229,25 @@ session_geometry <- function(sg_dt, mp) {
   click_enabled <- TRUE
   click_ignore_next <- FALSE
   
-  # plot_bivariate <- function(rid) {
-  #   output$bivariate_plot <- plotly::renderPlotly({
-  #     if (nrow(vis_sg_dt$dt) > 0) {
-  #       g <- terra::vect((vis_sg_dt$dt)[id == rid][["wkt"]], crs = "EPSG:4326")
-  #       coords <- terra::crds(g)
-  #       elevs <- terra::extract(cec, g, method = "bilinear", ID = FALSE, raw = TRUE)[,1]
-  #       xyz <- data.table::data.table(
-  #         id = 1,
-  #         lon = coords[, 1],
-  #         lat = coords[, 2],
-  #         elev = elevs
-  #       )
-  #       withCallingHandlers(
-  #         message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
-  #         warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
-  #         error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
-  #         {
-  #           climr::plot_bivariate(
-  #             xyz = xyz,
-  #             xvar = input$bivariate_element_x,
-  #             yvar = input$bivariate_element_y,
-  #             period_focal = input$bivariate_period,
-  #             gcms = list_gcms()[1],
-  #             ssp = list_ssps()[2],
-  #             interactive = TRUE
-  #           )
-  #         }
-  #       )
-  #     }
-  #   })
-  # }
+  plot_bivariate <- function(bivariate_data) {
+    output$bivariate_plot <- plotly::renderPlotly({
+      if (nrow(vis_sg_dt$dt) > 0 && !is.null(bivariate_data)) {
+        withCallingHandlers(
+          message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+          warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+          error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+          {
+            climr::plot_bivariate(
+              data = bivariate_data,
+              xvar = input$bivariate_element_x,
+              yvar = input$bivariate_element_y,
+              period_focal = input$bivariate_period,
+            )
+          }
+        )
+      }
+    })
+  }
   
   sg_methods <- list(
     add_point = function(lat,lng) {
@@ -762,9 +750,9 @@ session_geometry <- function(sg_dt, mp) {
     # view = function(rid) {
     #   view_map(rid)
     # },
-    # bivariate = function(rid) {
-    #   plot_bivariate(rid)
-    # },
+    bivariate = function(bivariate_data) {
+      plot_bivariate(bivariate_data)
+    },
     # timeseries = function(rid) {
     #   plot_timeseries(rid)
     # },
