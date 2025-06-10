@@ -166,9 +166,10 @@ visualization_geometry <- function(dt, mp) {
           {
             climr::plot_bivariate(
               X = bivariate_data,
-              xvar = climr::variables[Code_Element == input$bivariate_element_x, Code],
-              yvar = climr::variables[Code_Element == input$bivariate_element_y, Code],
+              xvar = climr::variables[Code_Element == input$bivariate_element_x & Time == input$bivariate_time_x, Code],
+              yvar = climr::variables[Code_Element == input$bivariate_element_y & Time == input$bivariate_time_y, Code],
               period_focal = input$bivariate_period,
+              interactive = TRUE
             )
           }
         )
