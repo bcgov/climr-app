@@ -229,26 +229,6 @@ session_geometry <- function(sg_dt, mp) {
   click_enabled <- TRUE
   click_ignore_next <- FALSE
   
-  plot_bivariate <- function(bivariate_data) {
-    output$bivariate_plot <- plotly::renderPlotly({
-      if (nrow(vis_sg_dt$dt) > 0 && !is.null(bivariate_data)) {
-        withCallingHandlers(
-          message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
-          warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
-          error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
-          {
-            climr::plot_bivariate(
-              data = bivariate_data,
-              xvar = input$bivariate_element_x,
-              yvar = input$bivariate_element_y,
-              period_focal = input$bivariate_period,
-            )
-          }
-        )
-      }
-    })
-  }
-  
   sg_methods <- list(
     add_point = function(lat,lng) {
       if (!click_enabled) return()
@@ -738,33 +718,12 @@ session_geometry <- function(sg_dt, mp) {
       vstore[["processing"]] <- FALSE
       shiny::updateActionButton(inputId = "generate_results", disabled = FALSE)
     },
-    # get = function() {
-    #   return(sg_dt$dt)
-    # },
-    # rm = function(rid) {
-    #     rem(rid)
-    # },
-    # clear_all = function() {
-    #   clear(mp)
-    # },
-    # view = function(rid) {
-    #   view_map(rid)
-    # },
-    bivariate = function(bivariate_data) {
-      plot_bivariate(bivariate_data)
+    rm = function(rid) {
+        rem(rid)
     },
-    # timeseries = function(rid) {
-    #   plot_timeseries(rid)
-    # },
-    # climate_diagram = function(rid) {
-    #   plot_climate_diagram(rid)
-    # },
-    # boxplot = function(rid) {
-    #   plot_boxplot(rid)
-    # },
-    # climate_stripes = function(rid) {
-    #   plot_climate_stripes(rid)
-    # },
+    clear_all = function(mp) {
+      clear(mp)
+    },
     add_point_enabled = function(val) {
       if (missing(val)) return(click_enabled)
       else click_enabled <<- val

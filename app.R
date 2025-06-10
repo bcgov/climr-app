@@ -106,7 +106,7 @@ l <- leaflet::leaflet(
   ) |>
   leaflet::setView(lng = -125, lat = 55, zoom = 5) |>
   leaflet::addMiniMap(toggleDisplay = TRUE, minimized = TRUE) |>
-  default_draw_tool() |>
+  # default_draw_tool() |>
   leaflet::hideGroup(c("WNA BEC", "Climate")) |>
   leaflet::showGroup("Hillshade")
 
@@ -439,8 +439,6 @@ shiny::shinyApp(
     # initialize vis_sg_dt as reactive
     vis_sg_dt <- reactiveValues(dt = data.table::data.table(
       id = integer(),
-      lat = character(),
-      long = character(),
       wkt = character(),
       group = character(),
       source = character(),
@@ -454,10 +452,11 @@ shiny::shinyApp(
     show_raster_ui <<- reactiveVal(TRUE)
     
     # ---- Modal input storage
-    output$getdata_map <- leaflet::renderLeaflet(l)
+    output$getdata_map <- leaflet::renderLeaflet(l |> default_draw_tool())
     output$vis_map <- leaflet::renderLeaflet(l)
     
-    # ---- Plot data storage
+    # ---- Plot data info
+    vis_by_map <- reactiveVal(FALSE)
     bivariate_data <- c()
     
     # allow map to be modified instead of re-rendering
@@ -552,8 +551,9 @@ shiny::shinyApp(
     
     # ---- Geometry
     source("scripts/geometry.R", local = TRUE)
+    source("scripts/geometry_visualization.R", local = TRUE)
     getdata_sg <- session_geometry(getdata_sg_dt, getdata_mp)
-    vis_sg <- session_geometry(vis_sg_dt, vis_mp)
+    vis_sg <- visualization_geometry(vis_sg_dt, vis_mp)
     
     # ---- Get Data Map events
     
@@ -610,21 +610,21 @@ shiny::shinyApp(
     # ---- Visualization Map events
     
     # add map points and drawing map shapes logic
-    shiny::observeEvent(input$vis_map_draw_start, {
-      if (shiny::in_devmode()) cat("Event: vis_map_draw_start", sep = "\n")
-      vis_sg$add_point_enabled(FALSE)
-    })
-    shiny::observeEvent(input$vis_map_draw_stop, {
-      if (shiny::in_devmode()) cat("Event: vis_map_draw_stop", sep = "\n")
-      vis_sg$add_point_enabled(TRUE)
-    })
-    shiny::observeEvent(input$vis_map_draw_new_feature, {
-      if (shiny::in_devmode()) cat("Event: vis_map_draw_new_feature", sep = "\n")
-      vis_sg$add_draw_poly(input$vis_map_draw_new_feature)
-    })
+    # shiny::observeEvent(input$vis_map_draw_start, {
+    #   if (shiny::in_devmode()) cat("Event: vis_map_draw_start", sep = "\n")
+    #   vis_sg$add_point_enabled(FALSE)
+    # })
+    # shiny::observeEvent(input$vis_map_draw_stop, {
+    #   if (shiny::in_devmode()) cat("Event: vis_map_draw_stop", sep = "\n")
+    #   vis_sg$add_point_enabled(TRUE)
+    # })
+    # shiny::observeEvent(input$vis_map_draw_new_feature, {
+    #   if (shiny::in_devmode()) cat("Event: vis_map_draw_new_feature", sep = "\n")
+    #   vis_sg$add_draw_poly(input$vis_map_draw_new_feature)
+    # })
     shiny::observeEvent(input$vis_map_click, {
       if (shiny::in_devmode()) cat("Event: vis_map_click", sep = "\n")
-      vis_sg$add_point(input$vis_map_click$lat, input$vis_map_click$lng)
+      vis_sg$add_point(input$vis_map_click$lat, input$vis_map_click$lng, vis_by_map)
     })
     
     # pop-up remove button for map points
@@ -661,13 +661,18 @@ shiny::shinyApp(
     
     # clear all selections (map and file) logic
     shiny::observeEvent(input$clear_selections, {
-      getdata_sg$clear_all()
+      getdata_sg$clear_all(getdata_mp)
     })
 
     sn <- \(j) setNames(j,j)
     
     # ---- Visualization data events
     shiny::observeEvent(input$input_type, {
+      if (input$input_type == "Map point") {
+        vis_by_map(TRUE)
+      } else {
+        vis_by_map(FALSE)
+      }
       show_plot <- input$input_type != "" && input$input_type != "Overlay"
       session$sendCustomMessage("toggle-plot", show_plot)
     })
@@ -1655,6 +1660,11 @@ shiny::shinyApp(
     })
     shiny::observeEvent(input$downscale_data, {
       if (shiny::in_devmode()) cat("Event: downscale_data", sep = "\n")
+      withCallingHandlers(
+        message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+        warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+        error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+        {
       g <- terra::vect((vis_sg_dt$dt)[1,][["wkt"]], crs = "EPSG:4326")
       coords <- terra::crds(g)
       elevs <- terra::extract(cec, g, method = "bilinear", ID = FALSE, raw = TRUE)[,1]
@@ -1666,6 +1676,8 @@ shiny::shinyApp(
       )
       bivariate_data <- climr::plot_bivariate_input(xyz)
       vis_sg$bivariate(bivariate_data)
+        }
+      )
     })
     
     # reactive outputs
