@@ -358,7 +358,6 @@ shiny::shinyApp(
                                              width = 9,
                                              style = "height: 75vh;", 
                                              plotly::plotlyOutput("bivariate_plot", height = "600px")
-                                             # shiny::plotOutput("bivariate_plot", height = "600px")
                                            )
                                          )),
                         bslib::nav_panel("Climate Diagram"),

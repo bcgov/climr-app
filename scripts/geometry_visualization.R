@@ -127,30 +127,7 @@ visualization_geometry <- function(dt, mp) {
       for (id in ((dt$dt)$id)) {
         rem(id)
       }
-      # remove file uploads
-      rem((dt$dt)[source %in% c("file_upload", "raster_upload")]$id)
     }
-    
-    # disable buttons
-    updateActionButton(session = getDefaultReactiveDomain(),
-                       "downscale_parameters", disabled = TRUE)
-    updateActionButton(session = getDefaultReactiveDomain(),
-                       "generate_results", disabled = TRUE)
-    
-    # remove any previewed rasters and legends
-    if (!is.null(vstore[["downscale_raster_preview"]])) {
-      leaflet::removeImage(mp, "rast_layer")
-    }
-    leaflet::clearControls(mp)
-    
-    # remove csv/raster preview
-    show_csv_dt(FALSE)
-    show_raster_ui(FALSE)
-    
-    # reset all parameters to defaults
-    lapply(names(downscale_default), \(x) {
-      vstore[[x]] <- downscale_default[[x]]
-    })
   }
   
   click_enabled <- TRUE

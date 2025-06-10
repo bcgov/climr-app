@@ -105,12 +105,7 @@ visualization_server <- function(input, output, session) {
           lat = coords[, 2],
           elev = elevs
         )
-        bivariate_data <- climr::plot_bivariate_input(xyz,
-                                                      obs_period = "2001_2020",
-                                                      gcms = list_gcms()[c(1, 4, 5, 6, 7, 10, 11, 12)], #
-                                                      ssps = list_ssps()[c(2)],
-                                                      gcm_periods = list_gcm_periods(),
-                                                      max_run = 10)
+        bivariate_data <- climr::plot_bivariate_input(xyz)
         vis_sg$bivariate(bivariate_data)
       }
     )
