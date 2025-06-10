@@ -347,11 +347,6 @@ shiny::shinyApp(
                                                  inline = TRUE,
                                                  choices = climr::list_gcm_periods()
                                                )
-                                               # shiny::checkboxInput(
-                                               #   inputId = "relative_scale_checkbox",
-                                               #   label = tags$span("Relative (%) scale for ratio variables", style = "font-size: 0.85em; font-weight: bold;"),
-                                               #   value = FALSE
-                                               # )
                                              )
                                            ),
                                            column(
@@ -360,10 +355,10 @@ shiny::shinyApp(
                                              plotly::plotlyOutput("bivariate_plot", height = "600px")
                                            )
                                          )),
-                        bslib::nav_panel("Climate Diagram"),
-                        bslib::nav_panel("Climate Stripes"),
-                        bslib::nav_panel("Boxplot"),
-                        bslib::nav_panel("Time Series")
+                        # bslib::nav_panel("Climate Diagram"),
+                        # bslib::nav_panel("Climate Stripes"),
+                        # bslib::nav_panel("Boxplot"),
+                        # bslib::nav_panel("Time Series")
                       )
                     )
                   )
