@@ -21,6 +21,27 @@ visualization_server <- function(input, output, session) {
   bivariate_data <- c()
   timeseries_data <- c()
   
+  # mapping for months/seasons
+  time_labels <- c(
+    "Annual" = "Ann",
+    "Winter" = "Wt",
+    "Spring" = "Sp",
+    "Summer" = "Sm",
+    "Autumn" = "At",
+    "January" = "Jan",
+    "February" = "Feb",
+    "March" = "Mar",
+    "April" = "Apr",
+    "May" = "May",
+    "June" = "Jun",
+    "July" = "Jul",
+    "August" = "Aug",
+    "September" = "Sep",
+    "October" = "Oct",
+    "November" = "Nov",
+    "December" = "Dec"
+  )
+  
   # allow map to be modified instead of re-rendering
   vis_mp <- leaflet::leafletProxy("vis_map")
   
@@ -173,7 +194,7 @@ visualization_server <- function(input, output, session) {
         label = h5("Choose x-axis season/month:"),
         width = "100%",
         inline = TRUE,
-        choices = c(climr::variables[Code_Element == input$bivariate_element_x,] %>% pull(Time))
+        choices = setNames(climr::variables[Code_Element == input$bivariate_element_x,] %>% pull(Time), time_labels[climr::variables[Code_Element == input$bivariate_element_x,] %>% pull(Time)])
       )
     }
   })
@@ -185,7 +206,7 @@ visualization_server <- function(input, output, session) {
         label = h5("Choose y-axis season/month:"),
         width = "100%",
         inline = TRUE,
-        choices = c(climr::variables[Code_Element == input$bivariate_element_y,] %>% pull(Time))
+        choices = setNames(climr::variables[Code_Element == input$bivariate_element_y,] %>% pull(Time), time_labels[climr::variables[Code_Element == input$bivariate_element_y,] %>% pull(Time)])
       )
     }
   })
@@ -197,7 +218,7 @@ visualization_server <- function(input, output, session) {
         label = h5("Choose season/month:"),
         width = "100%",
         inline = TRUE,
-        choices = c(climr::variables[Code_Element == input$time_series_element,] %>% pull(Time))
+        choices = setNames(climr::variables[Code_Element == input$time_series_element,] %>% pull(Time), time_labels[climr::variables[Code_Element == input$time_series_element,] %>% pull(Time)])
       )
     }
   })
