@@ -163,10 +163,7 @@ visualization_geometry <- function(dt, mp) {
         {
           climr::plot_timeSeries(
             X = timeseries_data,
-            var1 = climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code],
-            obs_ts_dataset = input$time_series_dataset,
-            gcms = input$time_series_gcm,
-            ssps = input$time_series_ssp        
+            var1 = climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code]
           )
         }
       )

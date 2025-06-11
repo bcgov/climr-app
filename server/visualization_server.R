@@ -16,6 +16,9 @@ visualization_server <- function(input, output, session) {
   # ---- Modal input storage
   output$vis_map <- leaflet::renderLeaflet(l)
   
+  # allow map to be modified instead of re-rendering
+  vis_mp <- leaflet::leafletProxy("vis_map")
+  
   # ---- Plot data info
   vis_by_map <- reactiveVal(FALSE)
   bivariate_data <- c()
@@ -42,8 +45,13 @@ visualization_server <- function(input, output, session) {
     "December" = "Dec"
   )
   
-  # allow map to be modified instead of re-rendering
-  vis_mp <- leaflet::leafletProxy("vis_map")
+  vstore <- reactiveValues(
+    tifsource = names(climr_tif) |> head(1),
+    time = NULL,
+    element = NULL,
+    climatevar = "NONE",
+    vscale = "none"
+  )
   
   # ---- Geometry
   source("scripts/geometry_visualization.R", local = TRUE)
@@ -110,24 +118,91 @@ visualization_server <- function(input, output, session) {
   })
   shiny::observeEvent(input$downscale_data_bivariate, {
     if (shiny::in_devmode()) cat("Event: downscale_data_bivariate", sep = "\n")
-    withCallingHandlers(
-      message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
-      warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
-      error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
-      {
-        g <- terra::vect((vis_sg_dt$dt)[1,][["wkt"]], crs = "EPSG:4326")
-        coords <- terra::crds(g)
-        elevs <- terra::extract(cec, g, method = "bilinear", ID = FALSE, raw = TRUE)[,1]
-        xyz <- data.table::data.table(
-          id = 1,
-          lon = coords[, 1],
-          lat = coords[, 2],
-          elev = elevs
+    if (nrow(vis_sg_dt$dt) < 1 & input$input_type == "Map point") {
+      showModal(
+        modalDialog(
+          title = "Warning",
+          paste("Please select a map point!"),
+          easyClose = TRUE
         )
-        bivariate_data <- climr::plot_bivariate_input(xyz)
-        vis_sg$bivariate(bivariate_data)
-      }
-    )
+      )
+    } else {
+      withCallingHandlers(
+        message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+        warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+        error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+        {
+          g <- terra::vect((vis_sg_dt$dt)[1,][["wkt"]], crs = "EPSG:4326")
+          coords <- terra::crds(g)
+          elevs <- terra::extract(cec, g, method = "bilinear", ID = FALSE, raw = TRUE)[,1]
+          xyz <- data.table::data.table(
+            id = 1,
+            lon = coords[, 1],
+            lat = coords[, 2],
+            elev = elevs
+          )
+          bivariate_data <- climr::plot_bivariate_input(xyz)
+          vis_sg$bivariate(bivariate_data)
+        }
+      )
+    }
+  })
+  shiny::observeEvent(input$time_series_dataset, {
+    if (shiny::in_devmode()) cat("Event: time_series_dataset", sep = "\n")
+    if (!is.null(timeseries_data)) {
+      vis_sg$timeseries(timeseries_data)
+    }    
+  })
+  shiny::observeEvent(input$time_series_gcms, {
+    if (shiny::in_devmode()) cat("Event: time_series_gcm", sep = "\n")
+    if (!is.null(timeseries_data)) {
+      vis_sg$timeseries(timeseries_data)
+    }    
+  })
+  shiny::observeEvent(input$time_series_ssps, {
+    if (shiny::in_devmode()) cat("Event: time_series_ssp", sep = "\n")
+    if (!is.null(timeseries_data)) {
+      vis_sg$timeseries(timeseries_data)
+    }    
+  })
+  shiny::observeEvent(input$downscale_data_time_series, {
+    if (shiny::in_devmode()) cat("Event: downscale_data_time_series", sep = "\n")
+    if (nrow(vis_sg_dt$dt) < 1 & input$input_type == "Map point") {
+      showModal(
+        modalDialog(
+          title = "Warning",
+          paste("Please select a map point!"),
+          easyClose = TRUE
+        )
+      )
+    } else {
+      withCallingHandlers(
+        message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+        warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+        error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+        {
+          g <- terra::vect((vis_sg_dt$dt)[1,][["wkt"]], crs = "EPSG:4326")
+          coords <- terra::crds(g)
+          elevs <- terra::extract(cec, g, method = "bilinear", ID = FALSE, raw = TRUE)[,1]
+          xyz <- data.table::data.table(
+            id = 1,
+            lon = coords[, 1],
+            lat = coords[, 2],
+            elev = elevs
+          )
+          showModal(
+            modalDialog(
+              title = "Just a note!",
+              paste("There is a lot of data being downscaled right now to set up an interactive plot, so thank you for being patient! :)"),
+              easyClose = TRUE
+            )
+          )
+          timeseries_data <- climr::plot_timeSeries_input(xyz, gcms = input$time_series_gcms, ssps = input$time_series_ssps, obs_ts_dataset = input$time_series_dataset)
+          vis_sg$timeseries(timeseries_data)
+          removeModal()
+        }
+      )
+    }
   })
   shiny::observeEvent(input$time_series_element, {
     if (shiny::in_devmode()) cat("Event: time_series_element", sep = "\n")
@@ -140,53 +215,6 @@ visualization_server <- function(input, output, session) {
     if (!is.null(timeseries_data)) {
       vis_sg$timeseries(timeseries_data)
     }    
-  })
-  shiny::observeEvent(input$time_series_dataset, {
-    if (shiny::in_devmode()) cat("Event: time_series_dataset", sep = "\n")
-    if (!is.null(timeseries_data)) {
-      vis_sg$timeseries(timeseries_data)
-    }    
-  })
-  shiny::observeEvent(input$time_series_gcm, {
-    if (shiny::in_devmode()) cat("Event: time_series_gcm", sep = "\n")
-    if (!is.null(timeseries_data)) {
-      vis_sg$timeseries(timeseries_data)
-    }    
-  })
-  shiny::observeEvent(input$time_series_ssp, {
-    if (shiny::in_devmode()) cat("Event: time_series_ssp", sep = "\n")
-    if (!is.null(timeseries_data)) {
-      vis_sg$timeseries(timeseries_data)
-    }    
-  })
-  shiny::observeEvent(input$downscale_data_time_series, {
-    if (shiny::in_devmode()) cat("Event: downscale_data_time_series", sep = "\n")
-    withCallingHandlers(
-      message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
-      warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
-      error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
-      {
-        g <- terra::vect((vis_sg_dt$dt)[1,][["wkt"]], crs = "EPSG:4326")
-        coords <- terra::crds(g)
-        elevs <- terra::extract(cec, g, method = "bilinear", ID = FALSE, raw = TRUE)[,1]
-        xyz <- data.table::data.table(
-          id = 1,
-          lon = coords[, 1],
-          lat = coords[, 2],
-          elev = elevs
-        )
-        showModal(
-          modalDialog(
-            title = "Just a note!",
-            paste("There is a lot of data being downscaled right now to set up an interactive plot, so thank you for being patient! :)"),
-            easyClose = TRUE
-          )
-        )
-        timeseries_data <- climr::plot_timeSeries_input(xyz)
-        vis_sg$timeseries(timeseries_data)
-        removeModal()
-      }
-    )
   })
   
   # reactive outputs
@@ -222,6 +250,43 @@ visualization_server <- function(input, output, session) {
         width = "100%",
         inline = TRUE,
         choices = setNames(climr::variables[Code_Element == input$time_series_element,] %>% pull(Time), time_labels[climr::variables[Code_Element == input$time_series_element,] %>% pull(Time)])
+      )
+    }
+  })
+  
+  # ---- Visualization Overlay events
+  shiny::observeEvent(input$tifsource, {
+    if (shiny::in_devmode()) cat("Event: tifsource", sep = "\n")
+    vstore[["tifsource"]] <- input$tifsource
+  })
+  
+  # reactive outputs
+  output$overlay_element <- shiny::renderUI({
+    if (!is.null(input$tifsource)) {
+      shiny::radioButtons(
+        inputId = "element",
+        label = h5("Choose element:",
+                   prompter::add_prompt(
+                     tooltipsIcon,
+                     message = HTML(paste("do we need this one?")),
+                     position = "top",
+                     size = "large",
+                     shadow = FALSE
+                   )),
+        width = "100%",
+        inline = TRUE,
+        choices = {
+          dt <- climr_tif[[vstore[["tifsource"]]]]
+          elements <- unique(dt[, list(element, category, label)])
+          basic <- elements[category %in% "Basic elements", setNames(element, label)]
+          derived <- elements[category %in% "Derived elements", setNames(element, label)]
+          annual <- elements[category %in% "Annual elements" & !(element %in% derived), setNames(element, label)]
+          list(
+            "Basic elements" = basic,
+            "Derived elements" = derived,
+            "Annual elements" = annual
+          )
+        }
       )
     }
   })

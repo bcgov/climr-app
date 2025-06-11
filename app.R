@@ -389,18 +389,7 @@ shiny::shinyApp(
                                              bslib::card(
                                                title = "Time Series Variable",
                                                style = "height: 99%; overflow-y: auto;",
-                                               shiny::actionButton(
-                                                 inputId = "downscale_data_time_series",
-                                                 label = "Downscale Data"
-                                               ),
-                                               shiny::radioButtons(
-                                                 inputId = "time_series_element",
-                                                 label = h5("Choose element:"),
-                                                 width = "100%",
-                                                 inline = TRUE,
-                                                 choices = unique(climr::variables %>% pull(Code_Element))
-                                               ),
-                                               shiny::uiOutput("time_series_valid_season"),
+                                               h4("Downscale Options", style = "margin-bottom: 5px;"),
                                                shiny::radioButtons(
                                                  inputId = "time_series_dataset",
                                                  label = h5("Choose dataset:"),
@@ -408,20 +397,33 @@ shiny::shinyApp(
                                                  inline = TRUE,
                                                  choices = c("MSWX Blend" = "mswx.blend", "ClimateNA" = "climatena", "Climatic Research Unit / Global Precipitation Climatology Centre" = "cru.gpcc")
                                                ),
-                                               shiny::radioButtons(
-                                                 inputId = "time_series_gcm",
-                                                 label = h5("Choose GCM:"),
+                                               shiny::checkboxGroupInput(
+                                                 inputId = "time_series_gcms",
+                                                 label = h5("Choose GCMs:"),
                                                  width = "100%",
                                                  inline = TRUE,
                                                  choices = climr::list_gcms()
                                                ),
-                                               shiny::radioButtons(
-                                                 inputId = "time_series_ssp",
-                                                 label = h5("Choose SSP:"),
+                                               shiny::checkboxGroupInput(
+                                                 inputId = "time_series_ssps",
+                                                 label = h5("Choose SSPs:"),
                                                  width = "100%",
                                                  inline = TRUE,
                                                  choices = climr::list_ssps()
-                                               )
+                                               ),
+                                               shiny::actionButton(
+                                                 inputId = "downscale_data_time_series",
+                                                 label = "Downscale Data"
+                                               ),
+                                               h4("Interactive Plot Options", style = "margin-bottom: 5px;"),
+                                               shiny::radioButtons(
+                                                 inputId = "time_series_element",
+                                                 label = h5("Choose element:"),
+                                                 width = "100%",
+                                                 inline = TRUE,
+                                                 choices = unique(climr::variables %>% pull(Code_Element))
+                                               ),
+                                               shiny::uiOutput("time_series_valid_season")
                                              )
                                            ),
                                            column(
@@ -441,6 +443,21 @@ shiny::shinyApp(
                                bslib::card(
                                  title = "Overlay Options",
                                  style = "height: 99%; overflow-y: auto;",
+                                 shiny::radioButtons(
+                                   inputId = "tifsource",
+                                   label = h5("Choose source:",
+                                              prompter::add_prompt(
+                                                tooltipsIcon,
+                                                message = HTML(paste("source info!")),
+                                                position = "top",
+                                                size = "large",
+                                                shadow = FALSE
+                                              )),
+                                   width = "100%",
+                                   inline = TRUE,
+                                   choices = names(climr_tif)
+                                 ),
+                                 shiny::uiOutput("overlay_element"),
                                )
                     )
                   ),
