@@ -238,6 +238,13 @@ shiny::shinyApp(
                                     document.body.classList.remove('show-plot');
                                   }
                                 });
+                                Shiny.addCustomMessageHandler('toggle-overlay', function(show) {
+                                  if (show) {
+                                    document.body.classList.add('show-overlay');
+                                  } else {
+                                    document.body.classList.remove('show-overlay');
+                                  }
+                                });
                               ")),
                     tags$style(HTML("
                               #map-container {
@@ -273,6 +280,22 @@ shiny::shinyApp(
                                 min-width: 0 !important;
                                 text-align: center;
                               }
+                              
+                              .show-overlay #map-container {
+                                width: 80%;
+                              }
+                              
+                              #overlay-container {
+                                width: 19%;
+                                float: right;
+                                height: 85vh;
+                                overflow-y: auto;
+                                display: none;
+                              }
+                              
+                              .show-overlay #overlay-container {
+                                display: block;
+                              }
                             "))
                   ),
                   # Map container
@@ -307,7 +330,7 @@ shiny::shinyApp(
                   
                   # Plot container (initially hidden)
                   shiny::conditionalPanel(
-                    condition = "input.input_type !== '' && input.input_type !== 'Overlay'",
+                    condition = "input.input_type !== null && input.input_type !== 'Overlay'",
                     shiny::div(id = "plot-container",
                                style = "height: 85vh; display: flex; flex-direction: column;",
                       bslib::navset_card_underline(
@@ -409,7 +432,19 @@ shiny::shinyApp(
                                          ))
                       )
                     )
-                  )
+                  ),
+                  # Overlay container (initially hidden)
+                  shiny::conditionalPanel(
+                    condition = "input.input_type == 'Overlay'",
+                    shiny::div(id = "overlay-container",
+                               style = "height: 85vh; display: flex; flex-direction: column;",
+                               bslib::card(
+                                 title = "Overlay Options",
+                                 style = "height: 99%; overflow-y: auto;",
+                               )
+                    )
+                  ),
+                  
         )
       ),
      

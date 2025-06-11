@@ -74,9 +74,12 @@ visualization_server <- function(input, output, session) {
       vis_by_map(TRUE)
     } else {
       vis_by_map(FALSE)
+      vis_sg$clear_all(vis_mp)
     }
     show_plot <- input$input_type != "" && input$input_type != "Overlay"
     session$sendCustomMessage("toggle-plot", show_plot)
+    show_overlay <- input$input_type == "Overlay"
+    session$sendCustomMessage("toggle-overlay", show_overlay)
   })
   
   # ---- Visualization Plot events
