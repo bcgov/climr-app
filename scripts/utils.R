@@ -146,7 +146,7 @@ label_climatevars <- c(
 )
 
 time_labels_season <- c(
-  "Annual" = "",
+  "Annual" = "aa",
   "Winter" = "wt",
   "Spring" = "sp",
   "Summer" = "sm",

@@ -282,11 +282,11 @@ shiny::shinyApp(
                               }
                               
                               .show-overlay #map-container {
-                                width: 80%;
+                                width: 78%;
                               }
                               
                               #overlay-container {
-                                width: 19%;
+                                width: 21%;
                                 float: right;
                                 height: 85vh;
                                 overflow-y: auto;
@@ -449,7 +449,7 @@ shiny::shinyApp(
                                               prompter::add_prompt(
                                                 tooltipsIcon,
                                                 message = HTML(paste("source info!")),
-                                                position = "top",
+                                                position = "bottom",
                                                 size = "large",
                                                 shadow = FALSE
                                               )),
@@ -458,6 +458,19 @@ shiny::shinyApp(
                                    choices = names(climr_tif)
                                  ),
                                  shiny::uiOutput("overlay_element"),
+                                 shiny::uiOutput("overlay_period"),
+                                 shiny::uiOutput("scale_adj"),
+                                 shiny::actionButton(
+                                   inputId = "load_overlay",
+                                   label = "Load Overlay",
+                                   icon = shiny::icon("droplet")
+                                 ),
+                                 shiny::actionButton(
+                                   inputId = "download_overlay",
+                                   label = "Download Overlay",
+                                   disabled = TRUE,
+                                   icon = shiny::icon("map")
+                                 ),
                                )
                     )
                   ),

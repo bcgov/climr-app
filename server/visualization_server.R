@@ -49,8 +49,8 @@ visualization_server <- function(input, output, session) {
     tifsource = names(climr_tif) |> head(1),
     time = NULL,
     element = NULL,
-    climatevar = "NONE",
-    vscale = "none"
+    climatevar = NULL,
+    vscale = NULL
   )
   
   # ---- Geometry
@@ -255,9 +255,77 @@ visualization_server <- function(input, output, session) {
   })
   
   # ---- Visualization Overlay events
-  shiny::observeEvent(input$tifsource, {
-    if (shiny::in_devmode()) cat("Event: tifsource", sep = "\n")
+  shiny::observeEvent(input$load_overlay, {
+    if (shiny::in_devmode()) cat("Event: load_overlay", sep = "\n")
+    
+    # update selected options
     vstore[["tifsource"]] <- input$tifsource
+    vstore[["time"]] <- input$time
+    vstore[["element"]] <- input$element
+    vstore[["vscale"]] <- input$vscale
+    
+    # create URL
+    if (is.null(input$element) || is.null(input$time)) return()
+    dt <- climr_tif[[vstore[["tifsource"]]]]
+    get_time_code <- function(label) {
+      if (label %in% names(time_labels_season)) {
+        return(time_labels_season[[label]])
+      } else if (label %in% names(time_labels_month)) {
+        return(time_labels_month[[label]])
+      } else {
+        return()
+      }
+    }
+    url <- dt[element == input$element & time_code == get_time_code(input$time), url]
+    if (length(url) == 1) {
+      vstore[["climatevar"]] <- url
+    } else {
+      vstore[["climatevar"]] <- NULL
+    }
+    
+    # render overlay
+    mp <- leaflet::leafletProxy("vis_map", deferUntilFlush = FALSE)
+    mp |> leaflet::clearGroup("Climate") |> leaflet::hideGroup("Climate")
+    shiny::updateActionButton(inputId = "download_overlay", disabled = TRUE)
+    if (is.null(vstore[["climatevar"]])) return()
+    shiny::updateActionButton(inputId = "download_overlay", disabled = FALSE)
+
+    # set palettes
+    pal <- if (grepl("PPT", vstore[["element"]])) {
+      RColorBrewer::brewer.pal(9, "YlGnBu")
+    } else {
+      rev(RColorBrewer::brewer.pal(11, "RdYlBu"))
+    }
+    
+    # get scaling
+    if (isTRUE(vstore[["vscale"]])) {
+      vstore$vscale <- "log1p"
+    } else {
+      vstore$vscale <- ""
+    }
+    
+    mp |> leafem::addGeotiff(
+      url = vstore[["climatevar"]],
+      group = "Climate",
+      layerId = "val",
+      project = FALSE,
+      # opacity = 
+      # resolution = 
+      vscale = vstore[["vscale"]],
+      colorOptions = leafem::colorOptions(
+        palette = pal,
+        na.color = "transparent"
+      ),
+      imagequery = TRUE,
+      autozoom = FALSE,
+      options = leaflet::tileOptions(maxZoom = 25, maxNativeZoom = 20)
+    ) |> leaflet::showGroup("Climate")
+    
+    shiny::showNotification("Rendering %s values" |> sprintf(vstore[["element"]]), duration = 5)
+  })
+  shiny::observeEvent(input$download_overlay, {
+    if (shiny::in_devmode()) cat("Event: download_overlay", sep = "\n")
+    session$sendCustomMessage(type="jsCode", list(code = "window.location.assign('%s');" |> sprintf(vstore[["climatevar"]])))
   })
   
   # reactive outputs
@@ -268,8 +336,8 @@ visualization_server <- function(input, output, session) {
         label = h5("Choose element:",
                    prompter::add_prompt(
                      tooltipsIcon,
-                     message = HTML(paste("do we need this one?")),
-                     position = "top",
+                     message = "we should includ a list somewhere of what the variable mean?",
+                     position = "bottom",
                      size = "large",
                      shadow = FALSE
                    )),
@@ -277,16 +345,33 @@ visualization_server <- function(input, output, session) {
         inline = TRUE,
         choices = {
           dt <- climr_tif[[vstore[["tifsource"]]]]
-          elements <- unique(dt[, list(element, category, label)])
-          basic <- elements[category %in% "Basic elements", setNames(element, label)]
-          derived <- elements[category %in% "Derived elements", setNames(element, label)]
-          annual <- elements[category %in% "Annual elements" & !(element %in% derived), setNames(element, label)]
-          list(
-            "Basic elements" = basic,
-            "Derived elements" = derived,
-            "Annual elements" = annual
-          )
+          unique(dt[, element])
         }
+      )
+    }
+  })
+  
+  output$overlay_period <- shiny::renderUI({
+    if (!is.null(input$element) & input$element != "elev" & input$element != "lat" & input$element != "PET") {
+      shiny::radioButtons(
+        inputId = "time",
+        label = h5("Choose season/months:"),
+        width = "100%",
+        inline = TRUE,
+        choices = climr::variables[Code_Element == input$element, Time]
+      )
+    }
+  })
+  
+  output$scale_adj <- shiny::renderUI({
+    if (!is.null(input$element) & "ratio" %in% climr::variables[Code_Element == input$element, Type]) {
+      shiny::checkboxInput(
+        inputId = "vscale",
+        label = tags$span("Apply scale adjustment", style = "font-size: 0.85em; font-weight: bold;"),
+        value = reactive({
+          req(input$element)
+          "ratio" %in% climr::variables[Code_Element == input$element, Type]
+        })()
       )
     }
   })
