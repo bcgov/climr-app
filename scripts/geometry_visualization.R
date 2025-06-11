@@ -154,6 +154,25 @@ visualization_geometry <- function(dt, mp) {
     })
   }
   
+  plot_timeseries <- function(timeseries_data) {
+    output$timeseries_plot <- shiny::renderPlot({
+      withCallingHandlers(
+        message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+        warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+        error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+        {
+          climr::plot_timeSeries(
+            X = timeseries_data,
+            var1 = climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code],
+            obs_ts_dataset = input$time_series_dataset,
+            gcms = input$time_series_gcm,
+            ssps = input$time_series_ssp        
+          )
+        }
+      )
+    })     
+  }
+  
   sg_methods <- list(
     add_point = function(lat,lng,map_val) {
       if (!map_val()) return()
@@ -225,18 +244,18 @@ visualization_geometry <- function(dt, mp) {
     bivariate = function(bivariate_data) {
       plot_bivariate(bivariate_data)
     },
-    timeseries = function(rid) {
-      plot_timeseries(rid)
+    timeseries = function(timeseries_data) {
+      plot_timeseries(timeseries_data)
     },
-    climate_diagram = function(rid) {
-      plot_climate_diagram(rid)
-    },
-    boxplot = function(rid) {
-      plot_boxplot(rid)
-    },
-    climate_stripes = function(rid) {
-      plot_climate_stripes(rid)
-    },
+    # climate_diagram = function(rid) {
+    #   plot_climate_diagram(rid)
+    # },
+    # boxplot = function(rid) {
+    #   plot_boxplot(rid)
+    # },
+    # climate_stripes = function(rid) {
+    #   plot_climate_stripes(rid)
+    # },
     add_point_enabled = function(val) {
       if (missing(val)) return(click_enabled)
       else click_enabled <<- val

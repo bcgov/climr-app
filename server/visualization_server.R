@@ -19,6 +19,7 @@ visualization_server <- function(input, output, session) {
   # ---- Plot data info
   vis_by_map <- reactiveVal(FALSE)
   bivariate_data <- c()
+  timeseries_data <- c()
   
   # allow map to be modified instead of re-rendering
   vis_mp <- leaflet::leafletProxy("vis_map")
@@ -83,14 +84,8 @@ visualization_server <- function(input, output, session) {
       vis_sg$bivariate(bivariate_data)
     }    
   })
-  shiny::observeEvent(input$relative_scale_checkbox, {
-    if (shiny::in_devmode()) cat("Event: relative_scale_checkbox", sep = "\n")
-    if (!is.null(bivariate_data)) {
-      vis_sg$bivariate(bivariate_data)
-    }    
-  })
-  shiny::observeEvent(input$downscale_data, {
-    if (shiny::in_devmode()) cat("Event: downscale_data", sep = "\n")
+  shiny::observeEvent(input$downscale_data_bivariate, {
+    if (shiny::in_devmode()) cat("Event: downscale_data_bivariate", sep = "\n")
     withCallingHandlers(
       message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
       warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
@@ -107,6 +102,65 @@ visualization_server <- function(input, output, session) {
         )
         bivariate_data <- climr::plot_bivariate_input(xyz)
         vis_sg$bivariate(bivariate_data)
+      }
+    )
+  })
+  shiny::observeEvent(input$time_series_element, {
+    if (shiny::in_devmode()) cat("Event: time_series_element", sep = "\n")
+    if (!is.null(timeseries_data)) {
+      vis_sg$timeseries(timeseries_data)
+    }
+  })
+  shiny::observeEvent(input$time_series_season, {
+    if (shiny::in_devmode()) cat("Event: time_series_season", sep = "\n")
+    if (!is.null(timeseries_data)) {
+      vis_sg$timeseries(timeseries_data)
+    }    
+  })
+  shiny::observeEvent(input$time_series_dataset, {
+    if (shiny::in_devmode()) cat("Event: time_series_dataset", sep = "\n")
+    if (!is.null(timeseries_data)) {
+      vis_sg$timeseries(timeseries_data)
+    }    
+  })
+  shiny::observeEvent(input$time_series_gcm, {
+    if (shiny::in_devmode()) cat("Event: time_series_gcm", sep = "\n")
+    if (!is.null(timeseries_data)) {
+      vis_sg$timeseries(timeseries_data)
+    }    
+  })
+  shiny::observeEvent(input$time_series_ssp, {
+    if (shiny::in_devmode()) cat("Event: time_series_ssp", sep = "\n")
+    if (!is.null(timeseries_data)) {
+      vis_sg$timeseries(timeseries_data)
+    }    
+  })
+  shiny::observeEvent(input$downscale_data_time_series, {
+    if (shiny::in_devmode()) cat("Event: downscale_data_time_series", sep = "\n")
+    withCallingHandlers(
+      message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+      warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+      error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+      {
+        g <- terra::vect((vis_sg_dt$dt)[1,][["wkt"]], crs = "EPSG:4326")
+        coords <- terra::crds(g)
+        elevs <- terra::extract(cec, g, method = "bilinear", ID = FALSE, raw = TRUE)[,1]
+        xyz <- data.table::data.table(
+          id = 1,
+          lon = coords[, 1],
+          lat = coords[, 2],
+          elev = elevs
+        )
+        showModal(
+          modalDialog(
+            title = "Just a note!",
+            paste("There is a lot of data being downscaled right now to set up an interactive plot, so thank you for being patient! :)"),
+            easyClose = TRUE
+          )
+        )
+        timeseries_data <- climr::plot_timeSeries_input(xyz)
+        vis_sg$timeseries(timeseries_data)
+        removeModal()
       }
     )
   })
@@ -132,6 +186,18 @@ visualization_server <- function(input, output, session) {
         width = "100%",
         inline = TRUE,
         choices = c(climr::variables[Code_Element == input$bivariate_element_y,] %>% pull(Time))
+      )
+    }
+  })
+  
+  output$time_series_valid_season <- shiny::renderUI({
+    if (!is.null(input$time_series_element)) {
+      shiny::radioButtons(
+        inputId = "time_series_season",
+        label = h5("Choose season/month:"),
+        width = "100%",
+        inline = TRUE,
+        choices = c(climr::variables[Code_Element == input$time_series_element,] %>% pull(Time))
       )
     }
   })

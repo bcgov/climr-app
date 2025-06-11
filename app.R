@@ -321,7 +321,7 @@ shiny::shinyApp(
                                                title = "Bivariate Plot Variables",
                                                style = "height: 99%; overflow-y: auto;",
                                                shiny::actionButton(
-                                                 inputId = "downscale_data",
+                                                 inputId = "downscale_data_bivariate",
                                                  label = "Downscale Data"
                                                ),
                                                shiny::radioButtons(
@@ -358,7 +358,55 @@ shiny::shinyApp(
                         # bslib::nav_panel("Climate Diagram"),
                         # bslib::nav_panel("Climate Stripes"),
                         # bslib::nav_panel("Boxplot"),
-                        # bslib::nav_panel("Time Series")
+                        bslib::nav_panel("Time Series",
+                                         shiny::fluidRow(
+                                           column(
+                                             width = 3,
+                                             style = "height: 75vh;", 
+                                             bslib::card(
+                                               title = "Time Series Variable",
+                                               style = "height: 99%; overflow-y: auto;",
+                                               shiny::actionButton(
+                                                 inputId = "downscale_data_time_series",
+                                                 label = "Downscale Data"
+                                               ),
+                                               shiny::radioButtons(
+                                                 inputId = "time_series_element",
+                                                 label = h5("Choose element:"),
+                                                 width = "100%",
+                                                 inline = TRUE,
+                                                 choices = unique(climr::variables %>% pull(Code_Element))
+                                               ),
+                                               shiny::uiOutput("time_series_valid_season"),
+                                               shiny::radioButtons(
+                                                 inputId = "time_series_dataset",
+                                                 label = h5("Choose dataset:"),
+                                                 width = "100%",
+                                                 inline = TRUE,
+                                                 choices = c("MSWX Blend" = "mswx.blend", "ClimateNA" = "climatena", "Climatic Research Unit / Global Precipitation Climatology Centre" = "cru.gpcc")
+                                               ),
+                                               shiny::radioButtons(
+                                                 inputId = "time_series_gcm",
+                                                 label = h5("Choose GCM:"),
+                                                 width = "100%",
+                                                 inline = TRUE,
+                                                 choices = climr::list_gcms()
+                                               ),
+                                               shiny::radioButtons(
+                                                 inputId = "time_series_ssp",
+                                                 label = h5("Choose SSP:"),
+                                                 width = "100%",
+                                                 inline = TRUE,
+                                                 choices = climr::list_ssps()
+                                               )
+                                             )
+                                           ),
+                                           column(
+                                             width = 9,
+                                             style = "height: 75vh;", 
+                                             shiny::plotOutput("timeseries_plot", height = "600px")
+                                           )
+                                         ))
                       )
                     )
                   )
