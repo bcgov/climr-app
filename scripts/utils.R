@@ -283,6 +283,7 @@ add_custom_render <- function(map) {
                 let processedVals = scaleFunc(vals);
                 return clr(processedVals).hex();
             };
+            console.log("heyyyyy");
             layer.updateColors(pixelValuesToColorFn);
         }
       }

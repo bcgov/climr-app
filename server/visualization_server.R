@@ -299,7 +299,7 @@ visualization_server <- function(input, output, session) {
     
     # get scaling
     if (isTRUE(vstore[["vscale"]])) {
-      vstore$vscale <- "log1p"
+      vstore$vscale <- "log2"
     } else {
       vstore$vscale <- ""
     }
@@ -311,7 +311,6 @@ visualization_server <- function(input, output, session) {
       project = FALSE,
       # opacity = 
       # resolution = 
-      vscale = vstore[["vscale"]],
       colorOptions = leafem::colorOptions(
         palette = pal,
         na.color = "transparent"
@@ -320,9 +319,29 @@ visualization_server <- function(input, output, session) {
       autozoom = FALSE,
       options = leaflet::tileOptions(maxZoom = 25, maxNativeZoom = 20)
     ) |> leaflet::showGroup("Climate")
+    session$sendCustomMessage(type="updateClimatePalette", list(
+      category = "image", layerId = "val", vscale = vstore[["vscale"]], colorOptions = leafem::colorOptions(
+        palette = pal,
+        na.color = "transparent"
+      )
+    ))
     
     shiny::showNotification("Rendering %s values" |> sprintf(vstore[["element"]]), duration = 5)
   })
+  # shiny::observe({
+  #   vstore[["vscale"]]
+  #   pal <- if (grepl("PPT", vstore[["element"]])) {
+  #     RColorBrewer::brewer.pal(9, "YlGnBu")
+  #   } else {
+  #     rev(RColorBrewer::brewer.pal(11, "RdYlBu"))
+  #   }
+  #   session$sendCustomMessage(type="updateClimatePalette", list(
+  #     category = "image", layerId = "val", vscale = vstore[["vscale"]], colorOptions = leafem::colorOptions(
+  #       palette = pal,
+  #       na.color = "transparent"
+  #     )
+  #   ))
+  # })
   shiny::observeEvent(input$download_overlay, {
     if (shiny::in_devmode()) cat("Event: download_overlay", sep = "\n")
     session$sendCustomMessage(type="jsCode", list(code = "window.location.assign('%s');" |> sprintf(vstore[["climatevar"]])))
