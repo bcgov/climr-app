@@ -258,35 +258,51 @@ add_custom_render <- function(map) {
         }
       }
 
-      var updateClimatePalette=function(message) {
+      var updateClimatePalette = function(message) {
         var prefixedLayerId = map.layerManager._layerIdKey(message.category, message.layerId);
-        var layer = map.layerManager._byLayerId[prefixedLayerId];
-        if (layer !== undefined) {
+    
+        function tryApplyPalette(attemptsLeft = 10) {
+            var layer = map.layerManager._byLayerId[prefixedLayerId];
+    
+            if (layer) {
+                if (layer.options.georaster) {
+                    applyColorScale(layer);
+                } else {
+                    layer.once("load", () => applyColorScale(layer));
+                }
+            } else if (attemptsLeft > 0) {
+                // Wait 300ms and try again
+                setTimeout(() => tryApplyPalette(attemptsLeft - 1), 300);
+            } else {
+                console.warn("Layer not found after multiple attempts:", message.layerId);
+            }
+        }
+    
+        function applyColorScale(layer) {
             var georaster = layer.options.georaster;
             var colorOptions = message.colorOptions;
+    
             var scaleFunc = ({log: Math.log, log10: Math.log10, log1p: Math.log1p, log2: Math.log2}[message.vscale] || (x => x));
             const cols = colorOptions.palette;
             let scale = chroma.scale(cols);
+    
             let dmin = scaleFunc(georaster.mins[0]);
-            if (dmin === -Infinity || isNaN(dmin)) {
-              console.log(message.vscale);
-              console.log(georaster.mins[0]);
-              console.log(dmin);
-            }
             let dmax = scaleFunc(georaster.maxs[0]);
             let domain = [dmin, dmax];
             let nacol = colorOptions["na.color"];
             let clr = scale.domain(domain);
-            pixelValuesToColorFn = values => {
-                let vals = values[0];
-                if (isNaN(vals) || vals === georaster.noDataValue) return nacol;
-                let processedVals = scaleFunc(vals);
-                return clr(processedVals).hex();
+    
+            let pixelValuesToColorFn = values => {
+                let val = values[0];
+                if (isNaN(val) || val === georaster.noDataValue) return nacol;
+                return clr(scaleFunc(val)).hex();
             };
-            console.log("heyyyyy");
+    
             layer.updateColors(pixelValuesToColorFn);
         }
-      }
+    
+        tryApplyPalette(); // kick off the polling
+    };
 
       Shiny.addCustomMessageHandler(\'updateOpacity\', updateOpacity);
       Shiny.addCustomMessageHandler(\'updateResolution\', updateResolution);
