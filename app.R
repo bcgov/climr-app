@@ -280,22 +280,6 @@ shiny::shinyApp(
                                 min-width: 0 !important;
                                 text-align: center;
                               }
-                              
-                              .show-overlay #map-container {
-                                width: 78%;
-                              }
-                              
-                              #overlay-container {
-                                width: 21%;
-                                float: right;
-                                height: 85vh;
-                                overflow-y: auto;
-                                display: none;
-                              }
-                              
-                              .show-overlay #overlay-container {
-                                display: block;
-                              }
                             "))
                   ),
                   # Map container
@@ -305,7 +289,7 @@ shiny::shinyApp(
                         class = "input-control",
                         top = 90,            
                         left = 60,           
-                        width = 160,
+                        width = 175,
                         style = "padding: 10px;",
                         shiny::radioButtons(
                           inputId = "input_type",
@@ -324,6 +308,24 @@ shiny::shinyApp(
                         ),
                         shiny::actionButton("clear_map", "Clear Map",
                                             style = "width:100%; height:40px; background-color:#c21104; color: #FFF"
+                        ),
+                        br(),br(),
+                        h4("Overlay Controls"),
+                        shiny::uiOutput("overlay_element"),
+                        shiny::uiOutput("overlay_period"),
+                        shiny::uiOutput("scale_adj"),
+                        shiny::actionButton(
+                          inputId = "load_overlay",
+                          label = "Load",
+                          icon = shiny::icon("droplet"),
+                          width = "100%"
+                        ),
+                        shiny::actionButton(
+                          inputId = "download_overlay",
+                          label = "Download",
+                          disabled = TRUE,
+                          icon = shiny::icon("map"),
+                          width = "100%"
                         )
                       ),
                   ),
@@ -390,13 +392,13 @@ shiny::shinyApp(
                                                title = "Time Series Variable",
                                                style = "height: 99%; overflow-y: auto;",
                                                h4("Downscale Options", style = "margin-bottom: 5px;"),
-                                               shiny::radioButtons(
-                                                 inputId = "time_series_dataset",
-                                                 label = h5("Choose dataset:"),
-                                                 width = "100%",
-                                                 inline = TRUE,
-                                                 choices = c("MSWX Blend" = "mswx.blend", "ClimateNA" = "climatena", "Climatic Research Unit / Global Precipitation Climatology Centre" = "cru.gpcc")
-                                               ),
+                                               # shiny::radioButtons(
+                                               #   inputId = "time_series_dataset",
+                                               #   label = h5("Choose dataset:"),
+                                               #   width = "100%",
+                                               #   inline = TRUE,
+                                               #   choices = c("MSWX Blend" = "mswx.blend", "ClimateNA" = "climatena", "Climatic Research Unit / Global Precipitation Climatology Centre" = "cru.gpcc")
+                                               # ),
                                                shiny::checkboxGroupInput(
                                                  inputId = "time_series_gcms",
                                                  label = h5("Choose GCMs:"),
@@ -417,11 +419,19 @@ shiny::shinyApp(
                                                ),
                                                h4("Interactive Plot Options", style = "margin-bottom: 5px;"),
                                                shiny::radioButtons(
+                                                 inputId = "time_series_dataset",
+                                                 label = h5("Choose dataset:"),
+                                                 width = "100%",
+                                                 inline = TRUE,
+                                                 choices = c("MSWX Blend" = "mswx.blend", "ClimateNA" = "climatena", "Climatic Research Unit / Global Precipitation Climatology Centre" = "cru.gpcc")
+                                               ),
+                                               shiny::radioButtons(
                                                  inputId = "time_series_element",
                                                  label = h5("Choose element:"),
                                                  width = "100%",
                                                  inline = TRUE,
-                                                 choices = unique(climr::variables %>% pull(Code_Element))
+                                                 choices = unique(climr::variables %>% pull(Code_Element)),
+                                                 selected = "Tmax"
                                                ),
                                                shiny::uiOutput("time_series_valid_season")
                                              )
@@ -435,46 +445,6 @@ shiny::shinyApp(
                       )
                     )
                   ),
-                  # Overlay container (initially hidden)
-                  shiny::conditionalPanel(
-                    condition = "input.input_type == 'Overlay'",
-                    shiny::div(id = "overlay-container",
-                               style = "height: 85vh; display: flex; flex-direction: column;",
-                               bslib::card(
-                                 title = "Overlay Options",
-                                 style = "height: 99%; overflow-y: auto;",
-                                 shiny::radioButtons(
-                                   inputId = "tifsource",
-                                   label = h5("Choose source:",
-                                              prompter::add_prompt(
-                                                tooltipsIcon,
-                                                message = HTML(paste("source info!")),
-                                                position = "bottom",
-                                                size = "large",
-                                                shadow = FALSE
-                                              )),
-                                   width = "100%",
-                                   inline = TRUE,
-                                   choices = names(climr_tif)
-                                 ),
-                                 shiny::uiOutput("overlay_element"),
-                                 shiny::uiOutput("overlay_period"),
-                                 shiny::uiOutput("scale_adj"),
-                                 shiny::actionButton(
-                                   inputId = "load_overlay",
-                                   label = "Load Overlay",
-                                   icon = shiny::icon("droplet")
-                                 ),
-                                 shiny::actionButton(
-                                   inputId = "download_overlay",
-                                   label = "Download Overlay",
-                                   disabled = TRUE,
-                                   icon = shiny::icon("map")
-                                 ),
-                               )
-                    )
-                  ),
-                  
         )
       ),
      

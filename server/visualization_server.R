@@ -84,10 +84,8 @@ visualization_server <- function(input, output, session) {
       vis_by_map(FALSE)
       vis_sg$clear_all(vis_mp)
     }
-    show_plot <- input$input_type != "" && input$input_type != "Overlay"
+    show_plot <- input$input_type != ""
     session$sendCustomMessage("toggle-plot", show_plot)
-    show_overlay <- input$input_type == "Overlay"
-    session$sendCustomMessage("toggle-overlay", show_overlay)
   })
   
   # ---- Visualization Plot events
@@ -197,7 +195,7 @@ visualization_server <- function(input, output, session) {
               easyClose = TRUE
             )
           )
-          timeseries_data <- climr::plot_timeSeries_input(xyz, gcms = input$time_series_gcms, ssps = input$time_series_ssps, obs_ts_dataset = input$time_series_dataset)
+          timeseries_data <- climr::plot_timeSeries_input(xyz, gcms = input$time_series_gcms, ssps = input$time_series_ssps, obs_ts_dataset = c("mswx.blend", "cru.gpcc", "climatena"))
           vis_sg$timeseries(timeseries_data)
           removeModal()
         }
@@ -259,7 +257,6 @@ visualization_server <- function(input, output, session) {
     if (shiny::in_devmode()) cat("Event: load_overlay", sep = "\n")
     
     # update selected options
-    vstore[["tifsource"]] <- input$tifsource
     vstore[["time"]] <- input$time
     vstore[["element"]] <- input$element
     vstore[["vscale"]] <- input$vscale
@@ -297,7 +294,7 @@ visualization_server <- function(input, output, session) {
       vstore$vscale <- ""
     }
     
-    # set up palettes/breaks
+    # set up palettes/breaks (this needs speeding up - loading full raster in R right now)
     vals <- values(rast(url))
     vals <- vals[is.finite(vals)]
     q <- quantile(vals, c(0.005, 0.995))
@@ -342,34 +339,21 @@ visualization_server <- function(input, output, session) {
   
   # reactive outputs
   output$overlay_element <- shiny::renderUI({
-    if (!is.null(input$tifsource)) {
-      shiny::radioButtons(
-        inputId = "element",
-        label = h5("Choose element:",
-                   prompter::add_prompt(
-                     tooltipsIcon,
-                     message = "we should includ a list somewhere of what the variable mean?",
-                     position = "bottom",
-                     size = "large",
-                     shadow = FALSE
-                   )),
-        width = "100%",
-        inline = TRUE,
-        choices = {
-          dt <- climr_tif[[vstore[["tifsource"]]]]
-          unique(dt[, element])
-        }
-      )
-    }
+    shiny::selectInput(
+      inputId = "element",
+      label = "Choose element:",
+      choices = {
+        dt <- climr_tif[[vstore[["tifsource"]]]]
+        unique(dt[, element])
+      }
+    )
   })
   
   output$overlay_period <- shiny::renderUI({
     if (!is.null(input$element) & input$element != "elev" & input$element != "lat" & input$element != "PET") {
-      shiny::radioButtons(
+      shiny::selectInput(
         inputId = "time",
-        label = h5("Choose season/months:"),
-        width = "100%",
-        inline = TRUE,
+        label = "Choose season/months:",
         choices = climr::variables[Code_Element == input$element, Time]
       )
     }
@@ -379,7 +363,7 @@ visualization_server <- function(input, output, session) {
     if (!is.null(input$element) & "ratio" %in% climr::variables[Code_Element == input$element, Type]) {
       shiny::checkboxInput(
         inputId = "vscale",
-        label = tags$span("Apply scale adjustment", style = "font-size: 0.85em; font-weight: bold;"),
+        label = "Apply scale adjustment",
         value = reactive({
           req(input$element)
           "ratio" %in% climr::variables[Code_Element == input$element, Type]
