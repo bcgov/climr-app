@@ -14,7 +14,14 @@ visualization_server <- function(input, output, session) {
   )
   
   # ---- Modal input storage
-  output$vis_map <- leaflet::renderLeaflet(l)
+  output$vis_map <- leaflet::renderLeaflet(l |> addDistricts() |>
+                                             htmlwidgets::onRender("
+                                                  function(el, x) {
+                                                    window.map = this;
+                                                    console.log('Map assigned to window.map');
+                                                  }
+                                                ")
+                                           ) 
   
   # allow map to be modified instead of re-rendering
   vis_mp <- leaflet::leafletProxy("vis_map")
@@ -50,7 +57,8 @@ visualization_server <- function(input, output, session) {
     time = NULL,
     element = NULL,
     climatevar = NULL,
-    vscale = NULL
+    vscale = NULL,
+    flp_area = NULL
   )
   
   # ---- Geometry
@@ -76,6 +84,7 @@ visualization_server <- function(input, output, session) {
     vis_sg$clear_all(vis_mp)
     leaflet::removeImage(vis_mp, layerId = "val")
     leaflet::hideGroup(vis_mp, "Climate")
+    session$sendCustomMessage("clear_district","Waddles")
     if (!is.null(input$input_type)) {
       if (input$input_type != "") {
         session$sendCustomMessage("toggle-plot", FALSE)
@@ -95,11 +104,20 @@ visualization_server <- function(input, output, session) {
     )
   })
   
+  shiny::observeEvent(input$dist_click,{
+    vstore[["flp_area"]] <- input$dist_click
+  })
+  
   # ---- Visualization data events
   shiny::observeEvent(input$input_type, {
     if (input$input_type == "Map point") {
       vis_by_map(TRUE)
+    } else if (input$input_type == "FLP Area") {
+      dat <- list(url = "https://tileserver.thebeczone.ca/data/flp_bnd/{z}/{x}/{y}.pbf", name = "flp", id = "ORG_UNIT")
+      session$sendCustomMessage("addRegionTile",dat)
+      session$sendCustomMessage("reset_district","Luna")
     } else {
+      session$sendCustomMessage("clear_district","Waddles")
       vis_by_map(FALSE)
       vis_sg$clear_all(vis_mp)
     }
