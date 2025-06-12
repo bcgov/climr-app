@@ -75,14 +75,23 @@ visualization_server <- function(input, output, session) {
     if (shiny::in_devmode()) cat("Event: clear_map", sep = "\n")
     vis_sg$clear_all(vis_mp)
     leaflet::removeImage(vis_mp, layerId = "val")
+    leaflet::hideGroup(vis_mp, "Climate")
     if (!is.null(input$input_type)) {
       if (input$input_type != "") {
         session$sendCustomMessage("toggle-plot", FALSE)
       }
     }
+    shiny::updateActionButton(
+      inputId = "download_overlay",
+      disabled = TRUE
+    )
     shiny::updateRadioButtons(
       inputId = "input_type",
       selected = character(0)
+    )
+    shiny::updateCheckboxInput(
+      inputId = "show_overlay_controls",
+      value = FALSE
     )
   })
   
@@ -360,7 +369,8 @@ visualization_server <- function(input, output, session) {
       choices = {
         dt <- climr_tif[[vstore[["tifsource"]]]]
         unique(dt[, element])
-      }
+      },
+      selected = "Tave"
     )
   })
   
