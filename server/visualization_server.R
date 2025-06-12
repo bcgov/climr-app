@@ -112,6 +112,7 @@ visualization_server <- function(input, output, session) {
   shiny::observeEvent(input$input_type, {
     if (input$input_type == "Map point") {
       vis_by_map(TRUE)
+      session$sendCustomMessage("clear_district","Waddles")
     } else if (input$input_type == "FLP Area") {
       dat <- list(url = "https://tileserver.thebeczone.ca/data/flp_bnd/{z}/{x}/{y}.pbf", name = "flp", id = "ORG_UNIT")
       session$sendCustomMessage("addRegionTile",dat)

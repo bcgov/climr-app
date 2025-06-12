@@ -386,7 +386,51 @@ shiny::shinyApp(
                                              plotly::plotlyOutput("bivariate_plot", height = "600px")
                                            )
                                          )),
-                        # bslib::nav_panel("Climate Diagram"),
+                        bslib::nav_panel("Walter-Lieth",
+                                         shiny::fluidRow(
+                                           column(
+                                             width = 3,
+                                             style = "height: 75vh;", 
+                                             bslib::card(
+                                               title = "Walter-Lieth Variables",
+                                               style = "height: 99%; overflow-y: auto;",
+                                               shiny::actionButton(
+                                                 inputId = "downscale_data_wl",
+                                                 label = "Downscale Data"
+                                               ),
+                                               shiny::radioButtons(
+                                                 inputId = "bivariate_element_x",
+                                                 label = h5("Choose x-axis element:"),
+                                                 width = "100%",
+                                                 inline = TRUE,
+                                                 choices = unique(climr::variables %>% pull(Code_Element)),
+                                                 selected = "MAT"
+                                               ),
+                                               shiny::uiOutput("bivariate_valid_time_x"),
+                                               shiny::radioButtons(
+                                                 inputId = "bivariate_element_y",
+                                                 label = h5("Choose y-axis element:"),
+                                                 width = "100%",
+                                                 inline = TRUE,
+                                                 choices = unique(climr::variables %>% pull(Code_Element)),
+                                                 selected = "MAP"
+                                               ),
+                                               shiny::uiOutput("bivariate_valid_time_y"),
+                                               shiny::radioButtons(
+                                                 inputId = "bivariate_period",
+                                                 label = h5("Choose time period:"),
+                                                 width = "100%",
+                                                 inline = TRUE,
+                                                 choices = climr::list_gcm_periods()
+                                               )
+                                             )
+                                           ),
+                                           column(
+                                             width = 9,
+                                             style = "height: 75vh;", 
+                                             plotly::plotlyOutput("bivariate_plot", height = "600px")
+                                           )
+                                         )),
                         # bslib::nav_panel("Climate Stripes"),
                         # bslib::nav_panel("Boxplot"),
                         bslib::nav_panel("Time Series",
