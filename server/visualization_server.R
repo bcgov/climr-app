@@ -289,13 +289,6 @@ visualization_server <- function(input, output, session) {
     shiny::updateActionButton(inputId = "download_overlay", disabled = TRUE)
     if (is.null(vstore[["climatevar"]])) return()
     shiny::updateActionButton(inputId = "download_overlay", disabled = FALSE)
-
-    # set palettes
-    pal <- if (grepl("PPT", vstore[["element"]])) {
-      RColorBrewer::brewer.pal(9, "YlGnBu")
-    } else {
-      rev(RColorBrewer::brewer.pal(11, "RdYlBu"))
-    }
     
     # get scaling
     if (isTRUE(vstore[["vscale"]])) {
@@ -304,15 +297,29 @@ visualization_server <- function(input, output, session) {
       vstore$vscale <- ""
     }
     
+    # set up palettes/breaks
+    vals <- values(rast(url))
+    vals <- vals[is.finite(vals)]
+    q <- quantile(vals, c(0.005, 0.995))
+    inc <- diff(q) / 500
+    breaks <- seq(q[1] - inc, q[2] + inc, by = inc)
+    
+    if (grepl("PPT", vstore[["element"]])) {
+      pal <- RColorBrewer::brewer.pal(9, "YlGnBu")
+    } else {
+      pal <- rev(RColorBrewer::brewer.pal(11, "RdYlBu"))
+    }
+    
     mp |> leafem::addGeotiff(
       url = vstore[["climatevar"]],
       group = "Climate",
       layerId = "val",
       project = FALSE,
-      # opacity = 
-      # resolution = 
+      # opacity =
+      # resolution =
       colorOptions = leafem::colorOptions(
         palette = pal,
+        breaks = breaks,
         na.color = "transparent"
       ),
       imagequery = TRUE,
@@ -328,20 +335,6 @@ visualization_server <- function(input, output, session) {
     
     shiny::showNotification("Rendering %s values" |> sprintf(vstore[["element"]]), duration = 5)
   })
-  # shiny::observe({
-  #   vstore[["vscale"]]
-  #   pal <- if (grepl("PPT", vstore[["element"]])) {
-  #     RColorBrewer::brewer.pal(9, "YlGnBu")
-  #   } else {
-  #     rev(RColorBrewer::brewer.pal(11, "RdYlBu"))
-  #   }
-  #   session$sendCustomMessage(type="updateClimatePalette", list(
-  #     category = "image", layerId = "val", vscale = vstore[["vscale"]], colorOptions = leafem::colorOptions(
-  #       palette = pal,
-  #       na.color = "transparent"
-  #     )
-  #   ))
-  # })
   shiny::observeEvent(input$download_overlay, {
     if (shiny::in_devmode()) cat("Event: download_overlay", sep = "\n")
     session$sendCustomMessage(type="jsCode", list(code = "window.location.assign('%s');" |> sprintf(vstore[["climatevar"]])))
