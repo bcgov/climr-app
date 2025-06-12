@@ -74,6 +74,7 @@ visualization_server <- function(input, output, session) {
   shiny::observeEvent(input$clear_map, {
     if (shiny::in_devmode()) cat("Event: clear_map", sep = "\n")
     vis_sg$clear_all(vis_mp)
+    leaflet::removeImage(vis_mp, layerId = "val")
   })
   
   # ---- Visualization data events
@@ -259,7 +260,11 @@ visualization_server <- function(input, output, session) {
     # update selected options
     vstore[["time"]] <- input$time
     vstore[["element"]] <- input$element
-    vstore[["vscale"]] <- input$vscale
+    if ("ratio" %in% climr::variables[Code_Element == input$element & Time == input$time, Type]) {
+      vstore[["vscale"]] <- input$vscale
+    } else {
+      vstore[["vscale"]] <- FALSE
+    }
     
     # create URL
     if (is.null(input$element) || is.null(input$time)) return()

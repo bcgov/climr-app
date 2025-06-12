@@ -303,36 +303,40 @@ shiny::shinyApp(
                                      )
                           ),
                           width = "100%",
-                          choices = c("Map point", "Ecoregion", "FLP Area", "Overlay"),
+                          choices = c("Map point", "Ecoregion", "FLP Area"),
                           selected = character(0)
                         ),
                         shiny::actionButton("clear_map", "Clear Map",
                                             style = "width:100%; height:40px; background-color:#c21104; color: #FFF"
                         ),
-                        br(),br(),
-                        h4("Overlay Controls"),
-                        shiny::uiOutput("overlay_element"),
-                        shiny::uiOutput("overlay_period"),
-                        shiny::uiOutput("scale_adj"),
-                        shiny::actionButton(
-                          inputId = "load_overlay",
-                          label = "Load",
-                          icon = shiny::icon("droplet"),
-                          width = "100%"
+                        shiny::checkboxInput("show_overlay_controls", "Show climate map"
                         ),
-                        shiny::actionButton(
-                          inputId = "download_overlay",
-                          label = "Download",
-                          disabled = TRUE,
-                          icon = shiny::icon("map"),
-                          width = "100%"
+                        shiny::conditionalPanel(
+                          condition = "input.show_overlay_controls == true",
+                          h4("Overlay Controls"),
+                          shiny::uiOutput("overlay_element"),
+                          shiny::uiOutput("overlay_period"),
+                          shiny::uiOutput("scale_adj"),
+                          shiny::actionButton(
+                            inputId = "load_overlay",
+                            label = "Load",
+                            icon = shiny::icon("droplet"),
+                            width = "100%"
+                          ),
+                          shiny::actionButton(
+                            inputId = "download_overlay",
+                            label = "Download",
+                            disabled = TRUE,
+                            icon = shiny::icon("map"),
+                            width = "100%"
+                          ) 
                         )
                       ),
                   ),
                   
                   # Plot container (initially hidden)
                   shiny::conditionalPanel(
-                    condition = "input.input_type !== null && input.input_type !== 'Overlay'",
+                    condition = "input.input_type !== null",
                     shiny::div(id = "plot-container",
                                style = "height: 85vh; display: flex; flex-direction: column;",
                       bslib::navset_card_underline(
@@ -354,7 +358,8 @@ shiny::shinyApp(
                                                  label = h5("Choose x-axis element:"),
                                                  width = "100%",
                                                  inline = TRUE,
-                                                 choices = unique(climr::variables %>% pull(Code_Element))
+                                                 choices = unique(climr::variables %>% pull(Code_Element)),
+                                                 selected = "MAT"
                                                ),
                                                shiny::uiOutput("bivariate_valid_time_x"),
                                                shiny::radioButtons(
@@ -362,7 +367,8 @@ shiny::shinyApp(
                                                  label = h5("Choose y-axis element:"),
                                                  width = "100%",
                                                  inline = TRUE,
-                                                 choices = unique(climr::variables %>% pull(Code_Element))
+                                                 choices = unique(climr::variables %>% pull(Code_Element)),
+                                                 selected = "MAP"
                                                ),
                                                shiny::uiOutput("bivariate_valid_time_y"),
                                                shiny::radioButtons(
@@ -392,13 +398,6 @@ shiny::shinyApp(
                                                title = "Time Series Variable",
                                                style = "height: 99%; overflow-y: auto;",
                                                h4("Downscale Options", style = "margin-bottom: 5px;"),
-                                               # shiny::radioButtons(
-                                               #   inputId = "time_series_dataset",
-                                               #   label = h5("Choose dataset:"),
-                                               #   width = "100%",
-                                               #   inline = TRUE,
-                                               #   choices = c("MSWX Blend" = "mswx.blend", "ClimateNA" = "climatena", "Climatic Research Unit / Global Precipitation Climatology Centre" = "cru.gpcc")
-                                               # ),
                                                shiny::checkboxGroupInput(
                                                  inputId = "time_series_gcms",
                                                  label = h5("Choose GCMs:"),
