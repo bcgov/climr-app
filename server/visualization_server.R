@@ -75,6 +75,15 @@ visualization_server <- function(input, output, session) {
     if (shiny::in_devmode()) cat("Event: clear_map", sep = "\n")
     vis_sg$clear_all(vis_mp)
     leaflet::removeImage(vis_mp, layerId = "val")
+    if (!is.null(input$input_type)) {
+      if (input$input_type != "") {
+        session$sendCustomMessage("toggle-plot", FALSE)
+      }
+    }
+    shiny::updateRadioButtons(
+      inputId = "input_type",
+      selected = character(0)
+    )
   })
   
   # ---- Visualization data events
