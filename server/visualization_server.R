@@ -326,6 +326,7 @@ visualization_server <- function(input, output, session) {
       autozoom = FALSE,
       options = leaflet::tileOptions(maxZoom = 25, maxNativeZoom = 20)
     ) |> leaflet::showGroup("Climate")
+    
     session$sendCustomMessage(type="updateClimatePalette", list(
       category = "image", layerId = "val", vscale = vstore[["vscale"]], colorOptions = leafem::colorOptions(
         palette = pal,
