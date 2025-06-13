@@ -32,6 +32,12 @@ visualization_server <- function(input, output, session) {
   timeseries_data <- c()
   wl_data <- c()
   
+  # mapping for database connections
+  gcm_id <- data.table(gcm = list_gcms(), gcm_id = seq_along(list_gcms()))
+  ssp_id <- data.table(ssp = list_ssps(), ssp_id = seq_along(list_ssps()))
+  var_id <- data.table(var = list_vars(), var_id = seq_along(list_vars()))
+  dataset_id <- data.table(dataset = c("mswx.blend","cru.gpcc","climatena"), dataset_id = 1:3)
+  
   # mapping for months/seasons
   time_labels <- c(
     "Annual" = "Ann",
@@ -163,7 +169,34 @@ visualization_server <- function(input, output, session) {
           easyClose = TRUE
         )
       )
-    } else {
+    } else if (nrow(vis_sg_dt$dt) > 0 & input$input_type == "Map point") {
+      withCallingHandlers(
+        message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+        warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+        error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+        {
+          g <- terra::vect((vis_sg_dt$dt)[1,][["wkt"]], crs = "EPSG:4326")
+          coords <- terra::crds(g)
+          elevs <- terra::extract(cec, g, method = "bilinear", ID = FALSE, raw = TRUE)[,1]
+          xyz <- data.table::data.table(
+            id = 1,
+            lon = coords[, 1],
+            lat = coords[, 2],
+            elev = elevs
+          )
+          bivariate_data <- climr::plot_bivariate_input(xyz)
+          vis_sg$bivariate(bivariate_data)
+        }
+      )
+    } else if (is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") {
+      showModal(
+        modalDialog(
+          title = "Warning",
+          paste("Please select an FLP area!"),
+          easyClose = TRUE
+        )
+      )
+    } else if (!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") {
       withCallingHandlers(
         message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
         warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
@@ -212,7 +245,15 @@ visualization_server <- function(input, output, session) {
           easyClose = TRUE
         )
       )
-    } else {
+    } else if (is.null(input$time_series_gcms) | is.null(input$time_series_ssps)){
+      showModal(
+        modalDialog(
+          title = "Warning",
+          paste("Please select at least one GCM and SSP to downscale!"),
+          easyClose = TRUE
+        )
+      )
+    } else if (nrow(vis_sg_dt$dt) > 0 & input$input_type == "Map point") {
       withCallingHandlers(
         message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
         warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
@@ -293,7 +334,7 @@ visualization_server <- function(input, output, session) {
           easyClose = TRUE
         )
       )
-    } else {
+    } else if (nrow(vis_sg_dt$dt) > 0 & input$input_type == "Map point") {
       withCallingHandlers(
         message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
         warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},

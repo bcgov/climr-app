@@ -349,9 +349,12 @@ shiny::shinyApp(
                                              bslib::card(
                                                title = "Bivariate Plot Variables",
                                                style = "height: 99%; overflow-y: auto;",
-                                               shiny::actionButton(
-                                                 inputId = "downscale_data_bivariate",
-                                                 label = "Downscale Data"
+                                               shiny::conditionalPanel(
+                                                 condition = "input.input_type == 'Map point'",
+                                                 shiny::actionButton(
+                                                   inputId = "downscale_data_bivariate",
+                                                   label = "Downscale Data"
+                                                 )
                                                ),
                                                shiny::radioButtons(
                                                  inputId = "bivariate_element_x",
@@ -394,13 +397,12 @@ shiny::shinyApp(
                                              bslib::card(
                                                title = "Walter-Lieth Variables",
                                                style = "height: 99%; overflow-y: auto;",
-                                               shiny::actionButton(
-                                                 inputId = "downscale_data_wl",
-                                                 label = "Downscale Data"
-                                               ),
-                                               shiny::checkboxInput(
-                                                 inputId = "wl_diurnal",
-                                                 label = tags$span("Show diurnal range", style = "font-size: 0.85em; font-weight: bold;"),
+                                               shiny::conditionalPanel(
+                                                 condition = "input.input_type == 'Map point'",
+                                                 shiny::actionButton(
+                                                   inputId = "downscale_data_wl",
+                                                   label = "Downscale Data"
+                                                 )
                                                ),
                                                shiny::radioButtons(
                                                  inputId = "wl_obs_period",
@@ -429,6 +431,10 @@ shiny::shinyApp(
                                                  width = "100%",
                                                  inline = TRUE,
                                                  choices = climr::list_gcm_periods()
+                                               ),
+                                               shiny::checkboxInput(
+                                                 inputId = "wl_diurnal",
+                                                 label = tags$span("Show diurnal range", style = "font-size: 0.85em; font-weight: bold;"),
                                                )
                                              )
                                            ),
@@ -448,7 +454,10 @@ shiny::shinyApp(
                                              bslib::card(
                                                title = "Time Series Variable",
                                                style = "height: 99%; overflow-y: auto;",
-                                               h4("Downscale Options", style = "margin-bottom: 5px;"),
+                                               shiny::conditionalPanel(
+                                                 condition = "input.input_type == 'Map point'",
+                                                 h4("Downscale Options", style = "margin-bottom: 5px;")
+                                               ),
                                                shiny::checkboxGroupInput(
                                                  inputId = "time_series_gcms",
                                                  label = h5("Choose GCMs:"),
@@ -463,17 +472,21 @@ shiny::shinyApp(
                                                  inline = TRUE,
                                                  choices = climr::list_ssps()
                                                ),
-                                               shiny::actionButton(
-                                                 inputId = "downscale_data_time_series",
-                                                 label = "Downscale Data"
+                                               shiny::conditionalPanel(
+                                                 condition = "input.input_type == 'Map point'",
+                                                 shiny::actionButton(
+                                                   inputId = "downscale_data_time_series",
+                                                   label = "Downscale Data"
+                                                 ),
+                                                 h4("Interactive Plot Options", style = "margin-bottom: 5px;"),
                                                ),
-                                               h4("Interactive Plot Options", style = "margin-bottom: 5px;"),
                                                shiny::radioButtons(
                                                  inputId = "time_series_dataset",
                                                  label = h5("Choose dataset:"),
                                                  width = "100%",
                                                  inline = TRUE,
-                                                 choices = c("MSWX Blend" = "mswx.blend", "ClimateNA" = "climatena", "Climatic Research Unit / Global Precipitation Climatology Centre" = "cru.gpcc")
+                                                 choices = c("MSWX Blend" = "mswx.blend", "ClimateNA" = "climatena", "Climatic Research Unit / Global Precipitation Climatology Centre" = "cru.gpcc"),
+                                                 selected = "mswx.blend"
                                                ),
                                                shiny::radioButtons(
                                                  inputId = "time_series_element",
