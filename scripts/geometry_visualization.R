@@ -171,6 +171,26 @@ visualization_geometry <- function(dt, mp) {
     })     
   }
   
+  plot_walter_lieth <- function(wl_data) {
+    output$wl_plot <- shiny::renderPlot({
+      withCallingHandlers(
+        message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+        warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+        error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+        {
+          climr::plot_WalterLieth(
+            X = wl_data,
+            diurnal = input$wl_diurnal,
+            obs_period = input$wl_obs_period,
+            gcm = input$wl_gcm,
+            ssp = input$wl_ssp,
+            gcm_period = input$wl_gcm_period
+          )
+        }
+      )
+    })     
+  }
+  
   sg_methods <- list(
     add_point = function(lat,lng,map_val) {
       if (!map_val()) return()
@@ -245,9 +265,9 @@ visualization_geometry <- function(dt, mp) {
     timeseries = function(timeseries_data) {
       plot_timeseries(timeseries_data)
     },
-    # climate_diagram = function(rid) {
-    #   plot_climate_diagram(rid)
-    # },
+    walter_lieth = function(wl_data) {
+      plot_walter_lieth(wl_data)
+    },
     # boxplot = function(rid) {
     #   plot_boxplot(rid)
     # },

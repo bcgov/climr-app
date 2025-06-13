@@ -398,27 +398,34 @@ shiny::shinyApp(
                                                  inputId = "downscale_data_wl",
                                                  label = "Downscale Data"
                                                ),
+                                               shiny::checkboxInput(
+                                                 inputId = "wl_diurnal",
+                                                 label = tags$span("Show diurnal range", style = "font-size: 0.85em; font-weight: bold;"),
+                                               ),
                                                shiny::radioButtons(
-                                                 inputId = "bivariate_element_x",
-                                                 label = h5("Choose x-axis element:"),
+                                                 inputId = "wl_obs_period",
+                                                 label = h5("Choose observed period:"),
                                                  width = "100%",
                                                  inline = TRUE,
-                                                 choices = unique(climr::variables %>% pull(Code_Element)),
-                                                 selected = "MAT"
+                                                 choices = climr::list_obs_periods()
                                                ),
-                                               shiny::uiOutput("bivariate_valid_time_x"),
                                                shiny::radioButtons(
-                                                 inputId = "bivariate_element_y",
-                                                 label = h5("Choose y-axis element:"),
+                                                 inputId = "wl_gcm",
+                                                 label = h5("Choose GCM:"),
                                                  width = "100%",
                                                  inline = TRUE,
-                                                 choices = unique(climr::variables %>% pull(Code_Element)),
-                                                 selected = "MAP"
+                                                 choices = climr::list_gcms()
                                                ),
-                                               shiny::uiOutput("bivariate_valid_time_y"),
                                                shiny::radioButtons(
-                                                 inputId = "bivariate_period",
-                                                 label = h5("Choose time period:"),
+                                                 inputId = "wl_ssp",
+                                                 label = h5("Choose SSP:"),
+                                                 width = "100%",
+                                                 inline = TRUE,
+                                                 choices = climr::list_ssps()
+                                               ),
+                                               shiny::radioButtons(
+                                                 inputId = "wl_gcm_period",
+                                                 label = h5("Choose GCM period:"),
                                                  width = "100%",
                                                  inline = TRUE,
                                                  choices = climr::list_gcm_periods()
@@ -428,7 +435,7 @@ shiny::shinyApp(
                                            column(
                                              width = 9,
                                              style = "height: 75vh;", 
-                                             plotly::plotlyOutput("bivariate_plot", height = "600px")
+                                             plotly::plotlyOutput("wl_plot", height = "600px")
                                            )
                                          )),
                         # bslib::nav_panel("Climate Stripes"),

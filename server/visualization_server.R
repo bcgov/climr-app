@@ -252,6 +252,37 @@ visualization_server <- function(input, output, session) {
       vis_sg$timeseries(timeseries_data)
     }    
   })
+  shiny::observeEvent(input$downscale_data_wl, {
+    if (shiny::in_devmode()) cat("Event: downscale_data_wl", sep = "\n")
+    if (nrow(vis_sg_dt$dt) < 1 & input$input_type == "Map point") {
+      showModal(
+        modalDialog(
+          title = "Warning",
+          paste("Please select a map point!"),
+          easyClose = TRUE
+        )
+      )
+    } else {
+      withCallingHandlers(
+        message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+        warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+        error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+        {
+          g <- terra::vect((vis_sg_dt$dt)[1,][["wkt"]], crs = "EPSG:4326")
+          coords <- terra::crds(g)
+          elevs <- terra::extract(cec, g, method = "bilinear", ID = FALSE, raw = TRUE)[,1]
+          xyz <- data.table::data.table(
+            id = 1,
+            lon = coords[, 1],
+            lat = coords[, 2],
+            elev = elevs
+          )
+          wl_data <- climr::plot_WalterLieth_input(xyz, gcms = climr::list_gcms(), ssps = climr::list_ssps(), gcm_periods = climr::list_gcm_periods())
+          vis_sg$walter_lieth(wl_data)
+        }
+      )
+    }
+  })
   
   # reactive outputs
   output$bivariate_valid_time_x <- shiny::renderUI({
