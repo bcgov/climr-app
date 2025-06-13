@@ -165,6 +165,7 @@ visualization_geometry <- function(dt, mp) {
             X = timeseries_data,
             var1 = climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code],
             obs_ts_dataset = input$time_series_dataset
+            
           )
         }
       )

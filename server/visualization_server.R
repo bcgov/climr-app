@@ -113,6 +113,29 @@ visualization_server <- function(input, output, session) {
   
   shiny::observeEvent(input$dist_click,{
     vstore[["flp_area"]] <- input$dist_click
+    # if (!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") {
+    #   withCallingHandlers(
+    #     message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+    #     warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+    #     error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+    #     {
+    #       region <- vstore[["flp_area"]]
+    #       gcms <- gcm_id[gcm %in% input$time_series_gcms, gcm_id]
+    #       ssps <- ssp_id[ssp %in% input$time_series_ssps, ssp_id]
+    #       dataset <- dataset_id[dataset %in% input$time_series_dataset, dataset_id]
+    #       code <- climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code]
+    #       var <- var_id[var == code, var_id]
+    #       browser()
+    #       query <- sprinf("SELECT * FROM ds_timeseries WHERE region = '%s' 
+    #                         AND gcm_id IN (%s)
+    #                         AND ssp_id IN (%s)
+    #                         AND dataset_id IN (%s)
+    #                         AND var_id = '%s'", region, gcms, ssps, dataset, var)
+    #       dat <- climr:::db_safe_query(query)
+    #       vis_sg$timeseries(dat)
+    #     }
+    #   )
+    # }
   })
   
   # ---- Visualization data events
@@ -137,26 +160,78 @@ visualization_server <- function(input, output, session) {
   
   shiny::observeEvent(input$bivariate_element_x, {
     if (shiny::in_devmode()) cat("Event: bivariate_element_x", sep = "\n")
-    if (!is.null(bivariate_data)) {
-      vis_sg$bivariate(bivariate_data)
+    if (!is.null(input$input_type)) {
+      if (input$input_type == "Map point") {
+        if (!is.null(bivariate_data)) {
+          vis_sg$bivariate(bivariate_data)
+        }
+      } else if (!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") {
+        withCallingHandlers(
+          message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+          warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+          error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+          {
+            
+          }
+        )
+      }
     }
   })
   shiny::observeEvent(input$bivariate_time_x, {
     if (shiny::in_devmode()) cat("Event: bivariate_time_x", sep = "\n")
-    if (!is.null(bivariate_data)) {
-      vis_sg$bivariate(bivariate_data)
-    }    
+    if (!is.null(input$input_type)) {
+      if (input$input_type == "Map point") {
+        if (!is.null(bivariate_data)) {
+          vis_sg$bivariate(bivariate_data)
+        }
+      } else if (!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") {
+        withCallingHandlers(
+          message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+          warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+          error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+          {
+            
+          }
+        )
+      }
+    }  
   })
   shiny::observeEvent(input$bivariate_element_y, {
     if (shiny::in_devmode()) cat("Event: bivariate_element_y", sep = "\n")
-    if (!is.null(bivariate_data)) {
-      vis_sg$bivariate(bivariate_data)
+    if (!is.null(input$input_type)) {
+      if (input$input_type == "Map point") {
+        if (!is.null(bivariate_data)) {
+          vis_sg$bivariate(bivariate_data)
+        }
+      } else if (!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") {
+        withCallingHandlers(
+          message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+          warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+          error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+          {
+            
+          }
+        )
+      }
     }    
   })
   shiny::observeEvent(input$bivariate_time_y, {
     if (shiny::in_devmode()) cat("Event: bivariate_time_y", sep = "\n")
-    if (!is.null(bivariate_data)) {
-      vis_sg$bivariate(bivariate_data)
+    if (!is.null(input$input_type)) {
+      if (input$input_type == "Map point") {
+        if (!is.null(bivariate_data)) {
+          vis_sg$bivariate(bivariate_data)
+        }
+      } else if (!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") {
+        withCallingHandlers(
+          message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+          warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+          error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+          {
+            
+          }
+        )
+      }
     }    
   })
   shiny::observeEvent(input$downscale_data_bivariate, {
@@ -188,52 +263,65 @@ visualization_server <- function(input, output, session) {
           vis_sg$bivariate(bivariate_data)
         }
       )
-    } else if (is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") {
-      showModal(
-        modalDialog(
-          title = "Warning",
-          paste("Please select an FLP area!"),
-          easyClose = TRUE
-        )
-      )
-    } else if (!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") {
-      withCallingHandlers(
-        message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
-        warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
-        error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
-        {
-          g <- terra::vect((vis_sg_dt$dt)[1,][["wkt"]], crs = "EPSG:4326")
-          coords <- terra::crds(g)
-          elevs <- terra::extract(cec, g, method = "bilinear", ID = FALSE, raw = TRUE)[,1]
-          xyz <- data.table::data.table(
-            id = 1,
-            lon = coords[, 1],
-            lat = coords[, 2],
-            elev = elevs
-          )
-          bivariate_data <- climr::plot_bivariate_input(xyz)
-          vis_sg$bivariate(bivariate_data)
-        }
-      )
     }
-  })
-  shiny::observeEvent(input$time_series_dataset, {
-    if (shiny::in_devmode()) cat("Event: time_series_dataset", sep = "\n")
-    if (!is.null(timeseries_data)) {
-      vis_sg$timeseries(timeseries_data)
-    }    
   })
   shiny::observeEvent(input$time_series_gcms, {
     if (shiny::in_devmode()) cat("Event: time_series_gcm", sep = "\n")
-    if (!is.null(timeseries_data)) {
-      vis_sg$timeseries(timeseries_data)
-    }    
+    if (!is.null(input$input_type)) {
+      if (!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") {
+        withCallingHandlers(
+          message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+          warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+          error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+          {
+            # set up db query
+            region <- vstore[["flp_area"]]
+            gcms <- paste(gcm_id[gcm %in% input$time_series_gcms, gcm_id], collapse = ",")
+            ssps <- paste(ssp_id[ssp %in% input$time_series_ssps, ssp_id], collapse = ",")
+            dataset <- paste(dataset_id[dataset %in% input$time_series_dataset, dataset_id], collapse = ",")
+            code <- paste(climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code], collapse = ",")
+            var <- var_id[var == code, var_id]
+            browser()
+            # query <- sprintf("SELECT * FROM ds_timeseries WHERE region = '%s' 
+            #                 AND gcm_id IN (%s)
+            #                 AND ssp_id IN (%s)
+            #                 AND dataset_id IN (%s)
+            #                 AND var_id = %s", region, gcms, ssps, dataset, var)
+            query <- sprintf("SELECT * FROM ds_timeseries WHERE region = '%s' 
+                            AND gcm_id IN (%s)
+                            AND ssp_id IN (%s)
+                            AND var_id = %s", region, gcms, ssps, var)
+            dat <- climr:::db_safe_query(query)
+            
+            # reformat data
+            dat <- dat[,-c(1,6)]
+            gcm_map <- setNames(gcm_id$gcm, gcm_id$gcm_id)
+            ssp_map <- setNames(ssp_id$ssp, ssp_id$ssp_id)
+            dataset_map <- setNames(dataset_id$dataset, dataset_id$dataset_id)
+            dat$gcm_id <- gcm_map[dat$gcm_id]
+            dat$ssp_id <- ssp_map[dat$ssp_id]
+            dat$dataset_id <- dataset_map[dat$dataset_id]
+            names(dat)[c(1:6)] <- c("GCM", "SSP", "RUN", "DATASET", "PERIOD", code)
+            vis_sg$timeseries(dat)
+          }
+        )
+      }
+    }
   })
   shiny::observeEvent(input$time_series_ssps, {
     if (shiny::in_devmode()) cat("Event: time_series_ssp", sep = "\n")
-    if (!is.null(timeseries_data)) {
-      vis_sg$timeseries(timeseries_data)
-    }    
+    if (!is.null(input$input_type)) {
+      if (!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") {
+        withCallingHandlers(
+          message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+          warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+          error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+          {
+            
+          }
+        )
+      }
+    }
   })
   shiny::observeEvent(input$downscale_data_time_series, {
     if (shiny::in_devmode()) cat("Event: downscale_data_time_series", sep = "\n")
@@ -282,17 +370,62 @@ visualization_server <- function(input, output, session) {
       )
     }
   })
+  shiny::observeEvent(input$time_series_dataset, {
+    if (shiny::in_devmode()) cat("Event: time_series_dataset", sep = "\n")
+    if (!is.null(input$input_type)) {
+      if (input$input_type == "Map point") {
+        if (!is.null(timeseries_data)) {
+          vis_sg$timeseries(timeseries_data)
+        }
+      } else if (!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") {
+        withCallingHandlers(
+          message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+          warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+          error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+          {
+            
+          }
+        )
+      }
+    }   
+  })
   shiny::observeEvent(input$time_series_element, {
     if (shiny::in_devmode()) cat("Event: time_series_element", sep = "\n")
-    if (!is.null(timeseries_data)) {
-      vis_sg$timeseries(timeseries_data)
-    }
+    if (!is.null(input$input_type)) {
+      if (input$input_type == "Map point") {
+        if (!is.null(timeseries_data)) {
+          vis_sg$timeseries(timeseries_data)
+        }
+      } else if (!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") {
+        withCallingHandlers(
+          message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+          warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+          error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+          {
+            
+          }
+        )
+      }
+    } 
   })
   shiny::observeEvent(input$time_series_season, {
     if (shiny::in_devmode()) cat("Event: time_series_season", sep = "\n")
-    if (!is.null(timeseries_data)) {
-      vis_sg$timeseries(timeseries_data)
-    }    
+    if (!is.null(input$input_type)) {
+      if (input$input_type == "Map point") {
+        if (!is.null(timeseries_data)) {
+          vis_sg$timeseries(timeseries_data)
+        }
+      } else if (!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") {
+        withCallingHandlers(
+          message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+          warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+          error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+          {
+            
+          }
+        )
+      }
+    }     
   })
   shiny::observeEvent(input$wl_diurnal, {
     if (shiny::in_devmode()) cat("Event: wl_diurnal", sep = "\n")

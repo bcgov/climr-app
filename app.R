@@ -463,14 +463,16 @@ shiny::shinyApp(
                                                  label = h5("Choose GCMs:"),
                                                  width = "100%",
                                                  inline = TRUE,
-                                                 choices = climr::list_gcms()
+                                                 choices = climr::list_gcms(),
+                                                 selected = climr::list_gcms()[c(1, 4, 5, 6, 7, 10, 11, 12)]
                                                ),
                                                shiny::checkboxGroupInput(
                                                  inputId = "time_series_ssps",
                                                  label = h5("Choose SSPs:"),
                                                  width = "100%",
                                                  inline = TRUE,
-                                                 choices = climr::list_ssps()
+                                                 choices = climr::list_ssps(),
+                                                 selected = list_ssps()[c(1:3)]
                                                ),
                                                shiny::conditionalPanel(
                                                  condition = "input.input_type == 'Map point'",
