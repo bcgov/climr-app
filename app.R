@@ -435,7 +435,7 @@ shiny::shinyApp(
                                            column(
                                              width = 9,
                                              style = "height: 75vh;", 
-                                             plotly::plotlyOutput("wl_plot", height = "600px")
+                                             shiny::plotOutput("wl_plot", height = "600px")
                                            )
                                          )),
                         # bslib::nav_panel("Climate Stripes"),

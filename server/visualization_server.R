@@ -30,6 +30,7 @@ visualization_server <- function(input, output, session) {
   vis_by_map <- reactiveVal(FALSE)
   bivariate_data <- c()
   timeseries_data <- c()
+  wl_data <- c()
   
   # mapping for months/seasons
   time_labels <- c(
@@ -252,6 +253,36 @@ visualization_server <- function(input, output, session) {
       vis_sg$timeseries(timeseries_data)
     }    
   })
+  shiny::observeEvent(input$wl_diurnal, {
+    if (shiny::in_devmode()) cat("Event: wl_diurnal", sep = "\n")
+    if (!is.null(wl_data)) {
+      vis_sg$walter_lieth(wl_data)
+    }
+  })
+  shiny::observeEvent(input$wl_obs_period, {
+    if (shiny::in_devmode()) cat("Event: wl_obs_period", sep = "\n")
+    if (!is.null(wl_data)) {
+      vis_sg$walter_lieth(wl_data)
+    }
+  })
+  shiny::observeEvent(input$wl_gcm, {
+    if (shiny::in_devmode()) cat("Event: wl_gcm", sep = "\n")
+    if (!is.null(wl_data)) {
+      vis_sg$walter_lieth(wl_data)
+    }
+  })
+  shiny::observeEvent(input$wl_ssp, {
+    if (shiny::in_devmode()) cat("Event: wl_ssp", sep = "\n")
+    if (!is.null(wl_data)) {
+      vis_sg$walter_lieth(wl_data)
+    }
+  })
+  shiny::observeEvent(input$wl_gcm_period, {
+    if (shiny::in_devmode()) cat("Event: wl_gcm_period", sep = "\n")
+    if (!is.null(wl_data)) {
+      vis_sg$walter_lieth(wl_data)
+    }
+  })
   shiny::observeEvent(input$downscale_data_wl, {
     if (shiny::in_devmode()) cat("Event: downscale_data_wl", sep = "\n")
     if (nrow(vis_sg_dt$dt) < 1 & input$input_type == "Map point") {
@@ -277,7 +308,7 @@ visualization_server <- function(input, output, session) {
             lat = coords[, 2],
             elev = elevs
           )
-          wl_data <- climr::plot_WalterLieth_input(xyz, gcms = climr::list_gcms(), ssps = climr::list_ssps(), gcm_periods = climr::list_gcm_periods())
+          wl_data <- climr::plot_WalterLieth_input(xyz, obs_period = climr::list_obs_periods(), gcms = climr::list_gcms(), ssps = climr::list_ssps(), gcm_periods = climr::list_gcm_periods())
           vis_sg$walter_lieth(wl_data)
         }
       )
