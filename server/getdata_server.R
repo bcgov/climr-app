@@ -634,7 +634,16 @@ getdata_server <- function(input, output, session) {
     selections <- list(input$downscale_gcms, input$downscale_ssps, input$downscale_gcm_periods)
     lengths <- sapply(selections, length)
     
-    if (nrow(compatible_periods) == 0 & !is.null(input$downscale_custom_elements) & !is.null(input$downscale_custom_time_periods)) {
+    if ("Custom" %in% vstore[["downscale_extra_vars_sets"]] & is.null(vstore[["downscale_custom_elements"]]) | is.null(vstore[["downscale_custom_time_periods"]])) {
+      showModal(
+        modalDialog(
+          title = "Warning",
+          paste("Please select both custom element(s) and season/month(s)."),
+          easyClose = TRUE
+        )
+      )
+    } else if (nrow(compatible_periods) == 0 & !is.null(input$downscale_custom_elements) & !is.null(input$downscale_custom_time_periods)) {
+      browser()
       showModal(
         modalDialog(
           title = "Warning",
@@ -643,6 +652,7 @@ getdata_server <- function(input, output, session) {
         )
       )
     } else if (!(all(lengths == 0) || all(lengths > 0))) {
+      browser()
       showModal(
         modalDialog(
           title = "Warning",
