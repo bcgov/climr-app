@@ -89,6 +89,7 @@ visualization_server <- function(input, output, session) {
   shiny::observeEvent(input$clear_map, {
     if (shiny::in_devmode()) cat("Event: clear_map", sep = "\n")
     vis_sg$clear_all(vis_mp)
+    vis_by_map(FALSE)
     leaflet::removeImage(vis_mp, layerId = "val")
     leaflet::hideGroup(vis_mp, "Climate")
     session$sendCustomMessage("clear_district","Waddles")
@@ -109,33 +110,23 @@ visualization_server <- function(input, output, session) {
       inputId = "show_overlay_controls",
       value = FALSE
     )
+    output$bivariate_plot <- renderPlot({ NULL })
+    output$timeseries_plot <- renderPlot({ NULL })
+    output$wl_plot <- renderPlot({ NULL })
   })
   
   shiny::observeEvent(input$dist_click,{
     vstore[["flp_area"]] <- input$dist_click
-    # if (!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") {
-    #   withCallingHandlers(
-    #     message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
-    #     warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
-    #     error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
-    #     {
-    #       region <- vstore[["flp_area"]]
-    #       gcms <- gcm_id[gcm %in% input$time_series_gcms, gcm_id]
-    #       ssps <- ssp_id[ssp %in% input$time_series_ssps, ssp_id]
-    #       dataset <- dataset_id[dataset %in% input$time_series_dataset, dataset_id]
-    #       code <- climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code]
-    #       var <- var_id[var == code, var_id]
-    #       browser()
-    #       query <- sprinf("SELECT * FROM ds_timeseries WHERE region = '%s' 
-    #                         AND gcm_id IN (%s)
-    #                         AND ssp_id IN (%s)
-    #                         AND dataset_id IN (%s)
-    #                         AND var_id = '%s'", region, gcms, ssps, dataset, var)
-    #       dat <- climr:::db_safe_query(query)
-    #       vis_sg$timeseries(dat)
-    #     }
-    #   )
-    # }
+    if (!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") {
+      withCallingHandlers(
+        message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+        warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+        error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+        {
+
+        }
+      )
+    }
   })
   
   # ---- Visualization data events
@@ -274,35 +265,7 @@ visualization_server <- function(input, output, session) {
           warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
           error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
           {
-            # set up db query
-            region <- vstore[["flp_area"]]
-            gcms <- paste(gcm_id[gcm %in% input$time_series_gcms, gcm_id], collapse = ",")
-            ssps <- paste(ssp_id[ssp %in% input$time_series_ssps, ssp_id], collapse = ",")
-            dataset <- paste(dataset_id[dataset %in% input$time_series_dataset, dataset_id], collapse = ",")
-            code <- paste(climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code], collapse = ",")
-            var <- var_id[var == code, var_id]
-            browser()
-            # query <- sprintf("SELECT * FROM ds_timeseries WHERE region = '%s' 
-            #                 AND gcm_id IN (%s)
-            #                 AND ssp_id IN (%s)
-            #                 AND dataset_id IN (%s)
-            #                 AND var_id = %s", region, gcms, ssps, dataset, var)
-            query <- sprintf("SELECT * FROM ds_timeseries WHERE region = '%s' 
-                            AND gcm_id IN (%s)
-                            AND ssp_id IN (%s)
-                            AND var_id = %s", region, gcms, ssps, var)
-            dat <- climr:::db_safe_query(query)
-            
-            # reformat data
-            dat <- dat[,-c(1,6)]
-            gcm_map <- setNames(gcm_id$gcm, gcm_id$gcm_id)
-            ssp_map <- setNames(ssp_id$ssp, ssp_id$ssp_id)
-            dataset_map <- setNames(dataset_id$dataset, dataset_id$dataset_id)
-            dat$gcm_id <- gcm_map[dat$gcm_id]
-            dat$ssp_id <- ssp_map[dat$ssp_id]
-            dat$dataset_id <- dataset_map[dat$dataset_id]
-            names(dat)[c(1:6)] <- c("GCM", "SSP", "RUN", "DATASET", "PERIOD", code)
-            vis_sg$timeseries(dat)
+    
           }
         )
       }
@@ -426,6 +389,45 @@ visualization_server <- function(input, output, session) {
         )
       }
     }     
+  })
+  shiny::observeEvent(input$plot_ts_flp, {
+    if (shiny::in_devmode()) cat("Event: plot_ts_flp", sep = "\n")
+    if (!is.null(input$input_type)) {
+      if (!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") {
+        withCallingHandlers(
+          message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+          warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+          error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+          {
+            # set up db query
+            region <- vstore[["flp_area"]]
+            gcms <- paste(gcm_id[gcm %in% input$time_series_gcms, gcm_id], collapse = ",")
+            ssps <- paste(ssp_id[ssp %in% input$time_series_ssps, ssp_id], collapse = ",")
+            dataset <- paste(dataset_id[dataset %in% input$time_series_dataset, dataset_id], collapse = ",")
+            code <- paste(climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code], collapse = ",")
+            var <- var_id[var == code, var_id]
+            browser()
+            query <- sprintf("SELECT * FROM ds_timeseries WHERE region = '%s' 
+                            AND (gcm_id IN (%s) OR gcm_id IS NULL)
+                            AND (ssp_id IN (%s) OR ssp_id IS NULL)
+                            AND (dataset_id = %s OR dataset_id IS NULL)
+                            AND var_id = %s", region, gcms, ssps, dataset, var)
+            dat <- climr:::db_safe_query(query)
+            
+            # reformat data
+            dat <- dat[,-c(1,6)]
+            gcm_map <- setNames(gcm_id$gcm, gcm_id$gcm_id)
+            ssp_map <- setNames(ssp_id$ssp, ssp_id$ssp_id)
+            dataset_map <- setNames(dataset_id$dataset, dataset_id$dataset_id)
+            dat$gcm_id <- gcm_map[dat$gcm_id]
+            dat$ssp_id <- ssp_map[dat$ssp_id]
+            dat$dataset_id <- dataset_map[dat$dataset_id]
+            names(dat)[c(1:6)] <- c("GCM", "SSP", "RUN", "DATASET", "PERIOD", code)
+            vis_sg$timeseries(dat)
+          }
+        )
+      }
+    }
   })
   shiny::observeEvent(input$wl_diurnal, {
     if (shiny::in_devmode()) cat("Event: wl_diurnal", sep = "\n")

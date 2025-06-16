@@ -498,7 +498,15 @@ shiny::shinyApp(
                                                  choices = unique(climr::variables %>% pull(Code_Element)),
                                                  selected = "Tmax"
                                                ),
-                                               shiny::uiOutput("time_series_valid_season")
+                                               shiny::uiOutput("time_series_valid_season"),
+                                               shiny::conditionalPanel(
+                                                 condition = "input.input_type == 'FLP Area'",
+                                                 shiny::actionButton(
+                                                   inputId = "plot_ts_flp",
+                                                   label = "Plot",
+                                                   icon = icon("chart-simple")
+                                                 )
+                                               )
                                              )
                                            ),
                                            column(
