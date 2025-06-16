@@ -406,23 +406,24 @@ visualization_server <- function(input, output, session) {
             dataset <- paste(dataset_id[dataset %in% input$time_series_dataset, dataset_id], collapse = ",")
             code <- paste(climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code], collapse = ",")
             var <- var_id[var == code, var_id]
-            browser()
+
             query <- sprintf("SELECT * FROM ds_timeseries WHERE region = '%s' 
                             AND (gcm_id IN (%s) OR gcm_id IS NULL)
                             AND (ssp_id IN (%s) OR ssp_id IS NULL)
                             AND (dataset_id = %s OR dataset_id IS NULL)
                             AND var_id = %s", region, gcms, ssps, dataset, var)
             dat <- climr:::db_safe_query(query)
-            
+            dat <- as.data.table(dat)
+
             # reformat data
-            dat <- dat[,-c(1,6)]
-            gcm_map <- setNames(gcm_id$gcm, gcm_id$gcm_id)
-            ssp_map <- setNames(ssp_id$ssp, ssp_id$ssp_id)
-            dataset_map <- setNames(dataset_id$dataset, dataset_id$dataset_id)
-            dat$gcm_id <- gcm_map[dat$gcm_id]
-            dat$ssp_id <- ssp_map[dat$ssp_id]
-            dat$dataset_id <- dataset_map[dat$dataset_id]
-            names(dat)[c(1:6)] <- c("GCM", "SSP", "RUN", "DATASET", "PERIOD", code)
+            dat <- dat[,-c("region","var_id")]
+            dat[gcm_id, gcm := i.gcm, on = "gcm_id"]
+            dat[ssp_id, ssp := i.ssp, on = "ssp_id"]
+            dat[dataset_id, dataset := i.dataset, on = "dataset_id"]
+            dat[, run_id := as.character(run_id)]
+            dat[run_id == "1", run_id := "ensembleMean"]
+            dat <- dat[,-c("gcm_id","ssp_id", "dataset_id")]
+            setnames(dat, old = c("run_id", "period", "value", "gcm", "ssp", "dataset"), new = c("RUN", "PERIOD", code, "GCM", "SSP", "DATASET"))
             vis_sg$timeseries(dat)
           }
         )

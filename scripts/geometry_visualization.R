@@ -141,13 +141,15 @@ visualization_geometry <- function(dt, mp) {
           warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
           error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
           {
-            climr::plot_bivariate(
-              X = bivariate_data,
-              xvar = climr::variables[Code_Element == input$bivariate_element_x & Time == input$bivariate_time_x, Code],
-              yvar = climr::variables[Code_Element == input$bivariate_element_y & Time == input$bivariate_time_y, Code],
-              period_focal = input$bivariate_period,
-              interactive = TRUE
-            )
+            isolate({
+              climr::plot_bivariate(
+                X = bivariate_data,
+                xvar = climr::variables[Code_Element == input$bivariate_element_x & Time == input$bivariate_time_x, Code],
+                yvar = climr::variables[Code_Element == input$bivariate_element_y & Time == input$bivariate_time_y, Code],
+                period_focal = input$bivariate_period,
+                interactive = TRUE
+              )
+            })
           }
         )
       }
@@ -156,17 +158,19 @@ visualization_geometry <- function(dt, mp) {
   
   plot_timeseries <- function(timeseries_data) {
     output$timeseries_plot <- shiny::renderPlot({
+      #browser()
       withCallingHandlers(
         message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
         warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
         error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
         {
-          climr::plot_timeSeries(
-            X = timeseries_data,
-            var1 = climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code],
-            obs_ts_dataset = input$time_series_dataset
-            
-          )
+          isolate({
+            climr::plot_timeSeries(
+              X = timeseries_data,
+              var1 = climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code],
+              obs_ts_dataset = input$time_series_dataset
+            )
+          })
         }
       )
     })     
@@ -179,14 +183,16 @@ visualization_geometry <- function(dt, mp) {
         warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
         error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
         {
+          isolate({
           climr::plot_WalterLieth(
-            X = wl_data,
-            diurnal = input$wl_diurnal,
-            obs_period = input$wl_obs_period,
-            gcm = input$wl_gcm,
-            ssp = input$wl_ssp,
-            gcm_period = input$wl_gcm_period
-          )
+              X = wl_data,
+              diurnal = input$wl_diurnal,
+              obs_period = input$wl_obs_period,
+              gcm = input$wl_gcm,
+              ssp = input$wl_ssp,
+              gcm_period = input$wl_gcm_period
+            )
+          })
         }
       )
     })     
