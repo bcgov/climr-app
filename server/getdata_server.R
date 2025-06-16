@@ -643,7 +643,6 @@ getdata_server <- function(input, output, session) {
         )
       )
     } else if (nrow(compatible_periods) == 0 & !is.null(input$downscale_custom_elements) & !is.null(input$downscale_custom_time_periods)) {
-      browser()
       showModal(
         modalDialog(
           title = "Warning",
@@ -652,7 +651,6 @@ getdata_server <- function(input, output, session) {
         )
       )
     } else if (!(all(lengths == 0) || all(lengths > 0))) {
-      browser()
       showModal(
         modalDialog(
           title = "Warning",
