@@ -380,6 +380,14 @@ shiny::shinyApp(
                                                  width = "100%",
                                                  inline = TRUE,
                                                  choices = climr::list_gcm_periods()
+                                               ),
+                                               shiny::conditionalPanel(
+                                                 condition = "input.input_type == 'FLP Area'",
+                                                 shiny::actionButton(
+                                                   inputId = "plot_bivariate_flp",
+                                                   label = "Plot",
+                                                   icon = icon("chart-simple")
+                                                 )
                                                )
                                              )
                                            ),
@@ -435,6 +443,14 @@ shiny::shinyApp(
                                                shiny::checkboxInput(
                                                  inputId = "wl_diurnal",
                                                  label = tags$span("Show diurnal range", style = "font-size: 0.85em; font-weight: bold;"),
+                                               ),
+                                               shiny::conditionalPanel(
+                                                 condition = "input.input_type == 'FLP Area'",
+                                                 shiny::actionButton(
+                                                   inputId = "plot_bivariate_flp",
+                                                   label = "Plot",
+                                                   icon = icon("chart-simple")
+                                                 )
                                                )
                                              )
                                            ),

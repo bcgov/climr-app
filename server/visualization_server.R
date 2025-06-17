@@ -152,17 +152,13 @@ visualization_server <- function(input, output, session) {
   shiny::observeEvent(input$bivariate_element_x, {
     if (shiny::in_devmode()) cat("Event: bivariate_element_x", sep = "\n")
     if (!is.null(input$input_type)) {
-      if (input$input_type == "Map point") {
-        if (!is.null(bivariate_data)) {
-          vis_sg$bivariate(bivariate_data)
-        }
-      } else if (!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") {
-        withCallingHandlers(
-          message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
-          warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
-          error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+      if (!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") {
+      withCallingHandlers(
+        message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+        warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+        error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
           {
-            
+          
           }
         )
       }
@@ -171,17 +167,13 @@ visualization_server <- function(input, output, session) {
   shiny::observeEvent(input$bivariate_time_x, {
     if (shiny::in_devmode()) cat("Event: bivariate_time_x", sep = "\n")
     if (!is.null(input$input_type)) {
-      if (input$input_type == "Map point") {
-        if (!is.null(bivariate_data)) {
-          vis_sg$bivariate(bivariate_data)
-        }
-      } else if (!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") {
-        withCallingHandlers(
-          message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
-          warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
-          error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+      if (!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") {
+      withCallingHandlers(
+        message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+        warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+        error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
           {
-            
+          
           }
         )
       }
@@ -190,17 +182,13 @@ visualization_server <- function(input, output, session) {
   shiny::observeEvent(input$bivariate_element_y, {
     if (shiny::in_devmode()) cat("Event: bivariate_element_y", sep = "\n")
     if (!is.null(input$input_type)) {
-      if (input$input_type == "Map point") {
-        if (!is.null(bivariate_data)) {
-          vis_sg$bivariate(bivariate_data)
-        }
-      } else if (!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") {
-        withCallingHandlers(
-          message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
-          warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
-          error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+      if (!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") {
+      withCallingHandlers(
+        message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+        warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+        error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
           {
-            
+          
           }
         )
       }
@@ -209,17 +197,13 @@ visualization_server <- function(input, output, session) {
   shiny::observeEvent(input$bivariate_time_y, {
     if (shiny::in_devmode()) cat("Event: bivariate_time_y", sep = "\n")
     if (!is.null(input$input_type)) {
-      if (input$input_type == "Map point") {
-        if (!is.null(bivariate_data)) {
-          vis_sg$bivariate(bivariate_data)
-        }
-      } else if (!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") {
-        withCallingHandlers(
-          message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
-          warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
-          error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+      if (!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") {
+      withCallingHandlers(
+        message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+        warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+        error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
           {
-            
+          
           }
         )
       }
@@ -254,6 +238,46 @@ visualization_server <- function(input, output, session) {
           vis_sg$bivariate(bivariate_data)
         }
       )
+    }
+  })
+  shiny::observeEvent(input$plot_bivariate_flp, {
+    if (shiny::in_devmode()) cat("Event: plot_bivariate_flp", sep = "\n")
+    if (!is.null(input$input_type)) {
+      if (!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") {
+        withCallingHandlers(
+          message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+          warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+          error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+          {
+            # set up db query
+            region <- vstore[["flp_area"]]
+            gcms <- paste(gcm_id[,gcm_id], collapse = ",")
+            ssps <- paste(ssp_id[,ssp_id], collapse = ",")
+            code_x <- paste(climr::variables[Code_Element == input$bivariate_element_x & Time == input$bivariate_time_x, Code], collapse = ",")
+            var_x <- var_id[var == code_x, var_id]
+            code_y <- paste(climr::variables[Code_Element == input$bivariate_element_y & Time == input$bivariate_time_y, Code], collapse = ",")
+            var_y <- var_id[var == code_y, var_id]
+
+            query <- sprintf("SELECT * FROM ds_bivariate WHERE region = '%s'
+                            AND (gcm_id IN (%s) OR gcm_id IS NULL)
+                            AND (ssp_id IN (%s) OR ssp_id IS NULL)
+                            AND (var_id = %s OR var_id = %s)", region, gcms, ssps, var_x, var_y)
+            dat <- climr:::db_safe_query(query)
+            dat <- as.data.table(dat)
+
+            # reformat data
+            dat[gcm_id, gcm := i.gcm, on = "gcm_id"]
+            dat[ssp_id, ssp := i.ssp, on = "ssp_id"]
+            dat[var_id, var := i.var, on = "var_id"]
+            dat[, run_id := as.character(run_id)]
+            dat[run_id == "1", run_id := "ensembleMean"]
+            dat2 <- dcast(dat, gcm + ssp + run_id + period ~ var)
+            setnames(dat2, old = c("gcm", "ssp", "run_id", "period"), new = c("GCM", "SSP", "RUN", "PERIOD"))
+            write.csv(dat2, "bivariate_data.csv", row.names = FALSE)
+            vis_sg$bivariate(dat2)
+          }
+        )
+      }
     }
   })
   shiny::observeEvent(input$time_series_gcms, {
@@ -336,58 +360,46 @@ visualization_server <- function(input, output, session) {
   shiny::observeEvent(input$time_series_dataset, {
     if (shiny::in_devmode()) cat("Event: time_series_dataset", sep = "\n")
     if (!is.null(input$input_type)) {
-      if (input$input_type == "Map point") {
-        if (!is.null(timeseries_data)) {
-          vis_sg$timeseries(timeseries_data)
+      if (!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") {
+      withCallingHandlers(
+        message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+        warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+        error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+        {
+          
         }
-      } else if (!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") {
-        withCallingHandlers(
-          message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
-          warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
-          error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
-          {
-            
-          }
-        )
-      }
+      )
+    }
     }   
   })
   shiny::observeEvent(input$time_series_element, {
     if (shiny::in_devmode()) cat("Event: time_series_element", sep = "\n")
     if (!is.null(input$input_type)) {
-      if (input$input_type == "Map point") {
-        if (!is.null(timeseries_data)) {
-          vis_sg$timeseries(timeseries_data)
+      if (!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") {
+      withCallingHandlers(
+        message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+        warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+        error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+        {
+          
         }
-      } else if (!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") {
-        withCallingHandlers(
-          message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
-          warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
-          error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
-          {
-            
-          }
-        )
-      }
+      )
+    }
     } 
   })
   shiny::observeEvent(input$time_series_season, {
     if (shiny::in_devmode()) cat("Event: time_series_season", sep = "\n")
     if (!is.null(input$input_type)) {
-      if (input$input_type == "Map point") {
-        if (!is.null(timeseries_data)) {
-          vis_sg$timeseries(timeseries_data)
+      if (!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") {
+      withCallingHandlers(
+        message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+        warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+        error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+        {
+          
         }
-      } else if (!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") {
-        withCallingHandlers(
-          message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
-          warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
-          error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
-          {
-            
-          }
-        )
-      }
+      )
+    }
     }     
   })
   shiny::observeEvent(input$plot_ts_flp, {
@@ -416,13 +428,12 @@ visualization_server <- function(input, output, session) {
             dat <- as.data.table(dat)
 
             # reformat data
-            dat <- dat[,-c("region","var_id")]
             dat[gcm_id, gcm := i.gcm, on = "gcm_id"]
             dat[ssp_id, ssp := i.ssp, on = "ssp_id"]
             dat[dataset_id, dataset := i.dataset, on = "dataset_id"]
             dat[, run_id := as.character(run_id)]
             dat[run_id == "1", run_id := "ensembleMean"]
-            dat <- dat[,-c("gcm_id","ssp_id", "dataset_id")]
+            dat <- dat[,-c("gcm_id","ssp_id", "dataset_id", "region", "var_id")]
             setnames(dat, old = c("run_id", "period", "value", "gcm", "ssp", "dataset"), new = c("RUN", "PERIOD", code, "GCM", "SSP", "DATASET"))
             vis_sg$timeseries(dat)
           }
@@ -432,33 +443,23 @@ visualization_server <- function(input, output, session) {
   })
   shiny::observeEvent(input$wl_diurnal, {
     if (shiny::in_devmode()) cat("Event: wl_diurnal", sep = "\n")
-    if (!is.null(wl_data)) {
-      vis_sg$walter_lieth(wl_data)
-    }
+
   })
   shiny::observeEvent(input$wl_obs_period, {
     if (shiny::in_devmode()) cat("Event: wl_obs_period", sep = "\n")
-    if (!is.null(wl_data)) {
-      vis_sg$walter_lieth(wl_data)
-    }
+
   })
   shiny::observeEvent(input$wl_gcm, {
     if (shiny::in_devmode()) cat("Event: wl_gcm", sep = "\n")
-    if (!is.null(wl_data)) {
-      vis_sg$walter_lieth(wl_data)
-    }
+
   })
   shiny::observeEvent(input$wl_ssp, {
     if (shiny::in_devmode()) cat("Event: wl_ssp", sep = "\n")
-    if (!is.null(wl_data)) {
-      vis_sg$walter_lieth(wl_data)
-    }
+
   })
   shiny::observeEvent(input$wl_gcm_period, {
     if (shiny::in_devmode()) cat("Event: wl_gcm_period", sep = "\n")
-    if (!is.null(wl_data)) {
-      vis_sg$walter_lieth(wl_data)
-    }
+
   })
   shiny::observeEvent(input$downscale_data_wl, {
     if (shiny::in_devmode()) cat("Event: downscale_data_wl", sep = "\n")
@@ -611,8 +612,9 @@ visualization_server <- function(input, output, session) {
         na.color = "transparent"
       )
     ))
-    
     shiny::showNotification("Rendering %s values" |> sprintf(vstore[["element"]]), duration = 5)
+    # leaflet::addLegend(mp, position = "topright", pal = pal, values = vals)
+    
   })
   shiny::observeEvent(input$download_overlay, {
     if (shiny::in_devmode()) cat("Event: download_overlay", sep = "\n")
