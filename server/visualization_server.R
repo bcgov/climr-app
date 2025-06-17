@@ -91,6 +91,7 @@ visualization_server <- function(input, output, session) {
     vis_sg$clear_all(vis_mp)
     vis_by_map(FALSE)
     leaflet::removeImage(vis_mp, layerId = "val")
+    leaflet::clearControls(vis_mp)
     leaflet::hideGroup(vis_mp, "Climate")
     session$sendCustomMessage("clear_district","Waddles")
     if (!is.null(input$input_type)) {
@@ -533,7 +534,6 @@ visualization_server <- function(input, output, session) {
   # ---- Visualization Overlay events
   shiny::observeEvent(input$load_overlay, {
     if (shiny::in_devmode()) cat("Event: load_overlay", sep = "\n")
-    
     # update selected options
     vstore[["time"]] <- input$time
     vstore[["element"]] <- input$element
@@ -562,8 +562,9 @@ visualization_server <- function(input, output, session) {
       vstore[["climatevar"]] <- NULL
     }
     
-    # render overlay
+    # render overlay, making sure any old controls are cleared
     mp <- leaflet::leafletProxy("vis_map", deferUntilFlush = FALSE)
+    leaflet::clearControls(mp)
     mp |> leaflet::clearGroup("Climate") |> leaflet::hideGroup("Climate")
     shiny::updateActionButton(inputId = "download_overlay", disabled = TRUE)
     if (is.null(vstore[["climatevar"]])) return()
@@ -613,7 +614,21 @@ visualization_server <- function(input, output, session) {
       )
     ))
     shiny::showNotification("Rendering %s values" |> sprintf(vstore[["element"]]), duration = 5)
-    # leaflet::addLegend(mp, position = "topright", pal = pal, values = vals)
+    
+    # extract data for legend
+    legend_title <- climr::variables[Code_Element == vstore[["element"]] & Time == vstore[["time"]], Variable] |> tools::toTitleCase()
+    if (grepl("\\u00b0C", legend_title) | grepl("\\u00b0c", legend_title)) {
+      legend_title <- stringi::stri_unescape_unicode(legend_title)
+    }
+    units <- paste0(" ", climr::variables[Code_Element == vstore[["element"]] & Time == vstore[["time"]], Unit])
+    if (grepl("\\u00b0C", units)) {
+      units <- stringi::stri_unescape_unicode(units)
+    }
+    if (units == "%") {
+      units <- "\\%"
+    }
+    pal_leg <- leaflet::colorNumeric(palette = pal, domain = vals, na.color = "transparent")
+    leaflet::addLegend(mp, position = "topright", pal = pal_leg, values = vals, title = HTML(sprintf("<div style='width: 100px;'>%s</div>", legend_title)), labFormat = labelFormat(suffix = units))
     
   })
   shiny::observeEvent(input$download_overlay, {
