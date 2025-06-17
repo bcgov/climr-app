@@ -563,8 +563,7 @@ visualization_server <- function(input, output, session) {
     
     # render overlay, making sure any old controls are cleared
     mp <- leaflet::leafletProxy("vis_map", deferUntilFlush = FALSE)
-    leaflet::clearControls(mp)
-    mp |> leaflet::clearGroup("Climate") |> leaflet::hideGroup("Climate")
+    mp |> leaflet::clearGroup("Climate") |> leaflet::hideGroup("Climate") |> leaflet::clearControls()
     shiny::updateActionButton(inputId = "download_overlay", disabled = TRUE)
     if (is.null(vstore[["climatevar"]])) return()
     shiny::updateActionButton(inputId = "download_overlay", disabled = FALSE)
@@ -654,25 +653,29 @@ visualization_server <- function(input, output, session) {
   })
   
   output$overlay_period <- shiny::renderUI({
-    if (!is.null(input$element) & input$element != "elev" & input$element != "lat" & input$element != "PET") {
-      shiny::selectInput(
-        inputId = "time",
-        label = "Choose season/months:",
-        choices = climr::variables[Code_Element == input$element, Time]
-      )
+    if (!is.null(input$element)) {
+      if (input$element != "elev" & input$element != "lat" & input$element != "PET") {
+        shiny::selectInput(
+          inputId = "time",
+          label = "Choose season/months:",
+          choices = climr::variables[Code_Element == input$element, Time]
+        )
+      }
     }
   })
   
   output$scale_adj <- shiny::renderUI({
-    if (!is.null(input$element) & "ratio" %in% climr::variables[Code_Element == input$element, Type]) {
-      shiny::checkboxInput(
-        inputId = "vscale",
-        label = "Apply scale adjustment",
-        value = reactive({
-          req(input$element)
-          "ratio" %in% climr::variables[Code_Element == input$element, Type]
-        })()
-      )
+    if (!is.null(input$element)) {
+      if ("ratio" %in% climr::variables[Code_Element == input$element, Type]) {
+        shiny::checkboxInput(
+          inputId = "vscale",
+          label = "Apply scale adjustment",
+          value = reactive({
+            req(input$element)
+            "ratio" %in% climr::variables[Code_Element == input$element, Type]
+          })()
+        )
+      }
     }
   })
   

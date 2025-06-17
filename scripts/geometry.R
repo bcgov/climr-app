@@ -673,12 +673,14 @@ session_geometry <- function(sg_dt, mp) {
             
             # reactive output for percent change button
             output$calculate_percent_diff_checkbox <- shiny::renderUI({
-              variable_type <- raster_layers[Code_Element == vstore[["ds_ras_elements"]] & Time == vstore[["ds_ras_time_periods"]], Type]
-              if (vstore[["calculate_diff"]] & variable_type == "ratio") {
-                shiny::checkboxInput(
-                  inputId = "calculate_percent_diff",
-                  label = "Show percent change from reference period"
-                )
+              if (length(vstore[["ds_ras_elements"]]) == 1 && length(vstore[["ds_ras_time_periods"]]) == 1) {
+                variable_type <- raster_layers[Code_Element == vstore[["ds_ras_elements"]] & Time == vstore[["ds_ras_time_periods"]], Type]
+                if (vstore[["calculate_diff"]] & variable_type == "ratio") {
+                  shiny::checkboxInput(
+                    inputId = "calculate_percent_diff",
+                    label = "Show percent change from reference period"
+                  )
+                }
               }
             })
             
