@@ -274,7 +274,6 @@ visualization_server <- function(input, output, session) {
             dat[run_id == "1", run_id := "ensembleMean"]
             dat2 <- dcast(dat, gcm + ssp + run_id + period ~ var)
             setnames(dat2, old = c("gcm", "ssp", "run_id", "period"), new = c("GCM", "SSP", "RUN", "PERIOD"))
-            write.csv(dat2, "bivariate_data.csv", row.names = FALSE)
             vis_sg$bivariate(dat2)
           }
         )
@@ -578,9 +577,14 @@ visualization_server <- function(input, output, session) {
     }
     
     # set up palettes/breaks (this needs speeding up - loading full raster in R right now)
-    vals <- values(rast(url))
-    vals <- vals[is.finite(vals)]
-    q <- quantile(vals, c(0.005, 0.995))
+    # vals <- values(rast(url))
+    # vals <- vals[is.finite(vals)]
+    # q <- quantile(vals, c(0.005, 0.995))
+    ## try doing this with sampling to speed it up?
+    r <- rast(url)
+    sampled <- spatSample(r, size = 10000, method = "regular")  # Downloads 10k cells only
+    vals <- sampled[[1]]
+    q <- quantile(vals, c(0.005, 0.995), na.rm = TRUE)
     inc <- diff(q) / 500
     breaks <- seq(q[1] - inc, q[2] + inc, by = inc)
     
