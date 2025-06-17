@@ -574,16 +574,10 @@ visualization_server <- function(input, output, session) {
     } else {
       vstore$vscale <- ""
     }
-    
-    # set up palettes/breaks (this needs speeding up - loading full raster in R right now)
-    # vals <- values(rast(url))
-    # vals <- vals[is.finite(vals)]
-    # q <- quantile(vals, c(0.005, 0.995))
-    ## try doing this with sampling to speed it up?
+    # set up palettes/breaks
     r <- rast(url)
-    sampled <- spatSample(r, size = 10000, method = "regular")  # Downloads 10k cells only
-    vals <- sampled[[1]]
-    q <- quantile(vals, c(0.005, 0.995), na.rm = TRUE)
+    bounds <- minmax(r)
+    q <- quantile(bounds, c(0.005, 0.995), na.rm = TRUE)
     inc <- diff(q) / 500
     breaks <- seq(q[1] - inc, q[2] + inc, by = inc)
     
@@ -605,7 +599,7 @@ visualization_server <- function(input, output, session) {
         breaks = breaks,
         na.color = "transparent"
       ),
-      imagequery = TRUE,
+      imagequery = FALSE,
       autozoom = FALSE,
       options = leaflet::tileOptions(maxZoom = 25, maxNativeZoom = 20)
     ) |> leaflet::showGroup("Climate")
@@ -630,8 +624,8 @@ visualization_server <- function(input, output, session) {
     if (units == "%") {
       units <- "\\%"
     }
-    pal_leg <- leaflet::colorNumeric(palette = pal, domain = vals, na.color = "transparent")
-    leaflet::addLegend(mp, position = "topright", pal = pal_leg, values = vals, title = HTML(sprintf("<div style='width: 100px;'>%s</div>", legend_title)), labFormat = labelFormat(suffix = units))
+    pal_leg <- leaflet::colorNumeric(palette = pal, domain = bounds, na.color = "transparent")
+    leaflet::addLegend(mp, position = "topright", pal = pal_leg, values = bounds, title = HTML(sprintf("<div style='width: 100px;'>%s</div>", legend_title)), labFormat = labelFormat(suffix = units))
     
   })
   shiny::observeEvent(input$download_overlay, {
