@@ -423,10 +423,11 @@ visualization_server <- function(input, output, session) {
                             AND (gcm_id IN (%s) OR gcm_id IS NULL)
                             AND (ssp_id IN (%s) OR ssp_id IS NULL)
                             AND (dataset_id = %s OR dataset_id IS NULL)
-                            AND var_id = %s", region, gcms, ssps, dataset, var)
+                            AND var_id = %s
+                            ORDER BY gcm_id, period, run_id, ssp_id", region, gcms, ssps, dataset, var)
             dat <- climr:::db_safe_query(query)
             dat <- as.data.table(dat)
-
+            # browser()
             # reformat data
             dat[gcm_id, gcm := i.gcm, on = "gcm_id"]
             dat[ssp_id, ssp := i.ssp, on = "ssp_id"]
@@ -435,6 +436,7 @@ visualization_server <- function(input, output, session) {
             dat[run_id == "1", run_id := "ensembleMean"]
             dat <- dat[,-c("gcm_id","ssp_id", "dataset_id", "region", "var_id")]
             setnames(dat, old = c("run_id", "period", "value", "gcm", "ssp", "dataset"), new = c("RUN", "PERIOD", code, "GCM", "SSP", "DATASET"))
+            # write.csv(dat, "ts_data.csv")
             vis_sg$timeseries(dat)
           }
         )
