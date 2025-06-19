@@ -363,13 +363,16 @@ addDistricts <- function(map) {
       
       Shiny.addCustomMessageHandler("addRegionTile",function(data){
         map = window.map;
-        //console.log(window.map instanceof L.Map);
+        console.log(window.map instanceof L.Map);
         var url = data.url;
         var cname = data.name;
         var cid = data.id;
         console.log(url);
-        //console.log("HI");
+        console.log("HI");
         map.removeLayer(distLayer);
+        console.log("Pane exists?", !!map.getPane("tilePane"));
+                console.log(vectorTileOptionsDist(cname, cname, true,
+                          "tilePane", cid, cid));
         distLayer = L.vectorGrid.protobuf(url, vectorTileOptionsDist(cname, cname, true,
                           "tilePane", cid, cid)
         )
@@ -381,7 +384,8 @@ addDistricts <- function(map) {
         distLayer.bringToFront();
         distFlag = true;
         Shiny.setInputValue("dist_flag",distFlag);
-        
+        console.log("HI again, regiond should be rendered");
+
         distLayer.on("click", function(e){
           distLayer.resetFeatureStyle(distHL);
           distHL = e.layer.properties[cid];
@@ -435,127 +439,128 @@ addDistricts <- function(map) {
   map
 }
 
-# ecoregion tilelayers
-ecoregion_tileserver <- "https://tileserver.thebeczone.ca/data/ecoregions/{z}/{x}/{y}.pbf"
-ecoregion_tilelayer <- "Ecoregions"
-
-addEcoregions <- function(map) {
-  map <- htmlwidgets::onRender(map, paste0('
-    function(el, x, data) {
-            //Now districts regions
-            
-      district_flag = true;
-      Shiny.setInputValue("dist_flag",false);
-      var distHL = "DQU";
-      var styleHL = {
-            weight: 3,
-            color: "#fc036f",
-            fillColor: "#FFFB00",
-            fillOpacity: 1,
-            fill: false
-      };
-      var vectorTileOptionsDist=function(layerName, layerId, activ,
-                                     lfPane, prop, id) {
-        return {
-          vectorTileLayerName: layerName,
-          interactive: true,
-          vectorTileLayerStyles: {
-            [layerId]: function(properties, zoom) {
-              return {
-                weight: 1,
-                color: "#000000",
-                fill: true,
-                fillOpacity: 0
-              }
-            }
-          },
-          pane : lfPane, 
-          getFeatureId: function(f) {
-            return f.properties[id];
-          }
-        }
-      };
-      
-      distLayer = L.vectorGrid.protobuf(
-        "', ecoregion_tileserver, '",
-        vectorTileOptionsDist("Districts", "', ecoregion_tilelayer, '", true,
-                          "tilePane", "dist_code", "dist_code")
-      )
-      //map_2.layerManager.addLayer(distLayer, "tile", "dist_code", "dist_code");
-      
-      Shiny.addCustomMessageHandler("addEcoRegionTile",function(data){
-        map = window.map;
-        console.log(window.map instanceof L.Map);
-        var url = data.url;
-        var cname = data.name;
-        var cid = data.id;
-        console.log(url);
-        console.log("HI");
-        map.removeLayer(distLayer);
-        distLayer = L.vectorGrid.protobuf(url, vectorTileOptionsDist(cname, cname, true,
-                          "tilePane", cid, cid)
-        )
-        map.layerManager.addLayer(distLayer, "tile", cid, cid);
-        distLayer.bindTooltip(function(e) {
-          const fieldNames = Object.keys(e.properties);
-          return e.properties[fieldNames[0]];
-        }, {sticky: true, textsize: "12px", opacity: 1});
-        distLayer.bringToFront();
-        distFlag = true;
-        Shiny.setInputValue("dist_flag",distFlag);
-        
-        distLayer.on("click", function(e){
-          distLayer.resetFeatureStyle(distHL);
-          distHL = e.layer.properties[cid];
-          Shiny.setInputValue("dist_click",distHL);
-          distLayer.setFeatureStyle(distHL, styleHL);
-          flag = false;
-          distFlag = false;
-          setTimeout(() => {
-            Shiny.setInputValue("dist_flag",false);
-          }, 600);
-          });
-      });
-      
-      Shiny.addCustomMessageHandler("clear_district",function(x){
-        map.removeLayer(distLayer);
-        distFlag = false;
-        Shiny.setInputValue("dist_flag",distFlag);
-      });
-
-      Shiny.addCustomMessageHandler("selectDist",function(x){
-        distLayer.bringToFront();
-        distFlag = true;
-        Shiny.setInputValue("dist_flag",distFlag);
-      });
-      
-      Shiny.addCustomMessageHandler("clearTooltips",function(x){
-        distLayer.unbindTooltip();
-        distFlag = false;
-        Shiny.setInputValue("dist_flag",distFlag); 
-      });
-      
-      Shiny.addCustomMessageHandler("reset_ecoregion",function(x){
-        distLayer.resetFeatureStyle(distHL);
-        distFlag = true;
-        Shiny.setInputValue("dist_flag",distFlag);
-        distLayer.bindTooltip(function(e) {
-          const fieldNames = Object.keys(e.properties);
-          return e.properties[fieldNames[0]];
-        }, {sticky: true, textsize: "12px", opacity: 1});
-        //Shiny.setInputValue("dist_click",null);
-      });
-      
-      distLayer.bindTooltip(function(e) {
-        const fieldNames = Object.keys(e.properties);
-        return e.properties[fieldNames[0]];
-      }, {sticky: true, textsize: "12px", opacity: 1});
-      
-      // end districts
-    }'
-  ))
-  map
-}
+# # ecoregion tilelayers
+# ecoregion_tileserver <- "https://tileserver.thebeczone.ca/data/ecoregions/{z}/{x}/{y}.pbf"
+# ecoregion_tilelayer <- "Ecoregions"
+# 
+# addEcoregions <- function(map) {
+#   map <- htmlwidgets::onRender(map, paste0('
+#     function(el, x, data) {
+#             //Now districts regions
+#             
+#       ecoregion_flag = true;
+#       Shiny.setInputValue("eco_flag",false);
+#       var distHL = "DQU";
+#       var styleHL = {
+#             weight: 3,
+#             color: "#fc036f",
+#             fillColor: "#FFFB00",
+#             fillOpacity: 1,
+#             fill: false
+#       };
+#       var vectorTileOptionsER=function(layerName, layerId, activ,
+#                                      lfPane, prop, id) {
+#         return {
+#           vectorTileLayerName: layerName,
+#           interactive: true,
+#           vectorTileLayerStyles: {
+#             [layerId]: function(properties, zoom) {
+#               return {
+#                 weight: 1,
+#                 color: "#000000",
+#                 fill: true,
+#                 fillOpacity: 0
+#               }
+#             }
+#           },
+#           pane : lfPane, 
+#           getFeatureId: function(f) {
+#             return f.properties[id];
+#           }
+#         }
+#       };
+#       
+#       ecoLayer = L.vectorGrid.protobuf(
+#         "', ecoregion_tileserver, '",
+#         vectorTileOptionsER("Ecoregions", "', ecoregion_tilelayer, '", true,
+#                           "tilePane", "dist_code", "dist_code")
+#       )
+#       //map_2.layerManager.addLayer(ecoLayer, "tile", "dist_code", "dist_code");
+#       
+#       Shiny.addCustomMessageHandler("addEcoRegionTile",function(data){
+#         map = window.map;
+#         console.log(window.map instanceof L.Map);
+#         var url = data.url;
+#         var cname = data.name;
+#         var cid = data.id;
+#         console.log(url);
+#         console.log("HI");
+#         map.removeLayer(ecoLayer);
+#         ecoLayer = L.vectorGrid.protobuf(url, vectorTileOptionsER(cname, cname, true,
+#                           "tilePane", cid, cid)
+#         )
+#         map.layerManager.addLayer(ecoLayer, "tile", cid, cid);
+#         ecoLayer.bindTooltip(function(e) {
+#           const fieldNames = Object.keys(e.properties);
+#           return e.properties[fieldNames[0]];
+#         }, {sticky: true, textsize: "12px", opacity: 1});
+#         ecoLayer.bringToFront();
+#         ecoFlag = true;
+#         Shiny.setInputValue("eco_flag",ecoFlag);
+#         console.log("HI");
+#         
+#         ecoLayer.on("click", function(e){
+#           ecoLayer.resetFeatureStyle(distHL);
+#           distHL = e.layer.properties[cid];
+#           Shiny.setInputValue("er_click",distHL);
+#           ecoLayer.setFeatureStyle(distHL, styleHL);
+#           flag = false;
+#           ecoFlag = false;
+#           setTimeout(() => {
+#             Shiny.setInputValue("eco_flag",false);
+#           }, 600);
+#           });
+#       });
+#       
+#       Shiny.addCustomMessageHandler("clear_ecoregion",function(x){
+#         map.removeLayer(ecoLayer);
+#         ecoFlag = false;
+#         Shiny.setInputValue("eco_flag",ecoFlag);
+#       });
+# 
+#       Shiny.addCustomMessageHandler("selectER",function(x){
+#         ecoLayer.bringToFront();
+#         ecoFlag = true;
+#         Shiny.setInputValue("eco_flag",ecoFlag);
+#       });
+#       
+#       Shiny.addCustomMessageHandler("clearTooltips",function(x){
+#         ecoLayer.unbindTooltip();
+#         ecoFlag = false;
+#         Shiny.setInputValue("eco_flag",ecoFlag); 
+#       });
+#       
+#       Shiny.addCustomMessageHandler("reset_ecoregion",function(x){
+#         ecoLayer.resetFeatureStyle(distHL);
+#         ecoFlag = true;
+#         Shiny.setInputValue("eco_flag",ecoFlag);
+#         ecoLayer.bindTooltip(function(e) {
+#           const fieldNames = Object.keys(e.properties);
+#           return e.properties[fieldNames[0]];
+#         }, {sticky: true, textsize: "12px", opacity: 1});
+#         //Shiny.setInputValue("dist_click",null);
+#       });
+#       
+#       ecoLayer.bindTooltip(function(e) {
+#         const fieldNames = Object.keys(e.properties);
+#         return e.properties[fieldNames[0]];
+#       }, {sticky: true, textsize: "12px", opacity: 1});
+#       
+#       // end ecoregions
+#     }'
+#   ))
+#   map
+# }
 
 default_draw_tool <- function(mp) {
   mp |> leaflet.extras::addDrawToolbar(

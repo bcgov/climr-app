@@ -14,7 +14,7 @@ visualization_server <- function(input, output, session) {
   )
   
   # ---- Modal input storage
-  output$vis_map <- leaflet::renderLeaflet(l |> addDistricts() |> addEcoregions() |> 
+  output$vis_map <- leaflet::renderLeaflet(l |> addDistricts() |>  
                                              htmlwidgets::onRender("
                                                   function(el, x) {
                                                     window.map = this;
@@ -165,9 +165,9 @@ visualization_server <- function(input, output, session) {
     } else if (input$input_type == "Ecoregion") {
       vis_by_map(FALSE)
       vis_sg$clear_all(vis_mp)
-      dat <- list(url = "https://tileserver.thebeczone.ca/data/ecoregions/{z}/{x}/{y}.pbf", name = "Ecoregion", id = "NA_L3CODE")
-      session$sendCustomMessage("addEcoRegionTile",dat)
-      session$sendCustomMessage("reset_ecoregion","Luna")
+      dat <- list(url = "https://tileserver.thebeczone.ca/data/ecoregions/{z}/{x}/{y}.pbf", name = "Ecoregions", id = "NA_L3CODE")
+      session$sendCustomMessage("addRegionTile",dat)
+      session$sendCustomMessage("reset_region","Luna")
     } else {
       session$sendCustomMessage("clear_district","Waddles")
       vis_by_map(FALSE)
@@ -510,6 +510,7 @@ visualization_server <- function(input, output, session) {
     } else {
       vstore$vscale <- ""
     }
+
     # set up palettes/breaks
     r <- rast(url)
     bounds <- minmax(r)
@@ -517,7 +518,7 @@ visualization_server <- function(input, output, session) {
     inc <- diff(q) / 500
     breaks <- seq(q[1] - inc, q[2] + inc, by = inc)
     
-    if (grepl("PPT", vstore[["element"]])) {
+    if (grepl("PPT|MAP|MSP|PAS", vstore[["element"]])) {
       pal <- RColorBrewer::brewer.pal(9, "YlGnBu")
     } else {
       pal <- rev(RColorBrewer::brewer.pal(11, "RdYlBu"))
