@@ -65,7 +65,8 @@ visualization_server <- function(input, output, session) {
     element = NULL,
     climatevar = NULL,
     vscale = NULL,
-    flp_area = NULL
+    flp_area = NULL,
+    ecoregion = NULL
   )
   
   # ---- Geometry
@@ -116,7 +117,10 @@ visualization_server <- function(input, output, session) {
   })
   
   shiny::observeEvent(input$dist_click,{
-    vstore[["flp_area"]] <- input$dist_click
+    if (input$input_type == "FLP Area") {
+      vstore[["flp_area"]] <- input$dist_click
+    } else if (input$input_type == "Ecoregion")
+    vstore[["ecoregion"]] <- input$dist_click
   })
   
   # ---- Visualization data events
@@ -209,17 +213,17 @@ visualization_server <- function(input, output, session) {
       )
     }
   })
-  shiny::observeEvent(input$plot_bivariate_flp, {
-    if (shiny::in_devmode()) cat("Event: plot_bivariate_flp", sep = "\n")
+  shiny::observeEvent(input$plot_bivariate_flp_er, {
+    if (shiny::in_devmode()) cat("Event: plot_bivariate_flp_er", sep = "\n")
     if (!is.null(input$input_type)) {
-      if (!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") {
+      if ((!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") | (!is.null(vstore[["ecoregion"]]) & input$input_type == "Ecoregion")) {
         withCallingHandlers(
           message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
           warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
           error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
           {
             # set up db query
-            region <- vstore[["flp_area"]]
+            region <- vstore[[if (input$input_type == "FLP Area") "flp_area" else "ecoregion"]]
             gcms <- paste(gcm_id[,gcm_id], collapse = ",")
             ssps <- paste(ssp_id[,ssp_id], collapse = ",")
             code_x <- paste(climr::variables[Code_Element == input$bivariate_element_x & Time == input$bivariate_time_x, Code], collapse = ",")
@@ -269,7 +273,15 @@ visualization_server <- function(input, output, session) {
           easyClose = TRUE
         )
       )
-    } else if (input$input_type == "FLP Area" & !is.null(vstore[["flp_area"]])) {
+    } else if (input$input_type == "Ecoregion" & is.null(vstore[["ecoregion"]])) {
+      showModal(
+        modalDialog(
+          title = "Warning",
+          paste("Please select an ecoregion!"),
+          easyClose = TRUE
+        )
+      )
+    } else if ((!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") | (!is.null(vstore[["ecoregion"]]) & input$input_type == "Ecoregion")) {
       timeseries_modal()
     }
   })
@@ -322,10 +334,10 @@ visualization_server <- function(input, output, session) {
       )
     }
   })
-  shiny::observeEvent(input$plot_ts_flp, {
-    if (shiny::in_devmode()) cat("Event: plot_ts_flp", sep = "\n")
+  shiny::observeEvent(input$plot_ts_flp_er, {
+    if (shiny::in_devmode()) cat("Event: plot_ts_flp_er", sep = "\n")
     if (!is.null(input$input_type)) {
-      if (!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") {
+      if ((!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") | (!is.null(vstore[["ecoregion"]]) & input$input_type == "Ecoregion")) {
         withCallingHandlers(
           message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
           warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
@@ -398,10 +410,10 @@ visualization_server <- function(input, output, session) {
       )
     }
   })
-  shiny::observeEvent(input$plot_wl_flp, {
-    if (shiny::in_devmode()) cat("Event: plot_wl_flp", sep = "\n")
+  shiny::observeEvent(input$plot_wl_flp_er, {
+    if (shiny::in_devmode()) cat("Event: plot_wl_flp_er", sep = "\n")
     if (!is.null(input$input_type)) {
-      if (!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") {
+      if ((!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") | (!is.null(vstore[["ecoregion"]]) & input$input_type == "Ecoregion")) {
         withCallingHandlers(
           message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
           warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
@@ -568,9 +580,31 @@ visualization_server <- function(input, output, session) {
       suffix = units
     )
     
-    pal_leg <- leaflet::colorNumeric(palette = pal, domain = bounds, na.color = "transparent")
-    leaflet::addLegend(mp, position = "topright", pal = pal_leg, values = bounds, title = HTML(sprintf("<div style='width: 100px;'>%s</div>", legend_title)), labFormat = if (isTRUE(vstore[["vscale"]])) inv_log2_formatter else labelFormat(suffix = units))
-    
+    if ((vstore[["vscale"]]) == "log2") {
+      log_bounds <- log2(bounds + 1)
+
+      pal_leg <- leaflet::colorNumeric(palette = pal, domain = log_bounds, na.color = "transparent")
+
+      leaflet::addLegend(
+        mp,
+        position = "topright",
+        pal = pal_leg,
+        values = seq(log_bounds[1], log_bounds[2], length.out = 6),
+        title = HTML(sprintf("<div style='width: 100px;'>%s</div>", legend_title)),
+        labFormat = inv_log2_formatter
+      )
+    } else {
+      pal_leg <- leaflet::colorNumeric(palette = pal, domain = bounds, na.color = "transparent")
+
+      leaflet::addLegend(
+        mp,
+        position = "topright",
+        pal = pal_leg,
+        values = seq(bounds[1], bounds[2], length.out = 6),
+        title = HTML(sprintf("<div style='width: 100px;'>%s</div>", legend_title)),
+        labFormat = labelFormat(suffix = units)
+      )
+    }
   })
   shiny::observeEvent(input$download_overlay, {
     if (shiny::in_devmode()) cat("Event: download_overlay", sep = "\n")

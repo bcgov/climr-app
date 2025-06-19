@@ -383,9 +383,9 @@ shiny::shinyApp(
                                                  selected = "2041_2060"
                                                ),
                                                shiny::conditionalPanel(
-                                                 condition = "input.input_type == 'FLP Area'",
+                                                 condition = "input.input_type == 'FLP Area' || input.input_type == 'Ecoregion'",
                                                  shiny::actionButton(
-                                                   inputId = "plot_bivariate_flp",
+                                                   inputId = "plot_bivariate_flp_er",
                                                    label = "Plot",
                                                    icon = icon("chart-simple"),
                                                    style = "background-color:#1d8f0e; color: #FFF"
@@ -429,9 +429,9 @@ shiny::shinyApp(
                                                  label = tags$span("Show diurnal range", style = "font-size: 0.85em; font-weight: bold;"),
                                                ),
                                                shiny::conditionalPanel(
-                                                 condition = "input.input_type == 'FLP Area'",
+                                                 condition = "input.input_type == 'FLP Area' || input.input_type == 'Ecoregion'",
                                                  shiny::actionButton(
-                                                   inputId = "plot_wl_flp",
+                                                   inputId = "plot_wl_flp_er",
                                                    label = "Plot",
                                                    icon = icon("chart-simple"),
                                                    style = "background-color:#1d8f0e; color: #FFF"
@@ -482,9 +482,9 @@ shiny::shinyApp(
                                                ),
                                                shiny::uiOutput("time_series_valid_season"),
                                                shiny::conditionalPanel(
-                                                 condition = "input.input_type == 'FLP Area'",
+                                                 condition = "input.input_type == 'FLP Area' || input.input_type == 'Ecoregion'",
                                                  shiny::actionButton(
-                                                   inputId = "plot_ts_flp",
+                                                   inputId = "plot_ts_flp_er",
                                                    label = "Plot",
                                                    icon = icon("chart-simple"),
                                                    style = "background-color:#1d8f0e; color: #FFF"
