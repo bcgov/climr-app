@@ -447,7 +447,7 @@ shiny::shinyApp(
                                                shiny::conditionalPanel(
                                                  condition = "input.input_type == 'FLP Area'",
                                                  shiny::actionButton(
-                                                   inputId = "plot_bivariate_flp",
+                                                   inputId = "plot_wl_flp",
                                                    label = "Plot",
                                                    icon = icon("chart-simple")
                                                  )
