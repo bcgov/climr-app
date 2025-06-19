@@ -499,8 +499,8 @@ shiny::shinyApp(
                                                  )
                                                ),
                                                shiny::actionButton(
-                                                 inputId = "sim_data_ts",
-                                                 label = "Adjust Plot Options"
+                                                 inputId = "ts_adj_plot",
+                                                 label = "Adjust Plot"
                                                )
                                              )
                                            ),

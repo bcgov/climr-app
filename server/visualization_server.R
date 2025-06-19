@@ -123,7 +123,7 @@ visualization_server <- function(input, output, session) {
   timeseries_modal <- function() {
     shiny::showModal(
       shiny::modalDialog(
-        title = "Simulated Data Options", size = "l", fade = FALSE, class = "modal-dialog-scrollable",
+        title = "Adjust Plot Options", size = "l", fade = FALSE, class = "modal-dialog-scrollable",
         shiny::checkboxGroupInput(
           inputId = "time_series_gcms",
           label = h5("Choose GCMs:"),
@@ -249,7 +249,7 @@ visualization_server <- function(input, output, session) {
       }
     }
   })
-  shiny::observeEvent(input$sim_data_ts, {
+  shiny::observeEvent(input$ts_adj_plot, {
     if (shiny::in_devmode()) cat("Event: downscale_data_time_series", sep = "\n")
     if (nrow(vis_sg_dt$dt) < 1 & input$input_type == "Map point") {
       showModal(
@@ -308,7 +308,7 @@ visualization_server <- function(input, output, session) {
               easyClose = TRUE
             )
           )
-          if (!input$sim_data_ts) {
+          if (!input$ts_adj_plot) {
             gcms <- climr::list_gcms()[c(1, 4, 5, 6, 7, 10, 11, 12)]
             ssps <- climr::list_ssps()[c(1:3)]
           } else {
@@ -333,7 +333,7 @@ visualization_server <- function(input, output, session) {
           {
             # set up db query
             region <- vstore[["flp_area"]]
-            if (!input$sim_data_ts) {
+            if (!input$ts_adj_plot) {
               gcms <- paste(gcm_id[gcm %in% climr::list_gcms()[c(1, 4, 5, 6, 7, 10, 11, 12)], gcm_id], collapse = ",")
               ssps <- paste(ssp_id[ssp %in% climr::list_ssps()[c(1:3)], ssp_id], collapse = ",")
             } else {
