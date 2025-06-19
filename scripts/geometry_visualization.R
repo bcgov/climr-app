@@ -218,10 +218,7 @@ visualization_geometry <- function(dt, mp) {
           climr::plot_WalterLieth(
               X = wl_data,
               diurnal = input$wl_diurnal,
-              obs_period = input$wl_obs_period,
-              gcm = input$wl_gcm,
-              ssp = input$wl_ssp,
-              gcm_period = input$wl_gcm_period
+              obs_period = input$wl_obs_period
             )
           }
         )
@@ -235,10 +232,7 @@ visualization_geometry <- function(dt, mp) {
               climr::plot_WalterLieth(
                 X = wl_data,
                 diurnal = input$wl_diurnal,
-                obs_period = input$wl_obs_period,
-                gcm = input$wl_gcm,
-                ssp = input$wl_ssp,
-                gcm_period = input$wl_gcm_period
+                obs_period = input$wl_obs_period
               )
             })
           }

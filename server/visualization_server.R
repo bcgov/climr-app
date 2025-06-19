@@ -73,7 +73,6 @@ visualization_server <- function(input, output, session) {
   vis_sg <- visualization_geometry(vis_sg_dt, vis_mp)
   
   # ---- Visualization Map events
-  
   shiny::observeEvent(input$vis_map_click, {
     if (shiny::in_devmode()) cat("Event: vis_map_click", sep = "\n")
     vis_sg$add_point(input$vis_map_click$lat, input$vis_map_click$lng, vis_by_map)
@@ -118,19 +117,41 @@ visualization_server <- function(input, output, session) {
   
   shiny::observeEvent(input$dist_click,{
     vstore[["flp_area"]] <- input$dist_click
-    if (!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") {
-      withCallingHandlers(
-        message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
-        warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
-        error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
-        {
-
-        }
-      )
-    }
   })
   
   # ---- Visualization data events
+  timeseries_modal <- function() {
+    shiny::showModal(
+      shiny::modalDialog(
+        title = "Simulated Data Options", size = "l", fade = FALSE, class = "modal-dialog-scrollable",
+        shiny::checkboxGroupInput(
+          inputId = "time_series_gcms",
+          label = h5("Choose GCMs:"),
+          width = "100%",
+          inline = TRUE,
+          choices = climr::list_gcms(),
+          selected = climr::list_gcms()[c(1, 4, 5, 6, 7, 10, 11, 12)]
+        ),
+        shiny::checkboxGroupInput(
+          inputId = "time_series_ssps",
+          label = h5("Choose SSPs:"),
+          width = "100%",
+          inline = TRUE,
+          choices = climr::list_ssps(),
+          selected = climr::list_ssps()[c(1:3)]
+        ),
+        footer = shiny::tagList(
+          shiny::actionButton(
+            inputId = "timeseries_ok",
+            label = "OK!",
+            style = "background-color:#1d8f0e; color: #FFF",
+            icon = icon("check")
+          ), 
+        ),
+        easyClose = TRUE
+      )
+    )
+  }
   shiny::observeEvent(input$input_type, {
     if (input$input_type == "Map point") {
       vis_by_map(TRUE)
@@ -149,7 +170,6 @@ visualization_server <- function(input, output, session) {
   })
   
   # ---- Visualization Plot events
-  
   shiny::observeEvent(input$downscale_data_bivariate, {
     if (shiny::in_devmode()) cat("Event: downscale_data_bivariate", sep = "\n")
     if (nrow(vis_sg_dt$dt) < 1 & input$input_type == "Map point") {
@@ -221,7 +241,7 @@ visualization_server <- function(input, output, session) {
       }
     }
   })
-  shiny::observeEvent(input$downscale_data_time_series, {
+  shiny::observeEvent(input$sim_data_ts, {
     if (shiny::in_devmode()) cat("Event: downscale_data_time_series", sep = "\n")
     if (nrow(vis_sg_dt$dt) < 1 & input$input_type == "Map point") {
       showModal(
@@ -231,11 +251,30 @@ visualization_server <- function(input, output, session) {
           easyClose = TRUE
         )
       )
-    } else if (is.null(input$time_series_gcms) | is.null(input$time_series_ssps)){
+    } else if (nrow(vis_sg_dt$dt) > 0 & input$input_type == "Map point") {
+      timeseries_modal()
+    } else if (input$input_type == "FLP Area" & is.null(vstore[["flp_area"]])) {
       showModal(
         modalDialog(
           title = "Warning",
-          paste("Please select at least one GCM and SSP to downscale!"),
+          paste("Please select an FLP area!"),
+          easyClose = TRUE
+        )
+      )
+    } else if (input$input_type == "FLP Area" & !is.null(vstore[["flp_area"]])) {
+      timeseries_modal()
+    }
+  })
+  shiny::observeEvent(input$timeseries_ok, {
+    removeModal()
+  })
+  shiny::observeEvent(input$downscale_data_time_series, {
+    if (shiny::in_devmode()) cat("Event: downscale_data_time_series", sep = "\n")
+    if (nrow(vis_sg_dt$dt) < 1 & input$input_type == "Map point") {
+      showModal(
+        modalDialog(
+          title = "Warning",
+          paste("Please select a map point!"),
           easyClose = TRUE
         )
       )
@@ -261,7 +300,14 @@ visualization_server <- function(input, output, session) {
               easyClose = TRUE
             )
           )
-          timeseries_data <- climr::plot_timeSeries_input(xyz, gcms = input$time_series_gcms, ssps = input$time_series_ssps, obs_ts_dataset = c("mswx.blend", "cru.gpcc", "climatena"))
+          if (!input$sim_data_ts) {
+            gcms <- climr::list_gcms()[c(1, 4, 5, 6, 7, 10, 11, 12)]
+            ssps <- climr::list_ssps()[c(1:3)]
+          } else {
+            gcms <- input$time_series_gcms
+            ssps <- input$time_series_ssps
+          }
+          timeseries_data <- climr::plot_timeSeries_input(xyz, gcms = gcms, ssps = ssps, obs_ts_dataset = c("mswx.blend", "cru.gpcc", "climatena"))
           vis_sg$timeseries(timeseries_data)
           removeModal()
         }
@@ -279,8 +325,13 @@ visualization_server <- function(input, output, session) {
           {
             # set up db query
             region <- vstore[["flp_area"]]
-            gcms <- paste(gcm_id[gcm %in% input$time_series_gcms, gcm_id], collapse = ",")
-            ssps <- paste(ssp_id[ssp %in% input$time_series_ssps, ssp_id], collapse = ",")
+            if (!input$sim_data_ts) {
+              gcms <- paste(gcm_id[gcm %in% climr::list_gcms()[c(1, 4, 5, 6, 7, 10, 11, 12)], gcm_id], collapse = ",")
+              ssps <- paste(ssp_id[ssp %in% climr::list_ssps()[c(1:3)], ssp_id], collapse = ",")
+            } else {
+              gcms <- paste(gcm_id[gcm %in% input$time_series_gcms, gcm_id], collapse = ",")
+              ssps <- paste(ssp_id[ssp %in% input$time_series_ssps, ssp_id], collapse = ",")
+            }
             dataset <- paste(dataset_id[dataset %in% input$time_series_dataset, dataset_id], collapse = ",")
             code <- paste(climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code], collapse = ",")
             var <- var_id[var == code, var_id]
@@ -333,7 +384,7 @@ visualization_server <- function(input, output, session) {
             lat = coords[, 2],
             elev = elevs
           )
-          wl_data <- climr::plot_WalterLieth_input(xyz, obs_period = climr::list_obs_periods(), gcms = climr::list_gcms(), ssps = climr::list_ssps(), gcm_periods = climr::list_gcm_periods())
+          wl_data <- climr::plot_WalterLieth_input(xyz, obs_period = climr::list_obs_periods())
           vis_sg$walter_lieth(wl_data)
         }
       )
@@ -350,29 +401,22 @@ visualization_server <- function(input, output, session) {
           {
             # set up db query
             region <- vstore[["flp_area"]]
-            gcms <- paste(gcm_id[gcm == input$wl_gcm, gcm_id], collapse = ",")
-            ssps <- paste(ssp_id[ssp == input$wl_ssp, ssp_id], collapse = ",")
             codes <- c(sprintf("PPT_%02d", 1:12), sprintf("Tmax_%02d", 1:12), sprintf("Tmin_%02d", 1:12))
             var <- paste(var_id[var %in% codes, var_id], collapse = ",")
             
             query <- sprintf("SELECT * FROM ds_bivariate WHERE region = '%s' 
-                            AND (gcm_id = %s OR gcm_id IS NULL)
-                            AND (ssp_id = %s OR ssp_id IS NULL)
                             AND var_id IN (%s)
                             AND run_id = 1
-                            ORDER BY gcm_id, period, run_id, ssp_id", region, gcms, ssps, var)
+                            ORDER BY period", region, var)
             dat <- climr:::db_safe_query(query)
             dat <- as.data.table(dat)
             
             # reformat data
-            dat[gcm_id, gcm := i.gcm, on = "gcm_id"]
-            dat[ssp_id, ssp := i.ssp, on = "ssp_id"]
             dat[var_id, var := i.var, on = "var_id"]
             dat[, run_id := as.character(run_id)]
             dat[run_id == "1", run_id := "ensembleMean"]
-            dat2 <- dcast(dat, gcm + ssp + run_id + period ~ var)
-            # dat2[, elev := NA]
-            setnames(dat2, old = c("gcm", "ssp", "run_id", "period"), new = c("GCM", "SSP", "RUN", "PERIOD"))
+            dat2 <- dcast(dat, run_id + period ~ var)
+            setnames(dat2, old = c("run_id", "period"), new = c("RUN", "PERIOD"))
             vis_sg$walter_lieth(dat2)
           }
         )
@@ -383,11 +427,10 @@ visualization_server <- function(input, output, session) {
   # reactive outputs
   output$bivariate_valid_time_x <- shiny::renderUI({
     if (!is.null(input$bivariate_element_x)) {
-      shiny::radioButtons(
+      shiny::selectInput(
         inputId = "bivariate_time_x",
-        label = h5("Choose x-axis season/month:"),
+        label = h6("Choose season/month:"),
         width = "100%",
-        inline = TRUE,
         choices = setNames(climr::variables[Code_Element == input$bivariate_element_x,] %>% pull(Time), time_labels[climr::variables[Code_Element == input$bivariate_element_x,] %>% pull(Time)])
       )
     }
@@ -395,11 +438,10 @@ visualization_server <- function(input, output, session) {
   
   output$bivariate_valid_time_y <- shiny::renderUI({
     if (!is.null(input$bivariate_element_y)) {
-      shiny::radioButtons(
+      shiny::selectInput(
         inputId = "bivariate_time_y",
-        label = h5("Choose y-axis season/month:"),
+        label = h6("Choose season/month:"),
         width = "100%",
-        inline = TRUE,
         choices = setNames(climr::variables[Code_Element == input$bivariate_element_y,] %>% pull(Time), time_labels[climr::variables[Code_Element == input$bivariate_element_y,] %>% pull(Time)])
       )
     }
@@ -407,11 +449,10 @@ visualization_server <- function(input, output, session) {
   
   output$time_series_valid_season <- shiny::renderUI({
     if (!is.null(input$time_series_element)) {
-      shiny::radioButtons(
+      shiny::selectInput(
         inputId = "time_series_season",
         label = h5("Choose season/month:"),
         width = "100%",
-        inline = TRUE,
         choices = setNames(climr::variables[Code_Element == input$time_series_element,] %>% pull(Time), time_labels[climr::variables[Code_Element == input$time_series_element,] %>% pull(Time)])
       )
     }

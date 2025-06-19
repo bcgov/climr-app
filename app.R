@@ -280,6 +280,11 @@ shiny::shinyApp(
                                 min-width: 0 !important;
                                 text-align: center;
                               }
+                              
+                              .tight-card h5, .tight-card h6 {
+                                margin-top: 4px;
+                                margin-bottom: 4px;
+                              }
                             "))
                   ),
                   # Map container
@@ -345,6 +350,7 @@ shiny::shinyApp(
                                          shiny::fluidRow(
                                            column(
                                              width = 3,
+                                             class = "tight-card",
                                              style = "height: 75vh;", 
                                              bslib::card(
                                                title = "Bivariate Plot Variables",
@@ -354,22 +360,23 @@ shiny::shinyApp(
                                                  shiny::actionButton(
                                                    inputId = "downscale_data_bivariate",
                                                    label = "Downscale Data"
-                                                 )
+                                                 ),
+                                                 h4("Interactive Plot Options", style = "margin-bottom: 5px;"),
                                                ),
-                                               shiny::radioButtons(
+                                               h5("X-Axis", style = "margin-bottom: 5px;"),
+                                               shiny::selectInput(
                                                  inputId = "bivariate_element_x",
-                                                 label = h5("Choose x-axis element:"),
+                                                 label = h6("Choose element:"),
                                                  width = "100%",
-                                                 inline = TRUE,
                                                  choices = unique(climr::variables %>% pull(Code_Element)),
                                                  selected = "MAT"
                                                ),
                                                shiny::uiOutput("bivariate_valid_time_x"),
-                                               shiny::radioButtons(
+                                               h5("Y-Axis", style = "margin-bottom: 5px;"),
+                                               shiny::selectInput(
                                                  inputId = "bivariate_element_y",
-                                                 label = h5("Choose y-axis element:"),
+                                                 label = h6("Choose element:"),
                                                  width = "100%",
-                                                 inline = TRUE,
                                                  choices = unique(climr::variables %>% pull(Code_Element)),
                                                  selected = "MAP"
                                                ),
@@ -379,7 +386,8 @@ shiny::shinyApp(
                                                  label = h5("Choose time period:"),
                                                  width = "100%",
                                                  inline = TRUE,
-                                                 choices = climr::list_gcm_periods()
+                                                 choices = climr::list_gcm_periods(),
+                                                 selected = "2041_2060"
                                                ),
                                                shiny::conditionalPanel(
                                                  condition = "input.input_type == 'FLP Area'",
@@ -401,6 +409,7 @@ shiny::shinyApp(
                                          shiny::fluidRow(
                                            column(
                                              width = 3,
+                                             class = "tight-card",
                                              style = "height: 75vh;", 
                                              bslib::card(
                                                title = "Walter-Lieth Variables",
@@ -410,35 +419,15 @@ shiny::shinyApp(
                                                  shiny::actionButton(
                                                    inputId = "downscale_data_wl",
                                                    label = "Downscale Data"
-                                                 )
+                                                 ),
+                                                 h4("Interactive Plot Options", style = "margin-bottom: 5px;")
                                                ),
                                                shiny::radioButtons(
                                                  inputId = "wl_obs_period",
                                                  label = h5("Choose observed period:"),
                                                  width = "100%",
                                                  inline = TRUE,
-                                                 choices = climr::list_obs_periods()
-                                               ),
-                                               shiny::radioButtons(
-                                                 inputId = "wl_gcm",
-                                                 label = h5("Choose GCM:"),
-                                                 width = "100%",
-                                                 inline = TRUE,
-                                                 choices = climr::list_gcms()
-                                               ),
-                                               shiny::radioButtons(
-                                                 inputId = "wl_ssp",
-                                                 label = h5("Choose SSP:"),
-                                                 width = "100%",
-                                                 inline = TRUE,
-                                                 choices = climr::list_ssps()
-                                               ),
-                                               shiny::radioButtons(
-                                                 inputId = "wl_gcm_period",
-                                                 label = h5("Choose GCM period:"),
-                                                 width = "100%",
-                                                 inline = TRUE,
-                                                 choices = climr::list_gcm_periods()
+                                                 choices = c("1961_1990", climr::list_obs_periods())
                                                ),
                                                shiny::checkboxInput(
                                                  inputId = "wl_diurnal",
@@ -466,29 +455,14 @@ shiny::shinyApp(
                                          shiny::fluidRow(
                                            column(
                                              width = 3,
+                                             class = "tight-card",
                                              style = "height: 75vh;", 
                                              bslib::card(
                                                title = "Time Series Variable",
                                                style = "height: 99%; overflow-y: auto;",
-                                               shiny::conditionalPanel(
-                                                 condition = "input.input_type == 'Map point'",
-                                                 h4("Downscale Options", style = "margin-bottom: 5px;")
-                                               ),
-                                               shiny::checkboxGroupInput(
-                                                 inputId = "time_series_gcms",
-                                                 label = h5("Choose GCMs:"),
-                                                 width = "100%",
-                                                 inline = TRUE,
-                                                 choices = climr::list_gcms(),
-                                                 selected = climr::list_gcms()[c(1, 4, 5, 6, 7, 10, 11, 12)]
-                                               ),
-                                               shiny::checkboxGroupInput(
-                                                 inputId = "time_series_ssps",
-                                                 label = h5("Choose SSPs:"),
-                                                 width = "100%",
-                                                 inline = TRUE,
-                                                 choices = climr::list_ssps(),
-                                                 selected = list_ssps()[c(1:3)]
+                                               shiny::actionButton(
+                                                 inputId = "sim_data_ts",
+                                                 label = "Simulated Data"
                                                ),
                                                shiny::conditionalPanel(
                                                  condition = "input.input_type == 'Map point'",
@@ -506,11 +480,10 @@ shiny::shinyApp(
                                                  choices = c("MSWX Blend" = "mswx.blend", "ClimateNA" = "climatena", "Climatic Research Unit / Global Precipitation Climatology Centre" = "cru.gpcc"),
                                                  selected = "mswx.blend"
                                                ),
-                                               shiny::radioButtons(
+                                               shiny::selectInput(
                                                  inputId = "time_series_element",
                                                  label = h5("Choose element:"),
                                                  width = "100%",
-                                                 inline = TRUE,
                                                  choices = unique(climr::variables %>% pull(Code_Element)),
                                                  selected = "Tmax"
                                                ),
