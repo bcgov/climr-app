@@ -14,7 +14,7 @@ visualization_server <- function(input, output, session) {
   )
   
   # ---- Modal input storage
-  output$vis_map <- leaflet::renderLeaflet(l |> addDistricts() |>
+  output$vis_map <- leaflet::renderLeaflet(l |> addDistricts() |> addEcoregions() |> 
                                              htmlwidgets::onRender("
                                                   function(el, x) {
                                                     window.map = this;
@@ -157,9 +157,17 @@ visualization_server <- function(input, output, session) {
       vis_by_map(TRUE)
       session$sendCustomMessage("clear_district","Waddles")
     } else if (input$input_type == "FLP Area") {
+      vis_by_map(FALSE)
+      vis_sg$clear_all(vis_mp)
       dat <- list(url = "https://tileserver.thebeczone.ca/data/flp_bnd/{z}/{x}/{y}.pbf", name = "flp", id = "ORG_UNIT")
       session$sendCustomMessage("addRegionTile",dat)
       session$sendCustomMessage("reset_district","Luna")
+    } else if (input$input_type == "Ecoregion") {
+      vis_by_map(FALSE)
+      vis_sg$clear_all(vis_mp)
+      dat <- list(url = "https://tileserver.thebeczone.ca/data/ecoregions/{z}/{x}/{y}.pbf", name = "Ecoregion", id = "NA_L3CODE")
+      session$sendCustomMessage("addEcoRegionTile",dat)
+      session$sendCustomMessage("reset_ecoregion","Luna")
     } else {
       session$sendCustomMessage("clear_district","Waddles")
       vis_by_map(FALSE)
@@ -404,19 +412,19 @@ visualization_server <- function(input, output, session) {
             codes <- c(sprintf("PPT_%02d", 1:12), sprintf("Tmax_%02d", 1:12), sprintf("Tmin_%02d", 1:12))
             var <- paste(var_id[var %in% codes, var_id], collapse = ",")
             
-            query <- sprintf("SELECT * FROM ds_bivariate WHERE region = '%s' 
+            query <- sprintf("SELECT * FROM ds_bivariate WHERE region = '%s'
+                            AND gcm_id IS NULL
+                            AND ssp_id IS NULL
+                            AND run_id IS NULL
                             AND var_id IN (%s)
-                            AND run_id = 1
                             ORDER BY period", region, var)
             dat <- climr:::db_safe_query(query)
             dat <- as.data.table(dat)
             
             # reformat data
             dat[var_id, var := i.var, on = "var_id"]
-            dat[, run_id := as.character(run_id)]
-            dat[run_id == "1", run_id := "ensembleMean"]
-            dat2 <- dcast(dat, run_id + period ~ var)
-            setnames(dat2, old = c("run_id", "period"), new = c("RUN", "PERIOD"))
+            dat2 <- dcast(dat, period ~ var, value.var = "value")
+            setnames(dat2, old = c("period"), new = c("PERIOD"))
             vis_sg$walter_lieth(dat2)
           }
         )

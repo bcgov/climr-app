@@ -435,6 +435,128 @@ addDistricts <- function(map) {
   map
 }
 
+# ecoregion tilelayers
+ecoregion_tileserver <- "https://tileserver.thebeczone.ca/data/ecoregions/{z}/{x}/{y}.pbf"
+ecoregion_tilelayer <- "Ecoregions"
+
+addEcoregions <- function(map) {
+  map <- htmlwidgets::onRender(map, paste0('
+    function(el, x, data) {
+            //Now districts regions
+            
+      district_flag = true;
+      Shiny.setInputValue("dist_flag",false);
+      var distHL = "DQU";
+      var styleHL = {
+            weight: 3,
+            color: "#fc036f",
+            fillColor: "#FFFB00",
+            fillOpacity: 1,
+            fill: false
+      };
+      var vectorTileOptionsDist=function(layerName, layerId, activ,
+                                     lfPane, prop, id) {
+        return {
+          vectorTileLayerName: layerName,
+          interactive: true,
+          vectorTileLayerStyles: {
+            [layerId]: function(properties, zoom) {
+              return {
+                weight: 1,
+                color: "#000000",
+                fill: true,
+                fillOpacity: 0
+              }
+            }
+          },
+          pane : lfPane, 
+          getFeatureId: function(f) {
+            return f.properties[id];
+          }
+        }
+      };
+      
+      distLayer = L.vectorGrid.protobuf(
+        "', ecoregion_tileserver, '",
+        vectorTileOptionsDist("Districts", "', ecoregion_tilelayer, '", true,
+                          "tilePane", "dist_code", "dist_code")
+      )
+      //map_2.layerManager.addLayer(distLayer, "tile", "dist_code", "dist_code");
+      
+      Shiny.addCustomMessageHandler("addEcoRegionTile",function(data){
+        map = window.map;
+        console.log(window.map instanceof L.Map);
+        var url = data.url;
+        var cname = data.name;
+        var cid = data.id;
+        console.log(url);
+        console.log("HI");
+        map.removeLayer(distLayer);
+        distLayer = L.vectorGrid.protobuf(url, vectorTileOptionsDist(cname, cname, true,
+                          "tilePane", cid, cid)
+        )
+        map.layerManager.addLayer(distLayer, "tile", cid, cid);
+        distLayer.bindTooltip(function(e) {
+          const fieldNames = Object.keys(e.properties);
+          return e.properties[fieldNames[0]];
+        }, {sticky: true, textsize: "12px", opacity: 1});
+        distLayer.bringToFront();
+        distFlag = true;
+        Shiny.setInputValue("dist_flag",distFlag);
+        
+        distLayer.on("click", function(e){
+          distLayer.resetFeatureStyle(distHL);
+          distHL = e.layer.properties[cid];
+          Shiny.setInputValue("dist_click",distHL);
+          distLayer.setFeatureStyle(distHL, styleHL);
+          flag = false;
+          distFlag = false;
+          setTimeout(() => {
+            Shiny.setInputValue("dist_flag",false);
+          }, 600);
+          });
+      });
+      
+      Shiny.addCustomMessageHandler("clear_district",function(x){
+        map.removeLayer(distLayer);
+        distFlag = false;
+        Shiny.setInputValue("dist_flag",distFlag);
+      });
+
+      Shiny.addCustomMessageHandler("selectDist",function(x){
+        distLayer.bringToFront();
+        distFlag = true;
+        Shiny.setInputValue("dist_flag",distFlag);
+      });
+      
+      Shiny.addCustomMessageHandler("clearTooltips",function(x){
+        distLayer.unbindTooltip();
+        distFlag = false;
+        Shiny.setInputValue("dist_flag",distFlag); 
+      });
+      
+      Shiny.addCustomMessageHandler("reset_ecoregion",function(x){
+        distLayer.resetFeatureStyle(distHL);
+        distFlag = true;
+        Shiny.setInputValue("dist_flag",distFlag);
+        distLayer.bindTooltip(function(e) {
+          const fieldNames = Object.keys(e.properties);
+          return e.properties[fieldNames[0]];
+        }, {sticky: true, textsize: "12px", opacity: 1});
+        //Shiny.setInputValue("dist_click",null);
+      });
+      
+      distLayer.bindTooltip(function(e) {
+        const fieldNames = Object.keys(e.properties);
+        return e.properties[fieldNames[0]];
+      }, {sticky: true, textsize: "12px", opacity: 1});
+      
+      // end districts
+    }'
+  ))
+  map
+}
+
 default_draw_tool <- function(mp) {
   mp |> leaflet.extras::addDrawToolbar(
     position = "bottomleft",
