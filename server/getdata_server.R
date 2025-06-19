@@ -634,7 +634,7 @@ getdata_server <- function(input, output, session) {
     selections <- list(input$downscale_gcms, input$downscale_ssps, input$downscale_gcm_periods)
     lengths <- sapply(selections, length)
     
-    if ("Custom" %in% vstore[["downscale_extra_vars_sets"]] & is.null(vstore[["downscale_custom_elements"]]) | is.null(vstore[["downscale_custom_time_periods"]])) {
+    if ("Custom" %in% vstore[["downscale_extra_vars_sets"]] & (is.null(vstore[["downscale_custom_elements"]]) | is.null(vstore[["downscale_custom_time_periods"]]))) {
       showModal(
         modalDialog(
           title = "Warning",

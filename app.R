@@ -359,7 +359,8 @@ shiny::shinyApp(
                                                  condition = "input.input_type == 'Map point'",
                                                  shiny::actionButton(
                                                    inputId = "downscale_data_bivariate",
-                                                   label = "Downscale Data"
+                                                   label = "Downscale Data",
+                                                   style = "background-color:#1d8f0e; color: #FFF"
                                                  ),
                                                  h4("Interactive Plot Options", style = "margin-bottom: 5px;"),
                                                ),
@@ -394,7 +395,8 @@ shiny::shinyApp(
                                                  shiny::actionButton(
                                                    inputId = "plot_bivariate_flp",
                                                    label = "Plot",
-                                                   icon = icon("chart-simple")
+                                                   icon = icon("chart-simple"),
+                                                   style = "background-color:#1d8f0e; color: #FFF"
                                                  )
                                                )
                                              )
@@ -418,7 +420,8 @@ shiny::shinyApp(
                                                  condition = "input.input_type == 'Map point'",
                                                  shiny::actionButton(
                                                    inputId = "downscale_data_wl",
-                                                   label = "Downscale Data"
+                                                   label = "Downscale Data",
+                                                   style = "background-color:#1d8f0e; color: #FFF"
                                                  ),
                                                  h4("Interactive Plot Options", style = "margin-bottom: 5px;")
                                                ),
@@ -438,7 +441,8 @@ shiny::shinyApp(
                                                  shiny::actionButton(
                                                    inputId = "plot_wl_flp",
                                                    label = "Plot",
-                                                   icon = icon("chart-simple")
+                                                   icon = icon("chart-simple"),
+                                                   style = "background-color:#1d8f0e; color: #FFF"
                                                  )
                                                )
                                              )
@@ -460,15 +464,12 @@ shiny::shinyApp(
                                              bslib::card(
                                                title = "Time Series Variable",
                                                style = "height: 99%; overflow-y: auto;",
-                                               shiny::actionButton(
-                                                 inputId = "sim_data_ts",
-                                                 label = "Simulated Data"
-                                               ),
                                                shiny::conditionalPanel(
                                                  condition = "input.input_type == 'Map point'",
                                                  shiny::actionButton(
                                                    inputId = "downscale_data_time_series",
-                                                   label = "Downscale Data"
+                                                   label = "Downscale Data",
+                                                   style = "background-color:#1d8f0e; color: #FFF"
                                                  ),
                                                  h4("Interactive Plot Options", style = "margin-bottom: 5px;"),
                                                ),
@@ -493,8 +494,13 @@ shiny::shinyApp(
                                                  shiny::actionButton(
                                                    inputId = "plot_ts_flp",
                                                    label = "Plot",
-                                                   icon = icon("chart-simple")
+                                                   icon = icon("chart-simple"),
+                                                   style = "background-color:#1d8f0e; color: #FFF"
                                                  )
+                                               ),
+                                               shiny::actionButton(
+                                                 inputId = "sim_data_ts",
+                                                 label = "Adjust Plot Options"
                                                )
                                              )
                                            ),

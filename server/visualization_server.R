@@ -561,8 +561,15 @@ visualization_server <- function(input, output, session) {
     if (units == "%") {
       units <- "\\%"
     }
+    
+    # label formatters for legend
+    inv_log2_formatter <- labelFormat(
+      transform = function(x) round((2^x) - 1),  # inverse of log2(x + 1)
+      suffix = units
+    )
+    
     pal_leg <- leaflet::colorNumeric(palette = pal, domain = bounds, na.color = "transparent")
-    leaflet::addLegend(mp, position = "topright", pal = pal_leg, values = bounds, title = HTML(sprintf("<div style='width: 100px;'>%s</div>", legend_title)), labFormat = labelFormat(suffix = units))
+    leaflet::addLegend(mp, position = "topright", pal = pal_leg, values = bounds, title = HTML(sprintf("<div style='width: 100px;'>%s</div>", legend_title)), labFormat = if (isTRUE(vstore[["vscale"]])) inv_log2_formatter else labelFormat(suffix = units))
     
   })
   shiny::observeEvent(input$download_overlay, {
