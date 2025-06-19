@@ -267,7 +267,7 @@ getdata_server <- function(input, output, session) {
                   label = h5("Choose observation time-series data:",
                              prompter::add_prompt(
                                tooltipsIcon,
-                               message = HTML(paste("Dataset for observational time series data. What is MSWX?? ClimateNA gridded time series, CRU/GPCC for CRU TS (temperature) and GPCC (precipitation),")),
+                               message = HTML(paste("Dataset for observational time series data. MSWX Blend for Multi-Source Weather, ClimateNA gridded time series, CRU/GPCC for CRU TS (temperature) and GPCC (precipitation).")),
                                position = "top",
                                size = "large",
                                shadow = FALSE
@@ -385,7 +385,7 @@ getdata_server <- function(input, output, session) {
                 label = tags$span("Use ensemble mean", style = "font-size: 0.85em; font-weight: bold;",
                                   prompter::add_prompt(
                                     tooltipsIcon,
-                                    message = HTML(paste("Something helpful about ensemble mean.")),
+                                    message = HTML(paste("Ensemble mean info.")),
                                     position = "top",
                                     size = "large",
                                     shadow = FALSE
@@ -401,7 +401,7 @@ getdata_server <- function(input, output, session) {
                 label = h5("Choose maximum number of model runs:",
                            prompter::add_prompt(
                              tooltipsIcon,
-                             message = HTML(paste("More helpful things about model runs... Make sure to mention that 0 defaults to using ensemble mean.")),
+                             message = HTML(paste("Selecting 0 will default to ensemble mean.")),
                              position = "top",
                              size = "large",
                              shadow = FALSE
@@ -465,7 +465,7 @@ getdata_server <- function(input, output, session) {
             label = tags$span("Apply elevation adjustment to precipitation values during downscaling", style = "font-size: 0.85em; font-weight: bold;",
                               prompter::add_prompt(
                                 tooltipsIcon,
-                                message = HTML(paste("Elevation adjustments are cool, but why??")),
+                                message = HTML(paste("Elevation adjustment info.")),
                                 position = "top",
                                 size = "large",
                                 shadow = FALSE

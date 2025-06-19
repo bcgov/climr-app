@@ -294,19 +294,11 @@ shiny::shinyApp(
                         class = "input-control",
                         top = 90,            
                         left = 60,           
-                        width = 175,
+                        width = 170,
                         style = "padding: 10px;",
                         shiny::radioButtons(
                           inputId = "input_type",
-                          label = h4("Visualize by:",
-                                     prompter::add_prompt(
-                                       tooltipsIcon,
-                                       message = HTML(paste("info about cool visualizations!")),
-                                       position = "top",
-                                       size = "large",
-                                       shadow = FALSE
-                                     )
-                          ),
+                          label = h4("Visualize by:", style = "margin-bottom: 7px;"),
                           width = "100%",
                           choices = c("Map point", "Ecoregion", "FLP Area"),
                           selected = character(0)
