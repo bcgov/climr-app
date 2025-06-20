@@ -144,15 +144,15 @@ shiny::shinyApp(
           shiny::sidebarPanel(
             style = "height: 84vh; overflow-y: auto; overflow-x: auto;", # FIX HEIGHT TO BE ADAPTIVE
             
-            # create the link!!!
-            shiny::div(
-              style = "text-align: center;",
-              shiny::actionLink(
-                inputId = "tutorial",
-                label = "Click here for a tutorial",
-                )
-            ),
-            br(),
+            # # create the link!!!
+            # shiny::div(
+            #   style = "text-align: center;",
+            #   shiny::actionLink(
+            #     inputId = "tutorial",
+            #     label = "Click here for a tutorial",
+            #     )
+            # ),
+            # br(),
             splitLayout(
               actionButton("clear_selections", "Clear Selections",
                             style = "width:100%; height:70px; background-color:#c21104; color: #FFF"),

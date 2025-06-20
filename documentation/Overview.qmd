@@ -1,0 +1,33 @@
+# Overview
+
+What is the climr App? Or perhaps the ClimApp?
+
+## Structure
+
+The climr App is organized into three tabs.
+
+1.	__Get Data:__ User selects points or areas of interest using one of 2 methods
+    i.	Single map points or drawn polygons
+    ii.	Uploading a shape file
+  
+2.	__Visualization:__ 
+
+3.	__DOCUMENTATION__: Help files and data sources
+    a.	__Overview__: 
+    b.	__Instructions__: Instructions on how to use the tool
+    c.	__Methods__: Detailed background information about what's happening "under the hood"
+    d.	__Known issues__: Documentation on current known issues with the tool
+    e.  __Using the climr App for decisions__: Support and guidance for using the climr App as a decision-making tool
+    f.  __Definitions__: Glossary of climate variables?
+    g.  __Providing feedback__: Ways users can report issues or provide suggestions for future improvements
+    h.  __FAQs__: Frequently asked questions
+    i.  __Model information__: Version of input data and models
+    j.  __Shiny app information__: Github repo, license, and other info
+   
+## Acknowledgements
+
+    
+## References: 
+
+
+#### Additional Documents:

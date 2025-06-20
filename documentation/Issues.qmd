@@ -1,0 +1,12 @@
+# Known Issues
+
+## Known issues with the climr App :(
+
+This section is focused on aspects of the climr App related to
+trade-offs and intrinsic sources of error. We also list bugs or minor
+enhancements that have not yet been resolved. If you have an problem or
+suggestion to report, you can enter it as a "New issue" in our
+<a href="https://github.com/bcgov/climr-app/issues" target="_blank">GitHub
+repo </a>.
+
+### Issues requiring fixing

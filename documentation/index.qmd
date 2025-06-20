@@ -1,0 +1,7 @@
+---
+title: "climr Web Application"
+---
+
+Welcome to the **climr App** documentation.
+
+Use the navigation on the left or the search bar above to explore sections.

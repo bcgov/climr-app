@@ -154,6 +154,7 @@ visualization_geometry <- function(dt, mp) {
           )
         }
       } else if (input$input_type == "FLP Area" | input$input_type == "Ecoregion") {
+        #browser()
         withCallingHandlers(
           message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
           warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},

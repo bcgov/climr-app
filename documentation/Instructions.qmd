@@ -1,0 +1,17 @@
+# Instructions
+
+## SELECT SITES:
+
+In the first tab of the climr App, users can select points or areas of interest, and make manual adjustments to model parameters if necessary. For a very quick summary of functionality of this page, users can also click the *What does this page do* link at the top of the left-hand panel.
+
+### **Step 1.** Select points or areas of interest:
+
+Users can select points or areas of interest using **one of the following two methods**:
+
+-   **Option 1**. 
+
+-   **Option 2**. 
+
+## EXPORT
+
+
