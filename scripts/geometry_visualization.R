@@ -135,6 +135,7 @@ visualization_geometry <- function(dt, mp) {
   
   plot_bivariate <- function(bivariate_data) {
     output$bivariate_plot <- plotly::renderPlotly({
+      req(show_plots())
       if (input$input_type == "Map point") {
         if (nrow(dt$dt) > 0 && !is.null(bivariate_data)) {
           withCallingHandlers(
@@ -175,6 +176,7 @@ visualization_geometry <- function(dt, mp) {
   
   plot_timeseries <- function(timeseries_data) {
     output$timeseries_plot <- shiny::renderPlot({
+      req(show_plots())
       if (input$input_type == "Map point") {
         withCallingHandlers(
           message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
@@ -209,6 +211,7 @@ visualization_geometry <- function(dt, mp) {
   
   plot_walter_lieth <- function(wl_data) {
     output$wl_plot <- shiny::renderPlot({
+      req(show_plots())
       if (input$input_type == "Map point") {
         withCallingHandlers(
           message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},

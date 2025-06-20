@@ -238,13 +238,6 @@ shiny::shinyApp(
                                     document.body.classList.remove('show-plot');
                                   }
                                 });
-                                Shiny.addCustomMessageHandler('toggle-overlay', function(show) {
-                                  if (show) {
-                                    document.body.classList.add('show-overlay');
-                                  } else {
-                                    document.body.classList.remove('show-overlay');
-                                  }
-                                });
                               ")),
                     tags$style(HTML("
                               #map-container {
@@ -511,8 +504,8 @@ shiny::shinyApp(
       shiny::navbarMenu(
         "About",
         "How to use",
-        shiny::tabPanel("Map"),
-        shiny::tabPanel("Data"),
+        shiny::tabPanel("Get Data"),
+        shiny::tabPanel("Visualization"),
         "climr package",
         shiny::tabPanel(
           title = "Documentation",

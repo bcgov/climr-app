@@ -28,6 +28,7 @@ visualization_server <- function(input, output, session) {
   
   # ---- Plot data info
   vis_by_map <- reactiveVal(FALSE)
+  show_plots <- reactiveVal(TRUE)
   bivariate_data <- c()
   timeseries_data <- c()
   wl_data <- c()
@@ -111,9 +112,7 @@ visualization_server <- function(input, output, session) {
       inputId = "show_overlay_controls",
       value = FALSE
     )
-    output$bivariate_plot <- renderPlot({ NULL })
-    output$timeseries_plot <- renderPlot({ NULL })
-    output$wl_plot <- renderPlot({ NULL })
+    show_plots(FALSE)
   })
   
   shiny::observeEvent(input$dist_click,{
@@ -208,6 +207,7 @@ visualization_server <- function(input, output, session) {
             elev = elevs
           )
           bivariate_data <- climr::plot_bivariate_input(xyz)
+          show_plots(TRUE)
           vis_sg$bivariate(bivariate_data)
         }
       )
@@ -216,6 +216,7 @@ visualization_server <- function(input, output, session) {
   shiny::observeEvent(input$plot_bivariate_flp_er, {
     if (shiny::in_devmode()) cat("Event: plot_bivariate_flp_er", sep = "\n")
     if (!is.null(input$input_type)) {
+      show_plots(TRUE)
       if ((!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") | (!is.null(vstore[["ecoregion"]]) & input$input_type == "Ecoregion")) {
         withCallingHandlers(
           message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
@@ -328,6 +329,7 @@ visualization_server <- function(input, output, session) {
             ssps <- input$time_series_ssps
           }
           timeseries_data <- climr::plot_timeSeries_input(xyz, gcms = gcms, ssps = ssps, obs_ts_dataset = c("mswx.blend", "cru.gpcc", "climatena"))
+          show_plots(TRUE)
           vis_sg$timeseries(timeseries_data)
           removeModal()
         }
@@ -337,6 +339,7 @@ visualization_server <- function(input, output, session) {
   shiny::observeEvent(input$plot_ts_flp_er, {
     if (shiny::in_devmode()) cat("Event: plot_ts_flp_er", sep = "\n")
     if (!is.null(input$input_type)) {
+      show_plots(TRUE)
       if ((!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") | (!is.null(vstore[["ecoregion"]]) & input$input_type == "Ecoregion")) {
         withCallingHandlers(
           message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
@@ -344,7 +347,7 @@ visualization_server <- function(input, output, session) {
           error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
           {
             # set up db query
-            region <- vstore[["flp_area"]]
+            region <- vstore[[if (input$input_type == "FLP Area") "flp_area" else "ecoregion"]]
             if (!input$ts_adj_plot) {
               gcms <- paste(gcm_id[gcm %in% climr::list_gcms()[c(1, 4, 5, 6, 7, 10, 11, 12)], gcm_id], collapse = ",")
               ssps <- paste(ssp_id[ssp %in% climr::list_ssps()[c(1:3)], ssp_id], collapse = ",")
@@ -405,6 +408,7 @@ visualization_server <- function(input, output, session) {
             elev = elevs
           )
           wl_data <- climr::plot_WalterLieth_input(xyz, obs_period = climr::list_obs_periods())
+          show_plots(TRUE)
           vis_sg$walter_lieth(wl_data)
         }
       )
@@ -413,6 +417,7 @@ visualization_server <- function(input, output, session) {
   shiny::observeEvent(input$plot_wl_flp_er, {
     if (shiny::in_devmode()) cat("Event: plot_wl_flp_er", sep = "\n")
     if (!is.null(input$input_type)) {
+      show_plots(TRUE)
       if ((!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") | (!is.null(vstore[["ecoregion"]]) & input$input_type == "Ecoregion")) {
         withCallingHandlers(
           message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
@@ -420,7 +425,7 @@ visualization_server <- function(input, output, session) {
           error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
           {
             # set up db query
-            region <- vstore[["flp_area"]]
+            region <- vstore[[if (input$input_type == "FLP Area") "flp_area" else "ecoregion"]]
             codes <- c(sprintf("PPT_%02d", 1:12), sprintf("Tmax_%02d", 1:12), sprintf("Tmin_%02d", 1:12))
             var <- paste(var_id[var %in% codes, var_id], collapse = ",")
             
