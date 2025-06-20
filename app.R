@@ -293,7 +293,7 @@ shiny::shinyApp(
                           inputId = "input_type",
                           label = h4("Visualize by:", style = "margin-bottom: 7px;"),
                           width = "100%",
-                          choices = c("Map point", "Ecoregion", "FLP Area"),
+                          choices = c("FLP Area", "Ecoregion", "Map point"),
                           selected = character(0)
                         ),
                         shiny::actionButton("clear_map", "Clear Map",

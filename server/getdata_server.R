@@ -220,7 +220,7 @@ getdata_server <- function(input, output, session) {
                 label = h5("Choose observed periods:",
                            prompter::add_prompt(
                              tooltipsIcon,
-                             message = HTML(paste("Historical period for observed climate data, averaged over this period.")),
+                             message = HTML(paste("Historical period for observed climate data, averaged over this period. Ref period 1961_1990 will always be included.")),
                              position = "top",
                              size = "large",
                              shadow = FALSE
@@ -1131,7 +1131,7 @@ getdata_server <- function(input, output, session) {
           label = h5("Choose downscale resolution (m):",
                      prompter::add_prompt(
                        tooltipsIcon,
-                       message = HTML(paste("Target resolution for shapes drawn on map or added using file upload. Does not apply to points, raster or csv files.")),
+                       message = HTML(paste("Target resolution for shapes drawn on map or added using file upload. Does not apply to csv files.")),
                        position = "top",
                        size = "large",
                        shadow = FALSE
