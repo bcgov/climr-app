@@ -523,6 +523,33 @@ getdata_server <- function(input, output, session) {
         selected = vstore[["downscale_gcm_periods"]],
         inline = TRUE
       )
+    } else {
+      # GCMs
+      vstore[["downscale_gcms"]] <- NULL
+      shiny::updateCheckboxGroupInput(
+        inputId = "downscale_gcms",
+        choices = climr::list_gcms() |> sn(),
+        selected = vstore[["downscale_gcms"]],
+        inline = TRUE
+      )
+      
+      # SSPs
+      vstore[["downscale_ssps"]] <- NULL
+      shiny::updateCheckboxGroupInput(
+        inputId = "downscale_ssps",
+        choices = climr::list_ssps() |> sn(),
+        selected = vstore[["downscale_ssps"]],
+        inline = TRUE
+      )
+      
+      # GCM periods
+      vstore[["downscale_gcm_periods"]] <- NULL
+      shiny::updateCheckboxGroupInput(
+        inputId = "downscale_gcm_periods",
+        choices = c(climr::list_gcm_periods() |> sn()),
+        selected = vstore[["downscale_gcm_periods"]],
+        inline = TRUE
+      )
     }
   )
   
