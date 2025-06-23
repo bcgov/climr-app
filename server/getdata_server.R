@@ -525,29 +525,26 @@ getdata_server <- function(input, output, session) {
       )
     } else {
       # GCMs
-      vstore[["downscale_gcms"]] <- NULL
       shiny::updateCheckboxGroupInput(
         inputId = "downscale_gcms",
         choices = climr::list_gcms() |> sn(),
-        selected = vstore[["downscale_gcms"]],
+        selected = character(0),
         inline = TRUE
       )
       
       # SSPs
-      vstore[["downscale_ssps"]] <- NULL
       shiny::updateCheckboxGroupInput(
         inputId = "downscale_ssps",
         choices = climr::list_ssps() |> sn(),
-        selected = vstore[["downscale_ssps"]],
+        selected = character(0),
         inline = TRUE
       )
       
       # GCM periods
-      vstore[["downscale_gcm_periods"]] <- NULL
       shiny::updateCheckboxGroupInput(
         inputId = "downscale_gcm_periods",
         choices = c(climr::list_gcm_periods() |> sn()),
-        selected = vstore[["downscale_gcm_periods"]],
+        selected = character(0),
         inline = TRUE
       )
     }
@@ -1015,7 +1012,7 @@ getdata_server <- function(input, output, session) {
         ]
         
         # set palettes
-        col_scheme <- if (grepl("PPT", layer_match)) {
+        col_scheme <- if (grepl("PPT|MSP|MAP|PAS", layer_match)) {
           rev(hcl.colors(5,"Blue-Red 3"))
         } else {
           hcl.colors(5,"Blue-Red 3")
@@ -1090,7 +1087,7 @@ getdata_server <- function(input, output, session) {
         }
         
         # set palettes
-        col_scheme <- if (grepl("PPT", layer_match)) {
+        col_scheme <- if (grepl("PPT|MSP|MAP|PAS", layer_match)) {
           RColorBrewer::brewer.pal(9, "YlGnBu")
         } else {
           rev(RColorBrewer::brewer.pal(11, "RdYlBu"))
