@@ -17,7 +17,7 @@ The climr App is organized into three tabs.
     ii.  Ecoregions of North America
     iii. Single map point
     
-      Users can then visualize data for the selected area using available plot (Bivariate, Walter-Lieth, Time Series,       Boxplot, Climate Stripes).
+      Users can then visualize data for the selected area using available plots (Bivariate, Walter-Lieth, Time      Series, Boxplot, Climate Stripes).
       
       Users can also add climate maps as an overlay on North America.
 
