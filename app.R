@@ -16,6 +16,7 @@ suppressPackageStartupMessages({
   library(zip)
   library(plotly)
   library(dplyr)
+  library(quarto)
   source("scripts/utils.R", local = TRUE)
 })
 
@@ -149,7 +150,8 @@ shiny::shinyApp(
             #   style = "text-align: center;",
             #   shiny::actionLink(
             #     inputId = "tutorial",
-            #     label = "Click here for a tutorial",
+            #     label = "What does this page do",
+            #     icon = icon("question-circle")
             #     )
             # ),
             # br(),

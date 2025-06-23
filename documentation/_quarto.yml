@@ -16,9 +16,6 @@ book:
     - FAQs.qmd
     - Resources.qmd
 
-
-bibliography: references.bib
-
 format:
   html:
     css: style.css
