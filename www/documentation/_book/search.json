@@ -14,7 +14,7 @@
     "href": "Overview.html#structure",
     "title": "2  Overview",
     "section": "",
-    "text": "Get Data: Users can select points or areas of interest using one of 2 methods\n\nSingle map points or drawn polygons\nUploading a shape file\n\nUsers can then select the desired parameters and downscale the data. The downscaled data can be previewed and is available for download as csv and Geotiff.\nVisualization: Users can visualize data by choosing an area using one of 3 methods\n\nForest Landscape Plan (FLP) Area\nEcoregions of North America\nSingle map point\n\nUsers can then visualize data for the selected area using available plot (Bivariate, Walter-Lieth, Time Series, Boxplot, Climate Stripes).\nUsers can also add climate maps as an overlay on North America.\nDocumentation: Help files and data sources\n\nOverview:\nInstructions: Instructions on how to use the tool\nMethods: Detailed background information about what’s happening “under the hood”\nKnown issues: Documentation on current known issues with the tool\nUsing the climr App for decisions: Support and guidance for using the climr App as a decision-making tool\nDefinitions: Glossary of climate variables?\nProviding feedback: Ways users can report issues or provide suggestions for future improvements\nFAQs: Frequently asked questions\nModel information: Version of input data and models\nShiny app information: Github repo, license, and other info",
+    "text": "Get Data: Users can select points or areas of interest using one of 2 methods\n\nSingle map points or drawn polygons\nUploading a shape file\n\nUsers can then select the desired parameters and downscale the data. The downscaled data can be previewed and is available for download as csv and GeoTIFF.\nVisualization: Users can visualize data by choosing an area using one of 3 methods\n\nForest Landscape Plan (FLP) Area\nEcoregions of North America\nSingle map point\n\nUsers can then visualize data for the selected area using available plots (Bivariate, Walter-Lieth, Time Series, Boxplot, Climate Stripes).\nUsers can also add climate maps as an overlay on North America.\nDocumentation: Help files and data sources\n\nOverview:\nInstructions: Instructions on how to use the tool\nMethods: Detailed background information about what’s happening “under the hood”\nKnown issues: Documentation on current known issues with the tool\nUsing the climr App for decisions: Support and guidance for using the climr App as a decision-making tool\nDefinitions: Glossary of climate variables?\nProviding feedback: Ways users can report issues or provide suggestions for future improvements\nFAQs: Frequently asked questions\nModel information: Version of input data and models\nShiny app information: Github repo, license, and other info",
     "crumbs": [
       "<span class='chapter-number'>2</span>  <span class='chapter-title'>Overview</span>"
     ]
@@ -87,6 +87,56 @@
     "text": "3.2 Visualization\nIn the second tab of the climr App, users can select an area of interest by Forest Landscape Plan (FLP) Areas, ecoregions of North America, or by single map points. Users can then visualize data for the selected area by available plots (Bivariate, Walter-Lieth, Time Series, Boxplot, Climate Stripes). Users can also add a climate map as an overlay on North America. For a very quick summary of functionality of this page, users can also click the What does this page do link at the top of the floating panel.\n\n3.2.1 Step 1. Select points or areas of interest:\nUsers can select points or areas of interest using one of the following three methods:\n\nMethod 1. Select FLP Area and click on one of the outlined areas on the map.\nMethod 2. Select Ecoregion and click on one of the outlined areas on the map.\nMethod 3. Select Map point and click on the map to add a single point.\n\n\n\n3.2.2 Step 2. Visualize by plots:",
     "crumbs": [
       "<span class='chapter-number'>3</span>  <span class='chapter-title'>Instructions</span>"
+    ]
+  },
+  {
+    "objectID": "Methods.html",
+    "href": "Methods.html",
+    "title": "4  Methods",
+    "section": "",
+    "text": "4.1 Overview of the climr App Methods",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Methods</span>"
+    ]
+  },
+  {
+    "objectID": "Feedback.html",
+    "href": "Feedback.html",
+    "title": "7  Providing Feedback",
+    "section": "",
+    "text": "We welcome any feedback about the climr App.\nEmail us at ffec@gov.bc.ca or create a GitHub issue here.",
+    "crumbs": [
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Providing Feedback</span>"
+    ]
+  },
+  {
+    "objectID": "Issues.html",
+    "href": "Issues.html",
+    "title": "5  Known Issues",
+    "section": "",
+    "text": "5.1 Known issues with the climr App :(\nThis section is focused on aspects of the climr App related to trade-offs and intrinsic sources of error. We also list bugs or minor enhancements that have not yet been resolved. If you have an problem or suggestion to report, you can enter it as a “New issue” in our GitHub repo .",
+    "crumbs": [
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Known Issues</span>"
+    ]
+  },
+  {
+    "objectID": "Issues.html#known-issues-with-the-climr-app",
+    "href": "Issues.html#known-issues-with-the-climr-app",
+    "title": "5  Known Issues",
+    "section": "",
+    "text": "Note issues around the time it takes to downscale data for areas (not map points) when recommended default settings are used and multiple variables are used - Get Data tab.\nNote time it takes to render a time series plot from single map point data - Visualization tab. ### Issues requiring fixing",
+    "crumbs": [
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Known Issues</span>"
+    ]
+  },
+  {
+    "objectID": "Resources.html",
+    "href": "Resources.html",
+    "title": "9  Resources",
+    "section": "",
+    "text": "climr documentation here?",
+    "crumbs": [
+      "<span class='chapter-number'>9</span>  <span class='chapter-title'>Resources</span>"
     ]
   }
 ]
