@@ -538,7 +538,7 @@ shiny::shinyApp(
         "How to use",
         shiny::tabPanel("climr App",
                         tags$iframe(src = "documentation/_book/index.html",
-                                    width = "100%", frameborder = "0", height = "900px")
+                                    style = "width: 100%; height: calc(100vh - 130px); border: none;")
                         ),
         "climr package",
         shiny::tabPanel(
