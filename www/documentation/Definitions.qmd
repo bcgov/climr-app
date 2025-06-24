@@ -1,0 +1,59 @@
+# Definitions
+
+## Glossary of Terms
+
+**Extra climate variables**:
+  
+  - AHM: Annual heat/moisture index (annual)
+  
+  - bFFP: Beginning of the frost-free period (day of year) (annual)
+  
+  - CMD: Hargreaves climatic moisture deficit (mm) (annual, seasonal, monthly)
+  
+  - CMI: Climatic Moisture Index (cm) (annual, monthly)
+  
+  - DDsub0: Degree-days below 0°C (annual, seasonal, monthly)
+  
+  - DDsub18: Degree-days below 18°C (annual, seasonal, monthly)
+  
+  - DD18: Degree-days above 18°C (annual, seasonal, monthly)
+  
+  - DD5: Degree-days above 5°C (annual, seasonal, monthly)
+  
+  - eFFP: End of the frost-free period (day of year) (annual)
+  
+  - EMT: Extreme minimum temperature over 30 years (°C) (annual)
+  
+  - Eref: Hargreaves reference evaporation (mm) (annual, seasonal, monthly)
+  
+  - EXT: Extreme maximum temperature over 30 years (°C) (annual)
+  
+  - FFP: Frost-free period (mm) (annual)
+  
+  - MAP: Mean annual precipitation (mm) (annual)
+  
+  - MAT: Mean annual temperature (°C) (annual)
+  
+  - MCMT: Mean coldest month temperature (°C) (annual)
+  
+  - MSP: Growing season (May to September) precipitation (mm) (annual)
+  
+  - MWMT: Mean warmest month temperature (°C) (annual)
+  
+  - NFFD: Number of frost-free days (annual, seasonal, monthly)
+  
+  - PAS: Precipitation as snow (mm) (annual, seasonal, monthly)
+  
+  - PPT: Precipitation (mm) (annual, seasonal, monthly)
+  
+  - RH: Relative humidity (%) (annual, seasonal, monthly)
+  
+  - SHM: Summer heat/moisture index (annual)
+  
+  - Tave: Mean temperature (°C) (annual, seasonal, monthly)
+  
+  - TD: Continentality (MWMT-MCMT) (°C) (annual)
+  
+  - Tmax: Mean daily maximum temperature (°C) (annual, seasonal, monthly)
+  
+  - Tmin: Mean daily minimum temperature (°C) (annual, seasonal, monthly)

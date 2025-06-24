@@ -1,0 +1,46 @@
+# Overview
+
+What is the climr App? Or perhaps the ClimApp?
+
+## Structure
+
+The climr App is organized into three tabs.
+
+1.	__Get Data:__ Users can select points or areas of interest using one of 2 methods
+    i.	Single map points or drawn polygons
+    ii.	Uploading a shape file
+    
+      Users can then select the desired parameters and downscale the data. The downscaled data can be previewed and        is available for download as csv and GeoTIFF.
+  
+2.	__Visualization:__ Users can visualize data by choosing an area using one of 3 methods
+    i.   Forest Landscape Plan (FLP) Area
+    ii.  Ecoregions of North America
+    iii. Single map point
+    
+      Users can then visualize data for the selected area using available plots (Bivariate, Walter-Lieth, Time      Series, Boxplot, Climate Stripes).
+      
+      Users can also add climate maps as an overlay on North America.
+
+3.	__Documentation__: Help files and data sources
+    a.	__Overview__: 
+    b.	__Instructions__: Instructions on how to use the tool
+    c.	__Methods__: Detailed background information about what's happening "under the hood"
+    d.	__Known issues__: Documentation on current known issues with the tool
+    e.  __Using the climr App for decisions__: Support and guidance for using the climr App as a decision-making tool
+    f.  __Definitions__: Glossary of climate variables?
+    g.  __Providing feedback__: Ways users can report issues or provide suggestions for future improvements
+    h.  __FAQs__: Frequently asked questions
+    i.  __Model information__: Version of input data and models
+    j.  __Shiny app information__: Github repo, license, and other info
+   
+## Acknowledgements
+
+    
+## References: 
+
+
+#### Additional Documents:
+<a href="https://bcgov.github.io/climr/articles/index.html" target="_blank">climr Package Articles</a>
+
+<a href="https://bcgov.github.io/climr/reference/index.html" target="_blank">climr Package Reference</a>
+

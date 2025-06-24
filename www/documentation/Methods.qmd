@@ -1,0 +1,3 @@
+# Methods
+
+## Overview of the climr App Methods
