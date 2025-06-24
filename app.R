@@ -20,6 +20,10 @@ suppressPackageStartupMessages({
   source("scripts/utils.R", local = TRUE)
 })
 
+if (Sys.getenv("SHINY_DEPLOY") == "server") {
+  terraOptions(tempdir = "/opt/rtmp/temp")
+}
+
 # Tooltip setup
 tooltipsIcon <- icon("question-circle")
 # Use regular style instead of solid

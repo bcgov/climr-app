@@ -322,6 +322,7 @@ addDistricts <- function(map) {
     function(el, x, data) {
             //Now districts regions
             
+      map = this;
       district_flag = true;
       Shiny.setInputValue("dist_flag",false);
       var distHL = "DQU";
@@ -362,8 +363,8 @@ addDistricts <- function(map) {
       //map_2.layerManager.addLayer(distLayer, "tile", "dist_code", "dist_code");
       
       Shiny.addCustomMessageHandler("addRegionTile",function(data){
-        map = window.map;
-        console.log(window.map instanceof L.Map);
+        //map = window.map;
+        //console.log(window.map instanceof L.Map);
         var url = data.url;
         var cname = data.name;
         var cid = data.id;
@@ -371,8 +372,6 @@ addDistricts <- function(map) {
         console.log("HI");
         map.removeLayer(distLayer);
         console.log("Pane exists?", !!map.getPane("tilePane"));
-                console.log(vectorTileOptionsDist(cname, cname, true,
-                          "tilePane", cid, cid));
         distLayer = L.vectorGrid.protobuf(url, vectorTileOptionsDist(cname, cname, true,
                           "tilePane", cid, cid)
         )
