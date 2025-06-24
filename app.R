@@ -394,6 +394,11 @@ shiny::shinyApp(
                                                    icon = icon("chart-simple"),
                                                    style = "background-color:#1d8f0e; color: #FFF"
                                                  )
+                                               ),
+                                               shiny::downloadButton(
+                                                 outputId = "bivariate_download",
+                                                 label = "Download Plot",
+                                                 style = "width: 100%;"
                                                )
                                              )
                                            ),
@@ -440,6 +445,11 @@ shiny::shinyApp(
                                                    icon = icon("chart-simple"),
                                                    style = "background-color:#1d8f0e; color: #FFF"
                                                  )
+                                               ),
+                                               shiny::downloadButton(
+                                                 outputId = "wl_download",
+                                                 label = "Download Plot",
+                                                 style = "width: 100%;"
                                                )
                                              )
                                            ),
@@ -497,6 +507,11 @@ shiny::shinyApp(
                                                shiny::actionButton(
                                                  inputId = "ts_adj_plot",
                                                  label = "Adjust Plot"
+                                               ),
+                                               shiny::downloadButton(
+                                                 outputId = "timeseries_download",
+                                                 label = "Download Plot",
+                                                 style = "width: 100%;"
                                                )
                                              )
                                            ),

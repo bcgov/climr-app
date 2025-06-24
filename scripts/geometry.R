@@ -515,7 +515,6 @@ session_geometry <- function(sg_dt, mp) {
                   shiny::downloadButton(
                     outputId = "downscale_download",
                     label = "Download Downscaled Data",
-                    title = "Download downscaled geographies archive",
                     style = "width: 100%;"
                   )
                 )
