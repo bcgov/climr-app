@@ -13,6 +13,11 @@ visualization_server <- function(input, output, session) {
   filtered_dt = NULL
   )
   
+  # disable the download buttons on page load
+  shinyjs::disable("bivariate_download")
+  shinyjs::disable("wl_download")
+  shinyjs::disable("timeseries_download")
+  
   # ---- Modal input storage
   output$vis_map <- leaflet::renderLeaflet(l |> addDistricts() |>  
                                              htmlwidgets::onRender("
@@ -29,9 +34,9 @@ visualization_server <- function(input, output, session) {
   # ---- Plot data info
   vis_by_map <- reactiveVal(FALSE)
   show_plots <- reactiveVal(TRUE)
-  bivariate_data <- c()
-  timeseries_data <- c()
-  wl_data <- c()
+  bivariate_data <- data.table()
+  timeseries_data <- data.table()
+  wl_data <- data.table()
   
   # mapping for database connections
   gcm_id <- data.table(gcm = list_gcms(), gcm_id = seq_along(list_gcms()))
@@ -206,7 +211,7 @@ visualization_server <- function(input, output, session) {
             lat = coords[, 2],
             elev = elevs
           )
-          bivariate_data <- climr::plot_bivariate_input(xyz)
+          bivariate_data <<- climr::plot_bivariate_input(xyz)
           show_plots(TRUE)
           vis_sg$bivariate(bivariate_data)
         }
@@ -248,7 +253,8 @@ visualization_server <- function(input, output, session) {
             dat[run_id == "1", run_id := "ensembleMean"]
             dat2 <- dcast(dat, gcm + ssp + run_id + period ~ var)
             setnames(dat2, old = c("gcm", "ssp", "run_id", "period"), new = c("GCM", "SSP", "RUN", "PERIOD"))
-            vis_sg$bivariate(dat2)
+            bivariate_data <<- dat2
+            vis_sg$bivariate(bivariate_data)
           }
         )
       }
@@ -328,7 +334,7 @@ visualization_server <- function(input, output, session) {
             gcms <- input$time_series_gcms
             ssps <- input$time_series_ssps
           }
-          timeseries_data <- climr::plot_timeSeries_input(xyz, gcms = gcms, ssps = ssps, obs_ts_dataset = c("mswx.blend", "cru.gpcc", "climatena"))
+          timeseries_data <<- climr::plot_timeSeries_input(xyz, gcms = gcms, ssps = ssps, obs_ts_dataset = c("mswx.blend", "cru.gpcc", "climatena"))
           show_plots(TRUE)
           vis_sg$timeseries(timeseries_data)
           removeModal()
@@ -376,7 +382,8 @@ visualization_server <- function(input, output, session) {
             dat[run_id == "1", run_id := "ensembleMean"]
             dat <- dat[,-c("gcm_id","ssp_id", "dataset_id", "region", "var_id")]
             setnames(dat, old = c("run_id", "period", "value", "gcm", "ssp", "dataset"), new = c("RUN", "PERIOD", code, "GCM", "SSP", "DATASET"))
-            vis_sg$timeseries(dat)
+            timeseries_data <<- dat
+            vis_sg$timeseries(timeseries_data)
           }
         )
       }
@@ -407,7 +414,7 @@ visualization_server <- function(input, output, session) {
             lat = coords[, 2],
             elev = elevs
           )
-          wl_data <- climr::plot_WalterLieth_input(xyz, obs_period = climr::list_obs_periods())
+          wl_data <<- climr::plot_WalterLieth_input(xyz, obs_period = climr::list_obs_periods())
           show_plots(TRUE)
           vis_sg$walter_lieth(wl_data)
         }
@@ -442,7 +449,8 @@ visualization_server <- function(input, output, session) {
             dat[var_id, var := i.var, on = "var_id"]
             dat2 <- dcast(dat, period ~ var, value.var = "value")
             setnames(dat2, old = c("period"), new = c("PERIOD"))
-            vis_sg$walter_lieth(dat2)
+            wl_data <<- dat2
+            vis_sg$walter_lieth(wl_data)
           }
         )
       }
@@ -656,4 +664,63 @@ visualization_server <- function(input, output, session) {
     }
   })
   
+  # download handling for plots
+  output$bivariate_download <- shiny::downloadHandler(
+    filename = function() {
+      paste0("bivariate_plot_", Sys.time(), ".png")
+    },
+    content = function(file) {
+      pixelratio <- session$clientData$pixelratio
+      width  <- session$clientData$output_bivariate_plot_width
+      height <- session$clientData$output_bivariate_plot_height
+      
+      png(file, width = width*pixelratio*3, height = height*pixelratio*3, res = 120*pixelratio)
+      print(climr::plot_bivariate(
+              X = bivariate_data,
+              xvar = climr::variables[Code_Element == input$bivariate_element_x & Time == input$bivariate_time_x, Code],
+              yvar = climr::variables[Code_Element == input$bivariate_element_y & Time == input$bivariate_time_y, Code],
+              period_focal = input$bivariate_period,
+              interactive = FALSE
+              ))
+      dev.off()
+    }
+  )
+  
+  output$wl_download <- shiny::downloadHandler(
+    filename = function() {
+      paste0("walter_lieth_plot_", Sys.time(), ".png")
+    },
+    content = function(file) {
+      pixelratio <- session$clientData$pixelratio
+      width  <- session$clientData$output_wl_plot_width
+      height <- session$clientData$output_wl_plot_height
+      
+      png(file, width = width*pixelratio*3, height = height*pixelratio*3, res = 120*pixelratio)
+      print(climr::plot_WalterLieth(
+        X = wl_data,
+        diurnal = input$wl_diurnal,
+        obs_period = input$wl_obs_period
+      ))
+      dev.off()
+    }
+  )
+  
+  output$timeseries_download <- shiny::downloadHandler(
+    filename = function() {
+      paste0("timeseries_plot_", Sys.time(), ".png")
+    },
+    content = function(file) {
+      pixelratio <- session$clientData$pixelratio
+      width  <- session$clientData$output_timeseries_plot_width
+      height <- session$clientData$output_timeseries_plot_height
+      
+      png(file, width = width*pixelratio*3, height = height*pixelratio*3, res = 120*pixelratio)
+      print(climr::plot_timeSeries(
+        X = timeseries_data,
+        var1 = climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code],
+        obs_ts_dataset = input$time_series_dataset
+      ))
+      dev.off()
+    }
+  )
 }

@@ -231,10 +231,11 @@ shiny::shinyApp(
       shiny::tabPanel(
         title = "Visualization",
         prompter::use_prompt(),
+        shinyjs::useShinyjs(),
         shiny::mainPanel(
                   id = "main-panel-container",
                   width = "100%",
-                  shinyjs::useShinyjs(),
+                  # shinyjs::useShinyjs(),
                   tags$head(
                     tags$script(HTML("
                                 Shiny.addCustomMessageHandler('toggle-plot', function(show) {
@@ -453,7 +454,8 @@ shiny::shinyApp(
                                                shiny::downloadButton(
                                                  outputId = "wl_download",
                                                  label = "Download Plot",
-                                                 style = "width: 100%;"
+                                                 style = "width: 100%;",
+                                                 disabled = "disabled"
                                                )
                                              )
                                            ),
@@ -527,7 +529,7 @@ shiny::shinyApp(
                                          ))
                       )
                     )
-                  ),
+                  )
         )
       ),
      
