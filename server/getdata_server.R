@@ -840,16 +840,18 @@ getdata_server <- function(input, output, session) {
               width = "100%"
             ),
             
-            
             # preview for csv results
             shiny::uiOutput("preview_table_ui"),
-            br(),
             
-            shiny::downloadButton(
-              outputId = "downscale_download",
-              label = "Download Downscaled Data",
-              style = "width: 100%;"
-            ),
+            shiny::conditionalPanel(
+              condition = "input.downscale_output == 'csv'",
+              br(),
+              shiny::downloadButton(
+                outputId = "downscale_download",
+                label = "Download Downscaled Data",
+                style = "width: 100%;"
+              )
+            )
           )
         )
       } else {
