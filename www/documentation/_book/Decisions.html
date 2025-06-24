@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>2&nbsp; Overview – climr Web Application</title>
+<title>6&nbsp; Decision Guidance – climr Web Application</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -30,8 +30,8 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./Instructions.html" rel="next">
-<link href="./index.html" rel="prev">
+<link href="./Feedback.html" rel="next">
+<link href="./Issues.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -82,7 +82,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./Overview.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Overview</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./Decisions.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Decision Guidance</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -115,7 +115,7 @@ ul.task-list li input[type="checkbox"] {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./Overview.html" class="sidebar-item-text sidebar-link active">
+  <a href="./Overview.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Overview</span></span></a>
   </div>
 </li>
@@ -128,7 +128,7 @@ ul.task-list li input[type="checkbox"] {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./Methods.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Methods (How the Tool Works)</span></span></a>
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Methods</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -139,7 +139,7 @@ ul.task-list li input[type="checkbox"] {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./Decisions.html" class="sidebar-item-text sidebar-link">
+  <a href="./Decisions.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Decision Guidance</span></span></a>
   </div>
 </li>
@@ -166,23 +166,15 @@ ul.task-list li input[type="checkbox"] {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">Table of contents</h2>
-   
-  <ul>
-  <li><a href="#structure" id="toc-structure" class="nav-link active" data-scroll-target="#structure"><span class="header-section-number">2.1</span> Structure</a></li>
-  <li><a href="#acknowledgements" id="toc-acknowledgements" class="nav-link" data-scroll-target="#acknowledgements"><span class="header-section-number">2.2</span> Acknowledgements</a></li>
-  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">2.3</span> References:</a></li>
-  </ul>
-</nav>
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Overview</span></h1>
+<h1 class="title"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Decision Guidance</span></h1>
 </div>
 
 
@@ -199,53 +191,8 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>What is the climr App? Or perhaps the ClimApp?</p>
-<section id="structure" class="level2" data-number="2.1">
-<h2 data-number="2.1" class="anchored" data-anchor-id="structure"><span class="header-section-number">2.1</span> Structure</h2>
-<p>The climr App is organized into three tabs.</p>
-<ol type="1">
-<li><p><strong>Get Data:</strong> Users can select points or areas of interest using one of 2 methods</p>
-<ol type="i">
-<li>Single map points or drawn polygons</li>
-<li>Uploading a shape file</li>
-</ol>
-<p>Users can then select the desired parameters and downscale the data. The downscaled data can be previewed and is available for download as csv and Geotiff.</p></li>
-<li><p><strong>Visualization:</strong> Users can visualize data by choosing an area using one of 3 methods</p>
-<ol type="i">
-<li>Forest Landscape Plan (FLP) Area</li>
-<li>Ecoregions of North America</li>
-<li>Single map point</li>
-</ol>
-<p>Users can then visualize data for the selected area using available plot (Bivariate, Walter-Lieth, Time Series, Boxplot, Climate Stripes).</p>
-<p>Users can also add climate maps as an overlay on North America.</p></li>
-<li><p><strong>Documentation</strong>: Help files and data sources</p>
-<ol type="a">
-<li><strong>Overview</strong>:</li>
-<li><strong>Instructions</strong>: Instructions on how to use the tool</li>
-<li><strong>Methods</strong>: Detailed background information about what’s happening “under the hood”</li>
-<li><strong>Known issues</strong>: Documentation on current known issues with the tool</li>
-<li><strong>Using the climr App for decisions</strong>: Support and guidance for using the climr App as a decision-making tool</li>
-<li><strong>Definitions</strong>: Glossary of climate variables?</li>
-<li><strong>Providing feedback</strong>: Ways users can report issues or provide suggestions for future improvements</li>
-<li><strong>FAQs</strong>: Frequently asked questions</li>
-<li><strong>Model information</strong>: Version of input data and models</li>
-<li><strong>Shiny app information</strong>: Github repo, license, and other info</li>
-</ol></li>
-</ol>
-</section>
-<section id="acknowledgements" class="level2" data-number="2.2">
-<h2 data-number="2.2" class="anchored" data-anchor-id="acknowledgements"><span class="header-section-number">2.2</span> Acknowledgements</h2>
-</section>
-<section id="references" class="level2" data-number="2.3">
-<h2 data-number="2.3" class="anchored" data-anchor-id="references"><span class="header-section-number">2.3</span> References:</h2>
-<section id="additional-documents" class="level4" data-number="2.3.0.1">
-<h4 data-number="2.3.0.1" class="anchored" data-anchor-id="additional-documents"><span class="header-section-number">2.3.0.1</span> Additional Documents:</h4>
-<p><a href="https://bcgov.github.io/climr/articles/index.html" target="_blank">climr Package Articles</a></p>
-<p><a href="https://bcgov.github.io/climr/reference/index.html" target="_blank">climr Package Reference</a></p>
 
 
-</section>
-</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -667,13 +614,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./index.html" class="pagination-link" aria-label="climr Web Application">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">climr Web Application</span></span>
+      <a href="./Issues.html" class="pagination-link" aria-label="Known Issues">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Known Issues</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./Instructions.html" class="pagination-link" aria-label="Instructions">
-        <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Instructions</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./Feedback.html" class="pagination-link" aria-label="Providing Feedback">
+        <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Providing Feedback</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

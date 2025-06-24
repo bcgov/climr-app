@@ -76,7 +76,7 @@ To clear all selections, click **Reset**.
 
 ### **Step 3.** Generate Results:
 
-Click on the green **Generate Results** button. If the area of interest are map point(s) or an uploaded file of single points, the only output format available for the downscaled data is csv. If the area of interest is a map drawn shape or a shape file, users can choose between csv and GeoTIFF as the output format.
+Click on the **Generate Results** button. If the area of interest are map point(s) or an uploaded file of single points, the only output format available for the downscaled data is csv. If the area of interest is a map drawn shape or a shape file, users can choose between csv and GeoTIFF as the output format.
 
 If GeoTIFF is selected, users will need to choose downscale resolution.
 
@@ -92,7 +92,7 @@ Figure 5: Choosing output formats for downscaled data for a map drawn shape or s
 
 </figure>
 
-Click **Launch Downscale**. Notification boxes will appear on the right-hand side of the screen while the downscale is processing, indicating each step.
+Click **Launch Downscale Process**. Notification boxes will appear on the right-hand side of the screen while the downscale is processing, indicating each step.
 
 If csv has been selected, a preview will appear under the Launch Downscale button, and users can choose to download the data.
 
@@ -236,6 +236,25 @@ Information here about what the parameters mean??
 
 
 ## Visualization
+
+In the second tab of the climr App, users can select an area of interest by Forest Landscape Plan (FLP) Areas, ecoregions of North America, or by single map points. Users can then visualize data for the selected area by available plots (Bivariate, Walter-Lieth, Time Series, Boxplot, Climate Stripes). Users can also add a climate map as an overlay on North America. For a very quick summary of functionality of this page, users can also click the *What does this page do* link at the top of the floating panel.
+
+### **Step 1.** Select points or areas of interest:
+
+Users can select points or areas of interest using **one of the following three methods**:
+
+-   **Method 1**. Select **FLP Area** and click on one of the outlined areas on the map.
+
+-   **Method 2**. Select **Ecoregion** and click on one of the outlined areas on the map.
+
+-   **Method 3**. Select **Map point** and click on the map to add a single point.
+
+### **Step 2.** Visualize by plots:
+
+
+
+
+
 
 
 

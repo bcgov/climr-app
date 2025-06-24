@@ -149,16 +149,16 @@ shiny::shinyApp(
           shiny::sidebarPanel(
             style = "height: 84vh; overflow-y: auto; overflow-x: auto;", # FIX HEIGHT TO BE ADAPTIVE
             
-            # # create the link!!!
-            # shiny::div(
-            #   style = "text-align: center;",
-            #   shiny::actionLink(
-            #     inputId = "tutorial",
-            #     label = "What does this page do",
-            #     icon = icon("question-circle")
-            #     )
-            # ),
-            # br(),
+            # create the link!!!
+            shiny::div(
+              style = "text-align: center;",
+              shiny::actionLink(
+                inputId = "tutorial",
+                label = "What does this page do",
+                icon = icon("question-circle")
+                )
+            ),
+            br(),
             splitLayout(
               actionButton("clear_selections", "Clear Selections",
                             style = "width:100%; height:70px; background-color:#c21104; color: #FFF"),
@@ -295,6 +295,15 @@ shiny::shinyApp(
                         left = 60,           
                         width = 170,
                         style = "padding: 10px;",
+                        # # create the link!!!
+                        # shiny::div(
+                        #   style = "text-align: center;",
+                        #   shiny::actionLink(
+                        #     inputId = "tutorial",
+                        #     label = "What does this page do",
+                        #     icon = icon("question-circle")
+                        #     )
+                        # ),
                         shiny::radioButtons(
                           inputId = "input_type",
                           label = h4("Visualize by:", style = "margin-bottom: 7px;"),
@@ -508,10 +517,12 @@ shiny::shinyApp(
       ),
      
       shiny::navbarMenu(
-        "About",
+        "Documentation",
         "How to use",
-        shiny::tabPanel("Get Data"),
-        shiny::tabPanel("Visualization"),
+        shiny::tabPanel("climr App",
+                        tags$iframe(src = "documentation/_book/index.html",
+                                    width = "100%", frameborder = "0", height = "900px")
+                        ),
         "climr package",
         shiny::tabPanel(
           title = "Documentation",

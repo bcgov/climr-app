@@ -116,7 +116,21 @@ getdata_server <- function(input, output, session) {
   getdata_sg <- session_geometry(getdata_sg_dt, getdata_mp)
   
   # ---- Get Data Map events
-  
+  # How to use Get Data page
+  shiny::observeEvent(input$tutorial, {
+    showModal(modalDialog(
+      title = "What does this page do?",
+      easyClose = TRUE,
+      size = "xl",
+      footer = NULL,
+      tags$iframe(
+        src = "How_to_use_getdata.pdf#toolbar=0",
+        width = "100%",
+        height = "600px",
+        style = "border:none;"
+      )
+    ))
+  })
   # add map points and drawing map shapes logic
   shiny::observeEvent(input$getdata_map_draw_start, {
     if (shiny::in_devmode()) cat("Event: getdata_map_draw_start", sep = "\n")
@@ -168,7 +182,6 @@ getdata_server <- function(input, output, session) {
   })
   
   # ---- Get Data - Data table events
-  
   # delete a map point via data table
   shiny::observeEvent(input$delete_button, {
     if (shiny::in_devmode()) cat("Event: sg_remove", sep = "\n")
