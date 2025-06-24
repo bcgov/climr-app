@@ -228,10 +228,9 @@ visualization_server <- function(input, output, session) {
           warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
           error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
           {
-            # set up db query
+            # set up db query (only view ssp245)
             region <- vstore[[if (input$input_type == "FLP Area") "flp_area" else "ecoregion"]]
             gcms <- paste(gcm_id[,gcm_id], collapse = ",")
-            ssps <- paste(ssp_id[,ssp_id], collapse = ",")
             code_x <- paste(climr::variables[Code_Element == input$bivariate_element_x & Time == input$bivariate_time_x, Code], collapse = ",")
             var_x <- var_id[var == code_x, var_id]
             code_y <- paste(climr::variables[Code_Element == input$bivariate_element_y & Time == input$bivariate_time_y, Code], collapse = ",")
@@ -239,9 +238,9 @@ visualization_server <- function(input, output, session) {
 
             query <- sprintf("SELECT * FROM ds_bivariate WHERE region = '%s'
                             AND (gcm_id IN (%s) OR gcm_id IS NULL)
-                            AND (ssp_id IN (%s) OR ssp_id IS NULL)
+                            AND (ssp_id = 2 OR ssp_id IS NULL)
                             AND (var_id = %s OR var_id = %s)
-                            ORDER BY gcm_id, period, run_id, ssp_id", region, gcms, ssps, var_x, var_y)
+                            ORDER BY gcm_id, period, run_id, ssp_id", region, gcms, var_x, var_y)
             dat <- climr:::db_safe_query(query)
             dat <- as.data.table(dat)
 
