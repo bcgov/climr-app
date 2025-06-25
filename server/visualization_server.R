@@ -38,9 +38,6 @@ visualization_server <- function(input, output, session) {
   var_id <- data.table(var = list_vars(), var_id = seq_along(list_vars()))
   dataset_id <- data.table(dataset = c("mswx.blend","cru.gpcc","climatena"), dataset_id = 1:3)
   
-  # mapping for ecoregion codes
-  er_codes <- data.table::fread("data/Ecoregions_Codes.csv")
-  
   vstore <- reactiveValues(
     tifsource = names(climr_tif) |> head(1),
     time = NULL,

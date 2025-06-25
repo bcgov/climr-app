@@ -17,6 +17,7 @@ suppressPackageStartupMessages({
   library(plotly)
   library(dplyr)
   library(quarto)
+  library(jsonlite)
   source("scripts/utils.R", local = TRUE)
 })
 
@@ -30,6 +31,10 @@ tooltipsIcon <- icon("question-circle")
 tooltipsIcon$attribs$class <- gsub("fa ", "far ", tooltipsIcon$attribs$class, fixed = TRUE)
 # Wrap in a span to be able to use prompter
 tooltipsIcon <- span(tooltipsIcon)
+
+# mapping for ecoregion codes
+df <- read.csv("data/Ecoregions_Codes.csv", stringsAsFactors = FALSE)
+er_codes <- as.list(setNames(df$Name, df$Code))
 
 # Shiny options
 options(shiny.autoreload = TRUE)
@@ -124,7 +129,11 @@ shiny::shinyApp(
       tags$link(rel="icon", href="images/bcid-favicon-32x32.png", sizes="32x32", type="image/png"),
       tags$link(rel="icon", href="images/bcid-favicon-16x16.png", sizes="16x16", type="image/png"),
       tags$link(rel="mask-icon", href="images/bcid-apple-icon.svg", color="#036"),
-      tags$link(rel="icon", href="images/bcid-favicon-32x32.png")
+      tags$link(rel="icon", href="images/bcid-favicon-32x32.png"),
+      tags$script(HTML(sprintf(
+        "window.ecoregionNames = %s;",
+        jsonlite::toJSON(er_codes, auto_unbox = TRUE)
+      )))
     ),
     shiny::navbarPage(
       collapsible = TRUE,

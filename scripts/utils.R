@@ -368,7 +368,7 @@ addDistricts <- function(map) {
         var cname = data.name;
         var cid = data.id;
         var type = data.inputType;
-        console.log(url);
+        //console.log(url);
         map.removeLayer(distLayer);
         distLayer = L.vectorGrid.protobuf(url, vectorTileOptionsDist(cname, cname, true,
                           "tilePane", cid, cid)
@@ -378,11 +378,12 @@ addDistricts <- function(map) {
           const fieldNames = Object.keys(e.properties);
           console.log(type);
           if (type == "Ecoregion") {
-           const er_name = window.er_codes?.[e.properties[fieldNames[0]]];
-           console.log(er_name);
+           const er_name = window.ecoregionNames?.[e.properties[fieldNames[0]]];
+           //console.log(er_name);
+           //console.log(e.properties[fieldNames[0]]);
            return er_name;
           } else {
-            console.log(e.properties[fieldNames[0]]);
+            //console.log(e.properties[fieldNames[0]]);
             return e.properties[fieldNames[0]];
           }
         }, {sticky: true, textsize: "12px", opacity: 1});
