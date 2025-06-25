@@ -136,7 +136,7 @@ session_geometry <- function(sg_dt, mp) {
     
     e <- terra::ext(-179.0625, -51.5625, 14.375, 83.125)
     e_poly <- as.polygons(e)
-    crs(e_poly) <- "EPSG:4326" 
+    crs(e_poly) <- "EPSG:4326"
     
     if (grepl("POINT", new)) {
       
@@ -150,7 +150,7 @@ session_geometry <- function(sg_dt, mp) {
       # check if the point is within valid space
       p <- vect(cbind(lon, lat), crs = crs(e_poly))
       intersection <- terra::intersect(e_poly, p)
-      
+
       if (nrow(intersection) == 0) {
         showModal(
           modalDialog(
@@ -178,20 +178,6 @@ session_geometry <- function(sg_dt, mp) {
         index = index +1
       } 
 
-      # check if the point is within valid space
-      p <- vect(cbind(lon_coords, lat_coords), crs = crs(e_poly))
-      intersection <- terra::intersect(e_poly, p)
-      
-      if (nrow(intersection) == 0) {
-        showModal(
-          modalDialog(
-            title = "Warning",
-            paste("Please select a point or area within North America." ),
-            easyClose = TRUE
-          )
-        )
-        return()
-      }
       lon <- round(mean(lon_coords[!is.na(lon_coords)]), 5)
       lat <- round(mean(lat_coords[!is.na(lat_coords)]), 5)
       }

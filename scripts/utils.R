@@ -438,129 +438,6 @@ addDistricts <- function(map) {
   map
 }
 
-# # ecoregion tilelayers
-# ecoregion_tileserver <- "https://tileserver.thebeczone.ca/data/ecoregions/{z}/{x}/{y}.pbf"
-# ecoregion_tilelayer <- "Ecoregions"
-# 
-# addEcoregions <- function(map) {
-#   map <- htmlwidgets::onRender(map, paste0('
-#     function(el, x, data) {
-#             //Now districts regions
-#             
-#       ecoregion_flag = true;
-#       Shiny.setInputValue("eco_flag",false);
-#       var distHL = "DQU";
-#       var styleHL = {
-#             weight: 3,
-#             color: "#fc036f",
-#             fillColor: "#FFFB00",
-#             fillOpacity: 1,
-#             fill: false
-#       };
-#       var vectorTileOptionsER=function(layerName, layerId, activ,
-#                                      lfPane, prop, id) {
-#         return {
-#           vectorTileLayerName: layerName,
-#           interactive: true,
-#           vectorTileLayerStyles: {
-#             [layerId]: function(properties, zoom) {
-#               return {
-#                 weight: 1,
-#                 color: "#000000",
-#                 fill: true,
-#                 fillOpacity: 0
-#               }
-#             }
-#           },
-#           pane : lfPane, 
-#           getFeatureId: function(f) {
-#             return f.properties[id];
-#           }
-#         }
-#       };
-#       
-#       ecoLayer = L.vectorGrid.protobuf(
-#         "', ecoregion_tileserver, '",
-#         vectorTileOptionsER("Ecoregions", "', ecoregion_tilelayer, '", true,
-#                           "tilePane", "dist_code", "dist_code")
-#       )
-#       //map_2.layerManager.addLayer(ecoLayer, "tile", "dist_code", "dist_code");
-#       
-#       Shiny.addCustomMessageHandler("addEcoRegionTile",function(data){
-#         map = window.map;
-#         console.log(window.map instanceof L.Map);
-#         var url = data.url;
-#         var cname = data.name;
-#         var cid = data.id;
-#         console.log(url);
-#         console.log("HI");
-#         map.removeLayer(ecoLayer);
-#         ecoLayer = L.vectorGrid.protobuf(url, vectorTileOptionsER(cname, cname, true,
-#                           "tilePane", cid, cid)
-#         )
-#         map.layerManager.addLayer(ecoLayer, "tile", cid, cid);
-#         ecoLayer.bindTooltip(function(e) {
-#           const fieldNames = Object.keys(e.properties);
-#           return e.properties[fieldNames[0]];
-#         }, {sticky: true, textsize: "12px", opacity: 1});
-#         ecoLayer.bringToFront();
-#         ecoFlag = true;
-#         Shiny.setInputValue("eco_flag",ecoFlag);
-#         console.log("HI");
-#         
-#         ecoLayer.on("click", function(e){
-#           ecoLayer.resetFeatureStyle(distHL);
-#           distHL = e.layer.properties[cid];
-#           Shiny.setInputValue("er_click",distHL);
-#           ecoLayer.setFeatureStyle(distHL, styleHL);
-#           flag = false;
-#           ecoFlag = false;
-#           setTimeout(() => {
-#             Shiny.setInputValue("eco_flag",false);
-#           }, 600);
-#           });
-#       });
-#       
-#       Shiny.addCustomMessageHandler("clear_ecoregion",function(x){
-#         map.removeLayer(ecoLayer);
-#         ecoFlag = false;
-#         Shiny.setInputValue("eco_flag",ecoFlag);
-#       });
-# 
-#       Shiny.addCustomMessageHandler("selectER",function(x){
-#         ecoLayer.bringToFront();
-#         ecoFlag = true;
-#         Shiny.setInputValue("eco_flag",ecoFlag);
-#       });
-#       
-#       Shiny.addCustomMessageHandler("clearTooltips",function(x){
-#         ecoLayer.unbindTooltip();
-#         ecoFlag = false;
-#         Shiny.setInputValue("eco_flag",ecoFlag); 
-#       });
-#       
-#       Shiny.addCustomMessageHandler("reset_ecoregion",function(x){
-#         ecoLayer.resetFeatureStyle(distHL);
-#         ecoFlag = true;
-#         Shiny.setInputValue("eco_flag",ecoFlag);
-#         ecoLayer.bindTooltip(function(e) {
-#           const fieldNames = Object.keys(e.properties);
-#           return e.properties[fieldNames[0]];
-#         }, {sticky: true, textsize: "12px", opacity: 1});
-#         //Shiny.setInputValue("dist_click",null);
-#       });
-#       
-#       ecoLayer.bindTooltip(function(e) {
-#         const fieldNames = Object.keys(e.properties);
-#         return e.properties[fieldNames[0]];
-#       }, {sticky: true, textsize: "12px", opacity: 1});
-#       
-#       // end ecoregions
-#     }'
-#   ))
-#   map
-# }
-
 default_draw_tool <- function(mp) {
   mp |> leaflet.extras::addDrawToolbar(
     position = "bottomleft",
@@ -682,6 +559,36 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
       xyz$id <- seq_len(nrow(xyz))
     }
 
+    # clip area not in North America bounds
+    if (inherits(xyz, "SpatRaster")) {
+      e <- terra::ext(-179.0625, -51.5625, 14.375, 83.125)
+      i <- terra::intersect(terra::ext(xyz), e)
+      if (!is.null(i)) {
+        s <- xyz
+        xyz <- crop(s, e, snap = "in")
+        i <- terra::intersect(terra::ext(xyz), e)
+        if (is.null(i)) {
+          showModal(
+            modalDialog(
+              title = "Warning",
+              paste("Please select a point or area within North America." ),
+              easyClose = TRUE
+            )
+          )
+          return()
+        }
+      } else {
+        showModal(
+          modalDialog(
+            title = "Warning",
+            paste("Please select a point or area within North America." ),
+            easyClose = TRUE
+          )
+        )
+        return()
+      }
+    }  
+
     res <- ds(xyz)
     
     # keep a copy of res for previewing raster
@@ -702,6 +609,36 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
     raster_idx <- which(sg$source == "raster_upload")
     for (i in raster_idx) {
       xyz <- fg[[sg[["datapath"]][i]]]$raster
+      
+      # clip area not in North America bounds
+      if (inherits(xyz, "SpatRaster")) {
+        e <- terra::ext(-179.0625, -51.5625, 14.375, 83.125)
+        i <- terra::intersect(terra::ext(xyz), e)
+        if (!is.null(i)) {
+          s <- xyz
+          xyz <- crop(s, e, snap = "in")
+          i <- terra::intersect(terra::ext(xyz), e)
+          if (is.null(i)) {
+            showModal(
+              modalDialog(
+                title = "Warning",
+                paste("Please select a point or area within North America." ),
+                easyClose = TRUE
+              )
+            )
+            return()
+          }
+        } else {
+          showModal(
+            modalDialog(
+              title = "Warning",
+              paste("Please select a point or area within North America." ),
+              easyClose = TRUE
+            )
+          )
+          return()
+        }
+      } 
       res <- ds(xyz)
       # Write the current res to tif using the same run_id
       out_file <- file.path(temp_dir, paste0("downscale_", run_id, "_raster_",i,".%s" |> sprintf(vstore[["downscale_output"]])))
@@ -733,6 +670,36 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
     for (i in map_shape_idx) {
       g <- terra::vect(sg$wkt[i], crs = "EPSG:4326")
       xyz <- g |> rastmaker()
+      
+      # clip area not in North America bounds
+      if (inherits(xyz, "SpatRaster")) {
+        e <- terra::ext(-179.0625, -51.5625, 14.375, 83.125)
+        i <- terra::intersect(terra::ext(xyz), e)
+        if (!is.null(i)) {
+          s <- xyz
+          xyz <- crop(s, e, snap = "in")
+          i <- terra::intersect(terra::ext(xyz), e)
+          if (is.null(i)) {
+            showModal(
+              modalDialog(
+                title = "Warning",
+                paste("Please select a point or area within North America." ),
+                easyClose = TRUE
+              )
+            )
+            return()
+          }
+        } else {
+          showModal(
+            modalDialog(
+              title = "Warning",
+              paste("Please select a point or area within North America." ),
+              easyClose = TRUE
+            )
+          )
+          return()
+        }
+      } 
       res <- ds(xyz)
       res <- terra::mask(res, g)
       
@@ -755,6 +722,36 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
       for (j in seq_along(fg[[sg[["datapath"]][i]]]$shape)) {
         g <- fg[[sg[["datapath"]][i]]]$shape[j]
         xyz <- g |> rastmaker()
+        
+        # clip area not in North America bounds
+        if (inherits(xyz, "SpatRaster")) {
+          e <- terra::ext(-179.0625, -51.5625, 14.375, 83.125)
+          i <- terra::intersect(terra::ext(xyz), e)
+          if (!is.null(i)) {
+            s <- xyz
+            xyz <- crop(s, e, snap = "in")
+            i <- terra::intersect(terra::ext(xyz), e)
+            if (is.null(i)) {
+              showModal(
+                modalDialog(
+                  title = "Warning",
+                  paste("Please select a point or area within North America." ),
+                  easyClose = TRUE
+                )
+              )
+              return()
+            }
+          } else {
+            showModal(
+              modalDialog(
+                title = "Warning",
+                paste("Please select a point or area within North America." ),
+                easyClose = TRUE
+              )
+            )
+            return()
+          }
+        } 
         res <- ds(xyz)
         res <- terra::mask(res, g)
         
