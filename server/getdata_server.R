@@ -112,7 +112,7 @@ getdata_server <- function(input, output, session) {
   )
   
   # ---- Geometry
-  source("scripts/geometry.R", local = TRUE)
+  source("scripts/geometry_getdata.R", local = TRUE)
   getdata_sg <- session_geometry(getdata_sg_dt, getdata_mp)
   
   # ---- Get Data Map events

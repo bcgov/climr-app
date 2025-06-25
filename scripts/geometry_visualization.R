@@ -89,8 +89,39 @@ visualization_geometry <- function(dt, mp) {
   # add new geometries to dt$dt
   push <- function(new, g, s, d = NA_character_) {
     id <- max(c(0L,(dt$dt)$id))+1L
+    
+    # check if the point is within valid space
+    e <- terra::ext(-179.0625, -51.5625, 14.375, 83.125)
+    e_poly <- as.polygons(e)
+    crs(e_poly) <- "EPSG:4326"
+    
+    if (grepl("POINT", new)) {
+      
+      # Extract long and lat coordinates
+      coords <- gsub("POINT \\(|\\)", "", new)
+      coords_split <- strsplit(coords, " ")[[1]]
+      
+      lon <- round(as.numeric(coords_split[1]), 5)
+      lat <- round(as.numeric(coords_split[2]), 5)
+      
+      # check if the point is within valid space
+      p <- vect(cbind(lon, lat), crs = crs(e_poly))
+      intersection <- terra::intersect(e_poly, p)
+      
+      if (nrow(intersection) == 0) {
+        showModal(
+          modalDialog(
+            title = "Warning",
+            paste("Please select a point or area within North America." ),
+            easyClose = TRUE
+          )
+        )
+        return()
+      }
+    }
     # only allow one map point at a time
     dt$dt <- data.table::data.table(id = id, wkt = new, group = g, source = s, datapath = d)
+    
     # To show hull when npoints > 100
     if (!grepl("POINT", new)) g <- "shape"
     refresh(g)
