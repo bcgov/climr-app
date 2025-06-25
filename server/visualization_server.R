@@ -13,11 +13,6 @@ visualization_server <- function(input, output, session) {
   filtered_dt = NULL
   )
   
-  # disable the download buttons on page load
-  shinyjs::disable("bivariate_download")
-  shinyjs::disable("wl_download")
-  shinyjs::disable("timeseries_download")
-  
   # ---- Modal input storage
   output$vis_map <- leaflet::renderLeaflet(l |> addDistricts() |>  
                                              htmlwidgets::onRender("
@@ -33,7 +28,7 @@ visualization_server <- function(input, output, session) {
   
   # ---- Plot data info
   vis_by_map <- reactiveVal(FALSE)
-  show_plots <- reactiveVal(TRUE)
+  show_plots <- reactiveVal(FALSE)
   bivariate_data <- data.table()
   timeseries_data <- data.table()
   wl_data <- data.table()
@@ -44,26 +39,26 @@ visualization_server <- function(input, output, session) {
   var_id <- data.table(var = list_vars(), var_id = seq_along(list_vars()))
   dataset_id <- data.table(dataset = c("mswx.blend","cru.gpcc","climatena"), dataset_id = 1:3)
   
-  # mapping for months/seasons
-  time_labels <- c(
-    "Annual" = "Ann",
-    "Winter" = "Wt",
-    "Spring" = "Sp",
-    "Summer" = "Sm",
-    "Autumn" = "At",
-    "January" = "Jan",
-    "February" = "Feb",
-    "March" = "Mar",
-    "April" = "Apr",
-    "May" = "May",
-    "June" = "Jun",
-    "July" = "Jul",
-    "August" = "Aug",
-    "September" = "Sep",
-    "October" = "Oct",
-    "November" = "Nov",
-    "December" = "Dec"
-  )
+  # # mapping for months/seasons
+  # time_labels <- c(
+  #   "Annual" = "Ann",
+  #   "Winter" = "Wt",
+  #   "Spring" = "Sp",
+  #   "Summer" = "Sm",
+  #   "Autumn" = "At",
+  #   "January" = "Jan",
+  #   "February" = "Feb",
+  #   "March" = "Mar",
+  #   "April" = "Apr",
+  #   "May" = "May",
+  #   "June" = "Jun",
+  #   "July" = "Jul",
+  #   "August" = "Aug",
+  #   "September" = "Sep",
+  #   "October" = "Oct",
+  #   "November" = "Nov",
+  #   "December" = "Dec"
+  # )
   
   vstore <- reactiveValues(
     tifsource = names(climr_tif) |> head(1),
@@ -80,9 +75,19 @@ visualization_server <- function(input, output, session) {
   vis_sg <- visualization_geometry(vis_sg_dt, vis_mp)
   
   # ---- Visualization Map events
+  # click on map points
   shiny::observeEvent(input$vis_map_click, {
     if (shiny::in_devmode()) cat("Event: vis_map_click", sep = "\n")
     vis_sg$add_point(input$vis_map_click$lat, input$vis_map_click$lng, vis_by_map)
+    lapply(
+      c("downscale_data_time_series", "downscale_data_bivariate", "downscale_data_wl", "ts_adj_plot"),
+      function(btn_id) {
+        shiny::updateActionButton(
+          inputId = btn_id,
+          disabled = FALSE
+        )
+      }
+    )
   })
   
   # pop-up remove button for map points
@@ -91,15 +96,17 @@ visualization_server <- function(input, output, session) {
     vis_sg$rm(input$sg_remove)
   })
   
-  # clear map
-  shiny::observeEvent(input$clear_map, {
-    if (shiny::in_devmode()) cat("Event: clear_map", sep = "\n")
+  # clear map function
+  clear_all <- function() {
+    # remove all map points/shapes and overlays
     vis_sg$clear_all(vis_mp)
     vis_by_map(FALSE)
     leaflet::removeImage(vis_mp, layerId = "val")
     leaflet::clearControls(vis_mp)
     leaflet::hideGroup(vis_mp, "Climate")
     session$sendCustomMessage("clear_district","Waddles")
+    
+    # remove all plots
     if (!is.null(input$input_type)) {
       if (input$input_type != "") {
         session$sendCustomMessage("toggle-plot", FALSE)
@@ -118,13 +125,57 @@ visualization_server <- function(input, output, session) {
       value = FALSE
     )
     show_plots(FALSE)
+    
+    # disable downscale/plot buttons
+    lapply(
+      c("plot_ts_flp_er", "plot_bivariate_flp_er", "plot_wl_flp_er", "downscale_data_time_series", "downscale_data_bivariate", "downscale_data_wl", "ts_adj_plot"),
+      function(btn_id) {
+        shiny::updateActionButton(
+          inputId = btn_id,
+          disabled = TRUE
+        )
+      }
+    )
+  }
+  clear_inputs <- function() {
+    # clear map icons
+    vis_sg$clear_all(vis_mp)
+    vis_by_map(FALSE)
+    
+    # remove plots
+    show_plots(FALSE)
+    
+    # disable downscale/plot buttons
+    lapply(
+      c("plot_ts_flp_er", "plot_bivariate_flp_er", "plot_wl_flp_er", "downscale_data_time_series", "downscale_data_bivariate", "downscale_data_wl", "ts_adj_plot"),
+      function(btn_id) {
+        shiny::updateActionButton(
+          inputId = btn_id,
+          disabled = TRUE
+        )
+      }
+    )
+  }
+  shiny::observeEvent(input$clear_map, {
+    if (shiny::in_devmode()) cat("Event: clear_map", sep = "\n")
+    clear_all()
   })
-  
+  # click on ecoregion/FLP area
   shiny::observeEvent(input$dist_click,{
     if (input$input_type == "FLP Area") {
       vstore[["flp_area"]] <- input$dist_click
-    } else if (input$input_type == "Ecoregion")
-    vstore[["ecoregion"]] <- input$dist_click
+    } else if (input$input_type == "Ecoregion") {
+      vstore[["ecoregion"]] <- input$dist_click
+    }
+    lapply(
+      c("plot_ts_flp_er", "plot_bivariate_flp_er", "plot_wl_flp_er", "ts_adj_plot"),
+      function(btn_id) {
+        shiny::updateActionButton(
+          inputId = btn_id,
+          disabled = FALSE
+        )
+      }
+    )
   })
   
   # ---- Visualization data events
@@ -132,6 +183,14 @@ visualization_server <- function(input, output, session) {
     shiny::showModal(
       shiny::modalDialog(
         title = "Adjust Plot Options", size = "l", fade = FALSE, class = "modal-dialog-scrollable",
+        shiny::checkboxGroupInput(
+          inputId = "time_series_dataset",
+          label = h5("Choose dataset:"),
+          width = "100%",
+          inline = TRUE,
+          choices = c("MSWX Blend" = "mswx.blend", "ClimateNA" = "climatena", "Climatic Research Unit / Global Precipitation Climatology Centre" = "cru.gpcc"),
+          selected = c("mswx.blend", "climatena", "cru.gpcc")
+        ),
         shiny::checkboxGroupInput(
           inputId = "time_series_gcms",
           label = h5("Choose GCMs:"),
@@ -161,6 +220,8 @@ visualization_server <- function(input, output, session) {
     )
   }
   shiny::observeEvent(input$input_type, {
+    # clear previous inputs
+    clear_inputs()
     if (input$input_type == "Map point") {
       vis_by_map(TRUE)
       session$sendCustomMessage("clear_district","Waddles")
@@ -183,6 +244,11 @@ visualization_server <- function(input, output, session) {
     }
     show_plot <- input$input_type != ""
     session$sendCustomMessage("toggle-plot", show_plot)
+    
+    # disable the download buttons
+    shinyjs::disable("bivariate_download")
+    shinyjs::disable("wl_download")
+    shinyjs::disable("timeseries_download")
   })
   
   # ---- Visualization Plot events
@@ -214,6 +280,7 @@ visualization_server <- function(input, output, session) {
           bivariate_data <<- climr::plot_bivariate_input(xyz)
           show_plots(TRUE)
           vis_sg$bivariate(bivariate_data)
+          shinyjs::enable("bivariate_download")
         }
       )
     }
@@ -254,13 +321,14 @@ visualization_server <- function(input, output, session) {
             setnames(dat2, old = c("gcm", "ssp", "run_id", "period"), new = c("GCM", "SSP", "RUN", "PERIOD"))
             bivariate_data <<- dat2
             vis_sg$bivariate(bivariate_data)
+            shinyjs::enable("bivariate_download")
           }
         )
       }
     }
   })
   shiny::observeEvent(input$ts_adj_plot, {
-    if (shiny::in_devmode()) cat("Event: downscale_data_time_series", sep = "\n")
+    if (shiny::in_devmode()) cat("Event: ts_adj_plot", sep = "\n")
     if (nrow(vis_sg_dt$dt) < 1 & input$input_type == "Map point") {
       showModal(
         modalDialog(
@@ -327,16 +395,19 @@ visualization_server <- function(input, output, session) {
             )
           )
           if (!input$ts_adj_plot) {
+            datasets <- c("mswx.blend", "cru.gpcc", "climatena")
             gcms <- climr::list_gcms()[c(1, 4, 5, 6, 7, 10, 11, 12)]
             ssps <- climr::list_ssps()[c(1:3)]
           } else {
+            datasets <- input$time_series_dataset
             gcms <- input$time_series_gcms
             ssps <- input$time_series_ssps
           }
-          timeseries_data <<- climr::plot_timeSeries_input(xyz, gcms = gcms, ssps = ssps, obs_ts_dataset = c("mswx.blend", "cru.gpcc", "climatena"))
+          timeseries_data <<- climr::plot_timeSeries_input(xyz, gcms = gcms, ssps = ssps, obs_ts_dataset = datasets)
           show_plots(TRUE)
           vis_sg$timeseries(timeseries_data)
           removeModal()
+          shinyjs::enable("timeseries_download")
         }
       )
     }
@@ -344,8 +415,24 @@ visualization_server <- function(input, output, session) {
   shiny::observeEvent(input$plot_ts_flp_er, {
     if (shiny::in_devmode()) cat("Event: plot_ts_flp_er", sep = "\n")
     if (!is.null(input$input_type)) {
-      show_plots(TRUE)
-      if ((!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") | (!is.null(vstore[["ecoregion"]]) & input$input_type == "Ecoregion")) {
+      if (input$input_type == "FLP Area" & is.null(vstore[["flp_area"]])) {
+        showModal(
+          modalDialog(
+            title = "Warning",
+            paste("Please select an FLP area!"),
+            easyClose = TRUE
+          )
+        )
+      } else if (input$input_type == "Ecoregion" & is.null(vstore[["ecoregion"]])) {
+        showModal(
+          modalDialog(
+            title = "Warning",
+            paste("Please select an ecoregion!"),
+            easyClose = TRUE
+          )
+        )
+      } else if ((!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") | (!is.null(vstore[["ecoregion"]]) & input$input_type == "Ecoregion")) {
+        show_plots(TRUE)
         withCallingHandlers(
           message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
           warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
@@ -354,20 +441,21 @@ visualization_server <- function(input, output, session) {
             # set up db query
             region <- vstore[[if (input$input_type == "FLP Area") "flp_area" else "ecoregion"]]
             if (!input$ts_adj_plot) {
+              dataset <- paste(dataset_id[dataset %in% c("mswx.blend", "cru.gpcc", "climatena"), dataset_id], collapse = ",")
               gcms <- paste(gcm_id[gcm %in% climr::list_gcms()[c(1, 4, 5, 6, 7, 10, 11, 12)], gcm_id], collapse = ",")
               ssps <- paste(ssp_id[ssp %in% climr::list_ssps()[c(1:3)], ssp_id], collapse = ",")
             } else {
+              dataset <- paste(dataset_id[dataset %in% input$time_series_dataset, dataset_id], collapse = ",")
               gcms <- paste(gcm_id[gcm %in% input$time_series_gcms, gcm_id], collapse = ",")
               ssps <- paste(ssp_id[ssp %in% input$time_series_ssps, ssp_id], collapse = ",")
             }
-            dataset <- paste(dataset_id[dataset %in% input$time_series_dataset, dataset_id], collapse = ",")
             code <- paste(climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code], collapse = ",")
             var <- var_id[var == code, var_id]
 
             query <- sprintf("SELECT * FROM ds_timeseries WHERE region = '%s' 
                             AND (gcm_id IN (%s) OR gcm_id IS NULL)
                             AND (ssp_id IN (%s) OR ssp_id IS NULL)
-                            AND (dataset_id = %s OR dataset_id IS NULL)
+                            AND (dataset_id IN (%s) OR dataset_id IS NULL)
                             AND var_id = %s
                             ORDER BY gcm_id, period, run_id, ssp_id", region, gcms, ssps, dataset, var)
             dat <- climr:::db_safe_query(query)
@@ -383,6 +471,7 @@ visualization_server <- function(input, output, session) {
             setnames(dat, old = c("run_id", "period", "value", "gcm", "ssp", "dataset"), new = c("RUN", "PERIOD", code, "GCM", "SSP", "DATASET"))
             timeseries_data <<- dat
             vis_sg$timeseries(timeseries_data)
+            shinyjs::enable("timeseries_download")
           }
         )
       }
@@ -416,6 +505,7 @@ visualization_server <- function(input, output, session) {
           wl_data <<- climr::plot_WalterLieth_input(xyz, obs_period = climr::list_obs_periods())
           show_plots(TRUE)
           vis_sg$walter_lieth(wl_data)
+          shinyjs::enable("wl_download")
         }
       )
     }
@@ -423,8 +513,24 @@ visualization_server <- function(input, output, session) {
   shiny::observeEvent(input$plot_wl_flp_er, {
     if (shiny::in_devmode()) cat("Event: plot_wl_flp_er", sep = "\n")
     if (!is.null(input$input_type)) {
-      show_plots(TRUE)
-      if ((!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") | (!is.null(vstore[["ecoregion"]]) & input$input_type == "Ecoregion")) {
+      if (input$input_type == "FLP Area" & is.null(vstore[["flp_area"]])) {
+        showModal(
+          modalDialog(
+            title = "Warning",
+            paste("Please select an FLP area!"),
+            easyClose = TRUE
+          )
+        )
+      } else if (input$input_type == "Ecoregion" & is.null(vstore[["ecoregion"]])) {
+        showModal(
+          modalDialog(
+            title = "Warning",
+            paste("Please select an ecoregion!"),
+            easyClose = TRUE
+          )
+        )
+      } else if ((!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") | (!is.null(vstore[["ecoregion"]]) & input$input_type == "Ecoregion")) {
+        show_plots(TRUE)
         withCallingHandlers(
           message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
           warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
@@ -450,6 +556,7 @@ visualization_server <- function(input, output, session) {
             setnames(dat2, old = c("period"), new = c("PERIOD"))
             wl_data <<- dat2
             vis_sg$walter_lieth(wl_data)
+            shinyjs::enable("wl_download")
           }
         )
       }
@@ -461,9 +568,9 @@ visualization_server <- function(input, output, session) {
     if (!is.null(input$bivariate_element_x)) {
       shiny::selectInput(
         inputId = "bivariate_time_x",
-        label = h6("Choose season/month:"),
+        label = h6("Season/month:"),
         width = "100%",
-        choices = setNames(climr::variables[Code_Element == input$bivariate_element_x,] %>% pull(Time), time_labels[climr::variables[Code_Element == input$bivariate_element_x,] %>% pull(Time)])
+        choices = climr::variables[Code_Element == input$bivariate_element_x,] %>% pull(Time)
       )
     }
   })
@@ -472,9 +579,9 @@ visualization_server <- function(input, output, session) {
     if (!is.null(input$bivariate_element_y)) {
       shiny::selectInput(
         inputId = "bivariate_time_y",
-        label = h6("Choose season/month:"),
+        label = h6("Season/month:"),
         width = "100%",
-        choices = setNames(climr::variables[Code_Element == input$bivariate_element_y,] %>% pull(Time), time_labels[climr::variables[Code_Element == input$bivariate_element_y,] %>% pull(Time)])
+        choices = climr::variables[Code_Element == input$bivariate_element_y,] %>% pull(Time)
       )
     }
   })
@@ -483,9 +590,9 @@ visualization_server <- function(input, output, session) {
     if (!is.null(input$time_series_element)) {
       shiny::selectInput(
         inputId = "time_series_season",
-        label = h5("Choose season/month:"),
+        label = h5("Season/month:"),
         width = "100%",
-        choices = setNames(climr::variables[Code_Element == input$time_series_element,] %>% pull(Time), time_labels[climr::variables[Code_Element == input$time_series_element,] %>% pull(Time)])
+        choices = climr::variables[Code_Element == input$time_series_element,] %>% pull(Time)
       )
     }
   })

@@ -235,7 +235,7 @@ shiny::shinyApp(
         shiny::mainPanel(
                   id = "main-panel-container",
                   width = "100%",
-                  # shinyjs::useShinyjs(),
+                  shinyjs::useShinyjs(),
                   tags$head(
                     tags$script(HTML("
                                 Shiny.addCustomMessageHandler('toggle-plot', function(show) {
@@ -309,7 +309,7 @@ shiny::shinyApp(
                           inputId = "input_type",
                           label = h4("Visualize by:", style = "margin-bottom: 7px;"),
                           width = "100%",
-                          choices = c("FLP Area", "Ecoregion", "Map point"),
+                          choices = c("Ecoregion", "FLP Area", "Map point"),
                           selected = character(0)
                         ),
                         shiny::actionButton("clear_map", "Clear Map",
@@ -347,10 +347,73 @@ shiny::shinyApp(
                                style = "height: 85vh; display: flex; flex-direction: column;",
                       bslib::navset_card_underline(
                         id = "plot-tabs",
+                        bslib::nav_panel("Time Series",
+                                         shiny::fluidRow(
+                                           column(
+                                             width = 4,
+                                             class = "tight-card",
+                                             style = "height: 75vh;", 
+                                             bslib::card(
+                                               title = "Time Series Variable",
+                                               style = "height: 99%; overflow-y: auto;",
+                                               shiny::conditionalPanel(
+                                                 condition = "input.input_type == 'Map point'",
+                                                 shiny::actionButton(
+                                                   inputId = "downscale_data_time_series",
+                                                   label = "Downscale Data",
+                                                   style = "background-color:#1d8f0e; color: #FFF",
+                                                   disabled = TRUE
+                                                 )
+                                               ),
+                                               shiny::conditionalPanel(
+                                                 condition = "input.input_type == 'FLP Area' || input.input_type == 'Ecoregion'",
+                                                 shiny::actionButton(
+                                                   inputId = "plot_ts_flp_er",
+                                                   label = "Generate Plot",
+                                                   icon = icon("chart-simple"),
+                                                   style = "background-color:#1d8f0e; color: #FFF",
+                                                   disabled = TRUE
+                                                 )
+                                               ),
+                                               shiny::fluidRow(
+                                                 column(
+                                                   width = 6,
+                                                   shiny::selectInput(
+                                                     inputId = "time_series_element",
+                                                     label = h5("Element:"),
+                                                     width = "100%",
+                                                     choices = unique(climr::variables %>% pull(Code_Element)),
+                                                     selected = "Tmax"
+                                                   )
+                                                 ),
+                                                 column(
+                                                   width = 6,
+                                                   shiny::uiOutput("time_series_valid_season")
+                                                 )
+                                               ),
+                                               shiny::actionButton(
+                                                 inputId = "ts_adj_plot",
+                                                 label = "Adjust Plot",
+                                                 icon = icon("sliders-h"),
+                                                 disabled = TRUE
+                                               ),
+                                               shiny::downloadButton(
+                                                 outputId = "timeseries_download",
+                                                 label = "Download Plot",
+                                                 style = "width: 100%;"
+                                               )
+                                             )
+                                           ),
+                                           column(
+                                             width = 8,
+                                             style = "height: 75vh;", 
+                                             shiny::plotOutput("timeseries_plot", height = "600px")
+                                           )
+                                         )),
                         bslib::nav_panel("Bivariate",
                                          shiny::fluidRow(
                                            column(
-                                             width = 3,
+                                             width = 4,
                                              class = "tight-card",
                                              style = "height: 75vh;", 
                                              bslib::card(
@@ -361,28 +424,54 @@ shiny::shinyApp(
                                                  shiny::actionButton(
                                                    inputId = "downscale_data_bivariate",
                                                    label = "Downscale Data",
-                                                   style = "background-color:#1d8f0e; color: #FFF"
+                                                   style = "background-color:#1d8f0e; color: #FFF",
+                                                   disabled = TRUE
+                                                 )
+                                               ),
+                                               shiny::conditionalPanel(
+                                                 condition = "input.input_type == 'FLP Area' || input.input_type == 'Ecoregion'",
+                                                 shiny::actionButton(
+                                                   inputId = "plot_bivariate_flp_er",
+                                                   label = "Generate Plot",
+                                                   icon = icon("chart-simple"),
+                                                   style = "background-color:#1d8f0e; color: #FFF",
+                                                   disabled = TRUE
+                                                 )
+                                               ),
+                                               h5("X-Axis", style = "margin-bottom: -8px;"),
+                                               shiny::fluidRow(
+                                                 column(
+                                                   width = 6,
+                                                   shiny::selectInput(
+                                                     inputId = "bivariate_element_x",
+                                                     label = h6("Element:"),
+                                                     width = "100%",
+                                                     choices = unique(climr::variables %>% pull(Code_Element)),
+                                                     selected = "MAT"
+                                                   )
                                                  ),
-                                                 h4("Interactive Plot Options", style = "margin-bottom: 5px;"),
+                                                 column(
+                                                   width = 6,
+                                                   shiny::uiOutput("bivariate_valid_time_x")
+                                                 )
                                                ),
-                                               h5("X-Axis", style = "margin-bottom: 5px;"),
-                                               shiny::selectInput(
-                                                 inputId = "bivariate_element_x",
-                                                 label = h6("Choose element:"),
-                                                 width = "100%",
-                                                 choices = unique(climr::variables %>% pull(Code_Element)),
-                                                 selected = "MAT"
+                                               h5("Y-Axis", style = "margin-bottom: -8px;"),
+                                               shiny::fluidRow(
+                                                 column(
+                                                   width = 6,
+                                                   shiny::selectInput(
+                                                     inputId = "bivariate_element_y",
+                                                     label = h6("Element:"),
+                                                     width = "100%",
+                                                     choices = unique(climr::variables %>% pull(Code_Element)),
+                                                     selected = "MAP"
+                                                   )
+                                                 ),
+                                                 column(
+                                                   width = 6,
+                                                   shiny::uiOutput("bivariate_valid_time_y")
+                                                 )
                                                ),
-                                               shiny::uiOutput("bivariate_valid_time_x"),
-                                               h5("Y-Axis", style = "margin-bottom: 5px;"),
-                                               shiny::selectInput(
-                                                 inputId = "bivariate_element_y",
-                                                 label = h6("Choose element:"),
-                                                 width = "100%",
-                                                 choices = unique(climr::variables %>% pull(Code_Element)),
-                                                 selected = "MAP"
-                                               ),
-                                               shiny::uiOutput("bivariate_valid_time_y"),
                                                shiny::radioButtons(
                                                  inputId = "bivariate_period",
                                                  label = h5("Choose time period:"),
@@ -390,15 +479,6 @@ shiny::shinyApp(
                                                  inline = TRUE,
                                                  choices = climr::list_gcm_periods(),
                                                  selected = "2041_2060"
-                                               ),
-                                               shiny::conditionalPanel(
-                                                 condition = "input.input_type == 'FLP Area' || input.input_type == 'Ecoregion'",
-                                                 shiny::actionButton(
-                                                   inputId = "plot_bivariate_flp_er",
-                                                   label = "Plot",
-                                                   icon = icon("chart-simple"),
-                                                   style = "background-color:#1d8f0e; color: #FFF"
-                                                 )
                                                ),
                                                shiny::downloadButton(
                                                  outputId = "bivariate_download",
@@ -408,7 +488,7 @@ shiny::shinyApp(
                                              )
                                            ),
                                            column(
-                                             width = 9,
+                                             width = 8,
                                              style = "height: 75vh;", 
                                              plotly::plotlyOutput("bivariate_plot", height = "600px")
                                            )
@@ -416,7 +496,7 @@ shiny::shinyApp(
                         bslib::nav_panel("Walter-Lieth",
                                          shiny::fluidRow(
                                            column(
-                                             width = 3,
+                                             width = 4,
                                              class = "tight-card",
                                              style = "height: 75vh;", 
                                              bslib::card(
@@ -427,9 +507,19 @@ shiny::shinyApp(
                                                  shiny::actionButton(
                                                    inputId = "downscale_data_wl",
                                                    label = "Downscale Data",
-                                                   style = "background-color:#1d8f0e; color: #FFF"
-                                                 ),
-                                                 h4("Interactive Plot Options", style = "margin-bottom: 5px;")
+                                                   style = "background-color:#1d8f0e; color: #FFF",
+                                                   disabled = TRUE
+                                                 )
+                                               ),
+                                               shiny::conditionalPanel(
+                                                 condition = "input.input_type == 'FLP Area' || input.input_type == 'Ecoregion'",
+                                                 shiny::actionButton(
+                                                   inputId = "plot_wl_flp_er",
+                                                   label = "Generate Plot",
+                                                   icon = icon("chart-simple"),
+                                                   style = "background-color:#1d8f0e; color: #FFF",
+                                                   disabled = TRUE
+                                                 )
                                                ),
                                                shiny::radioButtons(
                                                  inputId = "wl_obs_period",
@@ -442,15 +532,6 @@ shiny::shinyApp(
                                                  inputId = "wl_diurnal",
                                                  label = tags$span("Show diurnal range", style = "font-size: 0.85em; font-weight: bold;"),
                                                ),
-                                               shiny::conditionalPanel(
-                                                 condition = "input.input_type == 'FLP Area' || input.input_type == 'Ecoregion'",
-                                                 shiny::actionButton(
-                                                   inputId = "plot_wl_flp_er",
-                                                   label = "Plot",
-                                                   icon = icon("chart-simple"),
-                                                   style = "background-color:#1d8f0e; color: #FFF"
-                                                 )
-                                               ),
                                                shiny::downloadButton(
                                                  outputId = "wl_download",
                                                  label = "Download Plot",
@@ -460,73 +541,13 @@ shiny::shinyApp(
                                              )
                                            ),
                                            column(
-                                             width = 9,
+                                             width = 8,
                                              style = "height: 75vh;", 
                                              shiny::plotOutput("wl_plot", height = "600px")
                                            )
-                                         )),
+                                         ))
                         # bslib::nav_panel("Climate Stripes"),
                         # bslib::nav_panel("Boxplot"),
-                        bslib::nav_panel("Time Series",
-                                         shiny::fluidRow(
-                                           column(
-                                             width = 3,
-                                             class = "tight-card",
-                                             style = "height: 75vh;", 
-                                             bslib::card(
-                                               title = "Time Series Variable",
-                                               style = "height: 99%; overflow-y: auto;",
-                                               shiny::conditionalPanel(
-                                                 condition = "input.input_type == 'Map point'",
-                                                 shiny::actionButton(
-                                                   inputId = "downscale_data_time_series",
-                                                   label = "Downscale Data",
-                                                   style = "background-color:#1d8f0e; color: #FFF"
-                                                 ),
-                                                 h4("Interactive Plot Options", style = "margin-bottom: 5px;"),
-                                               ),
-                                               shiny::radioButtons(
-                                                 inputId = "time_series_dataset",
-                                                 label = h5("Choose dataset:"),
-                                                 width = "100%",
-                                                 inline = TRUE,
-                                                 choices = c("MSWX Blend" = "mswx.blend", "ClimateNA" = "climatena", "Climatic Research Unit / Global Precipitation Climatology Centre" = "cru.gpcc"),
-                                                 selected = "mswx.blend"
-                                               ),
-                                               shiny::selectInput(
-                                                 inputId = "time_series_element",
-                                                 label = h5("Choose element:"),
-                                                 width = "100%",
-                                                 choices = unique(climr::variables %>% pull(Code_Element)),
-                                                 selected = "Tmax"
-                                               ),
-                                               shiny::uiOutput("time_series_valid_season"),
-                                               shiny::conditionalPanel(
-                                                 condition = "input.input_type == 'FLP Area' || input.input_type == 'Ecoregion'",
-                                                 shiny::actionButton(
-                                                   inputId = "plot_ts_flp_er",
-                                                   label = "Plot",
-                                                   icon = icon("chart-simple"),
-                                                   style = "background-color:#1d8f0e; color: #FFF"
-                                                 )
-                                               ),
-                                               shiny::actionButton(
-                                                 inputId = "ts_adj_plot",
-                                                 label = "Adjust Plot"
-                                               ),
-                                               shiny::downloadButton(
-                                                 outputId = "timeseries_download",
-                                                 label = "Download Plot",
-                                                 style = "width: 100%;"
-                                               )
-                                             )
-                                           ),
-                                           column(
-                                             width = 9,
-                                             style = "height: 75vh;", 
-                                             shiny::plotOutput("timeseries_plot", height = "600px")
-                                           )
-                                         ))
                       )
                     )
                   )
