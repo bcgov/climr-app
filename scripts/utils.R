@@ -364,26 +364,31 @@ addDistricts <- function(map) {
       
       Shiny.addCustomMessageHandler("addRegionTile",function(data){
         //map = window.map;
-        //console.log(window.map instanceof L.Map);
         var url = data.url;
         var cname = data.name;
         var cid = data.id;
+        var type = data.inputType;
         console.log(url);
-        console.log("HI");
         map.removeLayer(distLayer);
-        console.log("Pane exists?", !!map.getPane("tilePane"));
         distLayer = L.vectorGrid.protobuf(url, vectorTileOptionsDist(cname, cname, true,
                           "tilePane", cid, cid)
         )
         map.layerManager.addLayer(distLayer, "tile", cid, cid);
         distLayer.bindTooltip(function(e) {
           const fieldNames = Object.keys(e.properties);
-          return e.properties[fieldNames[0]];
+          console.log(type);
+          if (type == "Ecoregion") {
+           const er_name = window.er_codes?.[e.properties[fieldNames[0]]];
+           console.log(er_name);
+           return er_name;
+          } else {
+            console.log(e.properties[fieldNames[0]]);
+            return e.properties[fieldNames[0]];
+          }
         }, {sticky: true, textsize: "12px", opacity: 1});
         distLayer.bringToFront();
         distFlag = true;
         Shiny.setInputValue("dist_flag",distFlag);
-        console.log("HI again, regiond should be rendered");
 
         distLayer.on("click", function(e){
           distLayer.resetFeatureStyle(distHL);
@@ -429,7 +434,15 @@ addDistricts <- function(map) {
       
       distLayer.bindTooltip(function(e) {
         const fieldNames = Object.keys(e.properties);
-        return e.properties[fieldNames[0]];
+          console.log(type);
+          if (type == "Ecoregion") {
+           const er_name = window.er_codes?.[e.properties[fieldNames[0]]];
+           console.log(type);
+           return er_name;
+          } else {
+            console.log(e.properties[fieldNames[0]]);
+            return e.properties[fieldNames[0]];
+          }
       }, {sticky: true, textsize: "12px", opacity: 1});
       
       // end districts

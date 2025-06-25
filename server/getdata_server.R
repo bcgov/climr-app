@@ -800,7 +800,6 @@ getdata_server <- function(input, output, session) {
   
   shiny::observeEvent(input$generate_results, {
     if (shiny::in_devmode()) cat("Event: generate_results", sep = "\n")
-    
     # check that it is possible to downscale the data 
     temp_dt <- getdata_sg_dt$dt
     
@@ -809,6 +808,17 @@ getdata_server <- function(input, output, session) {
       
       # ensure all data sources are the same before opening Downscale Launch window
       if (length(unique((sources))) == 1) {
+        # ensure only 1 area has been selected
+        if (any(c("map_draw", "file_upload") %in% sources) & nrow(temp_dt) > 1) {
+          showModal(
+            modalDialog(
+              title = "Warning",
+              paste("Please ensure only a single area is selected."),
+              easyClose = TRUE
+            )
+          )
+          return()
+        }
         vstore[["processing"]] <- FALSE
         output$downscale_points_count_estimate <- shiny::renderUI({
           pce <- getdata_sg$process_count(vstore[["downscale_resolution"]])
@@ -1165,24 +1175,27 @@ getdata_server <- function(input, output, session) {
           inline = TRUE,
           selected = "tif"
         ),
-        shiny::sliderInput(
-          inputId = "downscale_resolution",
-          label = h5("Choose downscale resolution (m):",
-                     prompter::add_prompt(
-                       tooltipsIcon,
-                       message = HTML(paste("Target resolution for shapes drawn on map or added using file upload. Does not apply to csv files.")),
-                       position = "top",
-                       size = "large",
-                       shadow = FALSE
-                     )
-          ),
-          value = vstore[["downscale_resolution"]],
-          width = "100%",
-          min = 250,
-          max = 10000,
-          step = 50,
-          post = "m",
-          ticks = FALSE
+        shiny::conditionalPanel(
+          condition = "input.downscale_output == 'tif'",
+          shiny::sliderInput(
+            inputId = "downscale_resolution",
+            label = h5("Choose downscale resolution (m):",
+                       prompter::add_prompt(
+                         tooltipsIcon,
+                         message = HTML(paste("Target resolution for shapes drawn on map or added using file upload. Does not apply to csv files.")),
+                         position = "top",
+                         size = "large",
+                         shadow = FALSE
+                       )
+            ),
+            value = vstore[["downscale_resolution"]],
+            width = "100%",
+            min = 250,
+            max = 10000,
+            step = 50,
+            post = "m",
+            ticks = FALSE
+          )
         )
       )
     }

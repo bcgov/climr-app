@@ -1,7 +1,6 @@
 # Visualization tab server ----
 
 visualization_server <- function(input, output, session) {
-  
   # initialize vis_sg_dt as reactive
   vis_sg_dt <- reactiveValues(dt = data.table::data.table(
     id = integer(),
@@ -33,32 +32,14 @@ visualization_server <- function(input, output, session) {
   timeseries_data <- data.table()
   wl_data <- data.table()
   
-  # mapping for database connections
+  # mapping for database queries
   gcm_id <- data.table(gcm = list_gcms(), gcm_id = seq_along(list_gcms()))
   ssp_id <- data.table(ssp = list_ssps(), ssp_id = seq_along(list_ssps()))
   var_id <- data.table(var = list_vars(), var_id = seq_along(list_vars()))
   dataset_id <- data.table(dataset = c("mswx.blend","cru.gpcc","climatena"), dataset_id = 1:3)
   
-  # # mapping for months/seasons
-  # time_labels <- c(
-  #   "Annual" = "Ann",
-  #   "Winter" = "Wt",
-  #   "Spring" = "Sp",
-  #   "Summer" = "Sm",
-  #   "Autumn" = "At",
-  #   "January" = "Jan",
-  #   "February" = "Feb",
-  #   "March" = "Mar",
-  #   "April" = "Apr",
-  #   "May" = "May",
-  #   "June" = "Jun",
-  #   "July" = "Jul",
-  #   "August" = "Aug",
-  #   "September" = "Sep",
-  #   "October" = "Oct",
-  #   "November" = "Nov",
-  #   "December" = "Dec"
-  # )
+  # mapping for ecoregion codes
+  er_codes <- data.table::fread("data/Ecoregions_Codes.csv")
   
   vstore <- reactiveValues(
     tifsource = names(climr_tif) |> head(1),
@@ -220,6 +201,7 @@ visualization_server <- function(input, output, session) {
     )
   }
   shiny::observeEvent(input$input_type, {
+    type <- input$input_type
     # clear previous inputs
     clear_inputs()
     if (input$input_type == "Map point") {
@@ -228,13 +210,13 @@ visualization_server <- function(input, output, session) {
     } else if (input$input_type == "FLP Area") {
       vis_by_map(FALSE)
       vis_sg$clear_all(vis_mp)
-      dat <- list(url = "https://tileserver.thebeczone.ca/data/flp_bnd/{z}/{x}/{y}.pbf", name = "flp", id = "ORG_UNIT")
+      dat <- list(url = "https://tileserver.thebeczone.ca/data/flp_bnd/{z}/{x}/{y}.pbf", name = "flp", id = "ORG_UNIT", inputType = type)
       session$sendCustomMessage("addRegionTile",dat)
       session$sendCustomMessage("reset_district","Luna")
     } else if (input$input_type == "Ecoregion") {
       vis_by_map(FALSE)
       vis_sg$clear_all(vis_mp)
-      dat <- list(url = "https://tileserver.thebeczone.ca/data/ecoregions/{z}/{x}/{y}.pbf", name = "Ecoregions", id = "NA_L3CODE")
+      dat <- list(url = "https://tileserver.thebeczone.ca/data/ecoregions/{z}/{x}/{y}.pbf", name = "Ecoregions", id = "NA_L3CODE", inputType = type)
       session$sendCustomMessage("addRegionTile",dat)
       session$sendCustomMessage("reset_region","Luna")
     } else {

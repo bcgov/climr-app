@@ -1,0 +1,183 @@
+Code,Name
+1.1.1,Ellesmere and Devon Islands Ice Caps
+1.1.2,Baffin and Torngat Mountains
+10.1.1,Thompson-Okanogan Plateau
+10.1.2,Columbia Plateau
+10.1.3,Northern Basin and Range
+10.1.4,Wyoming Basin
+10.1.5,Central Basin and Range
+10.1.6,Colorado Plateaus
+10.1.7,Arizona/New Mexico Plateau
+10.1.8,Snake River Plain
+10.2.1,Mojave Basin and Range
+10.2.2,Sonoran Desert
+10.2.3,Baja Californian Desert
+10.2.4,Chihuahuan Desert
+11.1.1,"California Coastal Sage, Chaparral, and Oak Woodlands"
+11.1.2,Central California Valley
+11.1.3,Southern and Baja California Pine-Oak Mountains
+12.1.1,Madrean Archipelago
+12.1.2,"Piedmonts and Plains with Grasslands, Xeric Shrub, and Oak and Conifer Forests"
+12.2.1,Hills and Interior Plains with Xeric Shrub and Mesquite Low Forest
+13.1.1,Arizona/New Mexico Mountains
+13.2.1,"Sierra Madre Occidental with Conifer, Oak, and Mixed Forests"
+13.3.1,"Sierra Madre Oriental with Conifer, Oak, and Mixed Forests"
+13.4.1,Interior Plains and Piedmonts with Grasslands and Xeric Shrub
+13.4.2,"Hills and Sierras with Conifer, Oak, and Mixed Forests"
+13.5.1,"Sierras of Jalisco and Michoacan with Conifer, Oak, and Mixed Forests"
+13.5.2,"Sierras of Guerrero and Oaxaca with Conifer, Oak, and Mixed Forests"
+13.6.1,"Central American Sierra Madre with Conifer, Oak, and Mixed Forests"
+13.6.2,"Chiapas Highlands with Conifer, Oak, and Mixed Forest"
+14.1.1,Coastal Plain with Low Tropical Deciduous Forest
+14.1.2,Hills and Sierra with Low Tropical Deciduous Forest and Oak Forest
+14.2.1,Northwestern Yucatan Plain with Low Tropical Deciduous Forest
+14.3.1,Sinaloa Coastal Plain with Low Thorn Tropical Forest and Wetlands
+14.3.2,Sinaloa and Sonora Hills and Canyons with Xeric Shrub and Low Tropical Deciduous Forest
+14.4.1,Balsas Depression with Low Tropical Deciduous Forest and Xerophytic Shrub
+14.4.2,Chiapas Depression with Low Deciduous and Medium Semi-Deciduous Tropical Forest
+14.4.3,Valleys and Depressions with Xeric Shrub and Low Tropical Deciduous Forest
+14.5.1,Tehuantepec Canyon and Plain with Low Tropical Deciduous Forest and Low Thorn Tropical Forest
+14.5.2,South Pacific Hills and Piedmonts with Low Tropical Deciduous Forest
+14.6.1,Los Cabos Plains and Hills with Low Tropical Deciduous Forest and Xeric Shrub
+14.6.2,La Laguna Mountains with Oak and Conifer Forest
+15.1.1,Gulf of Mexico Coastal Plain with Wetlands and High Tropical Rain Forest
+15.1.2,Hills with Medium and High Evergreen Tropical Forest
+15.2.1,Plain with Low and Medium Deciduous Tropical Forest
+15.2.2,Plain with Medium and High Semi-Evergreen Tropical Forest
+15.2.3,Hills with High and Medium Semi-Evergreen Tropical Forest
+15.3.1,Los Tuxtlas Sierra with High Evergreen Tropical Forest
+15.4.1,Southern Florida Coastal Plain
+15.5.1,Nayarit and Sinaloa Plain with Low Thorn Tropical Forest
+15.5.2,Jalisco and Nayarit Hills and Plains with Medium Semi-Evergreen Tropical Forest
+15.6.1,Coastal Plain and Hills with High and Medium-High Evergreen Tropical Forest and Wetlands
+2.1.1,Sverdrup Islands Lowland
+2.1.2,Ellesmere Mountains and Eureka Hills
+2.1.3,Parry Islands Plateau
+2.1.4,Lancaster and Borden Peninsula Plateaus
+2.1.5,Foxe Uplands
+2.1.6,Baffin Uplands
+2.1.7,Gulf of Boothia and Foxe Basin Plains
+2.1.8,Victoria Island Lowlands
+2.1.9,Banks Island and Amundsen Gulf Lowlands
+2.2.1,Arctic Coastal Plain
+2.2.2,Arctic Foothills
+2.2.3,Subarctic Coastal Plains
+2.2.4,Seward Peninsula
+2.2.5,Bristol Bay-Nushagak Lowlands
+2.2.6,Aleution Islands
+2.3.1,Brooks Range/Richardson Mountains
+2.4.1,Amundsen Plains
+2.4.2,Aberdeen Plains
+2.4.3,Central Ungava Peninsula and Ottawa and Belcher Islands
+2.4.4,Queen Maud Gulf and Chantrey Inlet Lowlands
+3.1.1,Interior Forested Lowlands and Uplands
+3.1.2,Interior Bottomlands
+3.1.3,Yukon Flats
+3.2.1,Ogilvie Mountains
+3.2.2,Mackenzie and Selwyn Mountains
+3.2.3,Peel River and Nahanni Plateaus
+3.3.1,Great Bear Plains
+3.3.2,Hay and Slave River Lowlands
+3.4.1,Kazan River and Selwyn Lake Uplands
+3.4.2,La Grande Hills and New Quebec Central Plateau
+3.4.3,Smallwood Uplands
+3.4.4,Ungava Bay Basin and George Plateau
+3.4.5,Coppermine River and Tazin Lake Uplands
+4.1.1,Coastal Hudson Bay Lowland
+4.1.2,Hudson Bay and James Bay Lowlands
+5.1.1,Athabasca Plain and Churchill River Upland
+5.1.2,Lake Nipigon and Lac Seul Upland
+5.1.3,Central Laurentians and Mecatina Plateau
+5.1.4,Newfoundland Island
+5.1.5,Hayes River Upland and Big Trout Lake
+5.1.6,Abitibi Plains and Riviere Rupert Plateau
+5.2.1,Northern Lakes and Forests
+5.2.2,Northern Minnesota Wetlands
+5.2.3,Algonquin/Southern Laurentians
+5.3.1,Northern Appalachian and Atlantic Maritime Highlands
+5.3.3,North Central Appalachians
+5.4.1,Mid-Boreal Uplands and Peace-Wabaska Lowlands
+5.4.2,Clear Hills and Western Alberta Upland
+5.4.3,Mid-Boreal Lowland and Interlake Plain
+6.1.1,Interior Highlands and Klondike Plateau
+6.1.2,Alaska Range
+6.1.3,Copper Plateau
+6.1.4,Wrangell and St. Elias Mountains
+6.1.5,Watson Highlands
+6.1.6,Yukon-Stikine Highlands/Boreal Mountains and Plateaus
+6.2.1,Skeena-Omineca-Central Canadian Rocky Mountains
+6.2.10,Middle Rockies
+6.2.11,Klamath Mountains
+6.2.12,Sierra Nevada
+6.2.13,Wasatch and Uinta Mountains
+6.2.14,Southern Rockies
+6.2.15,Idaho Batholith
+6.2.2,Chilcotin Ranges and Fraser Plateau
+6.2.3,Columbia Mountains/Northern Rockies
+6.2.4,Canadian Rockies
+6.2.5,North Cascades
+6.2.6,Cypress Upland
+6.2.9,Blue Mountains
+7.1.1,Ahklun and Kilbuck Mountains
+7.1.2,Alaska Peninsula Mountains
+7.1.3,Cook Inlet
+7.1.4,Pacific Coastal Mountains
+7.1.5,Coastal Western Hemlock-Sitka Spruce Forests
+7.1.6,Pacific and Nass Ranges
+7.1.7,Strait of Georgia/Puget Lowland
+7.1.8,Coast Range
+7.1.9,Willamette Valley
+8.1.1,Eastern Great Lakes Lowlands
+8.1.10,Erie Drift Plain
+8.1.3,Northern Allegheny Plateau
+8.1.5,Driftless Area
+8.1.6,Southern Michigan/Northern Indiana Drift Plains
+8.1.7,Northeastern Coastal Zone
+8.1.8,Acadian Plains and Hills
+8.1.9,Maritime Lowlands
+8.2.2,Huron/Erie Lake Plains
+8.2.4,Eastern Corn Belt Plains
+8.3.1,Northern Piedmont
+8.3.2,Interior River Valleys and Hills
+8.3.3,Interior Plateau
+8.3.4,Piedmont
+8.3.5,Southeastern Plains
+8.3.6,Mississippi Valley Loess Plains
+8.3.7,South Central Plains
+8.3.8,East Central Texas Plains
+8.4.1,Ridge and Valley
+8.4.2,Central Appalachians
+8.4.3,Western Allegheny Plateau
+8.4.4,Blue Ridge
+8.4.5,Ozark Highlands
+8.4.6,Boston Mountains
+8.4.7,Arkansas Valley
+8.4.8,Ouachita Mountains
+8.4.9,Southwestern Appalachians
+8.5.1,Middle Atlantic Coastal Plain
+8.5.2,Mississippi Alluvial Plain
+8.5.3,Southern Coastal Plain
+8.5.4,Atlantic Coastal Pine Barrens
+9.2.1,Aspen Parkland/Northern Glaciated Plains
+9.2.2,Lake Manitoba and Lake Agassiz Plain
+9.2.3,Western Corn Belt Plains
+9.2.4,Central Irregular Plains
+9.3.1,Northwestern Glaciated Plains
+9.3.3,Northwestern Great Plains
+9.3.4,Nebraska Sand Hills
+9.4.1,High Plains
+9.4.2,Central Great Plains
+9.4.3,Southwestern Tablelands
+9.4.4,Flint Hills
+9.4.5,Cross Timbers
+9.4.6,Edwards Plateau
+9.4.7,Texas Blackland Prairies
+9.5.1,Western Gulf Coastal Plain
+9.6.1,Southern Texas Plains/Interior Plains and Hills with Xerophytic Shrub and Oak Forest
+8.1.4,North Central Hardwood Forests
+8.2.1,Southeastern Wisconsin Till Plains
+8.2.3,Central Corn Belt Plains
+8.1.2,Lake Erie Lowland
+0.0.0,Water
+6.2.7,Cascades
+6.2.8,Eastern Cascades Slopes and Foothills
