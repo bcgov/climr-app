@@ -133,13 +133,7 @@ shiny::shinyApp(
       tags$script(HTML(sprintf(
         "window.ecoregionNames = %s;",
         jsonlite::toJSON(er_codes, auto_unbox = TRUE)
-      ))),
-      tags$style(HTML("
-        .navbar {
-          z-index: 1100 !important;
-          position: relative;
-        }
-      "))
+      )))
     ),
     shiny::navbarPage(
       collapsible = TRUE,
@@ -163,8 +157,6 @@ shiny::shinyApp(
         shiny::sidebarLayout(
           shiny::sidebarPanel(
             style = "height: 84vh; overflow-y: auto; overflow-x: auto;", # FIX HEIGHT TO BE ADAPTIVE
-            
-            # create the link!!!
             shiny::div(
               style = "text-align: center;",
               shiny::actionLink(
@@ -371,6 +363,14 @@ shiny::shinyApp(
                                              bslib::card(
                                                title = "Time Series Variable",
                                                style = "height: 99%; overflow-y: auto;",
+                                               shiny::div(
+                                                 style = "text-align: center;",
+                                                 shiny::actionLink(
+                                                   inputId = "ts_plot_info",
+                                                   label = "What does this plot mean",
+                                                   icon = icon("question-circle")
+                                                 )
+                                               ),
                                                shiny::conditionalPanel(
                                                  condition = "input.input_type == 'Map point'",
                                                  shiny::actionButton(
@@ -434,6 +434,14 @@ shiny::shinyApp(
                                              bslib::card(
                                                title = "Bivariate Plot Variables",
                                                style = "height: 99%; overflow-y: auto;",
+                                               shiny::div(
+                                                 style = "text-align: center;",
+                                                 shiny::actionLink(
+                                                   inputId = "biv_plot_info",
+                                                   label = "What does this plot mean",
+                                                   icon = icon("question-circle")
+                                                 )
+                                               ),
                                                shiny::conditionalPanel(
                                                  condition = "input.input_type == 'Map point'",
                                                  shiny::actionButton(
@@ -517,6 +525,14 @@ shiny::shinyApp(
                                              bslib::card(
                                                title = "Walter-Lieth Variables",
                                                style = "height: 99%; overflow-y: auto;",
+                                               shiny::div(
+                                                 style = "text-align: center;",
+                                                 shiny::actionLink(
+                                                   inputId = "wl_plot_info",
+                                                   label = "What does this plot mean",
+                                                   icon = icon("question-circle")
+                                                 )
+                                               ),
                                                shiny::conditionalPanel(
                                                  condition = "input.input_type == 'Map point'",
                                                  shiny::actionButton(
@@ -571,28 +587,10 @@ shiny::shinyApp(
      
       shiny::navbarMenu(
         "Documentation",
-        shiny::tabPanel("climr App Documentation",
+        shiny::tabPanel("Documentation",
                         tags$iframe(src = "https://vonuma.com/climr-docs/index.html",
                                     style = "width: 100%; height: calc(100vh - 130px); border: none;")
                         ),
-        # "climr package",
-        # shiny::tabPanel(
-        #   title = "Documentation",
-        #   shiny::tags$iframe(
-        #     src = "https://bcgov.github.io/climr/reference/index.html",
-        #     style = "width: 100%; height: 90vh; border: none;",
-        #     seamless = "seamless"
-        #   )
-        # ),
-        # shiny::tabPanel(
-        #   title = "Articles",
-        #   shiny::tags$iframe(
-        #     src = "https://bcgov.github.io/climr/articles/index.html",
-        #     style = "width: 100%; height: 100vh; border: none;",
-        #     seamless = "seamless"
-        #   )
-        # )
-      ),
       header = list(
         shiny::includeCSS("www/style.css"),
         shiny::includeScript("www/script.js")
