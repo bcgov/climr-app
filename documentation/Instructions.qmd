@@ -154,7 +154,7 @@ To clear all selections on the map and start again with new data, click on the r
 
 ### More information on choosing downscale parameters:
 
-Information here about what the parameters mean??
+See the [Glossary of Terms](Definitions.qmd#downscale-parameters) for the definitions of downscale parameters.
 
 **Observed Climate Data**:
   
@@ -168,7 +168,7 @@ Information here about what the parameters mean??
   
   - Global Climate Models (GCMs):
   
-  - Shared Socio-economic Pathways (SSPs):
+  - Shared Socio-economic Pathways (SSPs): 
   
   - GCM Periods:
   
@@ -180,7 +180,7 @@ Information here about what the parameters mean??
   
 **Extra climate variables**:
 
-See the [Glossary of Terms](Definitions.qmd#glossary-of-terms) for more information on climate variables.
+See the [Glossary of Terms](Definitions.qmd#climate-variables) for the definitions of climate variables.
 
 
 ## Visualization
@@ -388,6 +388,8 @@ Figure 19: Climate map of annual Mean temperature (in °C) across North America
 </figcaption>
 
 </figure>
+
+For ratio variables, an **Apply scale adjustment** checkbox will appear, which applies a log scale adjustment to the data.
 
 To download the climate map, click **Download**.
 

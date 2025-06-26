@@ -53,6 +53,20 @@ visualization_server <- function(input, output, session) {
   vis_sg <- visualization_geometry(vis_sg_dt, vis_mp)
   
   # ---- Visualization Map events
+  shiny::observeEvent(input$tutorial_vis, {
+    showModal(modalDialog(
+      title = "What does this page do?",
+      easyClose = TRUE,
+      size = "xl",
+      footer = NULL,
+      tags$iframe(
+        src = "How_to_use_visualization.pdf#toolbar=0",
+        width = "100%",
+        height = "700px",
+        style = "border:none;"
+      )
+    ))
+  })
   # click on map points
   shiny::observeEvent(input$vis_map_click, {
     if (shiny::in_devmode()) cat("Event: vis_map_click", sep = "\n")

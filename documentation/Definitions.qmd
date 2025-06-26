@@ -2,7 +2,10 @@
 
 ## Glossary of Terms
 
-**Extra climate variables**:
+### **Downscale Parameters**:
+
+
+### **Climate Variables**:
   
   - AHM: Annual heat/moisture index (annual)
   

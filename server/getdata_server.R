@@ -126,7 +126,7 @@ getdata_server <- function(input, output, session) {
       tags$iframe(
         src = "How_to_use_getdata.pdf#toolbar=0",
         width = "100%",
-        height = "600px",
+        height = "700px",
         style = "border:none;"
       )
     ))
