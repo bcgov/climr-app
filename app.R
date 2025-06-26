@@ -133,7 +133,13 @@ shiny::shinyApp(
       tags$script(HTML(sprintf(
         "window.ecoregionNames = %s;",
         jsonlite::toJSON(er_codes, auto_unbox = TRUE)
-      )))
+      ))),
+      tags$style(HTML("
+        .navbar {
+          z-index: 1100 !important;
+          position: relative;
+        }
+      "))
     ),
     shiny::navbarPage(
       collapsible = TRUE,
@@ -565,28 +571,27 @@ shiny::shinyApp(
      
       shiny::navbarMenu(
         "Documentation",
-        "How to use",
-        shiny::tabPanel("climr App",
+        shiny::tabPanel("climr App Documentation",
                         tags$iframe(src = "documentation/_book/index.html",
                                     style = "width: 100%; height: calc(100vh - 130px); border: none;")
                         ),
-        "climr package",
-        shiny::tabPanel(
-          title = "Documentation",
-          shiny::tags$iframe(
-            src = "https://bcgov.github.io/climr/reference/index.html",
-            style = "width: 100%; height: 90vh; border: none;",
-            seamless = "seamless"
-          )
-        ),
-        shiny::tabPanel(
-          title = "Articles",
-          shiny::tags$iframe(
-            src = "https://bcgov.github.io/climr/articles/index.html",
-            style = "width: 100%; height: 100vh; border: none;",
-            seamless = "seamless"
-          )
-        )
+        # "climr package",
+        # shiny::tabPanel(
+        #   title = "Documentation",
+        #   shiny::tags$iframe(
+        #     src = "https://bcgov.github.io/climr/reference/index.html",
+        #     style = "width: 100%; height: 90vh; border: none;",
+        #     seamless = "seamless"
+        #   )
+        # ),
+        # shiny::tabPanel(
+        #   title = "Articles",
+        #   shiny::tags$iframe(
+        #     src = "https://bcgov.github.io/climr/articles/index.html",
+        #     style = "width: 100%; height: 100vh; border: none;",
+        #     seamless = "seamless"
+        #   )
+        # )
       ),
       header = list(
         shiny::includeCSS("www/style.css"),
