@@ -303,15 +303,14 @@ shiny::shinyApp(
                         left = 60,           
                         width = 170,
                         style = "padding: 10px;",
-                        # # create the link!!!
-                        # shiny::div(
-                        #   style = "text-align: center;",
-                        #   shiny::actionLink(
-                        #     inputId = "tutorial",
-                        #     label = "What does this page do",
-                        #     icon = icon("question-circle")
-                        #     )
-                        # ),
+                        shiny::div(
+                          style = "text-align: center;",
+                          shiny::actionLink(
+                            inputId = "tutorial_vis",
+                            label = "What does this page do",
+                            icon = icon("question-circle")
+                            )
+                        ),
                         shiny::radioButtons(
                           inputId = "input_type",
                           label = h4("Visualize by:", style = "margin-bottom: 7px;"),
@@ -585,12 +584,11 @@ shiny::shinyApp(
         )
       ),
      
-      shiny::navbarMenu(
-        "Documentation",
-        shiny::tabPanel("Documentation",
-                        tags$iframe(src = "https://vonuma.com/climr-docs/index.html",
-                                    style = "width: 100%; height: calc(100vh - 130px); border: none;")
-                        ),
+
+    shiny::tabPanel("Documentation",
+                    tags$iframe(src = "documentation/_book/index.html",
+                                style = "width: 100%; height: calc(100vh - 130px); border: none;")
+                    ),
       header = list(
         shiny::includeCSS("www/style.css"),
         shiny::includeScript("www/script.js")

@@ -179,82 +179,175 @@ Information here about what the parameters mean??
   - Why use the recommended default settings?
   
 **Extra climate variables**:
-  
-  - AHM: Annual heat/moisture index (annual)
-  
-  - bFFP: Beginning of the frost-free period (day of year) (annual)
-  
-  - CMD: Hargreaves climatic moisture deficit (mm) (annual, seasonal, monthly)
-  
-  - CMI: Climatic Moisture Index (cm) (annual, monthly)
-  
-  - DDsub0: Degree-days below 0°C (annual, seasonal, monthly)
-  
-  - DDsub18: Degree-days below 18°C (annual, seasonal, monthly)
-  
-  - DD18: Degree-days above 18°C (annual, seasonal, monthly)
-  
-  - DD5: Degree-days above 5°C (annual, seasonal, monthly)
-  
-  - eFFP: End of the frost-free period (day of year) (annual)
-  
-  - EMT: Extreme minimum temperature over 30 years (°C) (annual)
-  
-  - Eref: Hargreaves reference evaporation (mm) (annual, seasonal, monthly)
-  
-  - EXT: Extreme maximum temperature over 30 years (°C) (annual)
-  
-  - FFP: Frost-free period (mm) (annual)
-  
-  - MAP: Mean annual precipitation (mm) (annual)
-  
-  - MAT: Mean annual temperature (°C) (annual)
-  
-  - MCMT: Mean coldest month temperature (°C) (annual)
-  
-  - MSP: Growing season (May to September) precipitation (mm) (annual)
-  
-  - MWMT: Mean warmest month temperature (°C) (annual)
-  
-  - NFFD: Number of frost-free days (annual, seasonal, monthly)
-  
-  - PAS: Precipitation as snow (mm) (annual, seasonal, monthly)
-  
-  - PPT: Precipitation (mm) (annual, seasonal, monthly)
-  
-  - RH: Relative humidity (%) (annual, seasonal, monthly)
-  
-  - SHM: Summer heat/moisture index (annual)
-  
-  - Tave: Mean temperature (°C) (annual, seasonal, monthly)
-  
-  - TD: Continentality (MWMT-MCMT) (°C) (annual)
-  
-  - Tmax: Mean daily maximum temperature (°C) (annual, seasonal, monthly)
-  
-  - Tmin: Mean daily minimum temperature (°C) (annual, seasonal, monthly)
+
+See the [Glossary of Terms](Definitions.qmd#glossary-of-terms) for more information on climate variables.
 
 
 ## Visualization
 
-In the second tab of the climr App, users can select an area of interest by Forest Landscape Plan (FLP) Areas, ecoregions of North America, or by single map points. Users can then visualize data for the selected area by available plots (Bivariate, Walter-Lieth, Time Series, Boxplot, Climate Stripes). Users can also add a climate map as an overlay on North America. For a very quick summary of functionality of this page, users can also click the *What does this page do* link at the top of the floating panel.
+In the second tab of the climr App, users can select an ecoregion of North America, an area of interest by Forest Landscape Plan (FLP) Areas, or by single map points. Users can then visualize data for the selected area by available plots (Time Series, Bivariate, Walter-Lieth, Boxplot, Climate Stripes). Users can also add a climate map as an overlay on North America. For a very quick summary of functionality of this page, users can click the *What does this page do* link at the top of the floating panel. For information on each plot, users can also click on the *What does this plot mean* link at the top of panel of plot parameters.
 
 ### **Step 1.** Select points or areas of interest:
 
 Users can select points or areas of interest using **one of the following three methods**:
 
--   **Method 1**. Select **FLP Area** and click on one of the outlined areas on the map.
+-   **Method 1**. Select **Ecoregion** and click on one of the outlined areas on the map. The Ecoregion names will appear as users hover over the areas.
 
--   **Method 2**. Select **Ecoregion** and click on one of the outlined areas on the map.
+-   **Method 2**. Select **FLP Area** and click on one of the outlined areas on the map. The FLP Area names will appear as users hover over the areas.
 
 -   **Method 3**. Select **Map point** and click on the map to add a single point.
 
 ### **Step 2.** Visualize by plots:
 
+Users can navigate to each plot by clicking on the plot name within the navigation bar.
 
+#### **Ecoregion and FLP Area Plots**
 
+Please note that these plots are **not** interactive. Whenever a user makes a change to a variable, they must click the green **Generate Plot** button.
 
+##### **Time Series Plot:**
 
+Choose the variable to plot by clicking on the **Element** and **Season/month** drop-down inputs. Click on the green **Generate Plot** button.
 
+<figure style="text-align:center;">
 
+<img src="Figure_10_Timeseries_ecoregion.png" style="width:100%;"/>
+
+<figcaption style="font-size: 0.8em; color: gray;">
+
+Figure 10: Example of a Time Series plot for Mean daily maximum temperature for Thompson-Okanogan Plateau
+
+</figcaption>
+
+</figure>
+
+To adjust the plot parameters from the recommended defaults, click on the **Adjust Plot** button, select the observational dataset(s), GCM(s) and SSP(s), and click **OK!**.
+
+<figure style="text-align:center;">
+
+<img src="Figure_11_Timeseries_ecoregion_parameters.png" style="width:100%;"/>
+
+<figcaption style="font-size: 0.8em; color: gray;">
+
+Figure 11: Adjust Plot parameters window for Ecoregion and FLP Area Time Series plot
+
+</figcaption>
+
+</figure>
+
+To download the plot as a PNG, click the **Download Plot** button.
+
+##### **Bivariate Plot:**
+
+Choose the x-axis and y-axis variables to plot by clicking on the **Element** and **Season/month** drop-down inputs, and the **time period**. Click on the green **Generate Plot** button. 
+
+<figure style="text-align:center;">
+
+<img src="Figure_12_Bivariate_ecoregion.png" style="width:100%;"/>
+
+<figcaption style="font-size: 0.8em; color: gray;">
+
+Figure 12: Example of a Bivariate plot for Change in Annual precipitation vs. Change in Mean annual temperature for Chilcotin Ranges and Fraser Plateau
+
+</figcaption>
+
+</figure>
+
+To download the plot as a PNG, click the **Download Plot** button.
+
+##### **Walter-Lieth Climate Diagram:**
+
+Choose the **observed period** and if the **diurnal range** is shown. Click on the green **Generate Plot** button. 
+
+<figure style="text-align:center;">
+
+<img src="Figure_13_WalterLieth_flp.png" style="width:100%;"/>
+
+<figcaption style="font-size: 0.8em; color: gray;">
+
+Figure 13: Example of a Walter Lieth climate diagram for Change in Annual precipitation and Change in Mean annual temperature from 1961-1990 for the Mackenzie FLP Area
+
+</figcaption>
+
+</figure>
+
+To download the plot as a PNG, click the **Download Plot** button.
+
+#### **Map Point Plots**
+
+Please note that these plots **are** interactive. Whenever a user makes a change to a variable, the plot will automatically update.
+
+##### **Time Series Plot:**
+
+Click on the green **Downscale Data** button. The app will downscale data for all variables available for the selected map point, so it will take time. Blue notification boxes will appear on the right-hand side of the screen as the downscaling is in progress and a plot will appear after the downscaling is complete.
+
+<figure style="text-align:center;">
+
+<img src="Figure_14_Timeseries_mappoint.png" style="width:100%;"/>
+
+<figcaption style="font-size: 0.8em; color: gray;">
+
+Figure 14: Example of a Time Series plot for Mean daily maximum temperature for a point near Burns Lake, BC
+
+</figcaption>
+
+</figure>
+
+To change the variable plotted, select the **Element** and **Season/month** from the drop-down menus.
+
+To adjust the plot parameters from the recommended defaults, click on the **Adjust Plot** button, select the observational dataset(s), GCM(s) and SSP(s), and click **OK!**.
+
+<figure style="text-align:center;">
+
+<img src="Figure_11_Timeseries_ecoregion_parameters.png" style="width:100%;"/>
+
+<figcaption style="font-size: 0.8em; color: gray;">
+
+Figure 15: Adjust Plot parameters window for a map point Time Series plot
+
+</figcaption>
+
+</figure>
+
+To download the plot as a PNG, click the **Download Plot** button.
+
+##### **Bivariate Plot:**
+
+Click on the green **Downscale Data** button. The app will downscale data for all variables available for the selected map point and a plot will appear after the downscaling is complete.
+
+<figure style="text-align:center;">
+
+<img src="Figure_16_Bivariate_mappoint.png" style="width:100%;"/>
+
+<figcaption style="font-size: 0.8em; color: gray;">
+
+Figure 16: Example of a Bivariate plot for Change in Annual precipitation vs. Change in Mean annual temperature for a point near Smithers, BC
+
+</figcaption>
+
+</figure>
+
+To change the x-axis and y-axis variables plotted, click on the **Element** and **Season/month** drop-down inputs, and the **time period**.
+
+To download the plot as a PNG, click the **Download Plot** button.
+
+##### **Walter-Lieth Climate Diagram:**
+
+Click on the green **Downscale Data** button. The app will downscale data for all variables available for the selected map point and a plot will appear after the downscaling is complete.
+
+<figure style="text-align:center;">
+
+<img src="Figure_17_WalterLieth_mappoint.png" style="width:100%;"/>
+
+<figcaption style="font-size: 0.8em; color: gray;">
+
+Figure 17: Example of a Walter Lieth climate diagram for Change in Annual precipitation and Change in Mean annual temperature from 1961-1990 for a point near Prince George, BC
+
+</figcaption>
+
+</figure>
+
+Users can change the **observed period** and if the **diurnal range** is shown.
+
+To download the plot as a PNG, click the **Download Plot** button.
 

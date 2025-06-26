@@ -163,7 +163,7 @@ visualization_server <- function(input, output, session) {
         title = "Adjust Plot Options", size = "l", fade = FALSE, class = "modal-dialog-scrollable",
         shiny::checkboxGroupInput(
           inputId = "time_series_dataset",
-          label = h5("Choose dataset:"),
+          label = h5("Choose observational dataset:"),
           width = "100%",
           inline = TRUE,
           choices = c("MSWX Blend" = "mswx.blend", "ClimateNA" = "climatena", "Climatic Research Unit / Global Precipitation Climatology Centre" = "cru.gpcc"),

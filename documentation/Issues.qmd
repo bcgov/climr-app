@@ -4,7 +4,7 @@
 
 This section is focused on aspects of the climr App related to
 trade-offs and intrinsic sources of error. We also list bugs or minor
-enhancements that have not yet been resolved. If you have an problem or
+enhancements that have not yet been resolved. If you have a problem or
 suggestion to report, you can enter it as a "New issue" in our
 <a href="https://github.com/bcgov/climr-app/issues" target="_blank">GitHub
 repo </a>.
@@ -12,4 +12,5 @@ repo </a>.
 - Note issues around the time it takes to downscale data for areas (not map points) when recommended default settings are used and multiple variables are used - Get Data tab.
 
 - Note time it takes to render a time series plot from single map point data - Visualization tab.
+
 ### Issues requiring fixing
