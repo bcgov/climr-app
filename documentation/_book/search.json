@@ -14,7 +14,7 @@
     "href": "Overview.html",
     "title": "2  Overview",
     "section": "",
-    "text": "2.1 Structure\nThe climr App is organized into three tabs.",
+    "text": "2.1 Structure\nWhat is the climr App? Or perhaps the ClimApp?\nThe climr App is organized into three tabs.",
     "crumbs": [
       "<span class='chapter-number'>2</span>  <span class='chapter-title'>Overview</span>"
     ]
@@ -94,7 +94,7 @@
     "href": "Issues.html",
     "title": "5  Known Issues",
     "section": "",
-    "text": "5.1 Known issues with the climr App :(\nThis section is focused on aspects of the climr App related to trade-offs and intrinsic sources of error. We also list bugs or minor enhancements that have not yet been resolved. If you have an problem or suggestion to report, you can enter it as a “New issue” in our GitHub repo .",
+    "text": "5.1 Known issues with the climr App :(\nThis section is focused on aspects of the climr App related to trade-offs and intrinsic sources of error. We also list bugs or minor enhancements that have not yet been resolved. If you have a problem or suggestion to report, you can enter it as a “New issue” in our GitHub repo .",
     "crumbs": [
       "<span class='chapter-number'>5</span>  <span class='chapter-title'>Known Issues</span>"
     ]
