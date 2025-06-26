@@ -231,6 +231,54 @@ visualization_server <- function(input, output, session) {
   })
   
   # ---- Visualization Plot events
+  shiny::observeEvent(input$ts_plot_info, {
+    showModal(modalDialog(
+      title = "What does this plot mean?",
+      easyClose = TRUE,
+      size = "l",
+      shiny::p("Time series plots of 20th and 21st century climate change for user-selected locations and climate variables."),
+      shiny::p("Purposes of the plot:"),
+      shiny::tags$ul(
+        shiny::tags$li("View differences in interannual variability and climate change trends among global climate models (GCMs)"),
+        shiny::tags$li("View the differences between multiple simulations of each model"),
+        shiny::tags$li("Compare simulated and observed climate change from 1901 to present"),
+        shiny::tags$li("Compare time series of two different variables")
+      ),
+      shiny::p("All global climate model anomalies are bias-corrected to the 1961-1990 reference period normals.")
+      # add link for plot page in documentation
+    ))
+  })
+  shiny::observeEvent(input$biv_plot_info, {
+    showModal(modalDialog(
+      title = "What does this plot mean?",
+      easyClose = TRUE,
+      size = "l",
+      shiny::p("Bivariate plots showing 21st century climate change for user-selected locations and climate variables."),
+      shiny::p("Purposes of the plot:"),
+      shiny::tags$ol(
+        shiny::tags$li("Show differences in climate change trends among global climate models (GCMs)"),
+        shiny::tags$li("Show the differences between multiple simulations of each model"),
+        shiny::tags$li("Compare simulated climate change to observed climate change in the 2001-2020 period")
+      ),
+      shiny::p("All climate changes are relative to the 1961-1990 reference period normals.")
+      # add link for plot page in documentation
+    ))
+  })
+  shiny::observeEvent(input$wl_plot_info, {
+    showModal(modalDialog(
+      title = "What does this plot mean?",
+      easyClose = TRUE,
+      size = "l",
+      shiny::p("Walter-Lieth Climate Diagram."),
+      shiny::p("Purposes of the diagram:"),
+      shiny::tags$ul(
+        shiny::tags$li("Allow identification of humid and drought periods over a year"),
+        shiny::tags$li("Allow for an easy climate comparison between geographic locations")
+      ),
+      shiny::p("All global climate model anomalies are bias-corrected to the 1961-1990 reference period normals.")
+      # add link for plot page in documentation
+    ))
+  })
   shiny::observeEvent(input$downscale_data_bivariate, {
     if (shiny::in_devmode()) cat("Event: downscale_data_bivariate", sep = "\n")
     if (nrow(vis_sg_dt$dt) < 1 & input$input_type == "Map point") {

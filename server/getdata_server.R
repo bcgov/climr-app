@@ -817,7 +817,6 @@ getdata_server <- function(input, output, session) {
               easyClose = TRUE
             )
           )
-          return()
         }
         vstore[["processing"]] <- FALSE
         output$downscale_points_count_estimate <- shiny::renderUI({
