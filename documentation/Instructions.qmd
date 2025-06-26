@@ -185,7 +185,9 @@ See the [Glossary of Terms](Definitions.qmd#glossary-of-terms) for more informat
 
 ## Visualization
 
-In the second tab of the climr App, users can select an ecoregion of North America, an area of interest by Forest Landscape Plan (FLP) Areas, or by single map points. Users can then visualize data for the selected area by available plots (Time Series, Bivariate, Walter-Lieth, Boxplot, Climate Stripes). Users can also add a climate map as an overlay on North America. For a very quick summary of functionality of this page, users can click the *What does this page do* link at the top of the floating panel. For information on each plot, users can also click on the *What does this plot mean* link at the top of panel of plot parameters.
+In the second tab of the climr App, users can select an ecoregion of North America, an area of interest by Forest Landscape Plan (FLP) Areas, or by single map points. Users can then visualize data for the selected area by available plots (Time Series, Bivariate, Walter-Lieth). Users can also add a climate map as an overlay on North America. For a very quick summary of functionality of this page, users can click the *What does this page do* link at the top of the floating panel. For information on each plot, users can also click on the *What does this plot mean* link at the top of panel of plot parameters.
+
+Users can also visualize climate data across all of North America by climate map overlays.
 
 ### **Step 1.** Select points or areas of interest:
 
@@ -203,7 +205,7 @@ Users can navigate to each plot by clicking on the plot name within the navigati
 
 #### **Ecoregion and FLP Area Plots**
 
-Please note that these plots are **not** interactive. Whenever a user makes a change to a variable, they must click the green **Generate Plot** button.
+Please note that these plots are **not** interactive. Whenever a user makes a change to a variable, they must click the green **Generate Plot** button to see the changes reflected on the plot.
 
 ##### **Time Series Plot:**
 
@@ -350,4 +352,47 @@ Figure 17: Example of a Walter Lieth climate diagram for Change in Annual precip
 Users can change the **observed period** and if the **diurnal range** is shown.
 
 To download the plot as a PNG, click the **Download Plot** button.
+
+To clear all plots and selected points/areas, click the red **Clear Map** button.
+
+### Climate Map Overlays:
+
+Users can overlay a climate map onto all of North America. These maps can be displayed underneath the Ecoregion/FLP Area/map point boundaries or by itself.
+
+Click on the **Show climate map** checkbox in the main panel and variable options for the map will appear underneath.
+
+Choose the variable to display by selecting the **Element** and **Season/months** from the respective drop-down menus.
+
+<figure style="text-align:center;">
+
+<img src="Figure_18_Overlay_controls.png" style="width:25%;"/>
+
+<figcaption style="font-size: 0.8em; color: gray;">
+
+Figure 18: Climate map overlay controls
+
+</figcaption>
+
+</figure>
+
+Click **Load**. The map will take about 5-10 seconds to render.
+
+<figure style="text-align:center;">
+
+<img src="Figure_19_Overlay_Tave.png" style="width:100%;"/>
+
+<figcaption style="font-size: 0.8em; color: gray;">
+
+Figure 19: Climate map of annual Mean temperature (in °C) across North America
+
+</figcaption>
+
+</figure>
+
+To download the climate map, click **Download**.
+
+To remove the overlay, click on the red **Clear Map** button.
+
+
+
 

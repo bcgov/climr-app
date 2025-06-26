@@ -244,8 +244,8 @@ visualization_server <- function(input, output, session) {
         shiny::tags$li("Compare simulated and observed climate change from 1901 to present"),
         shiny::tags$li("Compare time series of two different variables")
       ),
-      shiny::p("All global climate model anomalies are bias-corrected to the 1961-1990 reference period normals.")
-      # add link for plot page in documentation
+      shiny::p("All global climate model anomalies are bias-corrected to the 1961-1990 reference period normals."),
+      HTML('<a href="documentation/_book/Instructions.html#step-2.-visualize-by-plots" target="_blank">Click here for documentation.</a>')
     ))
   })
   shiny::observeEvent(input$biv_plot_info, {
@@ -260,8 +260,8 @@ visualization_server <- function(input, output, session) {
         shiny::tags$li("Show the differences between multiple simulations of each model"),
         shiny::tags$li("Compare simulated climate change to observed climate change in the 2001-2020 period")
       ),
-      shiny::p("All climate changes are relative to the 1961-1990 reference period normals.")
-      # add link for plot page in documentation
+      shiny::p("All climate changes are relative to the 1961-1990 reference period normals."),
+      HTML('<a href="documentation/_book/Instructions.html#step-2.-visualize-by-plots" target="_blank">Click here for documentation.</a>')
     ))
   })
   shiny::observeEvent(input$wl_plot_info, {
@@ -275,8 +275,8 @@ visualization_server <- function(input, output, session) {
         shiny::tags$li("Allow identification of humid and drought periods over a year"),
         shiny::tags$li("Allow for an easy climate comparison between geographic locations")
       ),
-      shiny::p("All global climate model anomalies are bias-corrected to the 1961-1990 reference period normals.")
-      # add link for plot page in documentation
+      shiny::p("All global climate model anomalies are bias-corrected to the 1961-1990 reference period normals."),
+      HTML('<a href="documentation/_book/Instructions.html#step-2.-visualize-by-plots" target="_blank">Click here for documentation.</a>')
     ))
   })
   shiny::observeEvent(input$downscale_data_bivariate, {
@@ -761,7 +761,7 @@ visualization_server <- function(input, output, session) {
   output$overlay_element <- shiny::renderUI({
     shiny::selectInput(
       inputId = "element",
-      label = "Choose element:",
+      label = "Element:",
       choices = {
         dt <- climr_tif[[vstore[["tifsource"]]]]
         unique(dt[, element])
@@ -775,7 +775,7 @@ visualization_server <- function(input, output, session) {
       if (input$element != "elev" & input$element != "lat" & input$element != "PET") {
         shiny::selectInput(
           inputId = "time",
-          label = "Choose season/months:",
+          label = "Season/months:",
           choices = climr::variables[Code_Element == input$element, Time]
         )
       }
