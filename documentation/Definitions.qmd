@@ -4,6 +4,17 @@
 
 ### **Downscale Parameters**:
 
+  - **Global Climate Models (GCMs)**:
+  
+  - **Shared Socio-economic Pathways (SSPs)**: Scenarios of future greenhouse gas emissions, these pathways have been built by experts to examine how global society, demographics and economics might change by 2100. The app uses projections from the four major SSP scenarios: 
+  
+    - **SSP1-2.6**: Represents strong action to reduce emissions, in line with the Paris Climate Accords goal of keeping global warming to 2°C above pre-industrial temperatures.
+    
+    - **SSP2-4.5**: Represents moderate action to reduce emissions, roughly consistent with current emissions policies and economic trends.
+    
+    - **SSP3-7.0**: Represents a broader range of scenarios where little to no climate policy is implemented, leading to a steady, linear rise in greenhouse gas emissions over time.
+    
+    - **SSP5-8.5**: Represents a high-emissions scenario driven by rapid expansion in greenhouse gas emissions over the next several decades, resulting in end-of-century emission levels more than three times higher than current emissions.
 
 ### **Climate Variables**:
   
