@@ -14,7 +14,7 @@ Users can select points or areas of interest using **one of the following two me
 
 ### **Step 2.** Choose downscale parameters:
 
-Users can select parameters by clicking the **Choose Downscale Parameters** button. These parameters are separated into two categories, **Observed Climate Data** and **Simulated Climate Data**. 
+Users can select parameters by clicking the **Choose Downscale Parameters** button. These parameters are separated into two categories, **Observed Climate Data** and **Simulated Climate Data** (@fig-Downscale_Parameters). 
 
 ```{r}
 #| label: fig-Downscale_Parameters
@@ -22,59 +22,41 @@ Users can select parameters by clicking the **Choose Downscale Parameters** butt
 #| fig-align: center
 #| out.width: 90%
 #| echo: false
-knitr::include_graphics("Figure_1_Downscale_Parameters.png")
+knitr::include_graphics("Instructions_Downscale_Parameters.png")
 ```
 
-Under the **Observed Climate Data** accordion, users can select observed periods (the reference period 1961-1990 will always be computed) and choose to specify observed years and observation time-series data.
+Under the **Observed Climate Data** accordion, users can select observed periods (the reference period 1961-1990 will always be computed) and choose to specify observed years and observation time-series data (@fig-Observed_Climate_Data).
 
 ```{r}
-#| label: Observed_Climate_Data
+#| label: fig-Observed_Climate_Data
 #| fig-cap: "Example of selected parameters for Observed Climate Data"
 #| fig-align: center
 #| out.width: 90%
 #| echo: false
-knitr::include_graphics("Figure_2_Observed_Climate_Data.png")
+knitr::include_graphics("Instructions_Observed_Climate_Data.png")
 ```
 
-<figure style="text-align:center;">
+Under the **Simulated Climate Data** accordion, users can either choose to use the recommended default settings, or manually choose the Global Climate Models (GCMs), Shared Socio-economic Pathways (SSPs), GCM period, whether or not to specify the GCM years, and choose the maximum number of model runs (please note that if 0 is selected, the ensemble mean will be used) (@fig-Simulated_Climate_Data).
 
-<img src="Figure_2_Observed_Climate_Data.png" style="width:90%;"/>
+```{r}
+#| label: fig-Simulated_Climate_Data
+#| fig-cap: "Example of selected parameters for Simulated Climate Data"
+#| fig-align: center
+#| out.width: 90%
+#| echo: false
+knitr::include_graphics("Instructions_Simulated_Climate_Data.png")
+```
 
-<figcaption style="font-size: 0.8em; color: gray;">
+Users can then choose to select **extra climate variables**. These are organized into packages of **Monthly**, **Seasonal** and **Annual** variables, or users can choose to select custom variables by clicking **Custom** and specifying the element and seasons/months wanted (@fig-Extra_Climate_Variables). If no extra climate variables are selected, monthly PPT, Tmax, and Tmin will be computed.
 
-Figure 2: Example of selected parameters for Observed Climate Data
-
-</figcaption>
-
-</figure>
-
-Under the **Simulated Climate Data** accordion, users can either choose to use the recommended default settings, or manually choose the Global Climate Models (GCMs), Shared Socio-economic Pathways (SSPs), GCM period, whether or not to specify the GCM years, and choose the maximum number of model runs (please note that if 0 is selected, the ensemble mean will be used).
-
-<figure style="text-align:center;">
-
-<img src="Figure_3_Simulated_Climate_Data.png" style="width:90%;"/>
-
-<figcaption style="font-size: 0.8em; color: gray;">
-
-Figure 3: Example of selected parameters for Simulated Climate Data
-
-</figcaption>
-
-</figure>
-
-Users can then choose to select **extra climate variables**. These are organized into packages of **Monthly**, **Seasonal** and **Annual** variables, or users can choose to select custom variables by clicking **Custom** and specifying the element and seasons/months wanted. If no extra climate variables are selected, monthly PPT, Tmax, and Tmin will be computed.
-
-<figure style="text-align:center;">
-
-<img src="Figure_4_Extra_Climate_Variables.png" style="width:90%;"/>
-
-<figcaption style="font-size: 0.8em; color: gray;">
-
-Figure 4: Example of selections for extra climate variables
-
-</figcaption>
-
-</figure>
+```{r}
+#| label: fig-Extra_Climate_Variables
+#| fig-cap: "Example of selections for extra climate variables"
+#| fig-align: center
+#| out.width: 90%
+#| echo: false
+knitr::include_graphics("Instructions_Extra_Climate_Variables.png")
+```
 
 Click **Apply**!
 
@@ -84,77 +66,62 @@ To clear all selections, click **Reset**.
 
 Click on the **Generate Results** button. If the area of interest are map point(s) or an uploaded file of single points, the only output format available for the downscaled data is csv. If the area of interest is a map drawn shape or a shape file, users can choose between csv and GeoTIFF as the output format.
 
-If GeoTIFF is selected, users will need to choose downscale resolution.
+If GeoTIFF is selected, users will need to choose downscale resolution (@fig-GeoTIFF_downscale).
 
-<figure style="text-align:center;">
-
-<img src="Figure_5_GeoTIFF_downscale.png" style="width:90%;"/>
-
-<figcaption style="font-size: 0.8em; color: gray;">
-
-Figure 5: Choosing output formats for downscaled data for a map drawn shape or shape file
-
-</figcaption>
-
-</figure>
+```{r}
+#| label: fig-GeoTIFF_downscale
+#| fig-cap: "Choosing output formats for downscaled data for a map drawn shape or shape file"
+#| fig-align: center
+#| out.width: 90%
+#| echo: false
+knitr::include_graphics("Instructions_GeoTIFF_downscale.png")
+```
 
 Click **Launch Downscale Process**. Notification boxes will appear on the right-hand side of the screen while the downscale is processing, indicating each step.
 
-If csv has been selected, a preview will appear under the Launch Downscale button, and users can choose to download the data.
+If csv has been selected, a preview will appear under the Launch Downscale Process button, and users can choose to download the data (@fig-csv_preview).
 
-<figure style="text-align:center;">
+```{r}
+#| label: fig-csv_preview
+#| fig-cap: "Example of the Preview of Downscaled Data for single map points"
+#| fig-align: center
+#| out.width: 90%
+#| echo: false
+knitr::include_graphics("Instructions_csv_preview.png")
+```
 
-<img src="Figure_6_csv_preview.png" style="width:90%;"/>
+If GeoTIFF has been selected, raster preview options will appear on the main panel beside the map. Users can select raster to layers to preview in the area of interest on the map and click **Preview Raster Layer** to view. Users can also download the downscaled data from this panel (@fig-raster_preview_options).
 
-<figcaption style="font-size: 0.8em; color: gray;">
+```{r}
+#| label: fig-raster_preview_options
+#| fig-cap: "Example of raster preview for GeoTIFF output for Mean Annual Temperature in 1961-1990"
+#| fig-align: center
+#| out.width: 100%
+#| echo: false
+knitr::include_graphics("Instructions_raster_preview_options.png")
+```
 
-Figure 6: Example of the Preview of Downscaled Data for single map points
+Users can view the calculated difference between the period selected and the reference period (1961-1990) (@fig-calculated_diff).
 
-</figcaption>
+```{r}
+#| label: fig-calculated_diff
+#| fig-cap: "Example of calculated difference in Precipitation as Snow from 1961-1990 to 2001-2020"
+#| fig-align: center
+#| out.width: 100%
+#| echo: false
+knitr::include_graphics("Instructions_calculated_diff.png")
+```
 
-</figure>
+Users can also view the the percent change between the period selected and the reference period (1961-1990) (@fig-percent_change).
 
-If GeoTIFF has been selected, raster preview options will appear on the main panel beside the map. Users can select raster to layers to preview in the area of interest on the map and click **Preview Raster Layer** to view. Users can also download the downscaled data from this panel.
-
-<figure style="text-align:center;">
-
-<img src="Figure_7_raster_preview_options.png" style="width:100%;"/>
-
-<figcaption style="font-size: 0.8em; color: gray;">
-
-Figure 7: Example of raster preview for GeoTIFF output for Mean Annual Temperature in 1961-1990
-
-</figcaption>
-
-</figure>
-
-Users can view the calculated difference between the period selected and the reference period (1961-1990).
-
-<figure style="text-align:center;">
-
-<img src="Figure_8_calculated_diff.png" style="width:100%;"/>
-
-<figcaption style="font-size: 0.8em; color: gray;">
-
-Figure 8: Example of calculated difference in Precipitation as Snow from 1961-1990 to 2001-2020
-
-</figcaption>
-
-</figure>
-
-Users can also view the the percent change between the period selected and the reference period (1961-1990).
-
-<figure style="text-align:center;">
-
-<img src="Figure_9_percent_change.png" style="width:100%;"/>
-
-<figcaption style="font-size: 0.8em; color: gray;">
-
-Figure 9: Example of percent change in Precipitation as Snow from 1961-1990 to 2001-2020
-
-</figcaption>
-
-</figure>
+```{r}
+#| label: fig-percent_change
+#| fig-cap: "Example of percent change in Precipitation as Snow from 1961-1990 to 2001-2020"
+#| fig-align: center
+#| out.width: 100%
+#| echo: false
+knitr::include_graphics("Instructions_percent_change.png")
+```
 
 To clear all selections on the map and start again with new data, click on the red **Clear Selections** button in the main panel.
 
@@ -215,69 +182,57 @@ Please note that these plots are **not** interactive. Whenever a user makes a ch
 
 ##### **Time Series Plot:**
 
-Choose the variable to plot by clicking on the **Element** and **Season/month** drop-down inputs. Click on the green **Generate Plot** button.
+Choose the variable to plot by clicking on the **Element** and **Season/month** drop-down inputs. Click on the green **Generate Plot** button (@fig-Timeseries_ecoregion).
 
-<figure style="text-align:center;">
+```{r}
+#| label: fig-Timeseries_ecoregion
+#| fig-cap: "Example of a Time Series plot for Mean daily maximum temperature for Thompson-Okanogan Plateau"
+#| fig-align: center
+#| out.width: 100%
+#| echo: false
+knitr::include_graphics("Instructions_Timeseries_ecoregion.png")
+```
 
-<img src="Figure_10_Timeseries_ecoregion.png" style="width:100%;"/>
+To adjust the plot parameters from the recommended defaults, click on the **Adjust Plot** button, select the observational dataset(s), GCM(s) and SSP(s), and click **OK!** (@fig-Timeseries_ecoregion_parameters).
 
-<figcaption style="font-size: 0.8em; color: gray;">
-
-Figure 10: Example of a Time Series plot for Mean daily maximum temperature for Thompson-Okanogan Plateau
-
-</figcaption>
-
-</figure>
-
-To adjust the plot parameters from the recommended defaults, click on the **Adjust Plot** button, select the observational dataset(s), GCM(s) and SSP(s), and click **OK!**.
-
-<figure style="text-align:center;">
-
-<img src="Figure_11_Timeseries_ecoregion_parameters.png" style="width:100%;"/>
-
-<figcaption style="font-size: 0.8em; color: gray;">
-
-Figure 11: Adjust Plot parameters window for Ecoregion and FLP Area Time Series plot
-
-</figcaption>
-
-</figure>
+```{r}
+#| label: fig-Timeseries_ecoregion_parameters
+#| fig-cap: "Adjust Plot parameters window for Ecoregion and FLP Area Time Series plot"
+#| fig-align: center
+#| out.width: 100%
+#| echo: false
+knitr::include_graphics("Instructions_Timeseries_ecoregion_parameters.png")
+```
 
 To download the plot as a PNG, click the **Download Plot** button.
 
 ##### **Bivariate Plot:**
 
-Choose the x-axis and y-axis variables to plot by clicking on the **Element** and **Season/month** drop-down inputs, and the **time period**. Click on the green **Generate Plot** button. 
+Choose the x-axis and y-axis variables to plot by clicking on the **Element** and **Season/month** drop-down inputs, and the **time period**. Click on the green **Generate Plot** button (@fig-Bivariate_ecoregion).
 
-<figure style="text-align:center;">
-
-<img src="Figure_12_Bivariate_ecoregion.png" style="width:100%;"/>
-
-<figcaption style="font-size: 0.8em; color: gray;">
-
-Figure 12: Example of a Bivariate plot for Change in Annual precipitation vs. Change in Mean annual temperature for Chilcotin Ranges and Fraser Plateau
-
-</figcaption>
-
-</figure>
+```{r}
+#| label: fig-Bivariate_ecoregion
+#| fig-cap: "Example of a Bivariate plot for Change in Annual precipitation vs. Change in Mean annual temperature for Chilcotin Ranges and Fraser Plateau"
+#| fig-align: center
+#| out.width: 100%
+#| echo: false
+knitr::include_graphics("Instructions_Bivariate_ecoregion.png")
+```
 
 To download the plot as a PNG, click the **Download Plot** button.
 
 ##### **Walter-Lieth Climate Diagram:**
 
-Choose the **observed period** and if the **diurnal range** is shown. Click on the green **Generate Plot** button. 
+Choose the **observed period** and if the **diurnal range** is shown. Click on the green **Generate Plot** button (@fig-WalterLieth_flp).
 
-<figure style="text-align:center;">
-
-<img src="Figure_13_WalterLieth_flp.png" style="width:100%;"/>
-
-<figcaption style="font-size: 0.8em; color: gray;">
-
-Figure 13: Example of a Walter Lieth climate diagram for Change in Annual precipitation and Change in Mean annual temperature from 1961-1990 for the Mackenzie FLP Area
-
-</figcaption>
-
-</figure>
+```{r}
+#| label: fig-WalterLieth_flp
+#| fig-cap: "Example of a Walter Lieth climate diagram for Change in Annual precipitation and Change in Mean annual temperature from 1961-1990 for the Mackenzie FLP Area"
+#| fig-align: center
+#| out.width: 100%
+#| echo: false
+knitr::include_graphics("Instructions_WalterLieth_flp.png")
+```
 
 To download the plot as a PNG, click the **Download Plot** button.
 
@@ -287,53 +242,44 @@ Please note that these plots **are** interactive. Whenever a user makes a change
 
 ##### **Time Series Plot:**
 
-Click on the green **Downscale Data** button. The app will downscale data for all variables available for the selected map point, this can take about a minute. Blue notification boxes will appear on the right-hand side of the screen as the downscaling is in progress and a plot will appear after the downscaling is complete.
+Click on the green **Downscale Data** button. The app will downscale data for all variables available for the selected map point, this can take about a minute. Blue notification boxes will appear on the right-hand side of the screen as the downscaling is in progress and a plot will appear after the downscaling is complete (@fig-Timeseries_mappoint).
 
-<figure style="text-align:center;">
-
-<img src="Figure_14_Timeseries_mappoint.png" style="width:100%;"/>
-
-<figcaption style="font-size: 0.8em; color: gray;">
-
-Figure 14: Example of a Time Series plot for Mean daily maximum temperature for a point near Burns Lake, BC
-
-</figcaption>
-
-</figure>
+```{r}
+#| label: fig-Timeseries_mappoint
+#| fig-cap: "Example of a Time Series plot for Mean daily maximum temperature for a point near Burns Lake, BC"
+#| fig-align: center
+#| out.width: 100%
+#| echo: false
+knitr::include_graphics("Instructions_Timeseries_mappoint.png")
+```
 
 To change the variable plotted, select the **Element** and **Season/month** from the drop-down menus.
 
-To adjust the plot parameters from the recommended defaults, click on the **Adjust Plot** button, select the observational dataset(s), GCM(s) and SSP(s), and click **OK!**.
+To adjust the plot parameters from the recommended defaults, click on the **Adjust Plot** button, select the observational dataset(s), GCM(s) and SSP(s), and click **OK!** (@fig-Timeseries_mappoint_parameters).
 
-<figure style="text-align:center;">
-
-<img src="Figure_11_Timeseries_ecoregion_parameters.png" style="width:100%;"/>
-
-<figcaption style="font-size: 0.8em; color: gray;">
-
-Figure 15: Adjust Plot parameters window for a map point Time Series plot
-
-</figcaption>
-
-</figure>
+```{r}
+#| label: fig-Timeseries_mappoint_parameters
+#| fig-cap: "Adjust Plot parameters window for a map point Time Series plot"
+#| fig-align: center
+#| out.width: 100%
+#| echo: false
+knitr::include_graphics("Instructions_Timeseries_ecoregion_parameters.png")
+```
 
 To download the plot as a PNG, click the **Download Plot** button.
 
 ##### **Bivariate Plot:**
 
-Click on the green **Downscale Data** button. The app will downscale data for all variables available for the selected map point and a plot will appear after the downscaling is complete.
+Click on the green **Downscale Data** button. The app will downscale data for all variables available for the selected map point and a plot will appear after the downscaling is complete (@fig-Bivariate_mappoint).
 
-<figure style="text-align:center;">
-
-<img src="Figure_16_Bivariate_mappoint.png" style="width:100%;"/>
-
-<figcaption style="font-size: 0.8em; color: gray;">
-
-Figure 16: Example of a Bivariate plot for Change in Annual precipitation vs. Change in Mean annual temperature for a point near Smithers, BC
-
-</figcaption>
-
-</figure>
+```{r}
+#| label: fig-Bivariate_mappoint
+#| fig-cap: "Example of a Bivariate plot for Change in Annual precipitation vs. Change in Mean annual temperature for a point near Smithers, BC"
+#| fig-align: center
+#| out.width: 100%
+#| echo: false
+knitr::include_graphics("Instructions_Bivariate_mappoint.png")
+```
 
 To change the x-axis and y-axis variables plotted, click on the **Element** and **Season/month** drop-down inputs, and the **time period**.
 
@@ -341,19 +287,16 @@ To download the plot as a PNG, click the **Download Plot** button.
 
 ##### **Walter-Lieth Climate Diagram:**
 
-Click on the green **Downscale Data** button. The app will downscale data for all variables available for the selected map point and a plot will appear after the downscaling is complete.
+Click on the green **Downscale Data** button. The app will downscale data for all variables available for the selected map point and a plot will appear after the downscaling is complete (@fig-WalterLieth_mappoint).
 
-<figure style="text-align:center;">
-
-<img src="Figure_17_WalterLieth_mappoint.png" style="width:100%;"/>
-
-<figcaption style="font-size: 0.8em; color: gray;">
-
-Figure 17: Example of a Walter Lieth climate diagram for Change in Annual precipitation and Change in Mean annual temperature from 1961-1990 for a point near Prince George, BC
-
-</figcaption>
-
-</figure>
+```{r}
+#| label: fig-WalterLieth_mappoint
+#| fig-cap: "Example of a Walter Lieth climate diagram for Change in Annual precipitation and Change in Mean annual temperature from 1961-1990 for a point near Prince George, BC"
+#| fig-align: center
+#| out.width: 100%
+#| echo: false
+knitr::include_graphics("Instructions_WalterLieth_mappoint.png")
+```
 
 Users can change the **observed period** and if the **diurnal range** is shown.
 
@@ -367,33 +310,27 @@ Users can overlay a climate map onto all of North America. These maps can be dis
 
 Click on the **Show climate map** checkbox in the main panel and variable options for the map will appear underneath.
 
-Choose the variable to display by selecting the **Element** and **Season/months** from the respective drop-down menus.
+Choose the variable to display by selecting the **Element** and **Season/months** from the respective drop-down menus (@fig-Overlay_controls).
 
-<figure style="text-align:center;">
+```{r}
+#| label: fig-Overlay_controls
+#| fig-cap: "Climate map overlay controls"
+#| fig-align: center
+#| out.width: 25%
+#| echo: false
+knitr::include_graphics("Instructions_Overlay_controls.png")
+```
 
-<img src="Figure_18_Overlay_controls.png" style="width:25%;"/>
+Click **Load**. The map will take about 5-10 seconds to render (@fig-Overlay_Tave).
 
-<figcaption style="font-size: 0.8em; color: gray;">
-
-Figure 18: Climate map overlay controls
-
-</figcaption>
-
-</figure>
-
-Click **Load**. The map will take about 5-10 seconds to render.
-
-<figure style="text-align:center;">
-
-<img src="Figure_19_Overlay_Tave.png" style="width:100%;"/>
-
-<figcaption style="font-size: 0.8em; color: gray;">
-
-Figure 19: Climate map of annual Mean temperature (in °C) across North America
-
-</figcaption>
-
-</figure>
+```{r}
+#| label: fig-Overlay_Tave
+#| fig-cap: "Climate map of annual Mean temperature (in °C) across North America"
+#| fig-align: center
+#| out.width: 100%
+#| echo: false
+knitr::include_graphics("Instructions_Overlay_Tave.png")
+```
 
 For ratio variables, an **Apply scale adjustment** checkbox will appear, which applies a log scale adjustment to the data.
 
