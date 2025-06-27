@@ -20,7 +20,27 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
@@ -177,7 +197,23 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#overview-of-the-climr-app-methods" id="toc-overview-of-the-climr-app-methods" class="nav-link active" data-scroll-target="#overview-of-the-climr-app-methods"><span class="header-section-number">4.1</span> Overview of the climr App Methods</a></li>
+  <li><a href="#climr-downscaling-methods" id="toc-climr-downscaling-methods" class="nav-link active" data-scroll-target="#climr-downscaling-methods"><span class="header-section-number">4.1</span> climr downscaling methods</a>
+  <ul class="collapse">
+  <li><a href="#stage-1-change-factor-aka-delta-downscaling" id="toc-stage-1-change-factor-aka-delta-downscaling" class="nav-link" data-scroll-target="#stage-1-change-factor-aka-delta-downscaling"><span class="header-section-number">4.1.1</span> Stage 1: change-factor (aka “delta”) downscaling</a></li>
+  <li><a href="#stage-2-elevation-adjustment" id="toc-stage-2-elevation-adjustment" class="nav-link" data-scroll-target="#stage-2-elevation-adjustment"><span class="header-section-number">4.1.2</span> Stage 2: Elevation adjustment</a></li>
+  <li><a href="#stage-3-derived-variables" id="toc-stage-3-derived-variables" class="nav-link" data-scroll-target="#stage-3-derived-variables"><span class="header-section-number">4.1.3</span> Stage 3: Derived variables</a></li>
+  <li><a href="#full-article" id="toc-full-article" class="nav-link" data-scroll-target="#full-article"><span class="header-section-number">4.1.4</span> Full article</a></li>
+  </ul></li>
+  <li><a href="#the-climr-baseline-climatologies" id="toc-the-climr-baseline-climatologies" class="nav-link" data-scroll-target="#the-climr-baseline-climatologies"><span class="header-section-number">4.2</span> The climr baseline climatologies</a>
+  <ul class="collapse">
+  <li><a href="#full-article-1" id="toc-full-article-1" class="nav-link" data-scroll-target="#full-article-1"><span class="header-section-number">4.2.1</span> Full article</a></li>
+  </ul></li>
+  <li><a href="#historical-time-series" id="toc-historical-time-series" class="nav-link" data-scroll-target="#historical-time-series"><span class="header-section-number">4.3</span> Historical time series</a>
+  <ul class="collapse">
+  <li><a href="#full-article-2" id="toc-full-article-2" class="nav-link" data-scroll-target="#full-article-2"><span class="header-section-number">4.3.1</span> Full article</a></li>
+  </ul></li>
+  <li><a href="#global-climate-model-ensemble-selection" id="toc-global-climate-model-ensemble-selection" class="nav-link" data-scroll-target="#global-climate-model-ensemble-selection"><span class="header-section-number">4.4</span> Global climate model ensemble selection</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">4.5</span> References</a></li>
   </ul>
 </nav>
     </div>
@@ -203,10 +239,150 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<section id="overview-of-the-climr-app-methods" class="level2" data-number="4.1">
-<h2 data-number="4.1" class="anchored" data-anchor-id="overview-of-the-climr-app-methods"><span class="header-section-number">4.1</span> Overview of the climr App Methods</h2>
+<section id="climr-downscaling-methods" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="climr-downscaling-methods"><span class="header-section-number">4.1</span> climr downscaling methods</h2>
+<p>Downscaling is the process of converting low-spatial-resolution climate data to high resolution. <code>climr</code> adapts a downscaling approach originally implemented in <a href="https://climatena.ca/">ClimateNA</a> (<span class="citation" data-cites="wang2016">Wang et al. (<a href="#ref-wang2016" role="doc-biblioref">2016</a>)</span>) by Dr.&nbsp;Tongli Wang (University of British Columbia), Dr.&nbsp;Andreas Hamann (University of Alberta), and Dave Spittlehouse (BC Ministry of Forests). This approach downscales climate data in three stages:</p>
+<ol type="1">
+<li><em>Change-factor downscaling</em> of coarse-resolution (50-200km grid) monthly temperature and precipitation data from climate models or observational sources to high-resolution (1-4km grid);</li>
+<li><em>Elevation adjustment</em> of temperature variables to provide scales finer than the high-resolution reference grid; and</li>
+<li><em>Calculating derived variables</em> (e.g.&nbsp;degree-days and precipitation as snow) from the downscaled monthly temperature and precipitation variables.</li>
+</ol>
+<section id="stage-1-change-factor-aka-delta-downscaling" class="level3" data-number="4.1.1">
+<h3 data-number="4.1.1" class="anchored" data-anchor-id="stage-1-change-factor-aka-delta-downscaling"><span class="header-section-number">4.1.1</span> Stage 1: change-factor (aka “delta”) downscaling</h3>
+<p><code>climr</code> uses a simple method called change-factor downscaling. This method adds low-spatial-resolution anomalies (e.g., from a climate model) to a high-resolution gridded climate map (Tabor and Williams 2010). While change-factor downscaling is too simplistic for downscaling of daily time series or extremes indices, it is sufficient for downscaling temperature and precipitation data at low temporal resolution (e.g., 20-year climate averages).</p>
+<p>The default high-resolution climate maps used by <code>climr</code> are 800m gridded maps of mean daily maximum temperature (T<sub>max</sub>), mean daily minimum temperature (T<sub>min</sub>), and precipitation (PPT) for the 1961-1990 period. Global climate model data are at much lower resolution (60-200km grid scale). To downscale the GCM projection, we first interpolate the low-resolution GCM anomaly (e.g., the temperature change from 1961-1990 to 2041-2060) to the resolution of the detailed reference climate map. Then we add these smoothed anomalies to the high-resolution 1961-1990 climate map, resulting in a high-resolution map of the simulated climate in the future period (e.g., 2041-2060). In the case of precipitation, we multiply the reference climate by the relative anomaly (e.g., multiply by 1.07 for a 7% increase in precipitation), rather than adding the absolute anomaly.</p>
+</section>
+<section id="stage-2-elevation-adjustment" class="level3" data-number="4.1.2">
+<h3 data-number="4.1.2" class="anchored" data-anchor-id="stage-2-elevation-adjustment"><span class="header-section-number">4.1.2</span> Stage 2: Elevation adjustment</h3>
+<p><code>climr</code> uses elevation adjustment to downscale temperature variables to scales finer than the resolution of the reference climate map. It does this by inferring a relationship between temperature and elevation, known as a lapse rate, from the reference climate maps. The local lapse rate is calculated for each grid cell of the reference climate map using a linear regression of temperature to elevation among the focal cell and its 8 neighbours. This lapse rate is then added to the difference between the user-supplied elevation and the elevation of the climr reference map.</p>
+<p>Elevation adjustment provides a visually appealing map and can be useful in improving precision in climate values for points of interest in areas of steep topography. However, it is important to remember that the <code>climr</code> output only represents the effects of regional climate and elevation. Microclimatic factors such as aspect, vegetation, water bodies, frost pooling, and soil moisture are not represented in these maps.</p>
+<p>By default, <code>climr</code> doesn’t apply elevation adjustment to precipitation, because in most cases elevation does not influence precipitation at scales less than 2km. Instead, precipitation at scales finer than 2.5m is simply interpolated from the nearest four grid points in the reference map. Users can choose to apply elevation-adjustment to precipitation in the <code>Downscale Parameters</code> dialogue box.</p>
+</section>
+<section id="stage-3-derived-variables" class="level3" data-number="4.1.3">
+<h3 data-number="4.1.3" class="anchored" data-anchor-id="stage-3-derived-variables"><span class="header-section-number">4.1.3</span> Stage 3: Derived variables</h3>
+<p>The value of delta downscaling isn’t just in obtaining the new absolute values of temperature and precipitation. It allows us to calculate anomalies in other indices that don’t scale linearly with temperature or precipitation, such as degree-days or precipitation as snow. <code>climr</code> currently uses the ClimateNA derived variable equations (<span class="citation" data-cites="wang2016">Wang et al. (<a href="#ref-wang2016" role="doc-biblioref">2016</a>)</span>). These equations are developed by fitting non-linear models of the relationship between the variable of interest calculated from daily weather station data and monthly temperature and/or precipitation at these weather stations.</p>
+</section>
+<section id="full-article" class="level3" data-number="4.1.4">
+<h3 data-number="4.1.4" class="anchored" data-anchor-id="full-article"><span class="header-section-number">4.1.4</span> Full article</h3>
+<p>For more details and illustrations of the <code>climr</code> downscaling method, see the <a href="https://bcgov.github.io/climr/articles/methods_downscaling.html">full article</a>.</p>
+</section>
+</section>
+<section id="the-climr-baseline-climatologies" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="the-climr-baseline-climatologies"><span class="header-section-number">4.2</span> The climr baseline climatologies</h2>
+<p>High-quality gridded climatologies (climate maps) of North America are not currently available, despite the availability of high-quality climate maps for BC and the continental US (the PRISM maps; <span class="citation" data-cites="daly2008">Daly et al. (<a href="#ref-daly2008" role="doc-biblioref">2008</a>)</span>). Existing seamless maps made with a consistent methodology across North America (WorldClim, Daymet, and CHELSA) exhibit unacceptable artefacts in the complex topography of the western Cordillera. For this reason, we developed a mosaic of climatologies for use as climr’s baseline (reference) maps of temperature and precipitation.</p>
+<p>The climr mosaic is a composite of the 1981-2010 gridded climate maps from the following sources (<a href="#fig-climr_mosaic_dataSources" class="quarto-xref">Figure&nbsp;<span>4.1</span></a>):</p>
+<ul>
+<li><p><strong>PRISM for Western US</strong>—The Parameter-elevation Regressions on Independent Slopes Model (PRISM; <span class="citation" data-cites="daly2008">Daly et al. (<a href="#ref-daly2008" role="doc-biblioref">2008</a>)</span>) maps are recognized as the highest-quality gridded climatological normals for the contiguous United States. We blended the US PRISM with BC PRISM emulator (explained below) between latitudes 48<sup>o</sup>N and 49<sup>o</sup>N.</p></li>
+<li><p><strong>British Columbia PRISM</strong>—The BC PRISM (<span class="citation" data-cites="pcic2014">Pacific Climate Impacts Consortium (<a href="#ref-pcic2014" role="doc-biblioref">2014</a>)</span>) is developed by the <a href="pacificclimate.org/data/prism-climatology-and-monthly-timeseries">Pacific Climate Impacts Consortium</a> in collaboration with the PRISM Climate Group (Oregon State University). It generally is highly compatible with the US and Alaska PRISM products, with exceptions noted in the <a href="#apparent-tmin-artefacts-in-the-us-prism">Discussion section</a>. The blending with the PRISM emulator along the northern, eastern, and southern BC boundary does not compromise the integrity of the BC PRISM since the emulator replicates the PRISM map in the blending region.</p></li>
+<li><p><strong>Alaska PRISM</strong>—The PRISM 1981-2010 climatological maps for Alaska <a href="https://prism.oregonstate.edu/projects/public/alaska/report/ak_final_report_8110.pdf">(Daly et al.&nbsp;2018)</a> are the best available product, as a result of exhaustive station data compilation and local expert review, and are compatible with the BC PRISM.</p></li>
+<li><p><strong>Daymet for eastern North America and Mexico</strong>—While the US PRISM is likely preferable to Daymet over the continental US, Daymet (<span class="citation" data-cites="thornton2021">Thornton et al. (<a href="#ref-thornton2021" role="doc-biblioref">2021</a>)</span>) provides north-south continuity across Canada, USA, and Mexico. Daymet was chosen over other North American gridded climatologies (WorldClim and CHELSA) due to its relative quality and the availability of a 1981-2010 normal period.</p></li>
+<li><p><strong>PRISM Emulator in Yukon and Northwest Territories</strong>—We evaluated all available climatological maps for the Yukon and Northwest Territories (WorldClim, CHELSA, Daymet, NRCAN ANUSPLIN, and Western Canadian 4km 1961-1990 PRISM). None of these products were of acceptable quality due to very low weather station density. To provide a PRISM-compatible estimation of climate in this region, we trained deep learning models on the BC and Alaska PRISM maps and predicted them into the Yukon and NWT.</p></li>
+<li><p><strong>Predictive blending in Northern Mexico</strong>—The US PRISM and Daymet maps require blending at the US-Mexico border to avoid boundary artefacts. Rather than blending Daymet into the US PRISM, which would degrade the PRISM map, we used machine learning (Random Forest regression) to interpolate between PRISM and Daymet in a broad swath of Northern Mexico. This is a less sophisticated approach to PRISM emulation than used in the Yukon and NWT, but it is much more computationally efficient and produced acceptable results.</p></li>
+<li><p><strong>20km Coastal buffer</strong>—We extended the coastal climate values outwards into the ocean to a distance of 20km from shore. We retained existing coastal buffers present in the PRISM products and extended their outer limit where necessary. This buffer ensures climate values are available in outer coastal land areas, but is not intended to estimate temperature and precipitation over the ocean.</p></li>
+</ul>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div id="fig-climr_mosaic_dataSources" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-climr_mosaic_dataSources-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Figure_Methods_climr_mosaic_dataSources.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:90.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-climr_mosaic_dataSources-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4.1: Elements of the climr mosaic of 1981-2010 climatologies. PRISM and Daymet are publicly available datasets. The PRISM Emulator and predictive blending were developed as part of the climr mosaic method and are described in this article. Blending between products is as shown.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<section id="full-article-1" class="level3" data-number="4.2.1">
+<h3 data-number="4.2.1" class="anchored" data-anchor-id="full-article-1"><span class="header-section-number">4.2.1</span> Full article</h3>
+<p>For more details and illustrations of the climr baseline climatologies, see the <a href="https://bcgov.github.io/climr/articles/methods_mosaic.html">full article</a>.</p>
+</section>
+</section>
+<section id="historical-time-series" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="historical-time-series"><span class="header-section-number">4.3</span> Historical time series</h2>
+<p>The climr App provides access to three observational time series datasets of historical temperature and precipitation:</p>
+<ol type="1">
+<li>CRU/GPCC: The 1901-2023 combined Climatic Research Unit TS dataset (CRU; <span class="citation" data-cites="harris2020cruts">Harris et al. (<a href="#ref-harris2020cruts" role="doc-biblioref">2020</a>)</span>) for temperature and Global Precipitation Climatology Centre dataset (GPCC; <span class="citation" data-cites="becker2013gpcc">Becker et al. (<a href="#ref-becker2013gpcc" role="doc-biblioref">2013</a>)</span>) for precipitation;</li>
+<li>MSWX blend: The 1981-2024 Multi-Source Weather (MSWX; <span class="citation" data-cites="beck2022mswx">Beck et al. (<a href="#ref-beck2022mswx" role="doc-biblioref">2022</a>)</span>) for temperature and Multi-Source Weighted-Ensemble Precipitation (MSWEP; <span class="citation" data-cites="beck2019mswep">Beck et al. (<a href="#ref-beck2019mswep" role="doc-biblioref">2019</a>)</span>) for precipitation, which we have extended back to 1901 using the CRU/GPCC dataset; and</li>
+<li>ClimateNA: The 1901-2023 ClimateNA time series (<span class="citation" data-cites="wang2024monthly">Wang, Hamann, and Sang (<a href="#ref-wang2024monthly" role="doc-biblioref">2024</a>)</span>).</li>
+</ol>
+<p>Our analysis to date indicates substantial differences between these datasets (<a href="#fig-Figure_Methods_obsTS_compare" class="quarto-xref">Figure&nbsp;<span>4.2</span></a>), and that each has weaknesses. CRU/GPCC are compromised by the post-1990s decline in station density, while ClimateNA exhibits apparent interpolation artefacts with large impacts on the detected climate change trend. the MSWX blend produces credible trends for temperature and precipitation, but has likely artefacts in precipitation trends in the arctic. The MSWX blend is the most conceptually appealing approach to gridded time series because the gridpoints without station observations are informed by physical weather modeling. However, a more detailed validation would be required to establish MSWX as a preferred product. In the meantime, we are using the MSWX-blend for the 2001-2020 observed normals as well as for transferring the 1981-2010 climr climatological mosaic to the 1961-1990 baseline period. We recommend using the MSWX-blend as the primary</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div id="fig-Figure_Methods_obsTS_compare" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-Figure_Methods_obsTS_compare-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Figure_Methods_obsTS_compare.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:90.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-Figure_Methods_obsTS_compare-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4.2: Comparison of the CRU, MSWX-blend, and ClimateNA gridded time series in terms of the difference between the 1961-1990 and 2001-2020 average February Tmin.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<section id="full-article-2" class="level3" data-number="4.3.1">
+<h3 data-number="4.3.1" class="anchored" data-anchor-id="full-article-2"><span class="header-section-number">4.3.1</span> Full article</h3>
+<p>For more details on the gridded observational time series datasets, see the <a href="https://bcgov.github.io/climr/articles/guidance_timeSeries.html">full article</a>.</p>
+</section>
+</section>
+<section id="global-climate-model-ensemble-selection" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="global-climate-model-ensemble-selection"><span class="header-section-number">4.4</span> Global climate model ensemble selection</h2>
+<p>Wherever possible, climate change studies will benefit from the use of projections from multiple models to assess modeling uncertainties. There is broad scientific agreement that an ensemble of at least eight independent climate models are required to represent modeling uncertainties about climate change outcomes over large regions.</p>
+<p><span class="citation" data-cites="mahony2022">Mahony et al. (<a href="#ref-mahony2022" role="doc-biblioref">2022</a>)</span> recommend an ensemble of 8 models for ensemble analysis. This 8-model ensemble is more consistent with the IPCC’s assessment of climate sensitivity than the full 13-model <code>climr</code> ensemble (<a href="#fig-Figure_Methods_cmip6NA_NAM_Tmax_sm2" class="quarto-xref">Figure&nbsp;<span>4.3</span></a>), and excludes a model with problematic spatial artefacts in BC Coast Mountains. The recommended 8-model ensemble is: ACCESS-ESM1.5, CNRM-ESM2-1, EC-Earth3, GFDL-ESM4, GISS-E2-1-G, MIROC6, MPI-ESM1.2-HR, and MRI-ESM2.0.</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div id="fig-Figure_Methods_cmip6NA_NAM_Tmax_sm2" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-Figure_Methods_cmip6NA_NAM_Tmax_sm2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Figure_Methods_cmip6NA_NAM_Tmax_sm2.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:90.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-Figure_Methods_cmip6NA_NAM_Tmax_sm2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4.3: Comparison of the ClimateNA 13-model ensemble (dashed lines) and 8-model ensemble (solid lines) for the SSP2-4.5 scenario. The variable is mean summer daily maximum temperature (tasmax/Tmax_sm) averaged over North America. The 8-model ensemble excludes models with ECS outside the IPCC-assessed 2-5<sup>o</sup>C range.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>For more details on the climr global climate model ensemble selection, see the <a href="https://bcgov.github.io/climr/articles/methods_ensembleSelection.html">full article</a>.</p>
+</section>
+<section id="references" class="level2" data-number="4.5">
+<h2 data-number="4.5" class="anchored" data-anchor-id="references"><span class="header-section-number">4.5</span> References</h2>
 
 
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-beck2022mswx" class="csl-entry" role="listitem">
+Beck, Hylke E., Albert I. J. M. van Dijk, Pablo R. Larraondo, Tim R. McVicar, Ming Pan, Emanuel Dutra, and Diego G. Miralles. 2022. <span>“MSWX: Global 3-Hourly 0.1° Bias-Corrected Meteorological Data Including Near-Real-Time Updates and Forecast Ensembles.”</span> <em>Bulletin of the American Meteorological Society</em> 103 (3): E710–32. <a href="https://doi.org/10.1175/BAMS-D-21-0145.1">https://doi.org/10.1175/BAMS-D-21-0145.1</a>.
+</div>
+<div id="ref-beck2019mswep" class="csl-entry" role="listitem">
+Beck, Hylke E., Eric F. Wood, Ming Pan, Colby K. Fisher, Diego G. Miralles, Albert I. J. M. van Dijk, Tim R. McVicar, and Robert F. Adler. 2019. <span>“MSWEP V2 Global 3-Hourly 0.1° Precipitation: Methodology and Quantitative Assessment.”</span> <em>Bulletin of the American Meteorological Society</em> 100 (3): 473–500. <a href="https://doi.org/10.1175/BAMS-D-17-0138.1">https://doi.org/10.1175/BAMS-D-17-0138.1</a>.
+</div>
+<div id="ref-becker2013gpcc" class="csl-entry" role="listitem">
+Becker, Andreas, Peter Finger, Anja Meyer-Christoffer, Bruno Rudolf, Kathrin Schamm, Udo Schneider, and Markus Ziese. 2013. <span>“A Description of the Global Land-Surface Precipitation Data Products of the Global Precipitation Climatology Centre with Sample Applications Including Centennial (Trend) Analysis from 1901–Present.”</span> <em>Earth System Science Data</em> 5 (1): 71–99. <a href="https://doi.org/10.5194/essd-5-71-2013">https://doi.org/10.5194/essd-5-71-2013</a>.
+</div>
+<div id="ref-daly2008" class="csl-entry" role="listitem">
+Daly, C., M. Halbleib, J. I. Smith, W. P. Gibson, M. K. Doggett, G. H. Taylor, J. Curtis, and P. A. Pasteris. 2008. <span>“Physiographically Sensitive Mapping of Climatological Temperature and Precipitation Across the Conterminous United States.”</span> <em>International Journal of Climatology</em> 28 (15): 2031–64. <a href="https://doi.org/10.1002/joc.1688">https://doi.org/10.1002/joc.1688</a>.
+</div>
+<div id="ref-harris2020cruts" class="csl-entry" role="listitem">
+Harris, Ian, Timothy J. Osborn, Phil Jones, and David Lister. 2020. <span>“Version 4 of the CRU TS Monthly High-Resolution Gridded Multivariate Climate Dataset.”</span> <em>Scientific Data</em> 7 (1): 109. <a href="https://doi.org/10.1038/s41597-020-0453-3">https://doi.org/10.1038/s41597-020-0453-3</a>.
+</div>
+<div id="ref-mahony2022" class="csl-entry" role="listitem">
+Mahony, Colin R., Tongli Wang, Andreas Hamann, and Alex J. Cannon. 2022. <span>“A Global Climate Model Ensemble for Downscaled Monthly Climate Normals over North America.”</span> <em>International Journal of Climatology</em> 42: 5871–91. <a href="https://doi.org/10.1002/joc.7566">https://doi.org/10.1002/joc.7566</a>.
+</div>
+<div id="ref-pcic2014" class="csl-entry" role="listitem">
+Pacific Climate Impacts Consortium. 2014. <span>“High-Resolution 1981-2010 Gridded Precipitation and Temperature Climatologies for British Columbia.”</span> <em>Unpublished</em>. <a href="https://www.pacificclimate.org/data/prism-climatology-and-monthly-timeseries">https://www.pacificclimate.org/data/prism-climatology-and-monthly-timeseries</a>.
+</div>
+<div id="ref-thornton2021" class="csl-entry" role="listitem">
+Thornton, P. E., R. Shrestha, M. Thornton, S.-C. Kao, Y. Wei, and B. E. Wilson. 2021. <span>“Gridded Daily Weather Data for North America with Comprehensive Uncertainty Quantification.”</span> <em>Scientific Data</em> 8 (190): 1–17. <a href="https://doi.org/10.1038/s41597-021-00973-0">https://doi.org/10.1038/s41597-021-00973-0</a>.
+</div>
+<div id="ref-wang2024monthly" class="csl-entry" role="listitem">
+Wang, Tongli, Andreas Hamann, and Zihaohan Sang. 2024. <span>“Monthly High-Resolution Historical Climate Data for North America Since 1901.”</span> <em>International Journal of Climatology</em> 45 (3): e8726. <a href="https://doi.org/10.1002/joc.8726">https://doi.org/10.1002/joc.8726</a>.
+</div>
+<div id="ref-wang2016" class="csl-entry" role="listitem">
+Wang, Tongli, Andreas Hamann, Dave Spittlehouse, and Carlos Carroll. 2016. <span>“Locally Downscaled and Spatially Customizable Climate Data for Historical and Future Periods for North America.”</span> Edited by Inés Álvarez. <em>PLOS ONE</em> 11 (6): e0156720. <a href="https://doi.org/10.1371/journal.pone.0156720">https://doi.org/10.1371/journal.pone.0156720</a>.
+</div>
+</div>
 </section>
 
 </main> <!-- /main -->
