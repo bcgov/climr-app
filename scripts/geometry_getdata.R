@@ -528,7 +528,8 @@ session_geometry <- function(sg_dt, mp) {
                   shiny::actionButton(
                     inputId = "preview_raster",
                     label = "Preview Raster Layer",
-                    style = "width: 100%;"
+                    style = "width: 100%;",
+                    icon = shiny::icon("map")
                     ),
                   br(), br(),
                   shiny::downloadButton(
