@@ -4,7 +4,7 @@
 
 ### **Downscale Parameters**:
 
-  - **Global Climate Models (GCMs)**:
+  - **Global Climate Models (GCMs)**: The app uses 13 GCMs that are individually useful and are a good representation of the full CMIP6 ensemble, which is a collection of climate simulations produced by GCMs in a coordinated international climate modelling effort. The recommended defaults used within the app are an 8-model ensemble (ACCESS-ESM1.5, CNRM-ESM2-1, EC-Earth3, GFDL-ESM4, GISS-E2-1-G, MIROC6, MPI-ESM1.2-HR, and MRI-ESM2.0), a selection informed by a sensitivity analysis specific to British Columbia which evaluated the models' ability to capture historic climate variables, as well as other factors such as having multiple runs available. This recommended ensemble is also more consistent with the IPCC's assessment of climate sensitivity than the full 13-model ensemble available (<a href="https://rmets.onlinelibrary.wiley.com/doi/10.1002/joc.7566" target="_blank">Mahony et al. 2022</a>).
   
   - **Shared Socio-economic Pathways (SSPs)**: Scenarios of future greenhouse gas emissions, these pathways have been built by experts to examine how global society, demographics and economics might change by 2100. The app uses projections from the four major SSP scenarios: 
   
@@ -15,6 +15,8 @@
     - **SSP3-7.0**: Represents a broader range of scenarios where little to no climate policy is implemented, leading to a steady, linear rise in greenhouse gas emissions over time.
     
     - **SSP5-8.5**: Represents a high-emissions scenario driven by rapid expansion in greenhouse gas emissions over the next several decades, resulting in end-of-century emission levels more than three times higher than current emissions.
+    
+For more information regarding climate model and scenario selection, see <a href="https://bcgov.github.io/climr/articles/guidance_ensembleSelection.html" target="_blank">here</a>.
 
 ### **Climate Variables**:
   

@@ -281,7 +281,7 @@ Please note that these plots **are** interactive. Whenever a user makes a change
 
 ##### **Time Series Plot:**
 
-Click on the green **Downscale Data** button. The app will downscale data for all variables available for the selected map point, so it will take time. Blue notification boxes will appear on the right-hand side of the screen as the downscaling is in progress and a plot will appear after the downscaling is complete.
+Click on the green **Downscale Data** button. The app will downscale data for all variables available for the selected map point, this can take about a minute. Blue notification boxes will appear on the right-hand side of the screen as the downscaling is in progress and a plot will appear after the downscaling is complete.
 
 <figure style="text-align:center;">
 
