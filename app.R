@@ -586,7 +586,7 @@ shiny::shinyApp(
      
 
     shiny::tabPanel("Documentation",
-                    tags$iframe(src = "documentation/_book/index.html",
+                    tags$iframe(src = "https://vonuma.com/climr-docs/index.html",
                                 style = "width: 100%; height: calc(100vh - 130px); border: none;")
                     ),
       header = list(
