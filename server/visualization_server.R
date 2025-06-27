@@ -188,7 +188,7 @@ visualization_server <- function(input, output, session) {
           label = h5("Choose GCMs:"),
           width = "100%",
           inline = TRUE,
-          choices = climr::list_gcms(),
+          choices = climr::list_gcms()[c(1, 4, 5, 6, 7, 10, 11, 12)],
           selected = climr::list_gcms()[c(1, 4, 5, 6, 7, 10, 11, 12)]
         ),
         shiny::checkboxGroupInput(
@@ -196,7 +196,7 @@ visualization_server <- function(input, output, session) {
           label = h5("Choose SSPs:"),
           width = "100%",
           inline = TRUE,
-          choices = climr::list_ssps(),
+          choices = climr::list_ssps()[c(1:3)],
           selected = climr::list_ssps()[c(1:3)]
         ),
         footer = shiny::tagList(
