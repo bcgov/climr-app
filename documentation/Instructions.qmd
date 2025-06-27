@@ -16,19 +16,25 @@ Users can select points or areas of interest using **one of the following two me
 
 Users can select parameters by clicking the **Choose Downscale Parameters** button. These parameters are separated into two categories, **Observed Climate Data** and **Simulated Climate Data**. 
 
-<figure style="text-align:center;">
-
-<img src="Figure_1_Downscale_Parameters.png" style="width:90%;"/>
-
-<figcaption style="font-size: 0.8em; color: gray;">
-
-Figure 1: Downscale Parameters
-
-</figcaption>
-
-</figure>
+```{r}
+#| label: fig-Downscale_Parameters
+#| fig-cap: "Downscale Parameters"
+#| fig-align: center
+#| out.width: 90%
+#| echo: false
+knitr::include_graphics("Figure_1_Downscale_Parameters.png")
+```
 
 Under the **Observed Climate Data** accordion, users can select observed periods (the reference period 1961-1990 will always be computed) and choose to specify observed years and observation time-series data.
+
+```{r}
+#| label: Observed_Climate_Data
+#| fig-cap: "Example of selected parameters for Observed Climate Data"
+#| fig-align: center
+#| out.width: 90%
+#| echo: false
+knitr::include_graphics("Figure_2_Observed_Climate_Data.png")
+```
 
 <figure style="text-align:center;">
 
