@@ -22,7 +22,7 @@ Users can select parameters by clicking the **Choose Downscale Parameters** butt
 #| fig-align: center
 #| out.width: 90%
 #| echo: false
-knitr::include_graphics("Instructions_Downscale_Parameters.png")
+knitr::include_graphics("Figure_Instructions_Downscale_Parameters.png")
 ```
 
 Under the **Observed Climate Data** accordion, users can select observed periods (the reference period 1961-1990 will always be computed) and choose to specify observed years and observation time-series data (@fig-Observed_Climate_Data).
@@ -33,7 +33,7 @@ Under the **Observed Climate Data** accordion, users can select observed periods
 #| fig-align: center
 #| out.width: 90%
 #| echo: false
-knitr::include_graphics("Instructions_Observed_Climate_Data.png")
+knitr::include_graphics("Figure_Instructions_Observed_Climate_Data.png")
 ```
 
 Under the **Simulated Climate Data** accordion, users can either choose to use the recommended default settings, or manually choose the Global Climate Models (GCMs), Shared Socio-economic Pathways (SSPs), GCM period, whether or not to specify the GCM years, and choose the maximum number of model runs (please note that if 0 is selected, the ensemble mean will be used) (@fig-Simulated_Climate_Data).
@@ -44,10 +44,10 @@ Under the **Simulated Climate Data** accordion, users can either choose to use t
 #| fig-align: center
 #| out.width: 90%
 #| echo: false
-knitr::include_graphics("Instructions_Simulated_Climate_Data.png")
+knitr::include_graphics("Figure_Instructions_Simulated_Climate_Data.png")
 ```
 
-Users can then choose to select **extra climate variables**. These are organized into packages of **Monthly**, **Seasonal** and **Annual** variables, or users can choose to select custom variables by clicking **Custom** and specifying the element and seasons/months wanted (@fig-Extra_Climate_Variables). If no extra climate variables are selected, monthly PPT, Tmax, and Tmin will be computed.
+Users can then choose to select **extra climate variables**. These are organized into packages of **Monthly**, **Seasonal** and **Annual** variables, or users can choose to select custom variables by clicking **Custom** and specifying the element and seasons/months wanted (@fig-Extra_Climate_Variables). If no extra climate variables are selected, monthly precipitation (PPT), mean daily maximum temperature (T~max~), and mean daily minimum temperature (T~min~) will be computed.
 
 ```{r}
 #| label: fig-Extra_Climate_Variables
@@ -55,7 +55,7 @@ Users can then choose to select **extra climate variables**. These are organized
 #| fig-align: center
 #| out.width: 90%
 #| echo: false
-knitr::include_graphics("Instructions_Extra_Climate_Variables.png")
+knitr::include_graphics("Figure_Instructions_Extra_Climate_Variables.png")
 ```
 
 Click **Apply**!
@@ -74,7 +74,7 @@ If GeoTIFF is selected, users will need to choose downscale resolution (@fig-Geo
 #| fig-align: center
 #| out.width: 90%
 #| echo: false
-knitr::include_graphics("Instructions_GeoTIFF_downscale.png")
+knitr::include_graphics("Figure_Instructions_GeoTIFF_downscale.png")
 ```
 
 Click **Launch Downscale Process**. Notification boxes will appear on the right-hand side of the screen while the downscale is processing, indicating each step.
@@ -87,7 +87,7 @@ If csv has been selected, a preview will appear under the Launch Downscale Proce
 #| fig-align: center
 #| out.width: 90%
 #| echo: false
-knitr::include_graphics("Instructions_csv_preview.png")
+knitr::include_graphics("Figure_Instructions_csv_preview.png")
 ```
 
 If GeoTIFF has been selected, raster preview options will appear on the main panel beside the map. Users can select raster to layers to preview in the area of interest on the map and click **Preview Raster Layer** to view. Users can also download the downscaled data from this panel (@fig-raster_preview_options).
@@ -98,7 +98,7 @@ If GeoTIFF has been selected, raster preview options will appear on the main pan
 #| fig-align: center
 #| out.width: 100%
 #| echo: false
-knitr::include_graphics("Instructions_raster_preview_options.png")
+knitr::include_graphics("Figure_Instructions_raster_preview_options.png")
 ```
 
 Users can view the calculated difference between the period selected and the reference period (1961-1990) (@fig-calculated_diff).
@@ -109,7 +109,7 @@ Users can view the calculated difference between the period selected and the ref
 #| fig-align: center
 #| out.width: 100%
 #| echo: false
-knitr::include_graphics("Instructions_calculated_diff.png")
+knitr::include_graphics("Figure_Instructions_calculated_diff.png")
 ```
 
 Users can also view the the percent change between the period selected and the reference period (1961-1990) (@fig-percent_change).
@@ -120,7 +120,7 @@ Users can also view the the percent change between the period selected and the r
 #| fig-align: center
 #| out.width: 100%
 #| echo: false
-knitr::include_graphics("Instructions_percent_change.png")
+knitr::include_graphics("Figure_Instructions_percent_change.png")
 ```
 
 To clear all selections on the map and start again with new data, click on the red **Clear Selections** button in the main panel.
@@ -190,7 +190,7 @@ Choose the variable to plot by clicking on the **Element** and **Season/month** 
 #| fig-align: center
 #| out.width: 100%
 #| echo: false
-knitr::include_graphics("Instructions_Timeseries_ecoregion.png")
+knitr::include_graphics("Figure_Instructions_Timeseries_ecoregion.png")
 ```
 
 To adjust the plot parameters from the recommended defaults, click on the **Adjust Plot** button, select the observational dataset(s), GCM(s) and SSP(s), and click **OK!** (@fig-Timeseries_ecoregion_parameters).
@@ -201,7 +201,7 @@ To adjust the plot parameters from the recommended defaults, click on the **Adju
 #| fig-align: center
 #| out.width: 100%
 #| echo: false
-knitr::include_graphics("Instructions_Timeseries_ecoregion_parameters.png")
+knitr::include_graphics("Figure_Instructions_Timeseries_ecoregion_parameters.png")
 ```
 
 To download the plot as a PNG, click the **Download Plot** button.
@@ -216,7 +216,7 @@ Choose the x-axis and y-axis variables to plot by clicking on the **Element** an
 #| fig-align: center
 #| out.width: 100%
 #| echo: false
-knitr::include_graphics("Instructions_Bivariate_ecoregion.png")
+knitr::include_graphics("Figure_Instructions_Bivariate_ecoregion.png")
 ```
 
 To download the plot as a PNG, click the **Download Plot** button.
@@ -231,7 +231,7 @@ Choose the **observed period** and if the **diurnal range** is shown. Click on t
 #| fig-align: center
 #| out.width: 100%
 #| echo: false
-knitr::include_graphics("Instructions_WalterLieth_flp.png")
+knitr::include_graphics("Figure_Instructions_WalterLieth_flp.png")
 ```
 
 To download the plot as a PNG, click the **Download Plot** button.
@@ -250,7 +250,7 @@ Click on the green **Downscale Data** button. The app will downscale data for al
 #| fig-align: center
 #| out.width: 100%
 #| echo: false
-knitr::include_graphics("Instructions_Timeseries_mappoint.png")
+knitr::include_graphics("Figure_Instructions_Timeseries_mappoint.png")
 ```
 
 To change the variable plotted, select the **Element** and **Season/month** from the drop-down menus.
@@ -263,7 +263,7 @@ To adjust the plot parameters from the recommended defaults, click on the **Adju
 #| fig-align: center
 #| out.width: 100%
 #| echo: false
-knitr::include_graphics("Instructions_Timeseries_ecoregion_parameters.png")
+knitr::include_graphics("Figure_Instructions_Timeseries_ecoregion_parameters.png")
 ```
 
 To download the plot as a PNG, click the **Download Plot** button.
@@ -278,7 +278,7 @@ Click on the green **Downscale Data** button. The app will downscale data for al
 #| fig-align: center
 #| out.width: 100%
 #| echo: false
-knitr::include_graphics("Instructions_Bivariate_mappoint.png")
+knitr::include_graphics("Figure_Instructions_Bivariate_mappoint.png")
 ```
 
 To change the x-axis and y-axis variables plotted, click on the **Element** and **Season/month** drop-down inputs, and the **time period**.
@@ -295,7 +295,7 @@ Click on the green **Downscale Data** button. The app will downscale data for al
 #| fig-align: center
 #| out.width: 100%
 #| echo: false
-knitr::include_graphics("Instructions_WalterLieth_mappoint.png")
+knitr::include_graphics("Figure_Instructions_WalterLieth_mappoint.png")
 ```
 
 Users can change the **observed period** and if the **diurnal range** is shown.
@@ -318,7 +318,7 @@ Choose the variable to display by selecting the **Element** and **Season/months*
 #| fig-align: center
 #| out.width: 25%
 #| echo: false
-knitr::include_graphics("Instructions_Overlay_controls.png")
+knitr::include_graphics("Figure_Instructions_Overlay_controls.png")
 ```
 
 Click **Load**. The map will take about 5-10 seconds to render (@fig-Overlay_Tave).
@@ -329,7 +329,7 @@ Click **Load**. The map will take about 5-10 seconds to render (@fig-Overlay_Tav
 #| fig-align: center
 #| out.width: 100%
 #| echo: false
-knitr::include_graphics("Instructions_Overlay_Tave.png")
+knitr::include_graphics("Figure_Instructions_Overlay_Tave.png")
 ```
 
 For ratio variables, an **Apply scale adjustment** checkbox will appear, which applies a log scale adjustment to the data.
