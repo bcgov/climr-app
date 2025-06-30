@@ -396,7 +396,7 @@ shiny::shinyApp(
                                                      inputId = "time_series_element",
                                                      label = h5("Element:"),
                                                      width = "100%",
-                                                     choices = unique(climr::variables %>% pull(Code_Element)),
+                                                     choices = unique(climr::variables %>% filter(Code_Element != "CMI") %>% pull(Code_Element)),
                                                      selected = "Tmax"
                                                    )
                                                  ),
@@ -468,7 +468,7 @@ shiny::shinyApp(
                                                      inputId = "bivariate_element_x",
                                                      label = h6("Element:"),
                                                      width = "100%",
-                                                     choices = unique(climr::variables %>% pull(Code_Element)),
+                                                     choices = unique(climr::variables %>% filter(Code_Element != "CMI") %>% pull(Code_Element)),
                                                      selected = "MAT"
                                                    )
                                                  ),
@@ -485,7 +485,7 @@ shiny::shinyApp(
                                                      inputId = "bivariate_element_y",
                                                      label = h6("Element:"),
                                                      width = "100%",
-                                                     choices = unique(climr::variables %>% pull(Code_Element)),
+                                                     choices = unique(climr::variables %>% filter(Code_Element != "CMI") %>% pull(Code_Element)),
                                                      selected = "MAP"
                                                    )
                                                  ),
