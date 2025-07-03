@@ -1,3 +1,19 @@
 # Resources
 
-climr documentation here?
+## CarbonBrief Explainers
+
+[CarbonBrief](https://www.carbonbrief.org/) provides excellent articles explaining important concepts in climate change modeling. We recommend starting with the following articles: 
+
+  - [How do climate models work?](https://www.carbonbrief.org/qa-how-do-climate-models-work/)
+  - [Explainer: How ‘Shared Socioeconomic Pathways’ explore future climate change](https://www.carbonbrief.org/explainer-how-shared-socioeconomic-pathways-explore-future-climate-change/)
+  - [CMIP6: the next generation of climate models explained](https://www.carbonbrief.org/cmip6-the-next-generation-of-climate-models-explained/)
+  - [Explainer: The high-emissions ‘RCP8.5’ global warming scenario](https://www.carbonbrief.org/explainer-the-high-emissions-rcp8-5-global-warming-scenario/)
+  - [Timeline: The History of Climate Modelling](https://www.carbonbrief.org/timeline-history-climate-modelling/)
+
+## Exploring the GCM ensemble
+
+To better understand the global climate model ensemble featured in climr, try our [cmip6-BC](https://bcgov-env.shinyapps.io/cmip6-BC/) and [cmip6-NA](https://bcgov-env.shinyapps.io/cmip6-NA/) apps.   
+
+## The `climr` R package 
+
+If you are an R programmer, we recommend you use our R package [climr](https://bcgov.github.io/climr/), which provides programmatic access to the functionality of this app, and much more. 

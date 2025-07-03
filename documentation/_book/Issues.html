@@ -30,7 +30,7 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./Decisions.html" rel="next">
+<link href="./Definitions.html" rel="next">
 <link href="./Methods.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
@@ -139,32 +139,26 @@ ul.task-list li input[type="checkbox"] {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./Decisions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Decision Guidance</span></span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
   <a href="./Definitions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Definitions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Definitions</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./Feedback.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Providing Feedback</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Providing Feedback</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./FAQs.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Frequently Asked Questions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Frequently Asked Questions</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./Resources.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Resources</span></span></a>
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Resources</span></span></a>
   </div>
 </li>
     </ul>
@@ -209,12 +203,12 @@ ul.task-list li input[type="checkbox"] {
 <section id="known-issues-with-the-climr-app" class="level2" data-number="5.1">
 <h2 data-number="5.1" class="anchored" data-anchor-id="known-issues-with-the-climr-app"><span class="header-section-number">5.1</span> Known issues with the climr App :(</h2>
 <p>This section is focused on aspects of the climr App related to trade-offs and intrinsic sources of error. We also list bugs or minor enhancements that have not yet been resolved. If you have a problem or suggestion to report, you can enter it as a “New issue” in our <a href="https://github.com/bcgov/climr-app/issues" target="_blank">GitHub repo </a>.</p>
-<ul>
-<li><p>Note issues around the time it takes to downscale data for areas (not map points) when recommended default settings are used and multiple variables are used - Get Data tab.</p></li>
-<li><p>Note time it takes to render a time series plot from single map point data - Visualization tab.</p></li>
-</ul>
 <section id="issues-requiring-fixing" class="level3" data-number="5.1.1">
 <h3 data-number="5.1.1" class="anchored" data-anchor-id="issues-requiring-fixing"><span class="header-section-number">5.1.1</span> Issues requiring fixing</h3>
+<ul>
+<li><p>Viewing a Time Series plot for a single map point in the <strong>Visualization</strong> tab currently can take up to a minute. This is because the app downscales data for the recommended GCMs and SSPs, and all climate variables to create an interactive plot. We currently do not have a way to improve the time it takes to downscale the data.</p></li>
+<li><p>If a user attempts to downscale data from a drawn area or uploaded shape file in the <strong>Get Data</strong> tab with the recommended defaults selected for Simulated Climate Data, max runs specified and multiple extra climate variables or variable packages selected, the process can overwhelm the amount of memory available on our server. We are currently working on ways to address this issue.</p></li>
+</ul>
 
 
 </section>
@@ -645,8 +639,8 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./Decisions.html" class="pagination-link" aria-label="Decision Guidance">
-        <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Decision Guidance</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./Definitions.html" class="pagination-link" aria-label="Definitions">
+        <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Definitions</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

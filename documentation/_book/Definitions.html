@@ -20,7 +20,27 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
@@ -171,11 +191,9 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#glossary-of-terms" id="toc-glossary-of-terms" class="nav-link active" data-scroll-target="#glossary-of-terms"><span class="header-section-number">6.1</span> Glossary of Terms</a>
-  <ul class="collapse">
-  <li><a href="#downscale-parameters" id="toc-downscale-parameters" class="nav-link" data-scroll-target="#downscale-parameters"><span class="header-section-number">6.1.1</span> <strong>Downscale Parameters</strong>:</a></li>
-  <li><a href="#climate-variables" id="toc-climate-variables" class="nav-link" data-scroll-target="#climate-variables"><span class="header-section-number">6.1.2</span> <strong>Climate Variables</strong>:</a></li>
-  </ul></li>
+  <li><a href="#glossary-of-terms" id="toc-glossary-of-terms" class="nav-link active" data-scroll-target="#glossary-of-terms"><span class="header-section-number">6.1</span> Glossary of Terms</a></li>
+  <li><a href="#climate-variables" id="toc-climate-variables" class="nav-link" data-scroll-target="#climate-variables"><span class="header-section-number">6.2</span> <strong>Climate Variables</strong></a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">6.3</span> References</a></li>
   </ul>
 </nav>
     </div>
@@ -203,54 +221,62 @@ ul.task-list li input[type="checkbox"] {
 
 <section id="glossary-of-terms" class="level2" data-number="6.1">
 <h2 data-number="6.1" class="anchored" data-anchor-id="glossary-of-terms"><span class="header-section-number">6.1</span> Glossary of Terms</h2>
-<section id="downscale-parameters" class="level3" data-number="6.1.1">
-<h3 data-number="6.1.1" class="anchored" data-anchor-id="downscale-parameters"><span class="header-section-number">6.1.1</span> <strong>Downscale Parameters</strong>:</h3>
 <ul>
-<li><p><strong>Global Climate Models (GCMs)</strong>: The app uses 13 GCMs that are individually useful and are a good representation of the full CMIP6 ensemble, which is a collection of climate simulations produced by GCMs in a coordinated international climate modelling effort. The recommended defaults used within the app are an 8-model ensemble (ACCESS-ESM1.5, CNRM-ESM2-1, EC-Earth3, GFDL-ESM4, GISS-E2-1-G, MIROC6, MPI-ESM1.2-HR, and MRI-ESM2.0), a selection informed by a sensitivity analysis specific to British Columbia which evaluated the models’ ability to capture historic climate variables, as well as other factors such as having multiple runs available. This recommended ensemble is also more consistent with the IPCC’s assessment of climate sensitivity than the full 13-model ensemble available (<a href="https://rmets.onlinelibrary.wiley.com/doi/10.1002/joc.7566" target="_blank">Mahony et al.&nbsp;2022</a>).</p></li>
-<li><p><strong>Shared Socio-economic Pathways (SSPs)</strong>: Scenarios of future greenhouse gas emissions, these pathways have been built by experts to examine how global society, demographics and economics might change by 2100. The app uses projections from the four major SSP scenarios:</p>
+<li><p><strong>Global Climate Models (GCMs)</strong>: “Global climate model” is a generic term that encompasses both Earth System Models and General Circulation Models. General Circulation Models model the physics of the ocean, atmosphere, land surface, and typically also the ice caps/sheets. Earth System Models additionally also model biogeoclimatic cycles (e.g., carbon cycle mechanisms such as vegetation growth, forest fires, etc). For more on GCMs, see this <a href="https://www.carbonbrief.org/qa-how-do-climate-models-work/">explainer</a>.</p></li>
+<li><p><strong>GCM ensemble</strong>: In climate modeling, an ensemble is a collection of simulations for common time period. climr provides both single-model ensembles (multiple simulations of a single GCM) and multi-model ensembles (simulations from multiple GCMs) for each SSP scenario. The 13 GCMs provided by climr are representative of the full <a href="https://www.carbonbrief.org/cmip6-the-next-generation-of-climate-models-explained/">CMIP6</a> ensemble, which is a collection of climate simulations produced by GCMs in a coordinated international climate modelling effort. The recommended defaults used within the app are an 8-model ensemble (ACCESS-ESM1.5, CNRM-ESM2-1, EC-Earth3, GFDL-ESM4, GISS-E2-1-G, MIROC6, MPI-ESM1.2-HR, and MRI-ESM2.0) that better represents the IPCC’s assessed range of climate modeling uncertainty (<span class="citation" data-cites="mahony2022">Mahony et al. (<a href="#ref-mahony2022" role="doc-biblioref">2022</a>)</span>). For more information on climate model selection, see the <a href="https://bcgov.github.io/climr/articles/guidance_ensembleSelection.html">full article</a>.</p></li>
+<li><p><strong>Projection</strong>: A projection is an estimate of the change over time in a variable of interest given a specific set of assumptions. In the context of this app, each global climate model simulation is a projection.</p></li>
+<li><p><strong>Shared Socio-economic Pathways (SSPs)</strong>: The climate model simulations in this app follow scenarios of future (2015-2100) atmospheric greenhouse gas concentrations associated with global development scenarios of different ways that society, economics, and geopolitics could evolve: the <a href="https://www.carbonbrief.org/explainer-how-shared-socioeconomic-pathways-explore-future-climate-change/">Shared Socio-economic Pathways (SSPs)</a>. The SSPs begin in 2015; from 1850 to 2014, the climate models are run using historically observed greenhouse gas concentrations from natural (e.g., volcanoes) and human emissions sources. The app provides projections that follow four major SSP concentration scenarios:</p>
 <ul>
-<li><p><strong>SSP1-2.6</strong>: Represents strong action to reduce emissions, in line with the Paris Climate Accords goal of keeping global warming to 2°C above pre-industrial temperatures.</p></li>
+<li><p><strong>SSP1-2.6</strong>: Represents strong action to reduce emissions, roughly consistent with the Paris Climate Accords goal of limiting global warming to 2°C above pre-industrial temperatures.</p></li>
 <li><p><strong>SSP2-4.5</strong>: Represents moderate action to reduce emissions, roughly consistent with current emissions policies and economic trends.</p></li>
-<li><p><strong>SSP3-7.0</strong>: Represents a broader range of scenarios where little to no climate policy is implemented, leading to a steady, linear rise in greenhouse gas emissions over time.</p></li>
+<li><p><strong>SSP3-7.0</strong>: Represents a broader range of scenarios where no climate policy is implemented, leading to a steady, linear rise in greenhouse gas emissions over time.</p></li>
 <li><p><strong>SSP5-8.5</strong>: Represents a high-emissions scenario driven by rapid expansion in greenhouse gas emissions over the next several decades, resulting in end-of-century emission levels more than three times higher than current emissions.</p></li>
 </ul></li>
 </ul>
-<p>For more information regarding climate model and scenario selection, see <a href="https://bcgov.github.io/climr/articles/guidance_ensembleSelection.html" target="_blank">here</a>.</p>
 </section>
-<section id="climate-variables" class="level3" data-number="6.1.2">
-<h3 data-number="6.1.2" class="anchored" data-anchor-id="climate-variables"><span class="header-section-number">6.1.2</span> <strong>Climate Variables</strong>:</h3>
+<section id="climate-variables" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="climate-variables"><span class="header-section-number">6.2</span> <strong>Climate Variables</strong></h2>
+<p><strong>Direct Climate Variables</strong>—The following variables are calculated directly from monthly temperature and precipitation:</p>
 <ul>
-<li><p>AHM: Annual heat/moisture index (annual)</p></li>
-<li><p>bFFP: Beginning of the frost-free period (day of year) (annual)</p></li>
-<li><p>CMD: Hargreaves climatic moisture deficit (mm) (annual, seasonal, monthly)</p></li>
-<li><p>CMI: Climatic Moisture Index (cm) (annual, monthly)</p></li>
-<li><p>DDsub0: Degree-days below 0°C (annual, seasonal, monthly)</p></li>
-<li><p>DDsub18: Degree-days below 18°C (annual, seasonal, monthly)</p></li>
-<li><p>DD18: Degree-days above 18°C (annual, seasonal, monthly)</p></li>
-<li><p>DD5: Degree-days above 5°C (annual, seasonal, monthly)</p></li>
-<li><p>eFFP: End of the frost-free period (day of year) (annual)</p></li>
-<li><p>EMT: Extreme minimum temperature over 30 years (°C) (annual)</p></li>
-<li><p>Eref: Hargreaves reference evaporation (mm) (annual, seasonal, monthly)</p></li>
-<li><p>EXT: Extreme maximum temperature over 30 years (°C) (annual)</p></li>
-<li><p>FFP: Frost-free period (mm) (annual)</p></li>
-<li><p>MAP: Mean annual precipitation (mm) (annual)</p></li>
-<li><p>MAT: Mean annual temperature (°C) (annual)</p></li>
-<li><p>MCMT: Mean coldest month temperature (°C) (annual)</p></li>
-<li><p>MSP: Growing season (May to September) precipitation (mm) (annual)</p></li>
-<li><p>MWMT: Mean warmest month temperature (°C) (annual)</p></li>
-<li><p>NFFD: Number of frost-free days (annual, seasonal, monthly)</p></li>
-<li><p>PAS: Precipitation as snow (mm) (annual, seasonal, monthly)</p></li>
-<li><p>PPT: Precipitation (mm) (annual, seasonal, monthly)</p></li>
-<li><p>RH: Relative humidity (%) (annual, seasonal, monthly)</p></li>
-<li><p>SHM: Summer heat/moisture index (annual)</p></li>
-<li><p>Tave: Mean temperature (°C) (annual, seasonal, monthly)</p></li>
-<li><p>TD: Continentality (MWMT-MCMT) (°C) (annual)</p></li>
-<li><p>Tmax: Mean daily maximum temperature (°C) (annual, seasonal, monthly)</p></li>
-<li><p>Tmin: Mean daily minimum temperature (°C) (annual, seasonal, monthly)</p></li>
+<li><p>PPT: Precipitation (mm) (annual, seasonal, monthly) - Total precipitation (rain + snow) measured in millimeters of water equivalent.</p></li>
+<li><p>Tmax: Mean daily maximum temperature (°C) (annual, seasonal, monthly) - The average of the highest temperatures recorded each day over a specific period, such as a month or a season. It reflects the typical daytime heat conditions experienced during that time.</p></li>
+<li><p>Tmin: Mean daily minimum temperature (°C) (annual, seasonal, monthly) - The average of the lowest temperatures recorded each day over a specific period. It represents the typical nighttime or early morning cool conditions for that time frame.</p></li>
+<li><p>Tave: Mean temperature (°C) (annual, seasonal, monthly) - The average of Tmax and Tmin; a widely accepted approximation of actual mean temperature. This approach is taken because only daily maximum and minimum temperatures are available from many historical weather station records.</p></li>
+<li><p>MCMT: Mean coldest month temperature (°C) (annual) - Tave of the coldest month, determined from the 1961-1990 mean monthly Tave, at each location of interest.</p></li>
+<li><p>MWMT: Mean warmest month temperature (°C) (annual) - Tave of the warmest month, determined from the 1961-1990 mean monthly Tave, at each location of interest.</p></li>
+<li><p>TD: Continentality (°C) (annual) - Temperature difference between MCMT and MWMT, indicating the contrast between winter and summer temperature.</p></li>
 </ul>
-
-
+<p><strong>Derived Climate Variables</strong>—The following variables are estimated from monthly temperature and precipitation using equations provided by <span class="citation" data-cites="wang2012">Wang et al. (<a href="#ref-wang2012" role="doc-biblioref">2012</a>)</span> and <span class="citation" data-cites="wang2016">Wang et al. (<a href="#ref-wang2016" role="doc-biblioref">2016</a>)</span>:</p>
+<ul>
+<li><p>CMD: Hargreaves climatic moisture deficit (mm) (annual, seasonal, monthly). CMD is an absolute measure of the ecological water deficit in a given location, defined as the difference between atmospheric water demand (potential evapotranspiration; PET) and precipitation: CMD = PET - P. Hargreaves CMD estimates PET from simplified inputs of temperature, latitude, and month; it does not directly integrate data on humidity, wind speed, or actual soil moisture. High CMD values indicate climates where atmospheric demand for moisture greatly exceeds precipitation — typically arid or semi-arid regions. Low CMD values suggest relatively moist climates where precipitation is sufficient to meet or exceed evaporative demand.</p></li>
+<li><p>Eref: Hargreaves reference evapotranspiration (mm) (annual, seasonal, monthly) - An empirical estimate of the maximum possible rate of water loss from a reference surface (short grass) under given atmospheric conditions, assuming no water limitation. It uses monthly mean air temperature, temperature range (difference between daily maximum and minimum temperatures), and extraterrestrial radiation (a function of latitude and day of year). Hargreaves reference evapotranspiration is useful in data-sparse regions because it avoids the need for humidity, wind speed, or solar radiation data required by more complex models like Penman-Monteith, although it is generally less accurate.</p></li>
+<li><p>Degree-days: a unit of heat accumulation (a.k.a. heat sum) relevant to biological development (like plant growth or insect emergence) and building energy demand for heating and cooling. Degree-days indices are calculated as the difference between the daily average temperature (in degrees Celsius) and a threshold temperature, summed over all days within the specified time period such as month or season. For example, growing degree-days track how much heat is available for plant growth above a certain threshold (e.g., 5°C), while heating and cooling degree-days quantify how much heating or cooling is needed when temperatures fall below or rise above a comfort threshold (e.g., 18°C).</p></li>
+<li><p>DDsub0: Degree-days below 0°C (annual, seasonal, monthly) - Estimated freezing degree-days. See “degree-days” above.</p></li>
+<li><p>DDsub18: Degree-days below 18°C (annual, seasonal, monthly), Estimated heating degree-days. See “degree-days” above.</p></li>
+<li><p>DD18: Degree-days above 18°C (annual, seasonal, monthly), Estimated cooling degree-days. See “degree-days” above.</p></li>
+<li><p>DD5: Degree-days above 5°C (annual, seasonal, monthly), Estimated growing degree-days. See “degree-days” above.</p></li>
+<li><p>NFFD: Number of frost-free days (annual, seasonal, monthly) - An estimate of the total number of days where Tmin is greater than zero.</p></li>
+<li><p>bFFP: Beginning of the frost-free period (day of year) (annual) - An estimate of the day of year (counting from January 1) when Tmin begins to be consistently greater than zero for the duration of the growing season.</p></li>
+<li><p>eFFP: End of the frost-free period (day of year) (annual) - An estimate of the day of year (counting from January 1) when Tmin ceases to be continuously greater than zero, at the end of the growing season.</p></li>
+<li><p>FFP: Frost-free period (mm) (annual). The estimated number of consecutive days in which Tmin is greater than zero; calculated as eFFP - bFFP.</p></li>
+<li><p>PAS: Precipitation as snow (mm) (annual, seasonal, monthly) - Estimated solid water precipitation (in mm of water equivalent).</p></li>
+</ul>
 </section>
+<section id="references" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="references"><span class="header-section-number">6.3</span> References</h2>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-mahony2022" class="csl-entry" role="listitem">
+Mahony, Colin R., Tongli Wang, Andreas Hamann, and Alex J. Cannon. 2022. <span>“A Global Climate Model Ensemble for Downscaled Monthly Climate Normals over North America.”</span> <em>International Journal of Climatology</em> 42: 5871–91. <a href="https://doi.org/10.1002/joc.7566">https://doi.org/10.1002/joc.7566</a>.
+</div>
+<div id="ref-wang2012" class="csl-entry" role="listitem">
+Wang, Tongli, Andreas Hamann, D. L. Spittlehouse, and Trevor Q. Murdock. 2012. <span>“<span class="nocase">ClimateWNA–High-Resolution Spatial Climate Data for Western North America</span>.”</span> <em>Journal of Applied Meteorology and Climatology</em> 51 (1): 16–29. <a href="https://doi.org/10.1175/JAMC-D-11-043.1">https://doi.org/10.1175/JAMC-D-11-043.1</a>.
+</div>
+<div id="ref-wang2016" class="csl-entry" role="listitem">
+Wang, Tongli, Andreas Hamann, Dave Spittlehouse, and Carlos Carroll. 2016. <span>“Locally Downscaled and Spatially Customizable Climate Data for Historical and Future Periods for North America.”</span> Edited by Inés Álvarez. <em>PLOS ONE</em> 11 (6): e0156720. <a href="https://doi.org/10.1371/journal.pone.0156720">https://doi.org/10.1371/journal.pone.0156720</a>.
+</div>
+</div>
 </section>
 
 </main> <!-- /main -->

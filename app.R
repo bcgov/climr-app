@@ -11,6 +11,8 @@ suppressPackageStartupMessages({
   library(leaflet.extras)
   library(leaflet)
   library(shiny)
+  library(shinyjs)
+  library(callr)
   library(terra)
   library(climr)
   library(zip)
@@ -159,6 +161,7 @@ shiny::shinyApp(
       shiny::tabPanel(
         title = "Get Data",
         prompter::use_prompt(),
+        shinyjs::useShinyjs(),
         shiny::sidebarLayout(
           shiny::sidebarPanel(
             style = "height: 84vh; overflow-y: auto; overflow-x: auto;", # FIX HEIGHT TO BE ADAPTIVE
@@ -401,7 +404,7 @@ shiny::shinyApp(
                                                      inputId = "time_series_element",
                                                      label = h5("Element:"),
                                                      width = "100%",
-                                                     choices = unique(climr::variables %>% filter(Code_Element != "CMI") %>% pull(Code_Element)),
+                                                     choices = unique(climr::variables %>% filter(!Code_Element %in% c("CMI", "EXT", "EMT", "MAP", "MAT", "RH", "MSP", "AHM", "SHM")) %>% pull(Code_Element)),
                                                      selected = "Tmax"
                                                    )
                                                  ),
@@ -473,8 +476,8 @@ shiny::shinyApp(
                                                      inputId = "bivariate_element_x",
                                                      label = h6("Element:"),
                                                      width = "100%",
-                                                     choices = unique(climr::variables %>% filter(Code_Element != "CMI") %>% pull(Code_Element)),
-                                                     selected = "MAT"
+                                                     choices = unique(climr::variables %>% filter(!Code_Element %in% c("CMI", "EXT", "EMT", "MAP", "MAT", "RH", "MSP", "AHM", "SHM")) %>% pull(Code_Element)),
+                                                     selected = "Tmax"
                                                    )
                                                  ),
                                                  column(
@@ -490,8 +493,8 @@ shiny::shinyApp(
                                                      inputId = "bivariate_element_y",
                                                      label = h6("Element:"),
                                                      width = "100%",
-                                                     choices = unique(climr::variables %>% filter(Code_Element != "CMI") %>% pull(Code_Element)),
-                                                     selected = "MAP"
+                                                     choices = unique(climr::variables %>% filter(!Code_Element %in% c("CMI", "EXT", "EMT", "MAP", "MAT", "RH", "MSP", "AHM", "SHM")) %>% pull(Code_Element)),
+                                                     selected = "PPT"
                                                    )
                                                  ),
                                                  column(
@@ -625,6 +628,17 @@ shiny::shinyApp(
     session$allowReconnect("force")
     source("server/getdata_server.R", local = TRUE)
     source("server/visualization_server.R", local = TRUE)
+    
+    showModal(
+      modalDialog(
+        title = "Welcome to the climr App!",
+        paste("The climr App is a graphical interface for <a href='https://bcgov.github.io/climr/' target='_blank'>climr</a>, 
+              an R package that provides downscaled climate data for North America. 
+              This app allows users to download custom climate data for their areas of interest. 
+              It also provides visualizations of the climates of North America and how they are changing." ),
+        easyClose = TRUE
+      )
+    )
     
     getdata_server(input, output, session)
     visualization_server(input, output, session)
