@@ -786,7 +786,7 @@ visualization_server <- function(input, output, session) {
       label = "Element:",
       choices = {
         dt <- climr_tif[[vstore[["tifsource"]]]]
-        unique(dt[!element %in% c("CMI", "EXT", "EMT", "MAP", "MAT", "RH", "MSP", "AHM", "SHM"), element])
+        unique(dt[!element %in% c("PET", "lat", "CMI", "EXT", "EMT", "MAP", "MAT", "RH", "MSP", "AHM", "SHM"), element])
       },
       selected = "Tave"
     )
