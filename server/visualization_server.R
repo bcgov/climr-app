@@ -677,7 +677,7 @@ visualization_server <- function(input, output, session) {
     
     # get scaling
     if (isTRUE(vstore[["vscale"]])) {
-      vstore$vscale <- "log2"
+      vstore$vscale <- "log1p"
     } else {
       vstore$vscale <- ""
     }
@@ -743,13 +743,13 @@ visualization_server <- function(input, output, session) {
     }
     
     # label formatters for legend
-    inv_log2_formatter <- labelFormat(
-      transform = function(x) round((2^x) - 1),  # inverse of log2(x + 1)
+    inv_log1p_formatter <- labelFormat(
+      transform = function(x) round(exp(x) - 1),
       suffix = units
     )
     
-    if ((vstore[["vscale"]]) == "log2") {
-      log_bounds <- log2(pmax(bounds, 0) + 1)
+    if ((vstore[["vscale"]]) == "log1p") {
+      log_bounds <- log1p(pmax(bounds, 0))
 
       pal_leg <- leaflet::colorNumeric(palette = pal, domain = log_bounds, na.color = "transparent")
       
@@ -759,7 +759,7 @@ visualization_server <- function(input, output, session) {
         pal = pal_leg,
         values = seq(log_bounds[1], log_bounds[2], length.out = 6),
         title = HTML(sprintf("<div style='width: 100px;'>%s</div>", legend_title)),
-        labFormat = inv_log2_formatter
+        labFormat = inv_log1p_formatter
       )
     } else {
       pal_leg <- leaflet::colorNumeric(palette = pal, domain = bounds, na.color = "transparent")
@@ -786,7 +786,7 @@ visualization_server <- function(input, output, session) {
       label = "Element:",
       choices = {
         dt <- climr_tif[[vstore[["tifsource"]]]]
-        unique(dt[!element %in% c("CMI", "EXT", "EMT", "MAP", "MAT", "RH", "MSP", "AHM", "SHM"), element])
+        unique(dt[!element %in% c("PET", "lat", "CMI", "EXT", "EMT", "MAP", "MAT", "RH", "MSP", "AHM", "SHM"), element])
       },
       selected = "Tave"
     )
