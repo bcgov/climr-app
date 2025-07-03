@@ -689,7 +689,7 @@ visualization_server <- function(input, output, session) {
     inc <- diff(q) / 500
     breaks <- seq(q[1] - inc, q[2] + inc, by = inc)
     
-    if (grepl("PPT|MAP|MSP|PAS", vstore[["element"]])) {
+    if (grepl("PPT|MSP|PAS", vstore[["element"]])) {
       pal <- RColorBrewer::brewer.pal(9, "YlGnBu")
     } else {
       pal <- rev(RColorBrewer::brewer.pal(11, "RdYlBu"))
@@ -700,8 +700,6 @@ visualization_server <- function(input, output, session) {
       group = "Climate",
       layerId = "val",
       project = FALSE,
-      # opacity =
-      # resolution =
       colorOptions = leafem::colorOptions(
         palette = pal,
         breaks = breaks,
