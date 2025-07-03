@@ -720,17 +720,28 @@ visualization_server <- function(input, output, session) {
     ))
     shiny::showNotification("Rendering %s values" |> sprintf(vstore[["element"]]), duration = 5)
     
+    
     # extract data for legend
-    legend_title <- climr::variables[Code_Element == vstore[["element"]] & Time == vstore[["time"]], Variable] |> tools::toTitleCase()
-    if (grepl("\\u00b0C", legend_title) | grepl("\\u00b0c", legend_title)) {
-      legend_title <- stringi::stri_unescape_unicode(legend_title)
+    if (!(vstore[["element"]] %in% c("elev", "lat"))) {
+      legend_title <- climr::variables[Code_Element == vstore[["element"]] & Time == vstore[["time"]], Variable] |> tools::toTitleCase()
+      if (grepl("\\u00b0C", legend_title) | grepl("\\u00b0c", legend_title)) {
+        legend_title <- stringi::stri_unescape_unicode(legend_title)
+      }
+      units <- paste0(" ", climr::variables[Code_Element == vstore[["element"]] & Time == vstore[["time"]], Unit])
+      if (grepl("\\u00b0C", units)) {
+        units <- stringi::stri_unescape_unicode(units)
+      }
+      if (units == "%") {
+        units <- "\\%"
+      }
     }
-    units <- paste0(" ", climr::variables[Code_Element == vstore[["element"]] & Time == vstore[["time"]], Unit])
-    if (grepl("\\u00b0C", units)) {
-      units <- stringi::stri_unescape_unicode(units)
+    if (vstore[["element"]] == "elev") {
+      legend_title <- paste("Elevation")
+      units <- "m"
     }
-    if (units == "%") {
-      units <- "\\%"
+    if (vstore[["element"]] == "lat") {
+      legend_title <- paste("Latitude")
+      units <- ""
     }
     
     # label formatters for legend
