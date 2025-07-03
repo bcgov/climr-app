@@ -26,8 +26,6 @@ For more information regarding climate model and scenario selection, see <a href
   
   - CMD: Hargreaves climatic moisture deficit (mm) (annual, seasonal, monthly)
   
-  - CMI: Climatic Moisture Index (cm) (annual, monthly)
-  
   - DDsub0: Degree-days below 0°C (annual, seasonal, monthly)
   
   - DDsub18: Degree-days below 18°C (annual, seasonal, monthly)

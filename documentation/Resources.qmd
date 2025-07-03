@@ -1,3 +1,6 @@
 # Resources
 
-climr documentation here?
+<a href="https://www.carbonbrief.org/explainer-how-shared-socioeconomic-pathways-explore-future-climate-change/" target="_blank">Info on SSPs</a>
+
+<a href="https://www.realclimate.org/index.php/archives/2021/08/notallmodels/" target="_blank">Why a smaller ensemble of GCMs</a>
+
