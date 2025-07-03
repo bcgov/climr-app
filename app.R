@@ -627,7 +627,10 @@ shiny::shinyApp(
     showModal(
       modalDialog(
         title = "Welcome to the climr App!",
-        paste("Information here." ),
+        paste("The climr App is a graphical interface for <a href='https://bcgov.github.io/climr/' target='_blank'>climr</a>, 
+              an R package that provides downscaled climate data for North America. 
+              This app allows users to download custom climate data for their areas of interest. 
+              It also provides visualizations of the climates of North America and how they are changing." ),
         easyClose = TRUE
       )
     )
