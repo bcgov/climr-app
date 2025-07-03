@@ -456,7 +456,7 @@ getdata_server <- function(input, output, session) {
                 label = h5("Choose elements:"),
                 width = "100%",
                 inline = TRUE,
-                choices = unique(climr::variables %>% filter(Code_Element != "CMI") %>% pull(Code_Element)),
+                choices = unique(climr::variables %>% filter(!Code_Element %in% c("CMI", "EXT", "EMT", "MAP", "MAT", "RH", "MSP", "AHM", "SHM")) %>% pull(Code_Element)),
                 selected = vstore[["downscale_custom_elements"]]
               ),
               shiny::checkboxGroupInput(
@@ -464,7 +464,7 @@ getdata_server <- function(input, output, session) {
                 label = h5("Choose seasons/months:"),
                 width = "100%",
                 inline = TRUE,
-                choices = unique(climr::variables %>% pull(Time)), ## BUG - some annuals are showing up as ANY ##
+                choices = unique(climr::variables %>% pull(Time)), 
                 selected = vstore[["downscale_custom_time_periods"]]
               )
             )
@@ -756,15 +756,15 @@ getdata_server <- function(input, output, session) {
     
     # handle added variables
     if ("Monthly" %in% vstore[["downscale_extra_vars_sets"]]) {
-      monthly_vars <- climr::variables %>% filter(Category == "Monthly") %>% filter(Code_Element != "CMI") %>% pull(Code)
+      monthly_vars <- climr::variables %>% filter(Category == "Monthly") %>% filter(!Code_Element %in% c("CMI", "EXT", "EMT", "MAP", "MAT", "RH", "MSP", "AHM", "SHM")) %>% pull(Code)
       update_vstore_and_notify("downscale_extra_vars", monthly_vars, "Monthly vars")
     }
     if ("Seasonal" %in% vstore[["downscale_extra_vars_sets"]]) {
-      seasonal_vars <- climr::variables %>% filter(Category == "Seasonal") %>% filter(Code_Element != "CMI") %>% pull(Code)
+      seasonal_vars <- climr::variables %>% filter(Category == "Seasonal") %>% filter(!Code_Element %in% c("CMI", "EXT", "EMT", "MAP", "MAT", "RH", "MSP", "AHM", "SHM")) %>% pull(Code)
       update_vstore_and_notify("downscale_extra_vars", seasonal_vars, "Seasonal vars")
     }
     if ("Annual" %in% vstore[["downscale_extra_vars_sets"]]) {
-      annual_vars <- climr::variables %>% filter(Category == "Annual") %>% filter(Code_Element != "CMI") %>% pull(Code)
+      annual_vars <- climr::variables %>% filter(Category == "Annual") %>% filter(!Code_Element %in% c("CMI", "EXT", "EMT", "MAP", "MAT", "RH", "MSP", "AHM", "SHM")) %>% pull(Code)
       update_vstore_and_notify("downscale_extra_vars", annual_vars, "Annual vars")
     }
   }

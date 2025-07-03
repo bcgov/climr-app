@@ -751,10 +751,10 @@ visualization_server <- function(input, output, session) {
     )
     
     if ((vstore[["vscale"]]) == "log2") {
-      log_bounds <- log2(bounds + 1)
+      log_bounds <- log2(pmax(bounds, 0) + 1)
 
       pal_leg <- leaflet::colorNumeric(palette = pal, domain = log_bounds, na.color = "transparent")
-
+      
       leaflet::addLegend(
         mp,
         position = "topright",
@@ -765,7 +765,7 @@ visualization_server <- function(input, output, session) {
       )
     } else {
       pal_leg <- leaflet::colorNumeric(palette = pal, domain = bounds, na.color = "transparent")
-
+      
       leaflet::addLegend(
         mp,
         position = "topright",
@@ -788,7 +788,7 @@ visualization_server <- function(input, output, session) {
       label = "Element:",
       choices = {
         dt <- climr_tif[[vstore[["tifsource"]]]]
-        unique(dt[, element])
+        unique(dt[!element %in% c("CMI", "EXT", "EMT", "MAP", "MAT", "RH", "MSP", "AHM", "SHM"), element])
       },
       selected = "Tave"
     )
