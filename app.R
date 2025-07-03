@@ -49,17 +49,22 @@ mbhsstyle <- Sys.getenv("BCGOV_MAPBOX_HILLSHADE_STYLE")
 pals <- readRDS("scripts/pals.rds")
 
 # Elevation raster for missing values
-elevtif <- c(Sys.getenv("ELEV_RASTER"), "../northamerica_elevation_cec_2023.tif")
-if (!length(felev <- which(file.exists(elevtif)))) {
-  curl::curl_download("http://www.cec.org/files/atlas_layers/0_reference/0_03_elevation/elevation_tif.zip", "elevation_tif.zip")
-  unzip("elevation_tif.zip", files = "Elevation_TIF/NA_Elevation/data/northamerica/northamerica_elevation_cec_2023.tif", junkpaths = TRUE, exdir = "..")
-  unlink("elevation_tif.zip")
-  cec <- terra::rast("../northamerica_elevation_cec_2023.tif")
-  cec <- terra::project(cec, "EPSG:4326")
-  terra::writeRaster(cec, "../northamerica_elevation_cec_2023.tif", overwrite = TRUE)
+if(Sys.getenv("SHINY_DEPLOY") == "server"){
+  cec <- terra::rast(Sys.getenv("ELEV_RASTER"))
 } else {
-  cec <- terra::rast(elevtif[felev])
+  elevtif <- c(Sys.getenv("ELEV_RASTER"), "../northamerica_elevation_cec_2023.tif")
+  if (!length(felev <- which(file.exists(elevtif)))) {
+    curl::curl_download("http://www.cec.org/files/atlas_layers/0_reference/0_03_elevation/elevation_tif.zip", "elevation_tif.zip")
+    unzip("elevation_tif.zip", files = "Elevation_TIF/NA_Elevation/data/northamerica/northamerica_elevation_cec_2023.tif", junkpaths = TRUE, exdir = "..")
+    unlink("elevation_tif.zip")
+    cec <- terra::rast("../northamerica_elevation_cec_2023.tif")
+    cec <- terra::project(cec, "EPSG:4326")
+    terra::writeRaster(cec, "../northamerica_elevation_cec_2023.tif", overwrite = TRUE)
+  } else {
+    cec <- terra::rast(elevtif[felev])
+  }
 }
+
 
 # Base map ---- 
 l <- leaflet::leaflet(
@@ -626,7 +631,10 @@ shiny::shinyApp(
     showModal(
       modalDialog(
         title = "Welcome to the climr App!",
-        paste("Information here." ),
+        paste("The climr App is a graphical interface for <a href='https://bcgov.github.io/climr/' target='_blank'>climr</a>, 
+              an R package that provides downscaled climate data for North America. 
+              This app allows users to download custom climate data for their areas of interest. 
+              It also provides visualizations of the climates of North America and how they are changing." ),
         easyClose = TRUE
       )
     )
