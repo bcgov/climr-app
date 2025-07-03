@@ -259,7 +259,7 @@ visualization_server <- function(input, output, session) {
         shiny::tags$li("Compare time series of two different variables")
       ),
       shiny::p("All global climate model anomalies are bias-corrected to the 1961-1990 reference period normals."),
-      HTML('<a href="documentation/_book/Instructions.html#step-2.-visualize-by-plots" target="_blank">Click here for documentation.</a>')
+      #HTML('<a href="documentation/_book/Instructions.html#step-2.-visualize-by-plots" target="_blank">Click here for documentation.</a>')
     ))
   })
   shiny::observeEvent(input$biv_plot_info, {
@@ -275,7 +275,7 @@ visualization_server <- function(input, output, session) {
         shiny::tags$li("Compare simulated climate change to observed climate change in the 2001-2020 period")
       ),
       shiny::p("All climate changes are relative to the 1961-1990 reference period normals."),
-      HTML('<a href="documentation/_book/Instructions.html#step-2.-visualize-by-plots" target="_blank">Click here for documentation.</a>')
+      #HTML('<a href="documentation/_book/Instructions.html#step-2.-visualize-by-plots" target="_blank">Click here for documentation.</a>')
     ))
   })
   shiny::observeEvent(input$wl_plot_info, {
@@ -283,14 +283,13 @@ visualization_server <- function(input, output, session) {
       title = "What does this plot mean?",
       easyClose = TRUE,
       size = "l",
-      shiny::p("Walter-Lieth Climate Diagram."),
-      shiny::p("Purposes of the diagram:"),
+      shiny::p("Purposes of the Walter-Lieth Climate Diagram:"),
       shiny::tags$ul(
         shiny::tags$li("Allow identification of humid and drought periods over a year"),
         shiny::tags$li("Allow for an easy climate comparison between geographic locations")
       ),
       shiny::p("All global climate model anomalies are bias-corrected to the 1961-1990 reference period normals."),
-      HTML('<a href="documentation/_book/Instructions.html#step-2.-visualize-by-plots" target="_blank">Click here for documentation.</a>')
+      #HTML('<a href="documentation/_book/Instructions.html#step-2.-visualize-by-plots" target="_blank">Click here for documentation.</a>')
     ))
   })
   shiny::observeEvent(input$downscale_data_bivariate, {
@@ -690,7 +689,7 @@ visualization_server <- function(input, output, session) {
     inc <- diff(q) / 500
     breaks <- seq(q[1] - inc, q[2] + inc, by = inc)
     
-    if (grepl("PPT|MAP|MSP|PAS", vstore[["element"]])) {
+    if (grepl("PPT|MSP|PAS", vstore[["element"]])) {
       pal <- RColorBrewer::brewer.pal(9, "YlGnBu")
     } else {
       pal <- rev(RColorBrewer::brewer.pal(11, "RdYlBu"))
@@ -701,8 +700,6 @@ visualization_server <- function(input, output, session) {
       group = "Climate",
       layerId = "val",
       project = FALSE,
-      # opacity =
-      # resolution =
       colorOptions = leafem::colorOptions(
         palette = pal,
         breaks = breaks,
@@ -721,17 +718,28 @@ visualization_server <- function(input, output, session) {
     ))
     shiny::showNotification("Rendering %s values" |> sprintf(vstore[["element"]]), duration = 5)
     
+    
     # extract data for legend
-    legend_title <- climr::variables[Code_Element == vstore[["element"]] & Time == vstore[["time"]], Variable] |> tools::toTitleCase()
-    if (grepl("\\u00b0C", legend_title) | grepl("\\u00b0c", legend_title)) {
-      legend_title <- stringi::stri_unescape_unicode(legend_title)
+    if (!(vstore[["element"]] %in% c("elev", "lat"))) {
+      legend_title <- climr::variables[Code_Element == vstore[["element"]] & Time == vstore[["time"]], Variable] |> tools::toTitleCase()
+      if (grepl("\\u00b0C", legend_title) | grepl("\\u00b0c", legend_title)) {
+        legend_title <- stringi::stri_unescape_unicode(legend_title)
+      }
+      units <- paste0(" ", climr::variables[Code_Element == vstore[["element"]] & Time == vstore[["time"]], Unit])
+      if (grepl("\\u00b0C", units)) {
+        units <- stringi::stri_unescape_unicode(units)
+      }
+      if (units == "%") {
+        units <- "\\%"
+      }
     }
-    units <- paste0(" ", climr::variables[Code_Element == vstore[["element"]] & Time == vstore[["time"]], Unit])
-    if (grepl("\\u00b0C", units)) {
-      units <- stringi::stri_unescape_unicode(units)
+    if (vstore[["element"]] == "elev") {
+      legend_title <- paste("Elevation")
+      units <- "m"
     }
-    if (units == "%") {
-      units <- "\\%"
+    if (vstore[["element"]] == "lat") {
+      legend_title <- paste("Latitude")
+      units <- ""
     }
     
     # label formatters for legend
@@ -741,10 +749,10 @@ visualization_server <- function(input, output, session) {
     )
     
     if ((vstore[["vscale"]]) == "log2") {
-      log_bounds <- log2(bounds + 1)
+      log_bounds <- log2(pmax(bounds, 0) + 1)
 
       pal_leg <- leaflet::colorNumeric(palette = pal, domain = log_bounds, na.color = "transparent")
-
+      
       leaflet::addLegend(
         mp,
         position = "topright",
@@ -755,7 +763,7 @@ visualization_server <- function(input, output, session) {
       )
     } else {
       pal_leg <- leaflet::colorNumeric(palette = pal, domain = bounds, na.color = "transparent")
-
+      
       leaflet::addLegend(
         mp,
         position = "topright",
@@ -778,7 +786,7 @@ visualization_server <- function(input, output, session) {
       label = "Element:",
       choices = {
         dt <- climr_tif[[vstore[["tifsource"]]]]
-        unique(dt[, element])
+        unique(dt[!element %in% c("CMI", "EXT", "EMT", "MAP", "MAT", "RH", "MSP", "AHM", "SHM"), element])
       },
       selected = "Tave"
     )
