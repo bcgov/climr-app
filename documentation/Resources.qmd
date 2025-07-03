@@ -17,6 +17,3 @@ To better understand the global climate model ensemble featured in climr, try ou
 ## The `climr` R package 
 
 If you are an R programmer, we recommend you use our R package [climr](https://bcgov.github.io/climr/), which provides programmatic access to the functionality of this app, and much more. 
-
-
-
