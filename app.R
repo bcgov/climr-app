@@ -624,6 +624,14 @@ shiny::shinyApp(
     source("server/getdata_server.R", local = TRUE)
     source("server/visualization_server.R", local = TRUE)
     
+    showModal(
+      modalDialog(
+        title = "Welcome to the climr App!",
+        paste("Information here." ),
+        easyClose = TRUE
+      )
+    )
+    
     getdata_server(input, output, session)
     visualization_server(input, output, session)
     
