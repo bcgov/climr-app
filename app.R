@@ -11,6 +11,8 @@ suppressPackageStartupMessages({
   library(leaflet.extras)
   library(leaflet)
   library(shiny)
+  library(shinyjs)
+  library(callr)
   library(terra)
   library(climr)
   library(zip)
@@ -154,6 +156,7 @@ shiny::shinyApp(
       shiny::tabPanel(
         title = "Get Data",
         prompter::use_prompt(),
+        shinyjs::useShinyjs(),
         shiny::sidebarLayout(
           shiny::sidebarPanel(
             style = "height: 84vh; overflow-y: auto; overflow-x: auto;", # FIX HEIGHT TO BE ADAPTIVE

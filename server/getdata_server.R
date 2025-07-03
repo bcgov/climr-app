@@ -853,14 +853,36 @@ getdata_server <- function(input, output, session) {
             shiny::uiOutput("preview_table_ui"),
             
             shiny::conditionalPanel(
+              condition = "input.downscale_output == 'tif'",
+              br(),
+              shiny::actionButton(
+                inputId = "cancel_downscale",
+                label = "Cancel Downscale Process",
+                width = "100%",
+                style = "background-color: #d9534f; color: white; border: none;",
+                icon = shiny::icon("xmark")
+              )
+            ),
+            shiny::conditionalPanel(
               condition = "input.downscale_output == 'csv'",
               br(),
-              shiny::downloadButton(
-                outputId = "downscale_download",
-                label = "Download Downscaled Data",
-                style = "width: 100%;"
+              div(
+                style = "display: flex; gap: 10px;",
+                shiny::actionButton(
+                  inputId = "cancel_downscale",
+                  label = "Cancel Downscale Process",
+                  width = "100%",
+                  style = "background-color: #d9534f; color: white; border: none;",
+                  icon = shiny::icon("xmark")
+                ),
+                shiny::downloadButton(
+                  outputId = "downscale_download",
+                  label = "Download Downscaled Data",
+                  style = "width: 100%;"
+                )
               )
-            )
+            ),
+            shinyjs::disable("cancel_downscale")
           )
         )
       } else {
@@ -896,9 +918,10 @@ getdata_server <- function(input, output, session) {
     vstore[["downscale_resolution"]] <- input$downscale_resolution
   })
   shiny::observeEvent(input$downscale_process_launch, {
-    
     if (shiny::in_devmode()) cat("Event: downscale_process_launch", sep = "\n")
     if (vstore[["processing"]]) return()
+    
+   shinyjs::enable("cancel_downscale")
     
     if (input$downscale_output == "csv") {
       show_csv_dt(TRUE)
@@ -926,8 +949,12 @@ getdata_server <- function(input, output, session) {
     if (is.null(vstore[["downscale_obs_periods_checkbox"]])) {
       vstore[["downscale_obs_periods_checkbox"]] <- "1961_2020"
     }
-    
     getdata_sg$process()
+    
+  })
+  shiny::observeEvent(input$cancel_downscale, {
+    if (shiny::in_devmode()) cat("Event: downscale_process_launch", sep = "\n")
+    if (!vstore[["processing"]]) return()
     
   })
   shiny::observeEvent(input$ds_ras_elements, {
