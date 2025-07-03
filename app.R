@@ -12,7 +12,6 @@ suppressPackageStartupMessages({
   library(leaflet)
   library(shiny)
   library(shinyjs)
-  library(callr)
   library(terra)
   library(climr)
   library(zip)

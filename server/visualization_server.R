@@ -684,8 +684,11 @@ visualization_server <- function(input, output, session) {
 
     # set up palettes/breaks
     r <- rast(url)
-    bounds <- minmax(r)
-    q <- quantile(bounds, c(0.005, 0.995), na.rm = TRUE)
+    #bounds <- terra::minmax(r)
+    vals <- values(r, size = 100000, method = "regular", as.points = FALSE)
+    vals <- vals[!is.na(vals)]
+    #gen_seq <- seq(bounds[1], bounds[2], length.out = ceiling(diff(bounds) / 0.5))
+    q <- quantile(vals, c(0.005, 0.995), na.rm = TRUE)
     inc <- diff(q) / 500
     breaks <- seq(q[1] - inc, q[2] + inc, by = inc)
     
@@ -737,10 +740,6 @@ visualization_server <- function(input, output, session) {
       legend_title <- paste("Elevation")
       units <- "m"
     }
-    if (vstore[["element"]] == "lat") {
-      legend_title <- paste("Latitude")
-      units <- ""
-    }
     
     # label formatters for legend
     inv_log1p_formatter <- labelFormat(
@@ -749,6 +748,7 @@ visualization_server <- function(input, output, session) {
     )
     
     if ((vstore[["vscale"]]) == "log1p") {
+      bounds <- c(min(vals), max(vals))
       log_bounds <- log1p(pmax(bounds, 0))
 
       pal_leg <- leaflet::colorNumeric(palette = pal, domain = log_bounds, na.color = "transparent")
@@ -762,13 +762,13 @@ visualization_server <- function(input, output, session) {
         labFormat = inv_log1p_formatter
       )
     } else {
-      pal_leg <- leaflet::colorNumeric(palette = pal, domain = bounds, na.color = "transparent")
+      pal_leg <- leaflet::colorNumeric(palette = pal, domain = vals, na.color = "transparent")
       
       leaflet::addLegend(
         mp,
         position = "topright",
         pal = pal_leg,
-        values = seq(bounds[1], bounds[2], length.out = 6),
+        values = seq(vals[1], vals[2], length.out = 6),
         title = HTML(sprintf("<div style='width: 100px;'>%s</div>", legend_title)),
         labFormat = labelFormat(suffix = units)
       )
