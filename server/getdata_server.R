@@ -314,41 +314,7 @@ getdata_server <- function(input, output, session) {
               )
             ),
             shiny::uiOutput("gcm_years"),
-            shiny::div(
-              shiny::checkboxInput(
-                inputId = "downscale_ensemble_mean",
-                label = tags$span("Use ensemble mean", style = "font-size: 0.85em; font-weight: bold;",
-                                  prompter::add_prompt(
-                                    tooltipsIcon,
-                                    message = HTML(paste("Ensemble mean info.")),
-                                    position = "top",
-                                    size = "large",
-                                    shadow = FALSE
-                                  )
-                ),
-                value = vstore[["downscale_ensemble_mean"]],
-                width = "100%"
-              )
-            ),
-            shiny::div(
-              shiny::numericInput(
-                inputId = "downscale_max_run",
-                label = h5("Choose maximum number of model runs:",
-                           prompter::add_prompt(
-                             tooltipsIcon,
-                             message = HTML(paste("Selecting 0 will default to ensemble mean.")),
-                             position = "top",
-                             size = "large",
-                             shadow = FALSE
-                           )
-                ),
-                value = vstore[["downscale_max_run"]],
-                width = "100%",
-                min = 0,
-                max = 10,
-                step = 1
-              )
-            )
+            shiny::uiOutput("gcm_max_run")
           )
         ),
         br(),
@@ -527,10 +493,12 @@ getdata_server <- function(input, output, session) {
     vstore[["downscale_obs_periods"]] <- input$downscale_obs_periods_checkbox[input$downscale_obs_periods_checkbox != "1961_1990"]
     
     ## observed years ##
-    vstore[["downscale_obs_years_checkbox"]] <- input$observed_years_checkbox
-    if (vstore[["downscale_obs_years_checkbox"]]) {
-      date_range <- c(min(input$downscale_obs_years):max(input$downscale_obs_years))
-      vstore[["downscale_obs_years"]] <- date_range
+    if (!is.null(input$observed_years_checkbox)) {
+      vstore[["downscale_obs_years_checkbox"]] <- input$observed_years_checkbox
+      if (vstore[["downscale_obs_years_checkbox"]]) {
+        date_range <- c(min(input$downscale_obs_years):max(input$downscale_obs_years))
+        vstore[["downscale_obs_years"]] <- date_range
+      }
     }
     
     ## time series dataset ##
@@ -546,28 +514,35 @@ getdata_server <- function(input, output, session) {
     vstore[["downscale_gcm_periods"]] <- input$downscale_gcm_periods
     
     ## GCM years ##
-    vstore[["downscale_gcm_years_checkbox"]] <- input$gcm_years_checkbox
-    if (vstore[["downscale_gcm_years_checkbox"]]) {
-      # add selected range
-      date_range <- (min(input$downscale_gcm_years):max(input$downscale_gcm_years))
-      if (2015 %in% date_range & (min(date_range) != 2015)) {
-        hist_range <- (min(input$downscale_gcm_years):2014)
-        ssp_range <- (2015:max(input$downscale_gcm_years))
-      } else if (min(date_range) >= 2015) {
-        hist_range <- "NULL"
-        ssp_range <- (min(input$downscale_gcm_years):max(input$downscale_gcm_years))
-      } else {
-        hist_range <- (min(input$downscale_gcm_years):max(input$downscale_gcm_years))
-        ssp_range <- NULL
-      }
-      vstore[["downscale_gcm_years"]] <- input$downscale_gcm_years
-      vstore[["downscale_gcm_hist_years"]] <- hist_range
-      vstore[["downscale_gcm_ssp_years"]] <- ssp_range
+    if (!is.null(input$gcm_years_checkbox)) {
+      vstore[["downscale_gcm_years_checkbox"]] <- input$gcm_years_checkbox
+      if (vstore[["downscale_gcm_years_checkbox"]]) {
+        # add selected range
+        date_range <- (min(input$downscale_gcm_years):max(input$downscale_gcm_years))
+        if (2015 %in% date_range & (min(date_range) != 2015)) {
+          hist_range <- (min(input$downscale_gcm_years):2014)
+          ssp_range <- (2015:max(input$downscale_gcm_years))
+        } else if (min(date_range) >= 2015) {
+          hist_range <- "NULL"
+          ssp_range <- (min(input$downscale_gcm_years):max(input$downscale_gcm_years))
+        } else {
+          hist_range <- (min(input$downscale_gcm_years):max(input$downscale_gcm_years))
+          ssp_range <- NULL
+        }
+        vstore[["downscale_gcm_years"]] <- input$downscale_gcm_years
+        vstore[["downscale_gcm_hist_years"]] <- hist_range
+        vstore[["downscale_gcm_ssp_years"]] <- ssp_range
+      } 
     }
     
     ## ensemble mean / max model runs ##
-    vstore[["downscale_ensemble_mean"]] <- as.logical(input$downscale_ensemble_mean)
-    vstore[["downscale_max_run"]] <- input$downscale_max_run
+    if (!is.null(input$downscale_ensemble_mean)) {
+      vstore[["downscale_ensemble_mean"]] <- as.logical(input$downscale_ensemble_mean)
+      
+    }
+    if (!is.null(input$downscale_max_run)) {
+      vstore[["downscale_max_run"]] <- input$downscale_max_run
+    }
     
     ## extra climate variables ##
     # handle sets
@@ -691,6 +666,23 @@ getdata_server <- function(input, output, session) {
     }
   }
   
+  safe_length <- function(x) {
+    if (is.null(x)) return(1) 
+    length(x)
+  }
+  
+  # handler function for limiting query size 
+  limit_query_size <- function() {
+    browser()
+    # extract variables for layer count
+    params <- c("downscale_obs_periods", "downscale_obs_years", "downscale_obs_ts_dataset", "downscale_gcms", "downscale_ssps", "downscale_gcm_periods", "downscale_gcm_ssp_years", "downscale_gcm_hist_years", "downscale_max_run", "downscale_extra_vars")
+    layer_factors <- sapply(params, function(p) {
+      safe_length(vstore[[p]])
+    })
+    
+    n_layers <- prod(layer_factors)
+  }
+  
   # reset
   shiny::observeEvent(input$downscale_reset, {
     if (shiny::in_devmode()) cat("Event: downscale_reset", sep = "\n")
@@ -741,6 +733,7 @@ getdata_server <- function(input, output, session) {
           )
         }
         vstore[["processing"]] <- FALSE
+        nlayers <- limit_query_size()
         output$downscale_points_count_estimate <- shiny::renderUI({
           pce <- getdata_sg$process_count(vstore[["downscale_resolution"]])
           bslib::card(
@@ -1175,6 +1168,49 @@ getdata_server <- function(input, output, session) {
             ),
           )
         ),
+      )
+    }
+  })
+  
+  # reactive output for GCM max runs
+  output$gcm_max_run <- shiny::renderUI({
+    if (all(getdata_sg_dt$dt$group == "marker")) {
+      tagList(
+        shiny::div(
+          shiny::checkboxInput(
+            inputId = "downscale_ensemble_mean",
+            label = tags$span("Use ensemble mean", style = "font-size: 0.85em; font-weight: bold;",
+                              prompter::add_prompt(
+                                tooltipsIcon,
+                                message = HTML(paste("Ensemble mean info.")),
+                                position = "top",
+                                size = "large",
+                                shadow = FALSE
+                              )
+            ),
+            value = vstore[["downscale_ensemble_mean"]],
+            width = "100%"
+          )
+        ),
+        shiny::div(
+          shiny::numericInput(
+            inputId = "downscale_max_run",
+            label = h5("Choose maximum number of model runs:",
+                       prompter::add_prompt(
+                         tooltipsIcon,
+                         message = HTML(paste("Selecting 0 will default to ensemble mean.")),
+                         position = "top",
+                         size = "large",
+                         shadow = FALSE
+                       )
+            ),
+            value = vstore[["downscale_max_run"]],
+            width = "100%",
+            min = 0,
+            max = 10,
+            step = 1
+          )
+        )  
       )
     }
   })
