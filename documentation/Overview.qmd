@@ -41,7 +41,6 @@ The code for this app is open source:
 - climr R package: https://github.com/bcgov/climr
 - climr App: https://github.com/bcgov/climr-app
 
-
 ## Acknowledgements
 
 The collaborators on the climr app are: Tirion Grice (front end developer), Kiri Daust (lead developer), Colin Mahony (science lead), and Bruno Tremblay (back end developer). We also thank Ceres Barros and Aseem Sharma for their contributions to the `climr` package.
