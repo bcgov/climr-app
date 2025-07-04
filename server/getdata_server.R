@@ -245,53 +245,7 @@ getdata_server <- function(input, output, session) {
                 selected = vstore[["downscale_obs_periods_checkbox"]]
               )
             ),
-            br(),
-            shiny::div(
-              shiny::checkboxInput(
-                inputId = "observed_years_checkbox",
-                label = tags$span("Specify Observed Years", style = "font-size: 0.85em; font-weight: bold;"),
-                value = vstore[["downscale_obs_years_checkbox"]],
-                width = "100%"
-              )
-            ),
-            shiny::conditionalPanel(
-              condition = "input.observed_years_checkbox == true",
-              shiny::div(
-                shiny::sliderInput(
-                  inputId = "downscale_obs_years",
-                  label = h5("Choose observed years range:",
-                             prompter::add_prompt(
-                               tooltipsIcon,
-                               message = HTML(paste("Choose years to obtain individual years or time series of observational climate data.")),
-                               position = "top",
-                               size = "large",
-                               shadow = FALSE
-                             )
-                  ),
-                  min = min(climr::list_obs_years()),
-                  max = max(climr::list_obs_years()),
-                  value = c(1951,2024),
-                  width = "100%",
-                  step = 1,
-                  sep = ""
-                ),
-                shiny::radioButtons(
-                  inputId = "downscale_obs_ts_dataset",
-                  label = h5("Choose observation time-series data:",
-                             prompter::add_prompt(
-                               tooltipsIcon,
-                               message = HTML(paste("Dataset for observational time series data. MSWX Blend for Multi-Source Weather, ClimateNA gridded time series, CRU/GPCC for CRU TS (temperature) and GPCC (precipitation).")),
-                               position = "top",
-                               size = "large",
-                               shadow = FALSE
-                             )
-                  ),
-                  width = "100%",
-                  selected = vstore[["downscale_obs_ts_dataset"]],
-                  choices = c("MSWX Blend" = "mswx.blend", "ClimateNA" = "climatena", "Climatic Research Unit / Global Precipitation Climatology Centre" = "cru.gpcc")
-                )
-              )
-            )
+            shiny::uiOutput("observed_years")
           ),
           
           # Simulated climate data parameters
@@ -359,39 +313,7 @@ getdata_server <- function(input, output, session) {
                 selected = vstore[["downscale_gcm_periods"]]
               )
             ),
-            br(),
-            shiny::div(
-              shiny::checkboxInput(
-                inputId = "gcm_years_checkbox",
-                label = tags$span("Specify GCM Years", style = "font-size: 0.85em; font-weight: bold;"),
-                value = vstore[["downscale_gcm_years_checkbox"]],
-                width = "100%"
-              )
-            ),
-            shiny::conditionalPanel(
-              condition = "input.gcm_years_checkbox == true",
-              shiny::div(
-                shiny::sliderInput(
-                  inputId = "downscale_gcm_years",
-                  label = h5("Choose GCM years:",
-                             prompter::add_prompt(
-                               tooltipsIcon,
-                               message = HTML(paste("Choose time series years for GCM simulations of the historical scenario and future SSP scenarios.")),
-                               position = "top",
-                               size = "large",
-                               shadow = FALSE
-                             )
-                  ),
-                  width = "100%",
-                  min = min(climr::list_gcm_hist_years()),
-                  max = max(climr::list_gcm_ssp_years()),
-                  value = c(1951, 2100),
-                  step = 1,
-                  sep = ""
-                ),
-              )
-            ),
-            
+            shiny::uiOutput("gcm_years"),
             shiny::div(
               shiny::checkboxInput(
                 inputId = "downscale_ensemble_mean",
@@ -1164,6 +1086,97 @@ getdata_server <- function(input, output, session) {
         leaflet::addLegend(getdata_mp, pal = pal, values = values(raster_layer_values), title = HTML(sprintf("<div style='width: 200px;'>%s</div>", legend_title)), labFormat = if (vstore[["log_transform_raster"]] & variable_type == "ratio") inv_log2_formatter else labelFormat(suffix = units))
       }
     }  
+  })
+  
+  # reactive output for observed years
+  output$observed_years <- shiny::renderUI({
+    if (all(getdata_sg_dt$dt$group == "marker")) {
+      tagList(
+        shiny::checkboxInput(
+          inputId = "observed_years_checkbox",
+          label = tags$span("Specify Observed Years", style = "font-size: 0.85em; font-weight: bold;"),
+          value = vstore[["downscale_obs_years_checkbox"]],
+          width = "100%"
+        ),
+        shiny::conditionalPanel(
+          condition = "input.observed_years_checkbox == true",
+          shiny::div(
+            shiny::sliderInput(
+              inputId = "downscale_obs_years",
+              label = h5("Choose observed years range:",
+                         prompter::add_prompt(
+                           tooltipsIcon,
+                           message = HTML(paste("Choose years to obtain individual years or time series of observational climate data.")),
+                           position = "top",
+                           size = "large",
+                           shadow = FALSE
+                         )
+              ),
+              min = min(climr::list_obs_years()),
+              max = max(climr::list_obs_years()),
+              value = c(1951,2024),
+              width = "100%",
+              step = 1,
+              sep = ""
+            ),
+            shiny::radioButtons(
+              inputId = "downscale_obs_ts_dataset",
+              label = h5("Choose observation time-series data:",
+                         prompter::add_prompt(
+                           tooltipsIcon,
+                           message = HTML(paste("Dataset for observational time series data. MSWX Blend for Multi-Source Weather, ClimateNA gridded time series, CRU/GPCC for CRU TS (temperature) and GPCC (precipitation).")),
+                           position = "top",
+                           size = "large",
+                           shadow = FALSE
+                         )
+              ),
+              width = "100%",
+              selected = vstore[["downscale_obs_ts_dataset"]],
+              choices = c("MSWX Blend" = "mswx.blend", "ClimateNA" = "climatena", "Climatic Research Unit / Global Precipitation Climatology Centre" = "cru.gpcc")
+            )
+          )
+        )
+      )
+    }
+  })
+  
+  # reactive output for GCM years
+  output$gcm_years <- shiny::renderUI({
+    if (all(getdata_sg_dt$dt$group == "marker")) {
+      tagList(
+        shiny::div(
+          shiny::checkboxInput(
+            inputId = "gcm_years_checkbox",
+            label = tags$span("Specify GCM Years", style = "font-size: 0.85em; font-weight: bold;"),
+            value = vstore[["downscale_gcm_years_checkbox"]],
+            width = "100%"
+          )
+        ),
+        shiny::conditionalPanel(
+          condition = "input.gcm_years_checkbox == true",
+          shiny::div(
+            shiny::sliderInput(
+              inputId = "downscale_gcm_years",
+              label = h5("Choose GCM years:",
+                         prompter::add_prompt(
+                           tooltipsIcon,
+                           message = HTML(paste("Choose time series years for GCM simulations of the historical scenario and future SSP scenarios.")),
+                           position = "top",
+                           size = "large",
+                           shadow = FALSE
+                         )
+              ),
+              width = "100%",
+              min = min(climr::list_gcm_hist_years()),
+              max = max(climr::list_gcm_ssp_years()),
+              value = c(1951, 2100),
+              step = 1,
+              sep = ""
+            ),
+          )
+        ),
+      )
+    }
   })
   
   # reactive output for outputs options
