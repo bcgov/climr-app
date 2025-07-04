@@ -146,6 +146,7 @@ session_geometry <- function(sg_dt, mp) {
       
       lon <- round(as.numeric(coords_split[1]), 5)
       lat <- round(as.numeric(coords_split[2]), 5)
+      area <- 0
       
       # check if the point is within valid space
       p <- vect(cbind(lon, lat), crs = crs(e_poly))
@@ -180,9 +181,13 @@ session_geometry <- function(sg_dt, mp) {
 
       lon <- round(mean(lon_coords[!is.na(lon_coords)]), 5)
       lat <- round(mean(lat_coords[!is.na(lat_coords)]), 5)
+      
+      shape <- terra::vect(new, crs = "EPSG:4326")
+      shape_proj <- terra::project(shape, "EPSG:3857") # repreoject to planar to find area
+      area <- round(terra::expanse(shape_proj, unit = "m"), 2)
       }
     
-    sg_dt$dt <- rbind(sg_dt$dt, data.table::data.table(id = id, lat = lat, long = lon, wkt = new, group = g, source = s, datapath = d))
+    sg_dt$dt <- rbind(sg_dt$dt, data.table::data.table(id = id, lat = lat, long = lon, wkt = new, group = g, source = s, datapath = d, area = area))
     # To show hull when npoints > 100
     if (!grepl("POINT", new)) g <- "shape"
     refresh(g)

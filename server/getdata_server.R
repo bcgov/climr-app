@@ -10,7 +10,8 @@ getdata_server <- function(input, output, session) {
     wkt = character(),
     group = character(),
     source = character(),
-    datapath = character()
+    datapath = character(),
+    area = character()
   ),
   filtered_dt = NULL
   )
@@ -399,29 +400,29 @@ getdata_server <- function(input, output, session) {
   shiny::observe(
     if (vstore[["downscale_sim_recommended"]]) {
       # GCMs
-      vstore[["downscale_gcms"]] <- climr::list_gcms()[c(1,4:7,10:12)]
+      #vstore[["downscale_gcms"]] <- climr::list_gcms()[c(1,4:7,10:12)]
       shiny::updateCheckboxGroupInput(
         inputId = "downscale_gcms",
         choices = climr::list_gcms() |> sn(),
-        selected = vstore[["downscale_gcms"]],
+        selected = climr::list_gcms()[c(1,4:7,10:12)],
         inline = TRUE
       )
       
       # SSPs
-      vstore[["downscale_ssps"]] <- climr::list_ssps()[c(1:3)]
+      #vstore[["downscale_ssps"]] <- climr::list_ssps()[c(1:3)]
       shiny::updateCheckboxGroupInput(
         inputId = "downscale_ssps",
         choices = climr::list_ssps() |> sn(),
-        selected = vstore[["downscale_ssps"]],
+        selected = climr::list_ssps()[c(1:3)],
         inline = TRUE
       )
       
       # GCM periods
-      vstore[["downscale_gcm_periods"]] <- climr::list_gcm_periods()[c(1:5)]
+      #vstore[["downscale_gcm_periods"]] <- climr::list_gcm_periods()[c(1:5)]
       shiny::updateCheckboxGroupInput(
         inputId = "downscale_gcm_periods",
         choices = c(climr::list_gcm_periods() |> sn()),
-        selected = vstore[["downscale_gcm_periods"]],
+        selected = climr::list_gcm_periods()[c(1:5)],
         inline = TRUE
       )
     } else {
@@ -568,6 +569,13 @@ getdata_server <- function(input, output, session) {
     selections <- list(input$downscale_gcms, input$downscale_ssps, input$downscale_gcm_periods)
     lengths <- sapply(selections, length)
     
+    # calculate number of raster layers
+    if ((all(getdata_sg_dt$dt$group != "marker"))) {
+      n_layers <- calculate_layers()
+    } else {
+      n_layers <- 0
+    }
+    
     if ("Custom" %in% vstore[["downscale_extra_vars_sets"]] & (is.null(vstore[["downscale_custom_elements"]]) | is.null(vstore[["downscale_custom_time_periods"]]))) {
       showModal(
         modalDialog(
@@ -589,6 +597,14 @@ getdata_server <- function(input, output, session) {
         modalDialog(
           title = "Warning",
           paste("Please select a GCM AND an SSP AND a GCM period." ),
+          easyClose = TRUE
+        )
+      )
+    } else if (n_layers > 100000) {
+      showModal(
+        modalDialog(
+          title = "Warning",
+          paste("Too many output raster layers estimated to run the downscale process. We recommend running the downscale one GCM at a time, or running climate variables packages one at a time."),
           easyClose = TRUE
         )
       )
@@ -629,16 +645,40 @@ getdata_server <- function(input, output, session) {
     }
   }
   
-  remove_from_vstore <- function(vstore_key, vars, label) {
-    current_value <- vstore[[vstore_key]]
-    updated_value <- setdiff(current_value, vars)
-    deletions <- setdiff(updated_value, current_value)
+  append_vstore_and_notify <- function(vstore_key, input_value, msg_format) {
+    vpl <- 30
+    current_value <- isolate(vstore[[vstore_key]])
+    
+    # If NULL or uninitialized, treat as empty
+    if (is.null(current_value)) current_value <- character()
+    
+    # Special handling for "NULL" sentinel value logic
+    if ("NULL" %in% input_value) {
+      if (length(input_value) > 1) {
+        if ("NULL" %in% current_value) {
+          shiny::updateSelectInput(inputId = vstore_key, selected = setdiff(input_value, "NULL"))
+        } else {
+          shiny::updateSelectInput(inputId = vstore_key, selected = "NULL")
+        }
+        return()
+      }
+    }
+    
+    # Compute additions to current value (avoiding duplicates)
+    additions <- setdiff(input_value, current_value)
+    
+    # Append (union ensures no duplicates)
+    updated_value <- union(current_value, input_value)
     vstore[[vstore_key]] <- updated_value
     
-    shiny::showNotification(
-      sprintf(label),
-      duration = 2
-    )
+    # Notification for additions
+    if (length(additions) > 0) {
+      diff_value <- substr(paste(additions, collapse = ", "), 1, vpl)
+      shiny::showNotification(
+        sprintf("%s added [%s]", msg_format, diff_value),
+        duration = 2
+      )
+    }
   }
   
   # handler for extra climate variable sets
@@ -654,33 +694,48 @@ getdata_server <- function(input, output, session) {
     # handle added variables
     if ("Monthly" %in% vstore[["downscale_extra_vars_sets"]]) {
       monthly_vars <- climr::variables %>% filter(Category == "Monthly") %>% filter(!Code_Element %in% c("CMI", "EXT", "EMT", "MAP", "MAT", "RH", "MSP", "AHM", "SHM")) %>% pull(Code)
-      update_vstore_and_notify("downscale_extra_vars", monthly_vars, "Monthly vars")
+      append_vstore_and_notify("downscale_extra_vars", monthly_vars, "Monthly vars")
     }
     if ("Seasonal" %in% vstore[["downscale_extra_vars_sets"]]) {
       seasonal_vars <- climr::variables %>% filter(Category == "Seasonal") %>% filter(!Code_Element %in% c("CMI", "EXT", "EMT", "MAP", "MAT", "RH", "MSP", "AHM", "SHM")) %>% pull(Code)
-      update_vstore_and_notify("downscale_extra_vars", seasonal_vars, "Seasonal vars")
+      append_vstore_and_notify("downscale_extra_vars", seasonal_vars, "Seasonal vars")
     }
     if ("Annual" %in% vstore[["downscale_extra_vars_sets"]]) {
       annual_vars <- climr::variables %>% filter(Category == "Annual") %>% filter(!Code_Element %in% c("CMI", "EXT", "EMT", "MAP", "MAT", "RH", "MSP", "AHM", "SHM")) %>% pull(Code)
-      update_vstore_and_notify("downscale_extra_vars", annual_vars, "Annual vars")
+      append_vstore_and_notify("downscale_extra_vars", annual_vars, "Annual vars")
     }
   }
   
-  safe_length <- function(x) {
-    if (is.null(x)) return(1) 
-    length(x)
-  }
+  # estimate number of raster layers that will be in output
+  safe_length <- function(x) if (is.null(x)) 1 else length(x)
   
-  # handler function for limiting query size 
-  limit_query_size <- function() {
-    browser()
+  calculate_layers <- function() {
     # extract variables for layer count
-    params <- c("downscale_obs_periods", "downscale_obs_years", "downscale_obs_ts_dataset", "downscale_gcms", "downscale_ssps", "downscale_gcm_periods", "downscale_gcm_ssp_years", "downscale_gcm_hist_years", "downscale_max_run", "downscale_extra_vars")
+    params <- c("downscale_obs_periods_checkbox", "downscale_obs_years", "downscale_obs_ts_dataset", "downscale_gcms", "downscale_ssps", "downscale_gcm_periods", "downscale_gcm_ssp_years", "downscale_gcm_hist_years", "downscale_max_run", "downscale_extra_vars")
     layer_factors <- sapply(params, function(p) {
       safe_length(vstore[[p]])
     })
     
-    n_layers <- prod(layer_factors)
+    return(prod(layer_factors))
+  }
+  
+  # set raster resolution based on estimated number of layers
+  get_resolution_min <- function(n_layers) {
+    n_layers <- calculate_layers()
+    
+    # predefine point caps based on the number of layers to downscale
+    if (n_layers <= 99) cap <- 150000
+    else if (n_layers <= 999) cap <- 50000
+    else if (n_layers <= 9999) cap <- 25000
+    else cap <- 10000
+    
+    # base cell area on AOI area in m^2 / number of allowed points
+    cell_area <- as.numeric((getdata_sg_dt$dt)$area)/cap
+    # resolution is sqrt(area) rounded to the nearest 50m
+    res <- round(sqrt(cell_area)/50)*50
+    
+    if (res < 250) return(250)
+    return(res)
   }
   
   # reset
@@ -733,8 +788,8 @@ getdata_server <- function(input, output, session) {
           )
         }
         vstore[["processing"]] <- FALSE
-        nlayers <- limit_query_size()
         output$downscale_points_count_estimate <- shiny::renderUI({
+          get_resolution_min(calculate_layers())
           pce <- getdata_sg$process_count(vstore[["downscale_resolution"]])
           bslib::card(
             full_screen = FALSE,
@@ -766,38 +821,16 @@ getdata_server <- function(input, output, session) {
             
             # preview for csv results
             shiny::uiOutput("preview_table_ui"),
-            
-            shiny::conditionalPanel(
-              condition = "input.downscale_output == 'tif'",
-              br(),
-              shiny::actionButton(
-                inputId = "cancel_downscale",
-                label = "Cancel Downscale Process",
-                width = "100%",
-                style = "background-color: #d9534f; color: white; border: none;",
-                icon = shiny::icon("xmark")
-              )
-            ),
+
             shiny::conditionalPanel(
               condition = "input.downscale_output == 'csv'",
               br(),
-              div(
-                style = "display: flex; gap: 10px;",
-                shiny::actionButton(
-                  inputId = "cancel_downscale",
-                  label = "Cancel Downscale Process",
-                  width = "100%",
-                  style = "background-color: #d9534f; color: white; border: none;",
-                  icon = shiny::icon("xmark")
-                ),
-                shiny::downloadButton(
-                  outputId = "downscale_download",
-                  label = "Download Downscaled Data",
-                  style = "width: 100%;"
-                )
+              shiny::downloadButton(
+                outputId = "downscale_download",
+                label = "Download Downscaled Data",
+                style = "width: 100%;"
               )
-            ),
-            shinyjs::disable("cancel_downscale")
+            )
           )
         )
       } else {
@@ -836,8 +869,6 @@ getdata_server <- function(input, output, session) {
     if (shiny::in_devmode()) cat("Event: downscale_process_launch", sep = "\n")
     if (vstore[["processing"]]) return()
     
-   shinyjs::enable("cancel_downscale")
-    
     if (input$downscale_output == "csv") {
       show_csv_dt(TRUE)
     } else {
@@ -865,11 +896,6 @@ getdata_server <- function(input, output, session) {
       vstore[["downscale_obs_periods_checkbox"]] <- "1961_2020"
     }
     getdata_sg$process()
-    
-  })
-  shiny::observeEvent(input$cancel_downscale, {
-    if (shiny::in_devmode()) cat("Event: downscale_process_launch", sep = "\n")
-    if (!vstore[["processing"]]) return()
     
   })
   shiny::observeEvent(input$ds_ras_elements, {
@@ -1250,28 +1276,55 @@ getdata_server <- function(input, output, session) {
           inline = TRUE,
           selected = "tif"
         ),
-        shiny::conditionalPanel(
-          condition = "input.downscale_output == 'tif'",
-          shiny::sliderInput(
-            inputId = "downscale_resolution",
-            label = h5("Choose downscale resolution (m):",
-                       prompter::add_prompt(
-                         tooltipsIcon,
-                         message = HTML(paste("Target resolution for shapes drawn on map or added using file upload. Does not apply to csv files.")),
-                         position = "top",
-                         size = "large",
-                         shadow = FALSE
-                       )
-            ),
-            value = vstore[["downscale_resolution"]],
-            width = "100%",
-            min = 250,
-            max = 10000,
-            step = 50,
-            post = "m",
-            ticks = FALSE
-          )
-        )
+        shiny::uiOutput("resolution_slider")
+        # shiny::conditionalPanel(
+        #   condition = "input.downscale_output == 'tif'",
+        #   shiny::sliderInput(
+        #     inputId = "downscale_resolution",
+        #     label = h5("Choose downscale resolution (m):",
+        #                prompter::add_prompt(
+        #                  tooltipsIcon,
+        #                  message = HTML(paste("Target resolution for shapes drawn on map or added using file upload. Does not apply to csv files.")),
+        #                  position = "top",
+        #                  size = "large",
+        #                  shadow = FALSE
+        #                )
+        #     ),
+        #     value = vstore[["downscale_resolution"]],
+        #     width = "100%",
+        #     min = 250,
+        #     max = 10000,
+        #     step = 50,
+        #     post = "m",
+        #     ticks = FALSE
+        #   )
+        # )
+      )
+    }
+  })
+  
+  # reactive output for slider resolution
+  output$resolution_slider <- shiny::renderUI({
+    if (input$downscale_output == "tif") {
+      res_min <- get_resolution_min(calculate_layers())
+      shiny::sliderInput(
+        inputId = "downscale_resolution",
+        label = h5("Choose downscale resolution (m):",
+                   prompter::add_prompt(
+                     tooltipsIcon,
+                     message = HTML(paste("Target resolution for shapes drawn on map or added using file upload. Does not apply to csv files.")),
+                     position = "top",
+                     size = "large",
+                     shadow = FALSE
+                   )
+        ),
+        value = vstore[["downscale_resolution"]],
+        width = "100%",
+        min = res_min,
+        max = 10000,
+        step = 50,
+        post = "m",
+        ticks = FALSE
       )
     }
   })
