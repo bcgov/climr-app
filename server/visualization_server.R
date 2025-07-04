@@ -793,8 +793,8 @@ visualization_server <- function(input, output, session) {
       if (input$element != "elev" & input$element != "lat" & input$element != "PET") {
         shiny::selectInput(
           inputId = "time",
-          label = "Season/months:",
-          choices = climr::variables[Code_Element == input$element, Time]
+          label = "Season:",
+          choices = climr::variables[Code_Element == input$element & Category != "Monthly", Time]
         )
       }
     }
