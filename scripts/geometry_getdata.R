@@ -183,7 +183,7 @@ session_geometry <- function(sg_dt, mp) {
       lat <- round(mean(lat_coords[!is.na(lat_coords)]), 5)
       
       shape <- terra::vect(new, crs = "EPSG:4326")
-      shape_proj <- terra::project(shape, "EPSG:3857") # repreoject to planar to find area
+      shape_proj <- terra::project(shape, "+proj=aea +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs")
       area <- round(terra::expanse(shape_proj, unit = "m"), 2)
       }
     

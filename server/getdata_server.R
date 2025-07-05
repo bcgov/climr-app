@@ -722,10 +722,11 @@ getdata_server <- function(input, output, session) {
   # set raster resolution based on estimated number of layers
   get_resolution_min <- function(n_layers) {
     n_layers <- calculate_layers()
-    browser()
+    
     # predefine point caps based on the number of layers to downscale
-    if (n_layers <= 50) cap <- 150000
-    else if (n_layers <= 150) cap <- 100000
+    if (n_layers <= 100) cap <- 150000
+    else if (n_layers <= 200) cap <- 100000
+    else if (n_layers <= 500) cap <- 75000
     else if (n_layers <= 1000) cap <- 50000
     else if (n_layers <= 2000) cap <- 25000
     else cap <- 10000
