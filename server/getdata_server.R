@@ -600,7 +600,7 @@ getdata_server <- function(input, output, session) {
           easyClose = TRUE
         )
       )
-    } else if (n_layers > 100000) {
+    } else if (n_layers > 5000) { # THIS THRESHOLD MAY NEED TO CHANGE
       showModal(
         modalDialog(
           title = "Warning",
@@ -722,11 +722,12 @@ getdata_server <- function(input, output, session) {
   # set raster resolution based on estimated number of layers
   get_resolution_min <- function(n_layers) {
     n_layers <- calculate_layers()
-    
+    browser()
     # predefine point caps based on the number of layers to downscale
-    if (n_layers <= 99) cap <- 150000
-    else if (n_layers <= 999) cap <- 50000
-    else if (n_layers <= 9999) cap <- 25000
+    if (n_layers <= 50) cap <- 150000
+    else if (n_layers <= 150) cap <- 100000
+    else if (n_layers <= 1000) cap <- 50000
+    else if (n_layers <= 2000) cap <- 25000
     else cap <- 10000
     
     # base cell area on AOI area in m^2 / number of allowed points
