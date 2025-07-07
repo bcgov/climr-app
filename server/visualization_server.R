@@ -865,12 +865,13 @@ visualization_server <- function(input, output, session) {
       width  <- session$clientData$output_timeseries_plot_width
       height <- session$clientData$output_timeseries_plot_height
       
-      png(file, width = width*pixelratio*3, height = height*pixelratio*3, res = 120*pixelratio)
+      png(file, width = width*pixelratio*2, height = height*pixelratio*2, res = 120*pixelratio)
       print(climr::plot_timeSeries(
         X = timeseries_data,
         var1 = climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code],
-        obs_ts_dataset = input$time_series_dataset
-      ))
+        obs_ts_dataset = if (!input$ts_adj_plot) c("mswx.blend", "cru.gpcc", "climatena") else input$time_series_datasetinput$time_series_dataset
+        )
+      )
       dev.off()
     }
   )
