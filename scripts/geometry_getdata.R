@@ -182,9 +182,12 @@ session_geometry <- function(sg_dt, mp) {
       lon <- round(mean(lon_coords[!is.na(lon_coords)]), 5)
       lat <- round(mean(lat_coords[!is.na(lat_coords)]), 5)
       
+      # calculate area of shape
       shape <- terra::vect(new, crs = "EPSG:4326")
-      shape_proj <- terra::project(shape, "EPSG:6933") # reproject to planar to find area
-      area <- round(terra::expanse(shape_proj, unit = "m"), 2)
+      box <- terra::ext(shape)
+      box_poly <- terra::as.polygons(box, crs = "EPSG:4326")
+      box_proj <- terra::project(box_poly, "EPSG:6933") # reproject to planar to find area
+      area <- round(terra::expanse(box_proj, unit = "m"), 2)
       }
     
     sg_dt$dt <- rbind(sg_dt$dt, data.table::data.table(id = id, lat = lat, long = lon, wkt = new, group = g, source = s, datapath = d, area = area))
