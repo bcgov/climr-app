@@ -259,7 +259,7 @@ visualization_server <- function(input, output, session) {
         shiny::tags$li("Compare time series of two different variables")
       ),
       shiny::p("All global climate model anomalies are bias-corrected to the 1961-1990 reference period normals."),
-      #HTML('<a href="documentation/_book/Instructions.html#step-2.-visualize-by-plots" target="_blank">Click here for documentation.</a>')
+      HTML('<a href="https://vonuma.com/climr-docs/Instructions.html#step-2.-visualize-by-plots" target="_blank">Click here for documentation.</a>')
     ))
   })
   shiny::observeEvent(input$biv_plot_info, {
@@ -275,7 +275,7 @@ visualization_server <- function(input, output, session) {
         shiny::tags$li("Compare simulated climate change to observed climate change in the 2001-2020 period")
       ),
       shiny::p("All climate changes are relative to the 1961-1990 reference period normals."),
-      #HTML('<a href="documentation/_book/Instructions.html#step-2.-visualize-by-plots" target="_blank">Click here for documentation.</a>')
+      HTML('<a href="https://vonuma.com/climr-docs/Instructions.html#step-2.-visualize-by-plots" target="_blank">Click here for documentation.</a>')
     ))
   })
   shiny::observeEvent(input$wl_plot_info, {
@@ -289,7 +289,7 @@ visualization_server <- function(input, output, session) {
         shiny::tags$li("Allow for an easy climate comparison between geographic locations")
       ),
       shiny::p("All global climate model anomalies are bias-corrected to the 1961-1990 reference period normals."),
-      #HTML('<a href="documentation/_book/Instructions.html#step-2.-visualize-by-plots" target="_blank">Click here for documentation.</a>')
+      HTML('<a href="https://vonuma.com/climr-docs/Instructions.html#step-2.-visualize-by-plots" target="_blank">Click here for documentation.</a>')
     ))
   })
   shiny::observeEvent(input$downscale_data_bivariate, {

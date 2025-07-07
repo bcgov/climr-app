@@ -342,7 +342,14 @@ getdata_server <- function(input, output, session) {
             shiny::div(
               shiny::checkboxGroupInput(
                 inputId = "downscale_custom_elements",
-                label = h5("Choose elements:"),
+                label = h5("Choose elements:", 
+                           prompter::add_prompt(
+                             tooltipsIcon,
+                             message = HTML("See Definitions section in Documentation for more information on climate variables."),
+                             position = "top",
+                             size = "large",
+                             shadow = FALSE
+                           )),
                 width = "100%",
                 inline = TRUE,
                 choices = unique(climr::variables %>% filter(!Code_Element %in% c("CMI", "EXT", "EMT", "MAP", "MAT", "RH", "MSP", "AHM", "SHM")) %>% pull(Code_Element)),
@@ -364,15 +371,7 @@ getdata_server <- function(input, output, session) {
         shiny::div(
           shiny::checkboxInput(
             inputId = "downscale_core_ppt_lr",
-            label = tags$span("Apply elevation adjustment to precipitation values during downscaling", style = "font-size: 0.85em; font-weight: bold;",
-                              prompter::add_prompt(
-                                tooltipsIcon,
-                                message = HTML(paste("Elevation adjustment info.")),
-                                position = "top",
-                                size = "large",
-                                shadow = FALSE
-                              )
-            ),
+            label = tags$span("Apply elevation adjustment to precipitation values during downscaling", style = "font-size: 0.85em; font-weight: bold;"),
             value = vstore[["downscale_core_ppt_lr"]],
             width = "100%"
           )
@@ -603,7 +602,7 @@ getdata_server <- function(input, output, session) {
     } else if (n_layers > 4000) { # THIS THRESHOLD MAY NEED TO CHANGE
       showModal(
         modalDialog(
-          title = "Warning",
+          title = "Warning - Exceeds job size limit!",
           paste("Too many output raster layers estimated to run the downscale process. We recommend running the downscale one GCM at a time, or running climate variables packages one at a time."),
           easyClose = TRUE
         )
@@ -774,8 +773,9 @@ getdata_server <- function(input, output, session) {
     if (shiny::in_devmode()) cat("Event: generate_results", sep = "\n")
     # check that it is possible to downscale the data 
     temp_dt <- getdata_sg_dt$dt
+    n_layers <- calculate_layers()
     
-    if (!is.null(temp_dt) & nrow(temp_dt) > 0) {
+    if (!is.null(temp_dt) & nrow(temp_dt) > 0 & n_layers < 4000) {
       sources <- unique(na.omit(temp_dt$source))
       
       # ensure all data sources are the same before opening Downscale Launch window
@@ -845,6 +845,14 @@ getdata_server <- function(input, output, session) {
           )
         )
       }
+    } else if (n_layers >= 4000) {
+      showModal(
+        modalDialog(
+          title = "Warning - Exceeds job size limit!",
+          paste("Too many output raster layers estimated to run the downscale process. We recommend running the downscale one GCM at a time, or running climate variables packages one at a time."),
+          easyClose = TRUE
+        )
+      )
     } else {
       showModal(
         modalDialog(
@@ -1211,7 +1219,7 @@ getdata_server <- function(input, output, session) {
             label = tags$span("Use ensemble mean", style = "font-size: 0.85em; font-weight: bold;",
                               prompter::add_prompt(
                                 tooltipsIcon,
-                                message = HTML(paste("Ensemble mean info.")),
+                                message = HTML(paste("Use the ensemble mean instead of individual model runs.")),
                                 position = "top",
                                 size = "large",
                                 shadow = FALSE
@@ -1280,28 +1288,6 @@ getdata_server <- function(input, output, session) {
           selected = "tif"
         ),
         shiny::uiOutput("resolution_slider")
-        # shiny::conditionalPanel(
-        #   condition = "input.downscale_output == 'tif'",
-        #   shiny::sliderInput(
-        #     inputId = "downscale_resolution",
-        #     label = h5("Choose downscale resolution (m):",
-        #                prompter::add_prompt(
-        #                  tooltipsIcon,
-        #                  message = HTML(paste("Target resolution for shapes drawn on map or added using file upload. Does not apply to csv files.")),
-        #                  position = "top",
-        #                  size = "large",
-        #                  shadow = FALSE
-        #                )
-        #     ),
-        #     value = vstore[["downscale_resolution"]],
-        #     width = "100%",
-        #     min = 250,
-        #     max = 10000,
-        #     step = 50,
-        #     post = "m",
-        #     ticks = FALSE
-        #   )
-        # )
       )
     }
   })
@@ -1315,7 +1301,7 @@ getdata_server <- function(input, output, session) {
         label = h5("Choose downscale resolution (m):",
                    prompter::add_prompt(
                      tooltipsIcon,
-                     message = HTML(paste("Target resolution for shapes drawn on map or added using file upload. Does not apply to csv files.")),
+                     message = HTML(paste("Target resolution for shapes drawn on map or added using file upload. Does not apply to csv files. Available range will depend on how many raster output layers are estimated.")),
                      position = "top",
                      size = "large",
                      shadow = FALSE

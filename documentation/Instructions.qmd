@@ -25,22 +25,22 @@ Users can select parameters by clicking the **Choose Downscale Parameters** butt
 knitr::include_graphics("Figure_Instructions_Downscale_Parameters.png")
 ```
 
-Under the **Observed Climate Data** accordion, users can select observed periods (the reference period 1961-1990 will always be computed) and choose to specify observed years and observation time-series data (@fig-Observed_Climate_Data).
+Under the **Observed Climate Data** accordion, users can select observed periods (the reference period 1961-1990 will always be computed). If the input is a map-drawn shape or uploaded shape file, users can choose to specify observed years and observation time-series data (@fig-Observed_Climate_Data).
 
 ```{r}
 #| label: fig-Observed_Climate_Data
-#| fig-cap: "Example of selected parameters for Observed Climate Data"
+#| fig-cap: "Example of selected parameters for Observed Climate Data for shape input"
 #| fig-align: center
 #| out.width: 90%
 #| echo: false
 knitr::include_graphics("Figure_Instructions_Observed_Climate_Data.png")
 ```
 
-Under the **Simulated Climate Data** accordion, users can either choose to use the recommended default settings, or manually choose the Global Climate Models (GCMs), Shared Socio-economic Pathways (SSPs), GCM period, whether or not to specify the GCM years, and choose the maximum number of model runs (please note that if 0 is selected, the ensemble mean will be used) (@fig-Simulated_Climate_Data).
+Under the **Simulated Climate Data** accordion, users can either choose to use the recommended default settings, or manually choose the Global Climate Models (GCMs), Shared Socio-economic Pathways (SSPs), and GCM period. If the input is a map-drawn shape or uploaded shape file, users can choose to specify the GCM years, and the maximum number of model runs (please note that if 0 is selected, the ensemble mean will be used) (@fig-Simulated_Climate_Data).
 
 ```{r}
 #| label: fig-Simulated_Climate_Data
-#| fig-cap: "Example of selected parameters for Simulated Climate Data"
+#| fig-cap: "Example of selected parameters for Simulated Climate Data for shape input"
 #| fig-align: center
 #| out.width: 90%
 #| echo: false
@@ -94,7 +94,7 @@ If GeoTIFF has been selected, raster preview options will appear on the main pan
 
 ```{r}
 #| label: fig-raster_preview_options
-#| fig-cap: "Example of raster preview for GeoTIFF output for Mean Annual Temperature in 1961-1990"
+#| fig-cap: "Example of raster preview for GeoTIFF output for annual mean daily maximum temperature in 1961-1990"
 #| fig-align: center
 #| out.width: 100%
 #| echo: false
@@ -125,35 +125,33 @@ knitr::include_graphics("Figure_Instructions_percent_change.png")
 
 To clear all selections on the map and start again with new data, click on the red **Clear Selections** button in the main panel.
 
+### Job Size Limits for Raster Output:
+
+Currently, there are job size limits implemented on the downscaling of map-drawn shapes and uploaded shape files (see [Known Issues](Issues.qmd#issues-requiring-fixing) for more information). After a user has chosen the downscale parameters wanted and clicked **Apply**, a warning box may appear (@fig-job-size-warning). This occurs when a user has selected too many parameters, which creates too many raster layers to downscale. We recommend running the downscale process one GCM at a time if this happens; or if a user has selected multiple climate variable packages, try downscaling one package at a time.
+
+```{r}
+#| label: fig-job-size-warning
+#| fig-cap: "Warning for exceeding job size limits"
+#| fig-align: center
+#| out.width: 50%
+#| echo: false
+knitr::include_graphics("Figure_Instructions_warning_job_size.png")
+```
+
+After clicking **Generate Results**, the available range for downscale resolution is dependent on how many raster layers will be output (@fig-low-res). If a user wants a higher resolution (the highest possible is 250m), we recommend downscaling one GCM at a time.
+
+```{r}
+#| label: fig-low-res
+#| fig-cap: "Example of a limited available range for downscale resolution due to many parameters being selected for a large area"
+#| fig-align: center
+#| out.width: 90%
+#| echo: false
+knitr::include_graphics("Figure_Instructions_low_res.png")
+```
+
 ### More information on choosing downscale parameters:
 
-See the [Glossary of Terms](Definitions.qmd#downscale-parameters) for the definitions of downscale parameters.
-
-**Observed Climate Data**:
-  
-  - Observed Periods:
-  
-  - Observed Years:
-  
-  - Observation Time-Series Data:
-  
-**Simulated Climate Data**:
-  
-  - Global Climate Models (GCMs):
-  
-  - Shared Socio-economic Pathways (SSPs): 
-  
-  - GCM Periods:
-  
-  - GCM Years:
-  
-  - Model runs: (stuff about ensemble mean in here?)
-  
-  - Why use the recommended default settings?
-  
-**Extra climate variables**:
-
-See the [Glossary of Terms](Definitions.qmd#climate-variables) for the definitions of climate variables.
+See the [Glossary of Terms](Definitions.qmd) for the definitions of downscale parameters and climate variables.
 
 
 ## Visualization
@@ -212,7 +210,7 @@ Choose the x-axis and y-axis variables to plot by clicking on the **Element** an
 
 ```{r}
 #| label: fig-Bivariate_ecoregion
-#| fig-cap: "Example of a Bivariate plot for Change in Annual precipitation vs. Change in Mean annual temperature for Chilcotin Ranges and Fraser Plateau"
+#| fig-cap: "Example of a Bivariate plot for Change in Annual precipitation vs. Change in Mean daily maximum temperature for Chilcotin Ranges and Fraser Plateau"
 #| fig-align: center
 #| out.width: 100%
 #| echo: false
@@ -274,7 +272,7 @@ Click on the green **Downscale Data** button. The app will downscale data for al
 
 ```{r}
 #| label: fig-Bivariate_mappoint
-#| fig-cap: "Example of a Bivariate plot for Change in Annual precipitation vs. Change in Mean annual temperature for a point near Smithers, BC"
+#| fig-cap: "Example of a Bivariate plot for Change in Annual precipitation vs. Change in Mean daily maximum temperature for a point near Smithers, BC"
 #| fig-align: center
 #| out.width: 100%
 #| echo: false
@@ -310,7 +308,7 @@ Users can overlay a climate map onto all of North America. These maps can be dis
 
 Click on the **Show climate map** checkbox in the main panel and variable options for the map will appear underneath.
 
-Choose the variable to display by selecting the **Element** and **Season/months** from the respective drop-down menus (@fig-Overlay_controls).
+Choose the variable to display by selecting the **Element** and **Season** from the respective drop-down menus (@fig-Overlay_controls).
 
 ```{r}
 #| label: fig-Overlay_controls
