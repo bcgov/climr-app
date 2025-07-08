@@ -51,8 +51,11 @@ labelf <- function(fcontent) {
   months <- setNames(month.name, sprintf("%02d", 1:12))
   nm <- fcontent$name
   lbl <- basename(nm) |> tools::file_path_sans_ext()
-  season_idx <- grep(paste0("_", names(seasons), "$", collapse = "|"), lbl)
-  monthly_idx <- grep(paste0("_?", names(months), "$", collapse = "|"), lbl)
+  # season_idx <- grep(paste0("_", names(seasons), "$", collapse = "|"), lbl)
+  # monthly_idx <- grep(paste0("_?", names(months), "$", collapse = "|"), lbl)
+  season_idx <- grep(paste0("(_|^)", "(", paste(names(seasons), collapse = "|"), ")", "(_|\\b)"), lbl, perl = TRUE)
+  monthly_idx <- grep(paste0("(_|^)", "(", paste(names(months), collapse = "|"), ")", "(_|\\b)"), lbl, perl = TRUE)
+  
   annual_idx <- setdiff(seq_along(lbl), c(season_idx, monthly_idx))
   resp <- data.table::data.table(
     name = c(
@@ -82,20 +85,51 @@ labelf <- function(fcontent) {
       },
       label_climatevars[lbl[annual_idx]]
     ),
+    # element = c(
+    #   strsplit(
+    #     lbl[monthly_idx],
+    #     paste0("_?", names(months), "$", collapse = "|")
+    #   ) |> unlist(),
+    #   strsplit(
+    #     lbl[season_idx],
+    #     paste0("_", names(seasons), "$", collapse = "|")
+    #   ) |> unlist(),
+    #   lbl[annual_idx]
+    # ),
     element = c(
-      strsplit(
-        lbl[monthly_idx],
-        paste0("_?", names(months), "$", collapse = "|")
-      ) |> unlist(),
-      strsplit(
-        lbl[season_idx],
-        paste0("_", names(seasons), "$", collapse = "|")
-      ) |> unlist(),
-      lbl[annual_idx]
+      # For monthly
+      sub(paste0("(_(", paste(names(months), collapse = "|"), ").*)$"), "", lbl[monthly_idx]),
+      
+      # For seasonal
+      sub(paste0("(_(", paste(names(seasons), collapse = "|"), ").*)$"), "", lbl[season_idx]),
+      
+      # For annual, just take full label but strip any suffixes after the element name
+      sub(paste0("(_.*)$"), "", lbl[annual_idx])
     ),
+    # time_code = c(
+    #   substr(lbl[monthly_idx], nchar(lbl[monthly_idx]) - 1, nchar(lbl[monthly_idx])),
+    #   substr(lbl[season_idx], nchar(lbl[season_idx]) - 1, nchar(lbl[season_idx])),
+    #   rep("aa", length(annual_idx))
+    # ),
     time_code = c(
-      substr(lbl[monthly_idx], nchar(lbl[monthly_idx]) - 1, nchar(lbl[monthly_idx])),
-      substr(lbl[season_idx], nchar(lbl[season_idx]) - 1, nchar(lbl[season_idx])),
+      {
+        raw <- regmatches(
+          lbl[monthly_idx],
+          regexpr("(_|^)([a-z0-9]{2})(_|\\b)", lbl[monthly_idx], perl = TRUE)
+        )
+        code <- sub(".*(_|^)([a-z0-9]{2})(_|\\b).*", "\\2", raw)
+        code[!code %in% c(names(seasons), names(months))] <- "aa"
+        code
+      },
+      {
+        raw <- regmatches(
+          lbl[season_idx],
+          regexpr("(_|^)([a-z0-9]{2})(_|\\b)", lbl[season_idx], perl = TRUE)
+        )
+        code <- sub(".*(_|^)([a-z0-9]{2})(_|\\b).*", "\\2", raw)
+        code[!code %in% c(names(seasons), names(months))] <- "aa"
+        code
+      },
       rep("aa", length(annual_idx))
     ),
     category = c(

@@ -333,6 +333,12 @@ shiny::shinyApp(
                         shiny::conditionalPanel(
                           condition = "input.show_overlay_controls == true",
                           h4("Overlay Controls"),
+                          shiny::radioButtons(
+                            inputId = "overlay_res",
+                            label = "Resolution:",
+                            choices = c("800m", "2500m"),
+                            inline = TRUE
+                          ),
                           shiny::uiOutput("overlay_element"),
                           shiny::uiOutput("overlay_period"),
                           shiny::uiOutput("scale_adj"),

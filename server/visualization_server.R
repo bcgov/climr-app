@@ -39,7 +39,10 @@ visualization_server <- function(input, output, session) {
   dataset_id <- data.table(dataset = c("mswx.blend","cru.gpcc","climatena"), dataset_id = 1:3)
   
   vstore <- reactiveValues(
-    tifsource = names(climr_tif) |> head(1),
+    overlay_res = NULL,
+    # tifsource = names(climr_tif) |> head(1),
+    # tifsource = names(climr_tif)[2],
+    tifsource = NULL,
     time = NULL,
     element = NULL,
     climatevar = NULL,
@@ -638,6 +641,17 @@ visualization_server <- function(input, output, session) {
   })
   
   # ---- Visualization Overlay events
+  shiny::observeEvent(input$overlay_res, {
+    if (shiny::in_devmode()) cat("Event: load_overlay", sep = "\n")
+    if (!is.null(input$overlay_res)) {
+      vstore[["overlay_res"]] <- input$overlay_res
+      if (vstore[["overlay_res"]] == "800m") {
+        vstore[["tifsource"]] <- names(climr_tif)[2]
+      } else if (vstore[["overlay_res"]] == "2500m") {
+        vstore[["tifsource"]] <- names(climr_tif) |> head(1)
+      }
+    }
+  })
   shiny::observeEvent(input$load_overlay, {
     if (shiny::in_devmode()) cat("Event: load_overlay", sep = "\n")
     # update selected options
@@ -654,14 +668,16 @@ visualization_server <- function(input, output, session) {
     dt <- climr_tif[[vstore[["tifsource"]]]]
     get_time_code <- function(label) {
       if (label %in% names(time_labels_season)) {
-        return(time_labels_season[[label]])
-      } else if (label %in% names(time_labels_month)) {
-        return(time_labels_month[[label]])
+        return(time_labels_season[label])
       } else {
         return()
       }
     }
-    url <- dt[element == input$element & time_code == get_time_code(input$time), url]
+    if (vstore[["overlay_res"]] == "800m") {
+      url <- dt[element == input$element & time_code == get_time_code(input$time) & grepl("cropped", name), url]
+    } else {
+      url <- dt[element == input$element & time_code == get_time_code(input$time), url] 
+    }
     if (length(url) == 1) {
       vstore[["climatevar"]] <- url
     } else {
