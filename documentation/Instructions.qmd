@@ -25,22 +25,22 @@ Users can select parameters by clicking the **Choose Downscale Parameters** butt
 knitr::include_graphics("Figure_Instructions_Downscale_Parameters.png")
 ```
 
-Under the **Observed Climate Data** accordion, users can select observed periods (the reference period 1961-1990 will always be computed). If the input is a map-drawn shape or uploaded shape file, users can choose to specify observed years and observation time-series data (@fig-Observed_Climate_Data).
+Under the **Observed Climate Data** accordion, users can select observed periods (the reference period 1961-1990 will always be computed). If the input is individual map points, users can choose to specify observed years and observation time-series data (@fig-Observed_Climate_Data).
 
 ```{r}
 #| label: fig-Observed_Climate_Data
-#| fig-cap: "Example of selected parameters for Observed Climate Data for shape input"
+#| fig-cap: "Example of selected parameters for Observed Climate Data for map point input"
 #| fig-align: center
 #| out.width: 90%
 #| echo: false
 knitr::include_graphics("Figure_Instructions_Observed_Climate_Data.png")
 ```
 
-Under the **Simulated Climate Data** accordion, users can either choose to use the recommended default settings, or manually choose the Global Climate Models (GCMs), Shared Socio-economic Pathways (SSPs), and GCM period. If the input is a map-drawn shape or uploaded shape file, users can choose to specify the GCM years, and the maximum number of model runs (please note that if 0 is selected, the ensemble mean will be used) (@fig-Simulated_Climate_Data).
+Under the **Simulated Climate Data** accordion, users can either choose to use the recommended default settings, or manually choose the Global Climate Models (GCMs), Shared Socio-economic Pathways (SSPs), and GCM period. If the input is individual map points, users can choose to specify the GCM years, and the maximum number of model runs (please note that if 0 is selected, the ensemble mean will be used) (@fig-Simulated_Climate_Data). For shape input, the ensemble mean will always be used in the output data.
 
 ```{r}
 #| label: fig-Simulated_Climate_Data
-#| fig-cap: "Example of selected parameters for Simulated Climate Data for shape input"
+#| fig-cap: "Example of selected parameters for Simulated Climate Data for map point input"
 #| fig-align: center
 #| out.width: 90%
 #| echo: false
@@ -79,7 +79,7 @@ knitr::include_graphics("Figure_Instructions_GeoTIFF_downscale.png")
 
 Click **Launch Downscale Process**. Notification boxes will appear on the right-hand side of the screen while the downscale is processing, indicating each step.
 
-If csv has been selected, a preview will appear under the Launch Downscale Process button, and users can choose to download the data (@fig-csv_preview).
+If csv has been selected, a preview will appear under the **Launch Downscale Process** button, and users can choose to download the data (@fig-csv_preview).
 
 ```{r}
 #| label: fig-csv_preview
@@ -308,6 +308,8 @@ Users can overlay a climate map onto all of North America. These maps can be dis
 
 Click on the **Show climate map** checkbox in the main panel and variable options for the map will appear underneath.
 
+Choose the **Resolution** for the overlay. 2500m is available for all of North America while the 800m is only available for the west coast, from the top of the Mackenzie Mountains in the Yukon & Northwest Territories, down to the southern border of Oregon, and from the west coast to the east border of Alberta. We recommend the 800m resolution to users who are viewing smallers areas along the west coast.
+
 Choose the variable to display by selecting the **Element** and **Season** from the respective drop-down menus (@fig-Overlay_controls).
 
 ```{r}
@@ -319,18 +321,47 @@ Choose the variable to display by selecting the **Element** and **Season** from 
 knitr::include_graphics("Figure_Instructions_Overlay_controls.png")
 ```
 
-Click **Load**. The map will take about 5-10 seconds to render (@fig-Overlay_Tave).
+Click **Load**. The map will take about 5-10 seconds to render (see @fig-Overlay_Tave_2500m for 2500m resolution and @fig-Overlay_Tave_800m for 800m resolution).
 
 ```{r}
-#| label: fig-Overlay_Tave
-#| fig-cap: "Climate map of annual Mean temperature (in °C) across North America"
+#| label: fig-Overlay_Tave_2500m
+#| fig-cap: "2500m resolution climate map of annual Mean temperature (in °C) across North America"
 #| fig-align: center
 #| out.width: 100%
 #| echo: false
-knitr::include_graphics("Figure_Instructions_Overlay_Tave.png")
+knitr::include_graphics("Figure_Instructions_Overlay_Tave_2500m.png")
 ```
 
-For ratio variables, an **Apply scale adjustment** checkbox will appear, which applies a log scale adjustment to the data.
+For ratio variables, an **Apply scale adjustment** checkbox will appear, which applies a log scale adjustment to the data (@fig-Overlay_Tave_800m).
+
+```{r}
+#| label: fig-Overlay_Tave_800m
+#| fig-cap: "800m resolution climate map of annual Mean precipitation (in mm) across the west coast of North America (with log scale adjustment)"
+#| fig-align: center
+#| out.width: 100%
+#| echo: false
+knitr::include_graphics("Figure_Instructions_Overlay_PPT_800m.png")
+```
+
+Users can also zoom in on an area they would like to see in more detail, and click on **Rescale**. This will distribute the colour palette across the area of the map that is visible in the screen, allowing the user to see the differences in the variable selected more clearly. The difference between the original overlay and the rescaled version is shown in @fig-Overlay_Tave_800m_unscaled (without rescaling) and @fig-Overlay_Tave_800m_rescaled (with rescaling). Please note that users must **Load** the overlay of interest first, before clicking **Rescale**!
+
+```{r}
+#| label: fig-Overlay_Tave_800m_unscaled
+#| fig-cap: "800m resolution climate map of annual Mean temperature (in °C) across North America, zoomed into Vancouver Island without rescaling"
+#| fig-align: center
+#| out.width: 100%
+#| echo: false
+knitr::include_graphics("Figure_Instructions_Overlay_Tave_800m_unscaled.png")
+```
+
+```{r}
+#| label: fig-Overlay_Tave_800m_rescaled
+#| fig-cap: "800m resolution climate map of annual Mean temperature (in °C) across North America, zoomed into Vancouver Island with rescaling"
+#| fig-align: center
+#| out.width: 100%
+#| echo: false
+knitr::include_graphics("Figure_Instructions_Overlay_Tave_800m_rescaled.png")
+```
 
 To download the climate map, click **Download**.
 

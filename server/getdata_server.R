@@ -792,7 +792,9 @@ getdata_server <- function(input, output, session) {
         }
         vstore[["processing"]] <- FALSE
         output$downscale_points_count_estimate <- shiny::renderUI({
-          get_resolution_min(calculate_layers())
+          if (vstore[["downscale_output"]] == "tif") {
+            get_resolution_min(calculate_layers())
+          }
           pce <- getdata_sg$process_count(vstore[["downscale_resolution"]])
           bslib::card(
             full_screen = FALSE,
@@ -1219,7 +1221,7 @@ getdata_server <- function(input, output, session) {
             label = tags$span("Use ensemble mean", style = "font-size: 0.85em; font-weight: bold;",
                               prompter::add_prompt(
                                 tooltipsIcon,
-                                message = HTML(paste("Use the ensemble mean instead of individual model runs.")),
+                                message = HTML(paste("Include ensemble mean of model runs.")),
                                 position = "top",
                                 size = "large",
                                 shadow = FALSE
@@ -1307,7 +1309,7 @@ getdata_server <- function(input, output, session) {
                      shadow = FALSE
                    )
         ),
-        value = vstore[["downscale_resolution"]],
+        value = if (res_min > vstore[["downscale_resolution"]]) res_min else vstore[["downscale_resolution"]],
         width = "100%",
         min = res_min,
         max = 10000,
