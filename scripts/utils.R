@@ -317,6 +317,7 @@ add_custom_render <- function(map) {
             var colorOptions = message.colorOptions;
     
             var scaleFunc = ({log: Math.log, log10: Math.log10, log1p: Math.log1p, log2: Math.log2}[message.vscale] || (x => x));
+            console.log(scaleFunc);
             const cols = colorOptions.palette;
             let scale = chroma.scale(cols);
     

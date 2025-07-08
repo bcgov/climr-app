@@ -650,7 +650,8 @@ visualization_server <- function(input, output, session) {
     shiny::updateActionButton(inputId = "rescale_overlay", disabled = FALSE)
     
     # get scaling
-    if (isTRUE(vstore[["vscale"]])) {
+    vstore[["vscale"]] <- input$vscale
+    if (isTRUE(vstore[["vscale"]]) & input$element %in% c("PPT", "CMD", "PAS")) {
       vstore[["vscale"]] <- "log1p"
     } else {
       vstore[["vscale"]] <- ""
