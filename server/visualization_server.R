@@ -39,10 +39,8 @@ visualization_server <- function(input, output, session) {
   dataset_id <- data.table(dataset = c("mswx.blend","cru.gpcc","climatena"), dataset_id = 1:3)
   
   vstore <- reactiveValues(
-    overlay_res = NULL,
-    # tifsource = names(climr_tif) |> head(1),
-    # tifsource = names(climr_tif)[2],
     tifsource = NULL,
+    # current_overlay = NULL,
     time = NULL,
     element = NULL,
     climatevar = NULL,
@@ -641,65 +639,33 @@ visualization_server <- function(input, output, session) {
   })
   
   # ---- Visualization Overlay events
-  shiny::observeEvent(input$overlay_res, {
-    if (shiny::in_devmode()) cat("Event: load_overlay", sep = "\n")
-    if (!is.null(input$overlay_res)) {
-      vstore[["overlay_res"]] <- input$overlay_res
-      if (vstore[["overlay_res"]] == "800m") {
-        vstore[["tifsource"]] <- names(climr_tif)[2]
-      } else if (vstore[["overlay_res"]] == "2500m") {
-        vstore[["tifsource"]] <- names(climr_tif) |> head(1)
-      }
-    }
-  })
-  shiny::observeEvent(input$load_overlay, {
-    if (shiny::in_devmode()) cat("Event: load_overlay", sep = "\n")
-    # update selected options
-    vstore[["time"]] <- input$time
-    vstore[["element"]] <- input$element
-    if ("ratio" %in% climr::variables[Code_Element == input$element & Time == input$time, Type]) {
-      vstore[["vscale"]] <- input$vscale
-    } else {
-      vstore[["vscale"]] <- FALSE
-    }
-    
-    # create URL
-    if (is.null(input$element) || is.null(input$time)) return()
-    dt <- climr_tif[[vstore[["tifsource"]]]]
-    get_time_code <- function(label) {
-      if (label %in% names(time_labels_season)) {
-        return(time_labels_season[label])
-      } else {
-        return()
-      }
-    }
-    if (vstore[["overlay_res"]] == "800m") {
-      url <- dt[element == input$element & time_code == get_time_code(input$time) & grepl("cropped", name), url]
-    } else {
-      url <- dt[element == input$element & time_code == get_time_code(input$time), url] 
-    }
-    if (length(url) == 1) {
-      vstore[["climatevar"]] <- url
-    } else {
-      vstore[["climatevar"]] <- NULL
-    }
-    
+  load_overlay <- function(data) {
     # render overlay, making sure any old controls are cleared
     mp <- leaflet::leafletProxy("vis_map", deferUntilFlush = FALSE)
     mp |> leaflet::clearGroup("Climate") |> leaflet::hideGroup("Climate") |> leaflet::clearControls()
     shiny::updateActionButton(inputId = "download_overlay", disabled = TRUE)
-    if (is.null(vstore[["climatevar"]])) return()
+    shiny::updateActionButton(inputId = "rescale_overlay", disabled = TRUE)
+    if (is.null(data)) return()
     shiny::updateActionButton(inputId = "download_overlay", disabled = FALSE)
+    shiny::updateActionButton(inputId = "rescale_overlay", disabled = FALSE)
     
     # get scaling
     if (isTRUE(vstore[["vscale"]])) {
-      vstore$vscale <- "log1p"
+      vstore[["vscale"]] <- "log1p"
     } else {
-      vstore$vscale <- ""
+      vstore[["vscale"]] <- ""
     }
-
+      
     # set up palettes/breaks
-    r <- rast(url)
+    if (is.character(data)) {
+      r <- rast(data)
+      url <- data
+    } else {
+      r <- data
+      out <- file.path("www", "cropped.tif")
+      terra::writeRaster(data, out, overwrite = TRUE)
+      url <- "cropped.tif"
+    }
     bounds <- terra::minmax(r)
     q <- quantile(bounds, c(0.005, 0.995), na.rm = TRUE)
     inc <- diff(q) / 500
@@ -711,8 +677,8 @@ visualization_server <- function(input, output, session) {
       pal <- rev(RColorBrewer::brewer.pal(11, "RdYlBu"))
     }
     
-    mp |> leafem::addGeotiff(
-      url = vstore[["climatevar"]],
+    mp |> clearImages() |> leafem::addGeotiff(
+      url = url,
       group = "Climate",
       layerId = "val",
       project = FALSE,
@@ -736,7 +702,7 @@ visualization_server <- function(input, output, session) {
     
     
     # extract data for legend
-    if (!(vstore[["element"]] %in% c("elev", "lat"))) {
+    if (!(vstore[["element"]] %in% c("elev"))) {
       legend_title <- climr::variables[Code_Element == vstore[["element"]] & Time == vstore[["time"]], Variable] |> tools::toTitleCase()
       if (grepl("\\u00b0C", legend_title) | grepl("\\u00b0c", legend_title)) {
         legend_title <- stringi::stri_unescape_unicode(legend_title)
@@ -762,7 +728,7 @@ visualization_server <- function(input, output, session) {
     
     if ((vstore[["vscale"]]) == "log1p") {
       log_bounds <- log1p(pmax(bounds, 0))
-
+      
       pal_leg <- leaflet::colorNumeric(palette = pal, domain = log_bounds, na.color = "transparent")
       
       leaflet::addLegend(
@@ -785,10 +751,181 @@ visualization_server <- function(input, output, session) {
         labFormat = labelFormat(suffix = units)
       )
     }
+  }
+  get_bounds <- shiny::reactive({
+    input$vis_map_bounds
+  })
+  shiny::observeEvent(input$overlay_res, {
+    if (shiny::in_devmode()) cat("Event: overlay_res", sep = "\n")
+    if (!is.null(input$overlay_res)) {
+      if (input$overlay_res == "800m") {
+        vstore[["tifsource"]] <- names(climr_tif)[2]
+      } else if (input$overlay_res == "2500m") {
+        vstore[["tifsource"]] <- names(climr_tif) |> head(1)
+      }
+    }
+  })
+  shiny::observeEvent(input$load_overlay, {
+    if (shiny::in_devmode()) cat("Event: load_overlay", sep = "\n")
+    # update selected options
+    vstore[["time"]] <- input$time
+    vstore[["element"]] <- input$element
+    if ("ratio" %in% climr::variables[Code_Element == input$element & Time == input$time, Type]) {
+      vstore[["vscale"]] <- input$vscale
+    } else {
+      vstore[["vscale"]] <- FALSE
+    }
+    
+    # create URL
+    if (is.null(input$element) || is.null(input$time)) return()
+    dt <- climr_tif[[vstore[["tifsource"]]]]
+    get_time_code <- function(label) {
+      if (label %in% names(time_labels_season)) {
+        return(time_labels_season[label])
+      } else {
+        return()
+      }
+    }
+    if (input$overlay_res == "800m") {
+      url <- dt[element == input$element & time_code == get_time_code(input$time) & grepl("cropped", name), url]
+    } else {
+      url <- dt[element == input$element & time_code == get_time_code(input$time), url] 
+    }
+    if (length(url) == 1) {
+      vstore[["climatevar"]] <- url
+    } else {
+      vstore[["climatevar"]] <- NULL
+    }
+    
+    load_overlay(vstore[["climatevar"]])
+    
+    # # render overlay, making sure any old controls are cleared
+    # mp <- leaflet::leafletProxy("vis_map", deferUntilFlush = FALSE)
+    # mp |> leaflet::clearGroup("Climate") |> leaflet::hideGroup("Climate") |> leaflet::clearControls()
+    # shiny::updateActionButton(inputId = "download_overlay", disabled = TRUE)
+    # shiny::updateActionButton(inputId = "rescale_overlay", disabled = TRUE)
+    # if (is.null(vstore[["climatevar"]])) return()
+    # shiny::updateActionButton(inputId = "download_overlay", disabled = FALSE)
+    # shiny::updateActionButton(inputId = "rescale_overlay", disabled = FALSE)
+    # 
+    # # get scaling
+    # if (isTRUE(vstore[["vscale"]])) {
+    #   vstore$vscale <- "log1p"
+    # } else {
+    #   vstore$vscale <- ""
+    #}
+
+    # # set up palettes/breaks
+    # r <- rast(vstore[["climatevar"]])
+    # bounds <- terra::minmax(r)
+    # q <- quantile(bounds, c(0.005, 0.995), na.rm = TRUE)
+    # inc <- diff(q) / 500
+    # breaks <- seq(q[1] - inc, q[2] + inc, by = inc)
+    # 
+    # if (grepl("PPT|MSP|PAS", vstore[["element"]])) {
+    #   pal <- RColorBrewer::brewer.pal(9, "YlGnBu")
+    # } else {
+    #   pal <- rev(RColorBrewer::brewer.pal(11, "RdYlBu"))
+    # }
+    # 
+    # mp |> leafem::addGeotiff(
+    #   url = vstore[["climatevar"]],
+    #   group = "Climate",
+    #   layerId = "val",
+    #   project = FALSE,
+    #   colorOptions = leafem::colorOptions(
+    #     palette = pal,
+    #     breaks = breaks,
+    #     na.color = "transparent"
+    #   ),
+    #   imagequery = FALSE,
+    #   autozoom = FALSE,
+    #   options = leaflet::tileOptions(maxZoom = 25, maxNativeZoom = 20)
+    # ) |> leaflet::showGroup("Climate")
+    # 
+    # session$sendCustomMessage(type="updateClimatePalette", list(
+    #   category = "image", layerId = "val", vscale = vstore[["vscale"]], colorOptions = leafem::colorOptions(
+    #     palette = pal,
+    #     na.color = "transparent"
+    #   )
+    # ))
+    # shiny::showNotification("Rendering %s values" |> sprintf(vstore[["element"]]), duration = 5)
+    # 
+    # 
+    # # extract data for legend
+    # if (!(vstore[["element"]] %in% c("elev"))) {
+    #   legend_title <- climr::variables[Code_Element == vstore[["element"]] & Time == vstore[["time"]], Variable] |> tools::toTitleCase()
+    #   if (grepl("\\u00b0C", legend_title) | grepl("\\u00b0c", legend_title)) {
+    #     legend_title <- stringi::stri_unescape_unicode(legend_title)
+    #   }
+    #   units <- paste0(" ", climr::variables[Code_Element == vstore[["element"]] & Time == vstore[["time"]], Unit])
+    #   if (grepl("\\u00b0C", units)) {
+    #     units <- stringi::stri_unescape_unicode(units)
+    #   }
+    #   if (units == "%") {
+    #     units <- "\\%"
+    #   }
+    # }
+    # if (vstore[["element"]] == "elev") {
+    #   legend_title <- paste("Elevation")
+    #   units <- "m"
+    # }
+    # 
+    # # label formatters for legend
+    # inv_log1p_formatter <- labelFormat(
+    #   transform = function(x) round(exp(x) - 1),
+    #   suffix = units
+    # )
+    # 
+    # if ((vstore[["vscale"]]) == "log1p") {
+    #   log_bounds <- log1p(pmax(bounds, 0))
+    # 
+    #   pal_leg <- leaflet::colorNumeric(palette = pal, domain = log_bounds, na.color = "transparent")
+    #   
+    #   leaflet::addLegend(
+    #     mp,
+    #     position = "topright",
+    #     pal = pal_leg,
+    #     values = seq(log_bounds[1], log_bounds[2], length.out = 6),
+    #     title = HTML(sprintf("<div style='width: 100px;'>%s</div>", legend_title)),
+    #     labFormat = inv_log1p_formatter
+    #   )
+    # } else {
+    #   pal_leg <- leaflet::colorNumeric(palette = pal, domain = bounds, na.color = "transparent")
+    #   
+    #   leaflet::addLegend(
+    #     mp,
+    #     position = "topright",
+    #     pal = pal_leg,
+    #     values = seq(bounds[1], bounds[2], length.out = 6),
+    #     title = HTML(sprintf("<div style='width: 100px;'>%s</div>", legend_title)),
+    #     labFormat = labelFormat(suffix = units)
+    #   )
+    # }
   })
   shiny::observeEvent(input$download_overlay, {
     if (shiny::in_devmode()) cat("Event: download_overlay", sep = "\n")
     session$sendCustomMessage(type="jsCode", list(code = "window.location.assign('%s');" |> sprintf(vstore[["climatevar"]])))
+  })
+  shiny::observeEvent(input$rescale_overlay, {
+    if (shiny::in_devmode()) cat("Event: rescale_overlay", sep = "\n")
+    
+    # load full raster, crop and store updated raster
+    full_r <- terra::rast(vstore[["climatevar"]])
+    vstore[["current_overlay"]] <- full_r
+    bounds <- get_bounds()
+    if (is.null(bounds)) return()
+    box <- terra::ext(
+      bounds$west,
+      bounds$east,
+      bounds$south,
+      bounds$north
+    )
+    r_cropped <- terra::crop(full_r, box)
+    
+    load_overlay(r_cropped)
+    
+    # vstore[["current_overlay"]] <- r_cropped
   })
   
   # reactive outputs

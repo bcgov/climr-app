@@ -337,7 +337,8 @@ shiny::shinyApp(
                             inputId = "overlay_res",
                             label = "Resolution:",
                             choices = c("800m", "2500m"),
-                            inline = TRUE
+                            inline = TRUE,
+                            selected = "2500m"
                           ),
                           shiny::uiOutput("overlay_element"),
                           shiny::uiOutput("overlay_period"),
@@ -348,7 +349,7 @@ shiny::shinyApp(
                             icon = shiny::icon("droplet"),
                             width = "100%"
                           ),
-                          tags$div(style = "margin-top: 10px;"),
+                          tags$div(style = "margin-top: 5px;"),
                           shiny::actionButton(
                             inputId = "download_overlay",
                             label = "Download",
@@ -356,7 +357,7 @@ shiny::shinyApp(
                             icon = shiny::icon("map"),
                             width = "100%"
                           ),
-                          tags$div(style = "margin-top: 10px;"),
+                          tags$div(style = "margin-top: 5px;"),
                           shiny::actionButton(
                             inputId = "rescale_overlay",
                             label = "Rescale",
