@@ -172,7 +172,7 @@ shiny::shinyApp(
                 icon = icon("question-circle")
                 )
             ),
-            br(),
+            tags$div(style = "margin-top: 10px;"),
             splitLayout(
               actionButton("clear_selections", "Clear Selections",
                             style = "width:100%; height:70px; background-color:#c21104; color: #FFF"),
@@ -184,7 +184,7 @@ shiny::shinyApp(
                 disabled = TRUE
               )
             ),
-            br(),
+            tags$div(style = "margin-top: 20px;"),
             
             strong("Add Sites Using One of the 2 Methods Below:"),
             accordion(
@@ -226,11 +226,11 @@ shiny::shinyApp(
                 value = "acc_method2"
               )
             ),
-            br(),
+            tags$div(style = "margin-top: 20px;"),
             shiny::actionButton("downscale_parameters", "Choose Downscale Parameters",
                                 disabled = TRUE, icon = icon("sliders-h"), style = "width:100%; align:center;"),
             
-            br(), br(),
+            tags$div(style = "margin-top: 20px;"),
             
             # options for raster preview
             uiOutput("preview_raster_elements", width = "100%"),
@@ -348,11 +348,20 @@ shiny::shinyApp(
                             icon = shiny::icon("droplet"),
                             width = "100%"
                           ),
+                          tags$div(style = "margin-top: 10px;"),
                           shiny::actionButton(
                             inputId = "download_overlay",
                             label = "Download",
                             disabled = TRUE,
                             icon = shiny::icon("map"),
+                            width = "100%"
+                          ),
+                          tags$div(style = "margin-top: 10px;"),
+                          shiny::actionButton(
+                            inputId = "rescale_overlay",
+                            label = "Rescale",
+                            disabled = TRUE,
+                            icon = shiny::icon("sliders-h"),
                             width = "100%"
                           ) 
                         )

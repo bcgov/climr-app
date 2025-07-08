@@ -318,7 +318,7 @@ getdata_server <- function(input, output, session) {
             shiny::uiOutput("gcm_max_run")
           )
         ),
-        br(),
+        tags$div(style = "margin-top: 10px;"),
         
         shiny::div(
           shiny::checkboxGroupInput(
@@ -366,7 +366,7 @@ getdata_server <- function(input, output, session) {
             )
           )
         ),
-        br(),
+        tags$div(style = "margin-top: 20px;"),
         
         shiny::div(
           shiny::checkboxInput(
@@ -827,7 +827,7 @@ getdata_server <- function(input, output, session) {
 
             shiny::conditionalPanel(
               condition = "input.downscale_output == 'csv'",
-              br(),
+              tags$div(style = "margin-top: 10px;"),
               shiny::downloadButton(
                 outputId = "downscale_download",
                 label = "Download Downscaled Data",

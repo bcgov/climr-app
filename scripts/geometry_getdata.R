@@ -532,14 +532,14 @@ session_geometry <- function(sg_dt, mp) {
                     uiOutput("calculate_percent_diff_checkbox"),
                     uiOutput("log_transform")
                   ),
-                  br(),
+                  tags$div(style = "margin-top: 10px;"),
                   shiny::actionButton(
                     inputId = "preview_raster",
                     label = "Preview Raster Layer",
                     style = "width: 100%;",
                     icon = shiny::icon("map")
                     ),
-                  br(), br(),
+                  tags$div(style = "margin-top: 10px;"),
                   shiny::downloadButton(
                     outputId = "downscale_download",
                     label = "Download Downscaled Data",
