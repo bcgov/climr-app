@@ -663,9 +663,9 @@ visualization_server <- function(input, output, session) {
       url <- data
     } else {
       r <- data
-      if (Sys.getenv("SHINY_DEPLOY") == "server") { # is session$token unique to each user??
-        out <- file.path("/opt/rtmp/temp", paste0("cropped_", session$token, ".tif"))
-        url <- file.path("rtmp", paste0("cropped_", session_id, ".tif"))
+      if (Sys.getenv("SHINY_DEPLOY") == "server") {
+        out <- file.path("/opt/rtmp/temp", paste0("cropped_", user_id, ".tif"))
+        url <- file.path("rtmp", paste0("cropped_", user_id, ".tif"))
       } else {
         out <- file.path("www", "cropped.tif")
         url <- "cropped.tif"
