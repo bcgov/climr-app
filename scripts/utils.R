@@ -311,6 +311,12 @@ add_custom_render <- function(map) {
                 console.warn("Layer not found after multiple attempts:", message.layerId);
             }
         }
+        
+        function latLngToRasterXY(lat, lng, georaster) {
+            const x = Math.floor((lng - georaster.xmin) / georaster.pixelWidth);
+            const y = Math.floor((georaster.ymax - lat) / georaster.pixelHeight);
+            return [x, y];
+        }
     
         function applyColorScale(layer) {
             var georaster = layer.options.georaster;
@@ -321,8 +327,27 @@ add_custom_render <- function(map) {
             const cols = colorOptions.palette;
             let scale = chroma.scale(cols);
     
-            let dmin = scaleFunc(georaster.mins[0]);
-            let dmax = scaleFunc(georaster.maxs[0]);
+            //let dmin = scaleFunc(georaster.mins[0]);
+            //let dmax = scaleFunc(georaster.maxs[0]);
+            
+            var bounds = map.getBounds();
+            let [xmin, ymin] = latLngToRasterXY(bounds.getNorth(), bounds.getWest(), georaster);
+            let [xmax, ymax] = latLngToRasterXY(bounds.getSouth(), bounds.getEast(), georaster);
+            
+            let visibleValues = [];
+            for (let y = ymin; y <= ymax; y += 5) {
+                for (let x = xmin; x <= xmax; x++) {
+                    const val = georaster.values[0][y][x];
+                    if (!isNaN(val) && val !== georaster.noDataValue) {
+                        visibleValues.push(val);
+                    }
+                }
+            }
+            
+            let scaledValues = visibleValues.map(scaleFunc);
+            const dmin = scaledValues.reduce((a, b) => Math.min(a, b), Infinity);
+            const dmax = scaledValues.reduce((a, b) => Math.max(a, b), -Infinity);
+            
             let domain = [dmin, dmax];
             let nacol = colorOptions["na.color"];
             let clr = scale.domain(domain);

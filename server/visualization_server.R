@@ -638,6 +638,24 @@ visualization_server <- function(input, output, session) {
     }
   })
   
+  ###Testingg....
+  observeEvent(input$rescale_overlay, {
+    if (grepl("PPT|MSP|PAS", vstore[["element"]])) {
+      pal <- RColorBrewer::brewer.pal(9, "YlGnBu")
+    } else {
+      pal <- rev(RColorBrewer::brewer.pal(11, "RdYlBu"))
+    }
+    vstore[["vscale"]] <- input$vscale
+    session$sendCustomMessage(type="updateClimatePalette", list(
+      category = "image", layerId = "val", vscale = vstore[["vscale"]], colorOptions = leafem::colorOptions(
+        palette = pal,
+        na.color = "transparent"
+        )
+      )
+    )
+  })
+  
+  
   # ---- Visualization Overlay events
   load_overlay <- function(data) {
     # render overlay, making sure any old controls are cleared
@@ -809,24 +827,24 @@ visualization_server <- function(input, output, session) {
     if (shiny::in_devmode()) cat("Event: download_overlay", sep = "\n")
     session$sendCustomMessage(type="jsCode", list(code = "window.location.assign('%s');" |> sprintf(vstore[["climatevar"]])))
   })
-  shiny::observeEvent(input$rescale_overlay, {
-    if (shiny::in_devmode()) cat("Event: rescale_overlay", sep = "\n")
-    
-    # load full raster, crop and store updated raster
-    full_r <- terra::rast(vstore[["climatevar"]])
-    vstore[["current_overlay"]] <- full_r
-    bounds <- get_bounds()
-    if (is.null(bounds)) return()
-    box <- terra::ext(
-      bounds$west,
-      bounds$east,
-      bounds$south,
-      bounds$north
-    )
-    r_cropped <- terra::crop(full_r, box)
-    
-    load_overlay(r_cropped)
-  })
+  # shiny::observeEvent(input$rescale_overlay, {
+  #   if (shiny::in_devmode()) cat("Event: rescale_overlay", sep = "\n")
+  #   
+  #   # load full raster, crop and store updated raster
+  #   full_r <- terra::rast(vstore[["climatevar"]])
+  #   vstore[["current_overlay"]] <- full_r
+  #   bounds <- get_bounds()
+  #   if (is.null(bounds)) return()
+  #   box <- terra::ext(
+  #     bounds$west,
+  #     bounds$east,
+  #     bounds$south,
+  #     bounds$north
+  #   )
+  #   r_cropped <- terra::crop(full_r, box)
+  #   
+  #   load_overlay(r_cropped)
+  # })
   
   # reactive outputs
   output$overlay_element <- shiny::renderUI({

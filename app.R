@@ -19,6 +19,7 @@ suppressPackageStartupMessages({
   library(dplyr)
   library(quarto)
   library(jsonlite)
+  library(uuid)
   source("scripts/utils.R", local = TRUE)
 })
 
