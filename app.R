@@ -308,7 +308,7 @@ shiny::shinyApp(
                         class = "input-control",
                         top = 90,            
                         left = 60,           
-                        width = 170,
+                        width = 180,
                         style = "padding: 10px;",
                         shiny::div(
                           style = "text-align: center;",

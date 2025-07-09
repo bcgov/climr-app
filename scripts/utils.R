@@ -349,6 +349,7 @@ add_custom_render <- function(map) {
             const dmax = scaledValues.reduce((a, b) => Math.max(a, b), -Infinity);
             
             let domain = [dmin, dmax];
+            Shiny.setInputValue("overlay_domain", domain);
             let nacol = colorOptions["na.color"];
             let clr = scale.domain(domain);
     

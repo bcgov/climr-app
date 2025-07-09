@@ -641,7 +641,7 @@ visualization_server <- function(input, output, session) {
   # ---- Visualization Overlay events
   load_overlay <- function(data) {
     # render overlay, making sure any old controls are cleared
-    mp <- leaflet::leafletProxy("vis_map", deferUntilFlush = FALSE)
+    mp <<- leaflet::leafletProxy("vis_map", deferUntilFlush = FALSE)
     mp |> leaflet::clearGroup("Climate") |> leaflet::hideGroup("Climate") |> leaflet::clearControls()
     shiny::updateActionButton(inputId = "download_overlay", disabled = TRUE)
     shiny::updateActionButton(inputId = "rescale_overlay", disabled = TRUE)
@@ -693,6 +693,11 @@ visualization_server <- function(input, output, session) {
     ))
     shiny::showNotification("Rendering %s values" |> sprintf(vstore[["element"]]), duration = 5)
     
+    get_legend(bounds)
+  }
+  get_legend <- function(bounds) {
+    # clear any previous controls
+    mp |> leaflet::clearControls()
     
     # extract data for legend
     if (!(vstore[["element"]] %in% c("elev"))) {
@@ -718,6 +723,13 @@ visualization_server <- function(input, output, session) {
       transform = function(x) round(exp(x) - 1),
       suffix = units
     )
+    
+    # colour palette
+    if (grepl("PPT|MSP|PAS", vstore[["element"]])) {
+      pal <- RColorBrewer::brewer.pal(9, "YlGnBu")
+    } else {
+      pal <- rev(RColorBrewer::brewer.pal(11, "RdYlBu"))
+    }
     
     if ((vstore[["vscale"]]) == "log1p") {
       log_bounds <- log1p(pmax(bounds, 0))
@@ -796,7 +808,7 @@ visualization_server <- function(input, output, session) {
     if (shiny::in_devmode()) cat("Event: download_overlay", sep = "\n")
     session$sendCustomMessage(type="jsCode", list(code = "window.location.assign('%s');" |> sprintf(vstore[["climatevar"]])))
   })
-  observeEvent(input$rescale_overlay, {
+  shiny::observeEvent(input$rescale_overlay, {
     if (grepl("PPT|MSP|PAS", vstore[["element"]])) {
       pal <- RColorBrewer::brewer.pal(9, "YlGnBu")
     } else {
@@ -819,6 +831,10 @@ visualization_server <- function(input, output, session) {
       )
     )
     )
+  })
+  shiny::observeEvent(input$overlay_domain, {
+    bounds <- input$overlay_domain
+    get_legend(bounds)
   })
   
   # reactive outputs
