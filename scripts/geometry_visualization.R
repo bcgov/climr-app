@@ -174,13 +174,28 @@ visualization_geometry <- function(dt, mp) {
             warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
             error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
             {
-              climr::plot_bivariate(
-                X = bivariate_data,
-                xvar = climr::variables[Code_Element == input$bivariate_element_x & Time == input$bivariate_time_x, Code],
-                yvar = climr::variables[Code_Element == input$bivariate_element_y & Time == input$bivariate_time_y, Code],
-                period_focal = input$bivariate_period,
-                interactive = TRUE
-              )
+              tryCatch({
+                climr::plot_bivariate(
+                  X = bivariate_data,
+                  xvar = climr::variables[Code_Element == input$bivariate_element_x & Time == input$bivariate_time_x, Code],
+                  yvar = climr::variables[Code_Element == input$bivariate_element_y & Time == input$bivariate_time_y, Code],
+                  period_focal = input$bivariate_period,
+                  interactive = TRUE
+                )
+              }, error = function(e) {
+                if (grepl("Error: Non-zero values found in", e$message)) {
+                  showModal(
+                    modalDialog(
+                      title = "Error!",
+                      paste("The values for the reference period 1961-1990 are 0, while there are non-zero values for the variables selected. Unable to calculate percent change. If interested in this variable, please view the Time Series plot."),
+                      easyClose = TRUE
+                    )
+                  )
+                  return()
+                } else {
+                  stop(e)  # Re-throw if not the expected error
+                }
+              })
             }
           )
         }
@@ -190,14 +205,29 @@ visualization_geometry <- function(dt, mp) {
           warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
           error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
           {
-            isolate({
-              climr::plot_bivariate(
-                X = bivariate_data,
-                xvar = climr::variables[Code_Element == input$bivariate_element_x & Time == input$bivariate_time_x, Code],
-                yvar = climr::variables[Code_Element == input$bivariate_element_y & Time == input$bivariate_time_y, Code],
-                period_focal = input$bivariate_period,
-                interactive = TRUE
-              )
+            tryCatch({
+              isolate({
+                climr::plot_bivariate(
+                  X = bivariate_data,
+                  xvar = climr::variables[Code_Element == input$bivariate_element_x & Time == input$bivariate_time_x, Code],
+                  yvar = climr::variables[Code_Element == input$bivariate_element_y & Time == input$bivariate_time_y, Code],
+                  period_focal = input$bivariate_period,
+                  interactive = TRUE
+                )
+              })
+            }, error = function(e) {
+              if (grepl("Error: Non-zero values found in", e$message)) {
+                showModal(
+                  modalDialog(
+                    title = "Error!",
+                    paste("The values for the reference period 1961-1990 are 0, while there are non-zero values for the variables selected. Unable to calculate percent change. If interested in this variable, please view the Time Series plot."),
+                    easyClose = TRUE
+                  )
+                )
+                return()
+              } else {
+                stop(e)  # Re-throw if not the expected error
+              }
             })
           }
         )

@@ -645,7 +645,7 @@ visualization_server <- function(input, output, session) {
     } else {
       pal <- rev(RColorBrewer::brewer.pal(11, "RdYlBu"))
     }
-    vstore[["vscale"]] <- input$vscale
+    #vstore[["vscale"]] <- input$vscale
     session$sendCustomMessage(type="updateClimatePalette", list(
       category = "image", layerId = "val", vscale = vstore[["vscale"]], colorOptions = leafem::colorOptions(
         palette = pal,
