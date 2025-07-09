@@ -603,7 +603,7 @@ getdata_server <- function(input, output, session) {
       showModal(
         modalDialog(
           title = "Warning - Exceeds job size limit!",
-          paste("Too many output raster layers estimated to run the downscale process. We recommend running the downscale one GCM at a time, or running climate variables packages one at a time."),
+          HTML("Too many output raster layers estimated to run the downscale process. We recommend running the downscale one GCM at a time, or running climate variables packages one at a time. For large-scale downscaling, use the <a href='https://bcgov.github.io/climr/' target='_blank'>climr</a> R package."),
           easyClose = TRUE
         )
       )
@@ -851,7 +851,7 @@ getdata_server <- function(input, output, session) {
       showModal(
         modalDialog(
           title = "Warning - Exceeds job size limit!",
-          paste("Too many output raster layers estimated to run the downscale process. We recommend running the downscale one GCM at a time, or running climate variables packages one at a time."),
+          HTML("Too many output raster layers estimated to run the downscale process. We recommend running the downscale one GCM at a time, or running climate variables packages one at a time. For large-scale downscaling, use the <a href='https://bcgov.github.io/climr/' target='_blank'>climr</a> R package."),
           easyClose = TRUE
         )
       )
