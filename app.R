@@ -19,7 +19,6 @@ suppressPackageStartupMessages({
   library(dplyr)
   library(quarto)
   library(jsonlite)
-  library(uuid)
   source("scripts/utils.R", local = TRUE)
 })
 
@@ -644,7 +643,6 @@ shiny::shinyApp(
     session$allowReconnect("force")
     source("server/getdata_server.R", local = TRUE)
     source("server/visualization_server.R", local = TRUE)
-    user_id <<- uuid::UUIDgenerate()
     
     showModal(
       modalDialog(
@@ -662,7 +660,6 @@ shiny::shinyApp(
     
     getdata_server(input, output, session)
     visualization_server(input, output, session)
-    
   }
 )
 
