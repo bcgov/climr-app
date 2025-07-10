@@ -732,7 +732,11 @@ visualization_server <- function(input, output, session) {
     }
     
     if ((vstore[["vscale"]]) == "log1p") {
-      log_bounds <- log1p(pmax(bounds, 0))
+      if (!input$rescale_overlay) {
+        log_bounds <- log1p(pmax(bounds, 0))
+      } else {
+        log_bounds <- bounds
+      }
       
       pal_leg <- leaflet::colorNumeric(palette = pal, domain = log_bounds, na.color = "transparent")
       
@@ -757,9 +761,6 @@ visualization_server <- function(input, output, session) {
       )
     }
   }
-  get_bounds <- shiny::reactive({
-    input$vis_map_bounds
-  })
   shiny::observeEvent(input$overlay_res, {
     if (shiny::in_devmode()) cat("Event: overlay_res", sep = "\n")
     if (!is.null(input$overlay_res)) {
@@ -834,7 +835,9 @@ visualization_server <- function(input, output, session) {
   })
   shiny::observeEvent(input$overlay_domain, {
     bounds <- input$overlay_domain
-    get_legend(bounds)
+    if (input$rescale_overlay) {
+      get_legend(bounds)
+    }
   })
   
   # reactive outputs

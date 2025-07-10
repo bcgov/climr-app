@@ -336,7 +336,7 @@ add_custom_render <- function(map) {
             
             let visibleValues = [];
             for (let y = ymin; y <= ymax; y += 5) {
-                for (let x = xmin; x <= xmax; x++) {
+                for (let x = xmin; x <= xmax; x += 5) {
                     const val = georaster.values[0][y][x];
                     if (!isNaN(val) && val !== georaster.noDataValue) {
                         visibleValues.push(val);
