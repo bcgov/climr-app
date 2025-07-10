@@ -658,11 +658,28 @@ visualization_server <- function(input, output, session) {
     }
       
     # set up palettes/breaks
-    r <- rast(data)
-    bounds <- terra::minmax(r)
-    q <- quantile(bounds, c(0.005, 0.995), na.rm = TRUE)
-    inc <- diff(q) / 500
-    breaks <- seq(q[1] - inc, q[2] + inc, by = inc)
+    name <- climr::variables[Code_Element == input$element & Time == input$time, Code]
+    if (input$time == "Annual") {
+      matching_vars <- c(input$element, paste0(input$element, "_an"))
+      if (input$overlay_res == "800m") {
+        bounds <- as.numeric(
+          overlay_800m[variable %in% matching_vars, .(lower_bound, upper_bound)][1]
+        )
+      } else if (input$overlay_res == "2500m") {
+        bounds <- as.numeric(
+          overlay_2500m[variable %in% matching_vars, .(lower_bound, upper_bound)][1]
+        )
+      }
+      
+    } else {
+      if (input$overlay_res == "800m") {
+        bounds <- as.numeric(overlay_800m[variable == name, .(lower_bound, upper_bound)][1])
+      } else if (input$overlay_res == "2500m") {
+        bounds <- as.numeric(overlay_2500m[variable == name, .(lower_bound, upper_bound)][1])
+      } 
+    }
+    inc <- diff(bounds) / 500
+    breaks <- seq(bounds[1] - inc, bounds[2] + inc, by = inc)
     
     if (grepl("PPT|MSP|PAS", vstore[["element"]])) {
       pal <- RColorBrewer::brewer.pal(9, "YlGnBu")

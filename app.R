@@ -644,6 +644,10 @@ shiny::shinyApp(
     source("server/getdata_server.R", local = TRUE)
     source("server/visualization_server.R", local = TRUE)
     
+    # load bounds for map overlays
+    overlay_800m <<- as.data.table(read.csv("data/dt_800.csv"))
+    overlay_2500m <<- as.data.table(read.csv("data/dt_2500.csv"))
+    
     showModal(
       modalDialog(
         title = "Welcome to the climr App!",
