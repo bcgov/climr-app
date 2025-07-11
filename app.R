@@ -328,7 +328,9 @@ shiny::shinyApp(
                         shiny::actionButton("clear_map", "Clear Map",
                                             style = "width:100%; height:40px; background-color:#c21104; color: #FFF"
                         ),
-                        shiny::checkboxInput("show_overlay_controls", "Show climate map"
+                        shiny::checkboxInput(
+                          inputId = "show_overlay_controls", 
+                          label = tags$span("Show climate map", style = "font-size: 14px; display: inline-block; max-width: 160px; white-space: normal;"),
                         ),
                         shiny::conditionalPanel(
                           condition = "input.show_overlay_controls == true",

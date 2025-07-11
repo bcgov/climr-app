@@ -887,7 +887,7 @@ visualization_server <- function(input, output, session) {
       if (input$element %in% c("PPT", "CMD", "PAS")) {
         shiny::checkboxInput(
           inputId = "vscale",
-          label = "Apply scale adjustment",
+          label = tags$span("Apply scale adj.", style = "font-size: 15px; display: inline-block; max-width: 160px; white-space: normal;"),
           value = reactive({
             req(input$element)
             "ratio" %in% climr::variables[Code_Element == input$element, Type]
