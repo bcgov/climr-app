@@ -342,8 +342,8 @@ shiny::shinyApp(
                             inline = TRUE,
                             selected = "2500m"
                           ),
-                          shiny::uiOutput("overlay_element"),
-                          shiny::uiOutput("overlay_period"),
+                          shiny::selectInput("element", "Element:", choices = NULL),
+                          shiny::selectInput("time", "Season:", choices = NULL),
                           shiny::uiOutput("scale_adj"),
                           shiny::actionButton(
                             inputId = "load_overlay",

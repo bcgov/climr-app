@@ -865,31 +865,31 @@ visualization_server <- function(input, output, session) {
     }
   })
   
-  # reactive outputs
-  output$overlay_element <- shiny::renderUI({
-    shiny::selectInput(
-      inputId = "element",
-      label = "Element:",
-      choices = {
-        dt <- climr_tif[[vstore[["tifsource"]]]]
-        unique(dt[!element %in% c("PET", "lat", "CMI", "EXT", "EMT", "MAP", "MAT", "RH", "MSP", "AHM", "SHM"), element])
-      },
-      selected = "Tave"
+  # overlay element and time
+  shiny::observe({
+    dt <- climr_tif[[vstore[["tifsource"]]]]
+    valid_choices <- unique(dt[!element %in% c("PET", "lat", "CMI", "EXT", "EMT", "MAP", "MAT", "RH", "MSP", "AHM", "SHM"), element])
+    current <- input$element
+    shiny::updateSelectInput(session, "element",
+                             choices = valid_choices,
+                             selected = if (!is.null(current) && current %in% valid_choices) current else "Tave"
     )
   })
-  
-  output$overlay_period <- shiny::renderUI({
-    if (!is.null(input$element)) {
-      if (input$element != "elev" & input$element != "lat" & input$element != "PET") {
-        shiny::selectInput(
-          inputId = "time",
-          label = "Season:",
-          choices = climr::variables[Code_Element == input$element & Category != "Monthly", Time]
-        )
-      }
+  shiny::observe({
+    req(input$element)
+    if (!input$element %in% c("elev", "lat", "PET")) {
+      time_choices <- climr::variables[Code_Element == input$element & Category != "Monthly", Time]
+      current_time <- input$time
+      shiny::updateSelectInput(session, "time",
+                               choices = time_choices,
+                               selected = if (!is.null(current_time) && current_time %in% time_choices) current_time else NULL
+      )
+    } else {
+      shiny::updateSelectInput(session, "time", choices = character(0))
     }
   })
   
+  # reactive output for scale adj
   output$scale_adj <- shiny::renderUI({
     if (!is.null(input$element)) {
       if (input$element %in% c("PPT", "CMD", "PAS")) {
