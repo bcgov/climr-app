@@ -300,9 +300,9 @@ add_custom_render <- function(map) {
     
             if (layer) {
                 if (layer.options.georaster) {
-                    applyColorScale(layer);
+                    applyColorScale(layer, message.bounds);
                 } else {
-                    layer.once("load", () => applyColorScale(layer));
+                    layer.once("load", () => applyColorScale(layer, message.bounds));
                 }
             } else if (attemptsLeft > 0) {
                 // Wait 300ms and try again
@@ -318,7 +318,7 @@ add_custom_render <- function(map) {
             return [x, y];
         }
     
-        function applyColorScale(layer) {
+        function applyColorScale(layer, precomputedBounds = null) {
             var georaster = layer.options.georaster;
             var colorOptions = message.colorOptions;
     
@@ -326,29 +326,45 @@ add_custom_render <- function(map) {
             console.log(scaleFunc);
             const cols = colorOptions.palette;
             let scale = chroma.scale(cols);
+            
+            let domain;
     
             //let dmin = scaleFunc(georaster.mins[0]);
             //let dmax = scaleFunc(georaster.maxs[0]);
             
-            var bounds = map.getBounds();
-            let [xmin, ymin] = latLngToRasterXY(bounds.getNorth(), bounds.getWest(), georaster);
-            let [xmax, ymax] = latLngToRasterXY(bounds.getSouth(), bounds.getEast(), georaster);
-            
-            let visibleValues = [];
-            for (let y = ymin; y <= ymax; y += 5) {
-                for (let x = xmin; x <= xmax; x += 5) {
-                    const val = georaster.values[0][y][x];
-                    if (!isNaN(val) && val !== georaster.noDataValue) {
-                        visibleValues.push(val);
+            if (precomputedBounds == null) {
+                var bounds = map.getBounds();
+                let [xmin, ymin] = latLngToRasterXY(bounds.getNorth(), bounds.getWest(), georaster);
+                let [xmax, ymax] = latLngToRasterXY(bounds.getSouth(), bounds.getEast(), georaster);
+                
+                let visibleValues = [];
+                for (let y = ymin; y <= ymax; y += 5) {
+                    for (let x = xmin; x <= xmax; x += 5) {
+                        const val = georaster.values[0][y][x];
+                        if (!isNaN(val) && val !== georaster.noDataValue) {
+                            visibleValues.push(val);
+                        }
                     }
                 }
+                
+                let scaledValues = visibleValues.map(scaleFunc);
+                const dmin = scaledValues.reduce((a, b) => Math.min(a, b), Infinity);
+                const dmax = scaledValues.reduce((a, b) => Math.max(a, b), -Infinity);
+                domain = [dmin, dmax];
+                console.log("scaled bounds");
+                console.log(dmin);
+                console.log(dmax);
+            } else {
+                const dmin = scaleFunc(precomputedBounds[0]);
+                const dmax = scaleFunc(precomputedBounds[1]);
+                console.log("original bounds");
+                domain = [dmin, dmax];
+                console.log(dmin);
+                console.log(dmax);
             }
             
-            let scaledValues = visibleValues.map(scaleFunc);
-            const dmin = scaledValues.reduce((a, b) => Math.min(a, b), Infinity);
-            const dmax = scaledValues.reduce((a, b) => Math.max(a, b), -Infinity);
-            
-            let domain = [dmin, dmax];
+            //let domain = [dmin, dmax];
+            console.log(domain);
             Shiny.setInputValue("overlay_domain", domain);
             let nacol = colorOptions["na.color"];
             let clr = scale.domain(domain);

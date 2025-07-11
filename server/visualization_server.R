@@ -706,7 +706,8 @@ visualization_server <- function(input, output, session) {
       category = "image", layerId = "val", vscale = vstore[["vscale"]], colorOptions = leafem::colorOptions(
         palette = pal,
         na.color = "transparent"
-      )
+      ),
+      bounds = if (!vstore[["rescale"]]) bounds else NULL
     ))
     shiny::showNotification("Rendering %s values" |> sprintf(vstore[["element"]]), duration = 5)
     
