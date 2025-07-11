@@ -40,7 +40,7 @@ visualization_server <- function(input, output, session) {
   
   vstore <- reactiveValues(
     tifsource = NULL,
-    # current_overlay = NULL,
+    rescale = FALSE,
     time = NULL,
     element = NULL,
     climatevar = NULL,
@@ -749,7 +749,7 @@ visualization_server <- function(input, output, session) {
     }
     
     if ((vstore[["vscale"]]) == "log1p") {
-      if (!input$rescale_overlay) {
+      if (!vstore[["rescale"]]) {
         log_bounds <- log1p(pmax(bounds, 0))
       } else {
         log_bounds <- bounds
@@ -820,6 +820,9 @@ visualization_server <- function(input, output, session) {
       vstore[["climatevar"]] <- NULL
     }
     
+    # reset rescale
+    vstore[["rescale"]] <- FALSE
+    
     load_overlay(vstore[["climatevar"]])
   })
   shiny::observeEvent(input$download_overlay, {
@@ -838,10 +841,13 @@ visualization_server <- function(input, output, session) {
       } else {
         vstore[["vscale"]] <- ""
       }
-      
     } else {
       vstore[["vscale"]] <- FALSE
     }
+    
+    # set rescale
+    vstore[["rescale"]] <- TRUE
+    
     session$sendCustomMessage(type="updateClimatePalette", list(
       category = "image", layerId = "val", vscale = vstore[["vscale"]], colorOptions = leafem::colorOptions(
         palette = pal,
@@ -852,7 +858,7 @@ visualization_server <- function(input, output, session) {
   })
   shiny::observeEvent(input$overlay_domain, {
     bounds <- input$overlay_domain
-    if (input$rescale_overlay) {
+    if (vstore[["rescale"]]) {
       get_legend(bounds)
     }
   })
