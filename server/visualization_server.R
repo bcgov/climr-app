@@ -691,6 +691,7 @@ visualization_server <- function(input, output, session) {
       url = data,
       group = "Climate",
       layerId = "val",
+      resolution = 200,
       project = FALSE,
       colorOptions = leafem::colorOptions(
         palette = pal,
