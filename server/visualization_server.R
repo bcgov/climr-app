@@ -38,6 +38,12 @@ visualization_server <- function(input, output, session) {
   var_id <- data.table(var = list_vars(), var_id = seq_along(list_vars()))
   dataset_id <- data.table(dataset = c("mswx.blend","cru.gpcc","climatena"), dataset_id = 1:3)
   
+  defaults <- list(
+    ts_datasets = c("mswx.blend", "cru.gpcc", "climatena"),
+    ts_gcms = list_gcms()[c(1, 4, 5, 6, 7, 10, 11, 12)],
+    ts_ssps = list_ssps()[1:3]
+  )
+  
   vstore <- reactiveValues(
     tifsource = NULL,
     rescale = FALSE,
@@ -46,7 +52,10 @@ visualization_server <- function(input, output, session) {
     climatevar = NULL,
     vscale = NULL,
     flp_area = NULL,
-    ecoregion = NULL
+    ecoregion = NULL,
+    ts_datasets = c("mswx.blend", "cru.gpcc", "climatena"),
+    ts_gcms = list_gcms()[c(1, 4, 5, 6, 7, 10, 11, 12)],
+    ts_ssps = list_ssps()[1:3]
   )
   
   # ---- Geometry
@@ -152,6 +161,11 @@ visualization_server <- function(input, output, session) {
   shiny::observeEvent(input$clear_map, {
     if (shiny::in_devmode()) cat("Event: clear_map", sep = "\n")
     clear_all()
+    
+    # reset time series defaults
+    vstore[["ts_datasets"]] == defaults[["ts_datasets"]]
+    vstore[["ts_gcms"]] == defaults[["ts_gcms"]]
+    vstore[["ts_ssps"]] == defaults[["ts_ssps"]]
   })
   # click on ecoregion/FLP area
   shiny::observeEvent(input$dist_click,{
@@ -182,7 +196,7 @@ visualization_server <- function(input, output, session) {
           width = "100%",
           inline = TRUE,
           choices = c("MSWX Blend" = "mswx.blend", "ClimateNA" = "climatena", "Climatic Research Unit / Global Precipitation Climatology Centre" = "cru.gpcc"),
-          selected = c("mswx.blend", "climatena", "cru.gpcc")
+          selected = vstore[["ts_datasets"]]
         ),
         shiny::checkboxGroupInput(
           inputId = "time_series_gcms",
@@ -190,7 +204,7 @@ visualization_server <- function(input, output, session) {
           width = "100%",
           inline = TRUE,
           choices = climr::list_gcms()[c(1, 4, 5, 6, 7, 10, 11, 12)],
-          selected = climr::list_gcms()[c(1, 4, 5, 6, 7, 10, 11, 12)]
+          selected = vstore[["ts_gcms"]]
         ),
         shiny::checkboxGroupInput(
           inputId = "time_series_ssps",
@@ -198,7 +212,7 @@ visualization_server <- function(input, output, session) {
           width = "100%",
           inline = TRUE,
           choices = climr::list_ssps()[c(1:3)],
-          selected = climr::list_ssps()[c(1:3)]
+          selected = vstore[["ts_ssps"]]
         ),
         footer = shiny::tagList(
           shiny::actionButton(
@@ -214,6 +228,12 @@ visualization_server <- function(input, output, session) {
   }
   shiny::observeEvent(input$input_type, {
     type <- input$input_type
+    
+    # reset time series defaults
+    vstore[["ts_datasets"]] <- defaults[["ts_datasets"]]
+    vstore[["ts_gcms"]] <- defaults[["ts_gcms"]]
+    vstore[["ts_ssps"]] <- defaults[["ts_ssps"]]
+    
     # clear previous inputs
     clear_inputs()
     if (input$input_type == "Map point") {
@@ -401,6 +421,10 @@ visualization_server <- function(input, output, session) {
     }
   })
   shiny::observeEvent(input$timeseries_ok, {
+    # update time series input
+    vstore[["ts_datasets"]] <- input$time_series_dataset
+    vstore[["ts_gcms"]] <- input$time_series_gcms
+    vstore[["ts_ssps"]] <- input$time_series_ssps
     removeModal()
   })
   shiny::observeEvent(input$downscale_data_time_series, {
