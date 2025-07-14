@@ -727,13 +727,23 @@ visualization_server <- function(input, output, session) {
       options = leaflet::tileOptions(maxZoom = 25, maxNativeZoom = 20)
     ) |> leaflet::showGroup("Climate")
     
-    session$sendCustomMessage(type="updateClimatePalette", list(
-      category = "image", layerId = "val", vscale = vstore[["vscale"]], colorOptions = leafem::colorOptions(
-        palette = pal,
-        na.color = "transparent"
-      ),
-      bounds = if (!vstore[["rescale"]]) bounds else NULL
-    ))
+    # this makes the loading of overlays buggy for some reason?
+    if (vstore[["vscale"]] == "log1p") {
+      session$sendCustomMessage(type="updateClimatePalette", list(
+        category = "image", layerId = "val", vscale = vstore[["vscale"]], colorOptions = leafem::colorOptions(
+          palette = pal,
+          na.color = "transparent"
+        ),
+        bounds = if (!vstore[["rescale"]]) bounds else NULL
+      ))
+    }
+    # session$sendCustomMessage(type="updateClimatePalette", list(
+    #   category = "image", layerId = "val", vscale = vstore[["vscale"]], colorOptions = leafem::colorOptions(
+    #     palette = pal,
+    #     na.color = "transparent"
+    #   ),
+    #   bounds = if (!vstore[["rescale"]]) bounds else NULL
+    # ))
     shiny::showNotification("Rendering %s values" |> sprintf(vstore[["element"]]), duration = 5)
     
     get_legend(bounds)
