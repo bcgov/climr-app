@@ -939,7 +939,7 @@ visualization_server <- function(input, output, session) {
       width  <- session$clientData$output_bivariate_plot_width
       height <- session$clientData$output_bivariate_plot_height
       
-      png(file, width = width*pixelratio*2, height = height*pixelratio*2, res = 120*pixelratio)
+      png(file, width = width*pixelratio*1.5, height = height*pixelratio*1.5, res = 120*pixelratio)
       print(climr::plot_bivariate(
               X = bivariate_data,
               xvar = climr::variables[Code_Element == input$bivariate_element_x & Time == input$bivariate_time_x, Code],
@@ -960,7 +960,7 @@ visualization_server <- function(input, output, session) {
       width  <- session$clientData$output_wl_plot_width
       height <- session$clientData$output_wl_plot_height
       
-      png(file, width = width*pixelratio*2, height = height*pixelratio*2, res = 120*pixelratio)
+      png(file, width = width*pixelratio*1.5, height = height*pixelratio*1.5, res = 120*pixelratio)
       print(climr::plot_WalterLieth(
         X = wl_data,
         diurnal = input$wl_diurnal,
@@ -979,7 +979,7 @@ visualization_server <- function(input, output, session) {
       width  <- session$clientData$output_timeseries_plot_width
       height <- session$clientData$output_timeseries_plot_height
       
-      png(file, width = width*pixelratio*2, height = height*pixelratio*2, res = 120*pixelratio)
+      png(file, width = width*pixelratio*1.5, height = height*pixelratio*1.5, res = 120*pixelratio)
       print(climr::plot_timeSeries(
         X = timeseries_data,
         var1 = climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code],
