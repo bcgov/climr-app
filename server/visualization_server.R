@@ -313,7 +313,7 @@ visualization_server <- function(input, output, session) {
       shiny::p("The diagram provides an overview of climate seasonality using a dual-axis plot."),
       shiny::tags$ul(
         shiny::tags$li(HTML("<strong>Temperature</strong> (°C) is plotted on the left vertical axis.")),
-        shiny::tags$li(HTML("<strong>Precipitation</strong> (mm) is plotted on the right, typically at a scale where 2 mm of precipitation corresponds to 1°C (the 1:2 ratio)."))
+        shiny::tags$li(HTML("<strong>Precipitation</strong> (mm) is plotted on the right, typically at a scale where <strong>2 mm of precipitation corresponds to 1°C</strong> (the 1:2 ratio)."))
       ),
       shiny::p("The 1:2 scaling allows for a simplified identification of arid periods. However, this is only a rough proxy for climatic moisture deficit and does not directly integrate potential evapotranspiration and relevant factors like wind, humidity, or radiation. Therefore, the diagram should not be interpreted as a quantitative water balance diagram."),
       tags$img(src = "walter_lieth_plot_info1.png", style = "max-width:100%; height:auto; margin-top:20px;"),
