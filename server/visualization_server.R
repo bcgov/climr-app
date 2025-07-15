@@ -270,7 +270,7 @@ visualization_server <- function(input, output, session) {
     showModal(modalDialog(
       title = "What does this plot mean?",
       easyClose = TRUE,
-      size = "l",
+      size = "xl",
       shiny::p("Time series plots of 20th and 21st century climate change for user-selected locations and climate variables."),
       shiny::p("Purposes of the plot:"),
       shiny::tags$ul(
@@ -280,37 +280,46 @@ visualization_server <- function(input, output, session) {
         shiny::tags$li("Compare time series of two different variables")
       ),
       shiny::p("All global climate model anomalies are bias-corrected to the 1961-1990 reference period normals."),
-      HTML('<a href="https://vonuma.com/climr-docs/Instructions.html#step-2.-visualize-by-plots" target="_blank">Click here for documentation.</a>')
+      tags$img(src = "timeseries_plot_info.png", style = "max-width:100%; height:auto; margin-top:20px;")
     ))
   })
   shiny::observeEvent(input$biv_plot_info, {
     showModal(modalDialog(
       title = "What does this plot mean?",
       easyClose = TRUE,
-      size = "l",
-      shiny::p("Bivariate plots showing 21st century climate change for user-selected locations and climate variables."),
-      shiny::p("Purposes of the plot:"),
-      shiny::tags$ol(
-        shiny::tags$li("Show differences in climate change trends among global climate models (GCMs)"),
-        shiny::tags$li("Show the differences between multiple simulations of each model"),
-        shiny::tags$li("Compare simulated climate change to observed climate change in the 2001-2020 period")
+      size = "xl",
+      shiny::p("The bivariate plots show projections of 21st century climate change for user-selected climate variables. The main purposes of the plot are to:"),
+      shiny::tags$ul(
+        shiny::tags$li("Show differences in climate change trends among global climate models (GCMs);"),
+        shiny::tags$li("Show the differences between multiple simulations of each model; and"),
+        shiny::tags$li("Compare simulated climate change to observed climate change in the 2001-2020 period.")
       ),
-      shiny::p("All climate changes are relative to the 1961-1990 reference period normals."),
-      HTML('<a href="https://vonuma.com/climr-docs/Instructions.html#step-2.-visualize-by-plots" target="_blank">Click here for documentation.</a>')
+      shiny::p("We recommend using temperature variables as the x-axis. This provides a representation of how the y-axis variable is projected to change in proportion to regional climate heating."),
+      shiny::p("Details:"),
+      shiny::tags$ul(
+        shiny::tags$li("All climate changes are relative to the mean climate of the 1961-1990 period."),
+        shiny::tags$li("The observed climate change in the 2001-2020 period is obtained from the MSWX-blend dataset."),
+        shiny::tags$li("Change values are for the SSP2-4.5 emissions scenario only. We have not provided other scenarios as they tend to differ only in magnitude rather than trends and variation, which are the focus of this plot.")
+      ),
+      tags$img(src = "bivariate_plot_info.png", style = "max-width:100%; height:auto; margin-top:20px;")
     ))
   })
   shiny::observeEvent(input$wl_plot_info, {
     showModal(modalDialog(
       title = "What does this plot mean?",
       easyClose = TRUE,
-      size = "l",
-      shiny::p("Purposes of the Walter-Lieth Climate Diagram:"),
+      size = "xl",
+      shiny::p("The Walter-Lieth climate diagram was developed by German climatologists Heinrich Walter and Helmut Lieth in the 1950s–60s as part of their efforts to standardize the visualization of climate data for ecological zoning and global vegetation classification. The diagrams are a simple way to graphically represent seasonal patterns of temperature and precipitation at a given location, and to compare the climates of different regions."),
+      shiny::p("The diagram provides an overview of climate seasonality using a dual-axis plot."),
       shiny::tags$ul(
-        shiny::tags$li("Allow identification of humid and drought periods over a year"),
-        shiny::tags$li("Allow for an easy climate comparison between geographic locations")
+        shiny::tags$li(HTML("<strong>Temperature</strong> (°C) is plotted on the left vertical axis.")),
+        shiny::tags$li(HTML("<strong>Precipitation</strong> (mm) is plotted on the right, typically at a scale where 2 mm of precipitation corresponds to 1°C (the 1:2 ratio)."))
       ),
-      shiny::p("All global climate model anomalies are bias-corrected to the 1961-1990 reference period normals."),
-      HTML('<a href="https://vonuma.com/climr-docs/Instructions.html#step-2.-visualize-by-plots" target="_blank">Click here for documentation.</a>')
+      shiny::p("The 1:2 scaling allows for a simplified identification of arid periods. However, this is only a rough proxy for climatic moisture deficit and does not directly integrate potential evapotranspiration and relevant factors like wind, humidity, or radiation. Therefore, the diagram should not be interpreted as a quantitative water balance diagram."),
+      tags$img(src = "walter_lieth_plot_info1.png", style = "max-width:100%; height:auto; margin-top:20px;"),
+      shiny::p("How to interpret climatic trends:"),
+      tags$img(src = "walter_lieth_plot_info2.png", style = "max-width:100%; height:auto; margin-top:20px;")
+      
     ))
   })
   shiny::observeEvent(input$downscale_data_bivariate, {
