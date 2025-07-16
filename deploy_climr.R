@@ -2,10 +2,12 @@ library(analogsea)
 Sys.setenv(DO_PAT="eae4166ed2fac0e3c41660fe26a009bb0176ab8bceeaf753faf5189f58a06520")
 
 server <- analogsea::droplets()$`climr-server`
-reset_ssh_sessions()
+#reset_ssh_sessions()
 
-droplet_ssh(server, "R -e \"remotes::install_github('bcgov/climr@devl', upgrade = FALSE)\"")
+# use to re-install climr package
+#droplet_ssh(server, "R -e \"remotes::install_github('bcgov/climr@devl', upgrade = FALSE)\"")
 
+# use to deploy climr app
 analogsea::droplet_ssh(server, "rm -R /srv/shiny-server/climr-app")
 analogsea::droplet_ssh(server, "mkdir /srv/shiny-server/climr-app")
 analogsea::droplet_upload(server, "./.Renviron", "/srv/shiny-server/climr-app")

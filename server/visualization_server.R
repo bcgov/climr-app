@@ -38,15 +38,24 @@ visualization_server <- function(input, output, session) {
   var_id <- data.table(var = list_vars(), var_id = seq_along(list_vars()))
   dataset_id <- data.table(dataset = c("mswx.blend","cru.gpcc","climatena"), dataset_id = 1:3)
   
+  defaults <- list(
+    ts_datasets = c("mswx.blend", "cru.gpcc", "climatena"),
+    ts_gcms = list_gcms()[c(1, 4, 5, 6, 7, 10, 11, 12)],
+    ts_ssps = list_ssps()[1:3]
+  )
+  
   vstore <- reactiveValues(
     tifsource = NULL,
-    # current_overlay = NULL,
+    rescale = FALSE,
     time = NULL,
     element = NULL,
     climatevar = NULL,
     vscale = NULL,
     flp_area = NULL,
-    ecoregion = NULL
+    ecoregion = NULL,
+    ts_datasets = c("mswx.blend", "cru.gpcc", "climatena"),
+    ts_gcms = list_gcms()[c(1, 4, 5, 6, 7, 10, 11, 12)],
+    ts_ssps = list_ssps()[1:3]
   )
   
   # ---- Geometry
@@ -152,6 +161,11 @@ visualization_server <- function(input, output, session) {
   shiny::observeEvent(input$clear_map, {
     if (shiny::in_devmode()) cat("Event: clear_map", sep = "\n")
     clear_all()
+    
+    # reset time series defaults
+    vstore[["ts_datasets"]] == defaults[["ts_datasets"]]
+    vstore[["ts_gcms"]] == defaults[["ts_gcms"]]
+    vstore[["ts_ssps"]] == defaults[["ts_ssps"]]
   })
   # click on ecoregion/FLP area
   shiny::observeEvent(input$dist_click,{
@@ -182,7 +196,7 @@ visualization_server <- function(input, output, session) {
           width = "100%",
           inline = TRUE,
           choices = c("MSWX Blend" = "mswx.blend", "ClimateNA" = "climatena", "Climatic Research Unit / Global Precipitation Climatology Centre" = "cru.gpcc"),
-          selected = c("mswx.blend", "climatena", "cru.gpcc")
+          selected = vstore[["ts_datasets"]]
         ),
         shiny::checkboxGroupInput(
           inputId = "time_series_gcms",
@@ -190,7 +204,7 @@ visualization_server <- function(input, output, session) {
           width = "100%",
           inline = TRUE,
           choices = climr::list_gcms()[c(1, 4, 5, 6, 7, 10, 11, 12)],
-          selected = climr::list_gcms()[c(1, 4, 5, 6, 7, 10, 11, 12)]
+          selected = vstore[["ts_gcms"]]
         ),
         shiny::checkboxGroupInput(
           inputId = "time_series_ssps",
@@ -198,7 +212,7 @@ visualization_server <- function(input, output, session) {
           width = "100%",
           inline = TRUE,
           choices = climr::list_ssps()[c(1:3)],
-          selected = climr::list_ssps()[c(1:3)]
+          selected = vstore[["ts_ssps"]]
         ),
         footer = shiny::tagList(
           shiny::actionButton(
@@ -214,6 +228,12 @@ visualization_server <- function(input, output, session) {
   }
   shiny::observeEvent(input$input_type, {
     type <- input$input_type
+    
+    # reset time series defaults
+    vstore[["ts_datasets"]] <- defaults[["ts_datasets"]]
+    vstore[["ts_gcms"]] <- defaults[["ts_gcms"]]
+    vstore[["ts_ssps"]] <- defaults[["ts_ssps"]]
+    
     # clear previous inputs
     clear_inputs()
     if (input$input_type == "Map point") {
@@ -250,7 +270,7 @@ visualization_server <- function(input, output, session) {
     showModal(modalDialog(
       title = "What does this plot mean?",
       easyClose = TRUE,
-      size = "l",
+      size = "xl",
       shiny::p("Time series plots of 20th and 21st century climate change for user-selected locations and climate variables."),
       shiny::p("Purposes of the plot:"),
       shiny::tags$ul(
@@ -260,37 +280,46 @@ visualization_server <- function(input, output, session) {
         shiny::tags$li("Compare time series of two different variables")
       ),
       shiny::p("All global climate model anomalies are bias-corrected to the 1961-1990 reference period normals."),
-      HTML('<a href="https://vonuma.com/climr-docs/Instructions.html#step-2.-visualize-by-plots" target="_blank">Click here for documentation.</a>')
+      tags$img(src = "timeseries_plot_info.png", style = "max-width:100%; height:auto; margin-top:20px;")
     ))
   })
   shiny::observeEvent(input$biv_plot_info, {
     showModal(modalDialog(
       title = "What does this plot mean?",
       easyClose = TRUE,
-      size = "l",
-      shiny::p("Bivariate plots showing 21st century climate change for user-selected locations and climate variables."),
-      shiny::p("Purposes of the plot:"),
-      shiny::tags$ol(
-        shiny::tags$li("Show differences in climate change trends among global climate models (GCMs)"),
-        shiny::tags$li("Show the differences between multiple simulations of each model"),
-        shiny::tags$li("Compare simulated climate change to observed climate change in the 2001-2020 period")
+      size = "xl",
+      shiny::p("The bivariate plots show projections of 21st century climate change for user-selected climate variables. The main purposes of the plot are to:"),
+      shiny::tags$ul(
+        shiny::tags$li("Show differences in climate change trends among global climate models (GCMs);"),
+        shiny::tags$li("Show the differences between multiple simulations of each model; and"),
+        shiny::tags$li("Compare simulated climate change to observed climate change in the 2001-2020 period.")
       ),
-      shiny::p("All climate changes are relative to the 1961-1990 reference period normals."),
-      HTML('<a href="https://vonuma.com/climr-docs/Instructions.html#step-2.-visualize-by-plots" target="_blank">Click here for documentation.</a>')
+      shiny::p("We recommend using temperature variables as the x-axis. This provides a representation of how the y-axis variable is projected to change in proportion to regional climate heating."),
+      shiny::p("Details:"),
+      shiny::tags$ul(
+        shiny::tags$li("All climate changes are relative to the mean climate of the 1961-1990 period."),
+        shiny::tags$li("The observed climate change in the 2001-2020 period is obtained from the MSWX-blend dataset."),
+        shiny::tags$li("Change values are for the SSP2-4.5 emissions scenario only. We have not provided other scenarios as they tend to differ only in magnitude rather than trends and variation, which are the focus of this plot.")
+      ),
+      tags$img(src = "bivariate_plot_info.png", style = "max-width:100%; height:auto; margin-top:20px;")
     ))
   })
   shiny::observeEvent(input$wl_plot_info, {
     showModal(modalDialog(
       title = "What does this plot mean?",
       easyClose = TRUE,
-      size = "l",
-      shiny::p("Purposes of the Walter-Lieth Climate Diagram:"),
+      size = "xl",
+      shiny::p("The Walter-Lieth climate diagram was developed by German climatologists Heinrich Walter and Helmut Lieth in the 1950s–60s as part of their efforts to standardize the visualization of climate data for ecological zoning and global vegetation classification. The diagrams are a simple way to graphically represent seasonal patterns of temperature and precipitation at a given location, and to compare the climates of different regions."),
+      shiny::p("The diagram provides an overview of climate seasonality using a dual-axis plot."),
       shiny::tags$ul(
-        shiny::tags$li("Allow identification of humid and drought periods over a year"),
-        shiny::tags$li("Allow for an easy climate comparison between geographic locations")
+        shiny::tags$li(HTML("<strong>Temperature</strong> (°C) is plotted on the left vertical axis.")),
+        shiny::tags$li(HTML("<strong>Precipitation</strong> (mm) is plotted on the right, typically at a scale where <strong>2 mm of precipitation corresponds to 1°C</strong> (the 1:2 ratio)."))
       ),
-      shiny::p("All global climate model anomalies are bias-corrected to the 1961-1990 reference period normals."),
-      HTML('<a href="https://vonuma.com/climr-docs/Instructions.html#step-2.-visualize-by-plots" target="_blank">Click here for documentation.</a>')
+      shiny::p("The 1:2 scaling allows for a simplified identification of arid periods. However, this is only a rough proxy for climatic moisture deficit and does not directly integrate potential evapotranspiration and relevant factors like wind, humidity, or radiation. Therefore, the diagram should not be interpreted as a quantitative water balance diagram."),
+      tags$img(src = "walter_lieth_plot_info1.png", style = "max-width:100%; height:auto; margin-top:20px;"),
+      shiny::p("How to interpret climatic trends:"),
+      tags$img(src = "walter_lieth_plot_info2.png", style = "max-width:100%; height:auto; margin-top:20px;")
+      
     ))
   })
   shiny::observeEvent(input$downscale_data_bivariate, {
@@ -401,6 +430,10 @@ visualization_server <- function(input, output, session) {
     }
   })
   shiny::observeEvent(input$timeseries_ok, {
+    # update time series input
+    vstore[["ts_datasets"]] <- input$time_series_dataset
+    vstore[["ts_gcms"]] <- input$time_series_gcms
+    vstore[["ts_ssps"]] <- input$time_series_ssps
     removeModal()
   })
   shiny::observeEvent(input$downscale_data_time_series, {
@@ -639,6 +672,12 @@ visualization_server <- function(input, output, session) {
   })
   
   # ---- Visualization Overlay events
+  shiny::observe({
+    if (!input$show_overlay_controls) {
+      leaflet::removeImage(vis_mp, layerId = "val")
+      leaflet::clearControls(vis_mp)
+    }
+  })
   load_overlay <- function(data) {
     # render overlay, making sure any old controls are cleared
     mp <<- leaflet::leafletProxy("vis_map", deferUntilFlush = FALSE)
@@ -658,11 +697,28 @@ visualization_server <- function(input, output, session) {
     }
       
     # set up palettes/breaks
-    r <- rast(data)
-    bounds <- terra::minmax(r)
-    q <- quantile(bounds, c(0.005, 0.995), na.rm = TRUE)
-    inc <- diff(q) / 500
-    breaks <- seq(q[1] - inc, q[2] + inc, by = inc)
+    name <- climr::variables[Code_Element == input$element & Time == input$time, Code]
+    if (input$time == "Annual") {
+      matching_vars <- c(input$element, paste0(input$element, "_an"))
+      if (input$overlay_res == "800m") {
+        bounds <- as.numeric(
+          overlay_800m[variable %in% matching_vars, .(lower_bound, upper_bound)][1]
+        )
+      } else if (input$overlay_res == "2500m") {
+        bounds <- as.numeric(
+          overlay_2500m[variable %in% matching_vars, .(lower_bound, upper_bound)][1]
+        )
+      }
+      
+    } else {
+      if (input$overlay_res == "800m") {
+        bounds <- as.numeric(overlay_800m[variable == name, .(lower_bound, upper_bound)][1])
+      } else if (input$overlay_res == "2500m") {
+        bounds <- as.numeric(overlay_2500m[variable == name, .(lower_bound, upper_bound)][1])
+      } 
+    }
+    inc <- diff(bounds) / 500
+    breaks <- seq(bounds[1] - inc, bounds[2] + inc, by = inc)
     
     if (grepl("PPT|MSP|PAS", vstore[["element"]])) {
       pal <- RColorBrewer::brewer.pal(9, "YlGnBu")
@@ -674,6 +730,7 @@ visualization_server <- function(input, output, session) {
       url = data,
       group = "Climate",
       layerId = "val",
+      resolution = 200,
       project = FALSE,
       colorOptions = leafem::colorOptions(
         palette = pal,
@@ -685,12 +742,16 @@ visualization_server <- function(input, output, session) {
       options = leaflet::tileOptions(maxZoom = 25, maxNativeZoom = 20)
     ) |> leaflet::showGroup("Climate")
     
-    session$sendCustomMessage(type="updateClimatePalette", list(
-      category = "image", layerId = "val", vscale = vstore[["vscale"]], colorOptions = leafem::colorOptions(
-        palette = pal,
-        na.color = "transparent"
-      )
-    ))
+    if (vstore[["vscale"]] == "log1p") {
+      session$sendCustomMessage(type="updateClimatePalette", list(
+        category = "image", layerId = "val", vscale = vstore[["vscale"]], colorOptions = leafem::colorOptions(
+          palette = pal,
+          na.color = "transparent"
+        ),
+        bounds = if (!vstore[["rescale"]]) bounds else NULL
+      ))
+    }
+    
     shiny::showNotification("Rendering %s values" |> sprintf(vstore[["element"]]), duration = 5)
     
     get_legend(bounds)
@@ -732,7 +793,11 @@ visualization_server <- function(input, output, session) {
     }
     
     if ((vstore[["vscale"]]) == "log1p") {
-      log_bounds <- log1p(pmax(bounds, 0))
+      if (!vstore[["rescale"]]) {
+        log_bounds <- log1p(pmax(bounds, 0))
+      } else {
+        log_bounds <- bounds
+      }
       
       pal_leg <- leaflet::colorNumeric(palette = pal, domain = log_bounds, na.color = "transparent")
       
@@ -757,9 +822,6 @@ visualization_server <- function(input, output, session) {
       )
     }
   }
-  get_bounds <- shiny::reactive({
-    input$vis_map_bounds
-  })
   shiny::observeEvent(input$overlay_res, {
     if (shiny::in_devmode()) cat("Event: overlay_res", sep = "\n")
     if (!is.null(input$overlay_res)) {
@@ -802,6 +864,9 @@ visualization_server <- function(input, output, session) {
       vstore[["climatevar"]] <- NULL
     }
     
+    # reset rescale
+    vstore[["rescale"]] <- FALSE
+    
     load_overlay(vstore[["climatevar"]])
   })
   shiny::observeEvent(input$download_overlay, {
@@ -820,10 +885,13 @@ visualization_server <- function(input, output, session) {
       } else {
         vstore[["vscale"]] <- ""
       }
-      
     } else {
       vstore[["vscale"]] <- FALSE
     }
+    
+    # set rescale
+    vstore[["rescale"]] <- TRUE
+    
     session$sendCustomMessage(type="updateClimatePalette", list(
       category = "image", layerId = "val", vscale = vstore[["vscale"]], colorOptions = leafem::colorOptions(
         palette = pal,
@@ -834,40 +902,42 @@ visualization_server <- function(input, output, session) {
   })
   shiny::observeEvent(input$overlay_domain, {
     bounds <- input$overlay_domain
-    get_legend(bounds)
-  })
-  
-  # reactive outputs
-  output$overlay_element <- shiny::renderUI({
-    shiny::selectInput(
-      inputId = "element",
-      label = "Element:",
-      choices = {
-        dt <- climr_tif[[vstore[["tifsource"]]]]
-        unique(dt[!element %in% c("PET", "lat", "CMI", "EXT", "EMT", "MAP", "MAT", "RH", "MSP", "AHM", "SHM"), element])
-      },
-      selected = "Tave"
-    )
-  })
-  
-  output$overlay_period <- shiny::renderUI({
-    if (!is.null(input$element)) {
-      if (input$element != "elev" & input$element != "lat" & input$element != "PET") {
-        shiny::selectInput(
-          inputId = "time",
-          label = "Season:",
-          choices = climr::variables[Code_Element == input$element & Category != "Monthly", Time]
-        )
-      }
+    if (vstore[["rescale"]]) {
+      get_legend(bounds)
     }
   })
   
+  # overlay element and time
+  shiny::observe({
+    dt <- climr_tif[[vstore[["tifsource"]]]]
+    valid_choices <- unique(dt[!element %in% c("PET", "lat", "CMI", "EXT", "EMT", "MAP", "MAT", "RH", "MSP", "AHM", "SHM"), element])
+    current <- input$element
+    shiny::updateSelectInput(session, "element",
+                             choices = valid_choices,
+                             selected = if (!is.null(current) && current %in% valid_choices) current else "Tave"
+    )
+  })
+  shiny::observe({
+    req(input$element)
+    if (!input$element %in% c("elev", "lat", "PET")) {
+      time_choices <- climr::variables[Code_Element == input$element & Category != "Monthly", Time]
+      current_time <- input$time
+      shiny::updateSelectInput(session, "time",
+                               choices = time_choices,
+                               selected = if (!is.null(current_time) && current_time %in% time_choices) current_time else NULL
+      )
+    } else {
+      shiny::updateSelectInput(session, "time", choices = character(0))
+    }
+  })
+  
+  # reactive output for scale adj
   output$scale_adj <- shiny::renderUI({
     if (!is.null(input$element)) {
       if (input$element %in% c("PPT", "CMD", "PAS")) {
         shiny::checkboxInput(
           inputId = "vscale",
-          label = "Apply scale adjustment",
+          label = tags$span("Apply scale adj.", style = "font-size: 15px; display: inline-block; max-width: 160px; white-space: normal;"),
           value = reactive({
             req(input$element)
             "ratio" %in% climr::variables[Code_Element == input$element, Type]
@@ -887,7 +957,7 @@ visualization_server <- function(input, output, session) {
       width  <- session$clientData$output_bivariate_plot_width
       height <- session$clientData$output_bivariate_plot_height
       
-      png(file, width = width*pixelratio*3, height = height*pixelratio*3, res = 120*pixelratio)
+      png(file, width = width*pixelratio*1.5, height = height*pixelratio*1.5, res = 120*pixelratio)
       print(climr::plot_bivariate(
               X = bivariate_data,
               xvar = climr::variables[Code_Element == input$bivariate_element_x & Time == input$bivariate_time_x, Code],
@@ -908,7 +978,7 @@ visualization_server <- function(input, output, session) {
       width  <- session$clientData$output_wl_plot_width
       height <- session$clientData$output_wl_plot_height
       
-      png(file, width = width*pixelratio*3, height = height*pixelratio*3, res = 120*pixelratio)
+      png(file, width = width*pixelratio*1.5, height = height*pixelratio*1.5, res = 120*pixelratio)
       print(climr::plot_WalterLieth(
         X = wl_data,
         diurnal = input$wl_diurnal,
@@ -927,7 +997,7 @@ visualization_server <- function(input, output, session) {
       width  <- session$clientData$output_timeseries_plot_width
       height <- session$clientData$output_timeseries_plot_height
       
-      png(file, width = width*pixelratio*2, height = height*pixelratio*2, res = 120*pixelratio)
+      png(file, width = width*pixelratio*1.5, height = height*pixelratio*1.5, res = 120*pixelratio)
       print(climr::plot_timeSeries(
         X = timeseries_data,
         var1 = climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code],

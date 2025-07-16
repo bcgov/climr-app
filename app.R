@@ -328,7 +328,9 @@ shiny::shinyApp(
                         shiny::actionButton("clear_map", "Clear Map",
                                             style = "width:100%; height:40px; background-color:#c21104; color: #FFF"
                         ),
-                        shiny::checkboxInput("show_overlay_controls", "Show climate map"
+                        shiny::checkboxInput(
+                          inputId = "show_overlay_controls", 
+                          label = tags$span("Show climate map", style = "font-size: 14px; display: inline-block; max-width: 160px; white-space: normal;"),
                         ),
                         shiny::conditionalPanel(
                           condition = "input.show_overlay_controls == true",
@@ -340,8 +342,8 @@ shiny::shinyApp(
                             inline = TRUE,
                             selected = "2500m"
                           ),
-                          shiny::uiOutput("overlay_element"),
-                          shiny::uiOutput("overlay_period"),
+                          shiny::selectInput("element", "Element:", choices = NULL),
+                          shiny::selectInput("time", "Season:", choices = NULL),
                           shiny::uiOutput("scale_adj"),
                           shiny::actionButton(
                             inputId = "load_overlay",
@@ -643,6 +645,10 @@ shiny::shinyApp(
     session$allowReconnect("force")
     source("server/getdata_server.R", local = TRUE)
     source("server/visualization_server.R", local = TRUE)
+    
+    # load bounds for map overlays
+    overlay_800m <<- as.data.table(read.csv("data/dt_800.csv"))
+    overlay_2500m <<- as.data.table(read.csv("data/dt_2500.csv"))
     
     showModal(
       modalDialog(
