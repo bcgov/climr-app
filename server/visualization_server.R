@@ -672,6 +672,12 @@ visualization_server <- function(input, output, session) {
   })
   
   # ---- Visualization Overlay events
+  shiny::observe({
+    if (!input$show_overlay_controls) {
+      leaflet::removeImage(vis_mp, layerId = "val")
+      leaflet::clearControls(vis_mp)
+    }
+  })
   load_overlay <- function(data) {
     # render overlay, making sure any old controls are cleared
     mp <<- leaflet::leafletProxy("vis_map", deferUntilFlush = FALSE)
