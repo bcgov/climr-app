@@ -31,3 +31,7 @@ library(terra)
 dat <- rast("downscale_PPTD2R49_202506061656_map_draw_1.tif")
 install.packages("sf")
 install.packages("terra")
+
+library(sf)
+dat <- st_read("../CCISS_ShinyApp/NimpkishTest.gpkg")
+st_area(dat)
