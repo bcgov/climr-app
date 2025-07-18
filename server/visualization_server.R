@@ -39,7 +39,7 @@ visualization_server <- function(input, output, session) {
   dataset_id <- data.table(dataset = c("mswx.blend","cru.gpcc","climatena"), dataset_id = 1:3)
   
   defaults <- list(
-    ts_datasets = c("mswx.blend", "cru.gpcc", "climatena"),
+    ts_datasets = c("mswx.blend"),
     ts_gcms = list_gcms()[c(1, 4, 5, 6, 7, 10, 11, 12)],
     ts_ssps = list_ssps()[1:3]
   )
@@ -468,16 +468,7 @@ visualization_server <- function(input, output, session) {
               easyClose = TRUE
             )
           )
-          if (!input$ts_adj_plot) {
-            datasets <- c("mswx.blend", "cru.gpcc", "climatena")
-            gcms <- climr::list_gcms()[c(1, 4, 5, 6, 7, 10, 11, 12)]
-            ssps <- climr::list_ssps()[c(1:3)]
-          } else {
-            datasets <- input$time_series_dataset
-            gcms <- input$time_series_gcms
-            ssps <- input$time_series_ssps
-          }
-          timeseries_data <<- climr::plot_timeSeries_input(xyz, gcms = gcms, ssps = ssps, obs_ts_dataset = datasets)
+          timeseries_data <<- climr::plot_timeSeries_input(xyz, gcms = climr::list_gcms()[c(1, 4, 5, 6, 7, 10, 11, 12)], ssps = climr::list_ssps()[c(1:3)], obs_ts_dataset = c("mswx.blend", "cru.gpcc", "climatena"))
           show_plots(TRUE)
           vis_sg$timeseries(timeseries_data)
           removeModal()
@@ -1001,7 +992,7 @@ visualization_server <- function(input, output, session) {
       print(climr::plot_timeSeries(
         X = timeseries_data,
         var1 = climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code],
-        obs_ts_dataset = if (!input$ts_adj_plot) c("mswx.blend", "cru.gpcc", "climatena") else input$time_series_dataset,
+        obs_ts_dataset = if (!input$ts_adj_plot) c("mswx.blend") else input$time_series_dataset,
         app = TRUE
         )
       )
