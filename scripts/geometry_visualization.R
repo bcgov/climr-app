@@ -249,7 +249,8 @@ visualization_geometry <- function(dt, mp) {
               var1 = climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code],
               obs_ts_dataset = vstore[["ts_datasets"]],
               gcms = vstore[["ts_gcms"]],
-              ssps = vstore[["ts_ssps"]]
+              ssps = vstore[["ts_ssps"]],
+              app = TRUE
             )
           }
         )
@@ -265,7 +266,8 @@ visualization_geometry <- function(dt, mp) {
                 var1 = climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code],
                 obs_ts_dataset = vstore[["ts_datasets"]],
                 gcms = vstore[["ts_gcms"]],
-                ssps = vstore[["ts_ssps"]]
+                ssps = vstore[["ts_ssps"]],
+                app = TRUE
               )
             })
           }
