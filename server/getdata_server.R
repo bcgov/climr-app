@@ -1303,7 +1303,7 @@ getdata_server <- function(input, output, session) {
   
   # reactive output for slider resolution
   output$resolution_slider <- shiny::renderUI({
-    if (input$downscale_output == "tif") {
+    if (all((getdata_sg_dt$dt)$source != "map_click")) {
       res_min <- get_resolution_min(calculate_layers())
       shiny::sliderInput(
         inputId = "downscale_resolution",
