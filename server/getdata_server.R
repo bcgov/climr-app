@@ -484,6 +484,8 @@ getdata_server <- function(input, output, session) {
   
   # applies all user specified downscale parameters
   shiny::observeEvent(input$downscale_apply, {
+    # remove any existing raster previews
+    show_raster_ui(FALSE)
     
     ## observed periods ##
     vstore[["downscale_obs_periods_checkbox"]] <- input$downscale_obs_periods_checkbox
