@@ -1001,7 +1001,8 @@ visualization_server <- function(input, output, session) {
       print(climr::plot_timeSeries(
         X = timeseries_data,
         var1 = climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code],
-        obs_ts_dataset = if (!input$ts_adj_plot) c("mswx.blend", "cru.gpcc", "climatena") else input$time_series_dataset
+        obs_ts_dataset = if (!input$ts_adj_plot) c("mswx.blend", "cru.gpcc", "climatena") else input$time_series_dataset,
+        app = TRUE
         )
       )
       dev.off()
