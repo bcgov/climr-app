@@ -486,6 +486,8 @@ getdata_server <- function(input, output, session) {
   shiny::observeEvent(input$downscale_apply, {
     # remove any existing raster previews
     show_raster_ui(FALSE)
+    leaflet::removeImage(getdata_mp, "rast_layer")
+    leaflet::clearControls(getdata_mp)
     
     ## observed periods ##
     vstore[["downscale_obs_periods_checkbox"]] <- input$downscale_obs_periods_checkbox
@@ -764,6 +766,9 @@ getdata_server <- function(input, output, session) {
       vstore[[x]] <- downscale_default[[x]]
     })
     downscale_modal()
+    show_raster_ui(FALSE)
+    leaflet::removeImage(getdata_mp, "rast_layer")
+    leaflet::clearControls(getdata_mp)
   })
   
   shiny::observeEvent(input$confirm_reset_no, {
