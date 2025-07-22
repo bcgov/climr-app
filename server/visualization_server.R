@@ -1025,7 +1025,7 @@ visualization_server <- function(input, output, session) {
   # download handling for plots
   output$bivariate_download <- shiny::downloadHandler(
     filename = function() {
-      paste0("bivariate_plot_", Sys.time(), ".png")
+      paste0("bivariate_plot_", if (input$input_type != "Map Point") input$dist_click else "", "_", climr::variables[Code_Element == input$bivariate_element_x & Time == input$bivariate_time_x, Code], "_", climr::variables[Code_Element == input$bivariate_element_y & Time == input$bivariate_time_y, Code], ".png")
     },
     content = function(file) {
       pixelratio <- session$clientData$pixelratio
@@ -1046,7 +1046,7 @@ visualization_server <- function(input, output, session) {
   
   output$wl_download <- shiny::downloadHandler(
     filename = function() {
-      paste0("walter_lieth_plot_", Sys.time(), ".png")
+      paste0("walter_lieth_plot_", if (input$input_type != "Map Point") input$dist_click else "mappoint", ".png")
     },
     content = function(file) {
       pixelratio <- session$clientData$pixelratio
@@ -1065,7 +1065,7 @@ visualization_server <- function(input, output, session) {
   
   output$timeseries_download <- shiny::downloadHandler(
     filename = function() {
-      paste0("timeseries_plot_", Sys.time(), ".png")
+      paste0("timeseries_plot_", if (input$input_type != "Map Point") input$dist_click else "", "_", climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code], ".png")
     },
     content = function(file) {
       pixelratio <- session$clientData$pixelratio
