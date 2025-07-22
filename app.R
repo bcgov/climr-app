@@ -657,7 +657,8 @@ shiny::shinyApp(
               an R package that provides downscaled climate data for North America. 
               This app allows users to download custom climate data for their areas of interest. 
               It also provides visualizations of the climates of North America and how they are changing.
-              All content of this app is for information only and does not represent BC government policy." 
+              All content of this app is for information only and does not represent BC government policy.
+              This app is currently designed for screens that are 15\" and larger." 
         ),
         easyClose = TRUE,
         size = "l"

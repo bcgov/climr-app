@@ -37,6 +37,8 @@ visualization_server <- function(input, output, session) {
   ssp_id <- data.table(ssp = list_ssps(), ssp_id = seq_along(list_ssps()))
   var_id <- data.table(var = list_vars(), var_id = seq_along(list_vars()))
   dataset_id <- data.table(dataset = c("mswx.blend","cru.gpcc","climatena"), dataset_id = 1:3)
+  ssp_id2 <- data.table(ssp = c("historical", list_ssps()[1:3]), ssp_id = seq_along(list_ssps()))
+  type_id <- data.table(type = c("ensmin", "ensmax", "ensmean", "dataset"), type_id = 1:4)
   
   defaults <- list(
     ts_datasets = c("mswx.blend"),
@@ -496,7 +498,7 @@ visualization_server <- function(input, output, session) {
             easyClose = TRUE
           )
         )
-      } else if ((!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") | (!is.null(vstore[["ecoregion"]]) & input$input_type == "Ecoregion")) {
+      } else if ((!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area")) {
         show_plots(TRUE)
         withCallingHandlers(
           message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
@@ -504,16 +506,15 @@ visualization_server <- function(input, output, session) {
           error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
           {
             # set up db query
-            region <- vstore[[if (input$input_type == "FLP Area") "flp_area" else "ecoregion"]]
+            region <- vstore[["flp_area"]]
             if (!input$ts_adj_plot) {
               dataset <- paste(dataset_id[dataset %in% c("mswx.blend", "cru.gpcc", "climatena"), dataset_id], collapse = ",")
-              gcms <- paste(gcm_id[gcm %in% climr::list_gcms()[c(1, 4, 5, 6, 7, 10, 11, 12)], gcm_id], collapse = ",")
               ssps <- paste(ssp_id[ssp %in% climr::list_ssps()[c(1:3)], ssp_id], collapse = ",")
             } else {
               dataset <- paste(dataset_id[dataset %in% input$time_series_dataset, dataset_id], collapse = ",")
-              gcms <- paste(gcm_id[gcm %in% input$time_series_gcms, gcm_id], collapse = ",")
               ssps <- paste(ssp_id[ssp %in% input$time_series_ssps, ssp_id], collapse = ",")
             }
+            gcms <- paste(gcm_id[gcm %in% climr::list_gcms()[c(1, 4, 5, 6, 7, 10, 11, 12)], gcm_id], collapse = ",")
             code <- paste(climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code], collapse = ",")
             var <- var_id[var == code, var_id]
 
@@ -534,6 +535,89 @@ visualization_server <- function(input, output, session) {
             dat[run_id == "1", run_id := "ensembleMean"]
             dat <- dat[,-c("gcm_id","ssp_id", "dataset_id", "region", "var_id")]
             setnames(dat, old = c("run_id", "period", "value", "gcm", "ssp", "dataset"), new = c("RUN", "PERIOD", code, "GCM", "SSP", "DATASET"))
+            timeseries_data <<- dat
+            vis_sg$timeseries(timeseries_data)
+            shinyjs::enable("timeseries_download")
+          }
+        )
+      } else if (!is.null(vstore[["ecoregion"]]) & input$input_type == "Ecoregion") {
+        show_plots(TRUE)
+        withCallingHandlers(
+          message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+          warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+          error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+          {
+            # set up db query
+            region <- vstore[["ecoregion"]]
+            if (!input$ts_adj_plot) {
+              dataset <- paste(dataset_id[dataset %in% c("mswx.blend", "cru.gpcc", "climatena"), dataset_id], collapse = ",")
+              ssps <- paste(ssp_id2[ssp %in% climr::list_ssps()[c(1:3)], ssp_id], collapse = ",")
+            } else {
+              dataset <- paste(dataset_id[dataset %in% input$time_series_dataset, dataset_id], collapse = ",")
+              ssps <- paste(ssp_id2[ssp %in% input$time_series_ssps, ssp_id], collapse = ",")
+            }
+            code <- paste(climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code], collapse = ",")
+            var <- var_id[var == code, var_id]
+            
+            ## datasets
+            query <- sprintf("SELECT region, dataset_id, type_id, var_id, unnest(vals) value 
+                            FROM ecor_ts_datasets 
+                            WHERE region = '%s'
+                            AND var_id = %s", region, var)
+            dat_ds <- climr:::db_safe_query(query)
+            dat_ds <- as.data.table(dat_ds)
+            
+            # add periods
+            dataset_years <- c(1901:2024, 1901:2022, NA, NA, 1902:2023, NA, NA)
+            dat_ds[, period := dataset_years]
+            
+            # reformat data
+            dat_ds[, dataset_id %in% dataset]
+            dat_ds[dataset_id, dataset := i.dataset, on = "dataset_id"]
+            dat_ds[type_id, type := i.type, on = "type_id"]
+            dat_ds <- dat_ds[,-c("var_id", "dataset_id", "type_id")]
+            setnames(dat_ds, old = c("region", "dataset", "type", "value", "period"), new = c("REGION", "DATASET", "TYPE", "VAL", "PERIOD"))
+            
+            ## historical
+            query <- sprintf("SELECT region, ssp_id, type_id, var_id, unnest(vals) value 
+                            FROM ecor_ts_hist 
+                            WHERE region = '%s'
+                            AND var_id = %s", region, var)
+            dat_hist <- climr:::db_safe_query(query)
+            dat_hist <- as.data.table(dat_hist)
+            
+            # add periods
+            years_hist <- rep(sort(c(seq(1855, 2015, by=5), 2014)), 3)
+            dat_hist[, period := years_hist]
+            
+            # reformat data
+            dat_hist[ssp_id2, ssp := i.ssp, on = "ssp_id"]
+            dat_hist[type_id, type := i.type, on = "type_id"]
+            dat_hist <- dat_hist[,-c("var_id", "ssp_id", "type_id")]
+            setnames(dat_hist, old = c("region", "ssp", "type", "value", "period"), new = c("REGION", "SSP", "TYPE", "VAL", "PERIOD"))
+            
+            ## projected
+            query <- sprintf("SELECT region, ssp_id, type_id, var_id, unnest(vals) value 
+                            FROM ecor_ts_proj 
+                            WHERE region = '%s'
+                            AND var_id = %s", region, var)
+            dat_proj <- climr:::db_safe_query(query)
+            dat_proj <- as.data.table(dat_proj)
+            
+            # add periods
+            years_proj <- rep(c(2014, seq(2015, 2100, by=5)), 3*3)
+            dat_proj[, period := years_proj]
+            
+            # reformat data
+            dat_proj[, ssp_id %in% ssps]
+            dat_proj[ssp_id2, ssp := i.ssp, on = "ssp_id"]
+            dat_proj[type_id, type := i.type, on = "type_id"]
+            dat_proj <- dat_proj[,-c("var_id", "ssp_id", "type_id")]
+            setnames(dat_proj, old = c("region", "ssp", "type", "value", "period"), new = c("REGION", "SSP", "TYPE", "VAL", "PERIOD"))
+            
+            # join
+            dat <- rbindlist(list(dat_ds, dat_hist, dat_proj), fill = TRUE)
+            
             timeseries_data <<- dat
             vis_sg$timeseries(timeseries_data)
             shinyjs::enable("timeseries_download")
@@ -988,14 +1072,36 @@ visualization_server <- function(input, output, session) {
       width  <- session$clientData$output_timeseries_plot_width
       height <- session$clientData$output_timeseries_plot_height
       
-      png(file, width = width*pixelratio*1.5, height = height*pixelratio*1.5, res = 120*pixelratio)
-      print(climr::plot_timeSeries(
-        X = timeseries_data,
-        var1 = climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code],
-        obs_ts_dataset = if (!input$ts_adj_plot) c("mswx.blend") else input$time_series_dataset,
-        app = TRUE
+      png(file, width = width*pixelratio*1.75, height = height*pixelratio*1.5, res = 120*pixelratio)
+      if (input$input_type == "Map point") {
+        print(climr::plot_timeSeries(
+          X = timeseries_data,
+          var1 = climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code],
+          obs_ts_dataset = vstore[["ts_datasets"]],
+          gcms = vstore[["ts_gcms"]],
+          ssps = vstore[["ts_ssps"]],
+          app = TRUE
         )
-      )
+        )
+      } else if (input$input_type == "FLP Area") {
+        print(climr::plot_timeSeries(
+          X = timeseries_data,
+          var1 = climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code],
+          obs_ts_dataset = vstore[["ts_datasets"]],
+          ssps = vstore[["ts_ssps"]],
+          app = TRUE
+        )
+        )
+      } else {
+        print(climr::plot_timeSeries_preprocess(
+          X = timeseries_data,
+          var1 = climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code],
+          obs_ts_dataset = vstore[["ts_datasets"]],
+          ssps = vstore[["ts_ssps"]],
+          app = TRUE
+        )
+        )
+      }
       dev.off()
     }
   )
