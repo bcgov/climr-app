@@ -57,7 +57,10 @@ visualization_server <- function(input, output, session) {
     ecoregion = NULL,
     ts_datasets = c("mswx.blend", "cru.gpcc", "climatena"),
     ts_gcms = list_gcms()[c(1, 4, 5, 6, 7, 10, 11, 12)],
-    ts_ssps = list_ssps()[1:3]
+    ts_ssps = list_ssps()[1:3],
+    ts_time = "Annual",
+    biv_time_x = "Annual",
+    biv_time_y = "Annual"
   )
   
   # ---- Geometry
@@ -92,6 +95,7 @@ visualization_server <- function(input, output, session) {
         )
       }
     )
+    show_plots(FALSE)
   })
   
   # pop-up remove button for map points
@@ -185,6 +189,7 @@ visualization_server <- function(input, output, session) {
         )
       }
     )
+    show_plots(FALSE)
   })
   
   # ---- Visualization data events
@@ -200,13 +205,16 @@ visualization_server <- function(input, output, session) {
           choices = c("MSWX Blend" = "mswx.blend", "ClimateNA" = "climatena", "Climatic Research Unit / Global Precipitation Climatology Centre" = "cru.gpcc"),
           selected = vstore[["ts_datasets"]]
         ),
-        shiny::checkboxGroupInput(
-          inputId = "time_series_gcms",
-          label = h5("Choose GCMs:"),
-          width = "100%",
-          inline = TRUE,
-          choices = climr::list_gcms()[c(1, 4, 5, 6, 7, 10, 11, 12)],
-          selected = vstore[["ts_gcms"]]
+        shiny::conditionalPanel(
+          condition = "input.input_type == 'Map point'",
+          shiny::checkboxGroupInput(
+            inputId = "time_series_gcms",
+            label = h5("Choose GCMs:"),
+            width = "100%",
+            inline = TRUE,
+            choices = climr::list_gcms()[c(1, 4, 5, 6, 7, 10, 11, 12)],
+            selected = vstore[["ts_gcms"]]
+          )
         ),
         shiny::checkboxGroupInput(
           inputId = "time_series_ssps",
@@ -268,6 +276,15 @@ visualization_server <- function(input, output, session) {
   })
   
   # ---- Visualization Plot events
+  shiny::observeEvent(input$time_series_season, {
+    vstore[["ts_time"]] <- input$time_series_season
+  })
+  shiny::observeEvent(input$bivariate_time_x, {
+    vstore[["biv_time_x"]] <- input$bivariate_time_x
+  })
+  shiny::observeEvent(input$bivariate_time_y, {
+    vstore[["biv_time_y"]] <- input$bivariate_time_y
+  })
   shiny::observeEvent(input$ts_plot_info, {
     showModal(modalDialog(
       title = "What does this plot mean?",
@@ -715,33 +732,54 @@ visualization_server <- function(input, output, session) {
   # reactive outputs
   output$bivariate_valid_time_x <- shiny::renderUI({
     if (!is.null(input$bivariate_element_x)) {
+      available_time <- climr::variables[Code_Element == input$bivariate_element_x,] %>% pull(Time)
+      selected_time <- if (vstore[["biv_time_x"]] %in% available_time) {
+        vstore[["biv_time_x"]]
+      } else {
+        "Annual"
+      }
       shiny::selectInput(
         inputId = "bivariate_time_x",
         label = h6("Season/month:"),
         width = "100%",
-        choices = climr::variables[Code_Element == input$bivariate_element_x,] %>% pull(Time)
+        choices = climr::variables[Code_Element == input$bivariate_element_x,] %>% pull(Time),
+        selected = selected_time
       )
     }
   })
   
   output$bivariate_valid_time_y <- shiny::renderUI({
     if (!is.null(input$bivariate_element_y)) {
+      available_time <- climr::variables[Code_Element == input$bivariate_element_y,] %>% pull(Time)
+      selected_time <- if (vstore[["biv_time_y"]] %in% available_time) {
+        vstore[["biv_time_y"]]
+      } else {
+        "Annual"
+      }
       shiny::selectInput(
         inputId = "bivariate_time_y",
         label = h6("Season/month:"),
         width = "100%",
-        choices = climr::variables[Code_Element == input$bivariate_element_y,] %>% pull(Time)
+        choices = climr::variables[Code_Element == input$bivariate_element_y,] %>% pull(Time),
+        selected = selected_time
       )
     }
   })
   
   output$time_series_valid_season <- shiny::renderUI({
     if (!is.null(input$time_series_element)) {
+      available_time <- climr::variables[Code_Element == input$time_series_element,] %>% pull(Time)
+      selected_time <- if (vstore[["ts_time"]] %in% available_time) {
+        vstore[["ts_time"]]
+      } else {
+        "Annual"
+      }
       shiny::selectInput(
         inputId = "time_series_season",
         label = h5("Season/month:"),
         width = "100%",
-        choices = climr::variables[Code_Element == input$time_series_element,] %>% pull(Time)
+        choices = climr::variables[Code_Element == input$time_series_element,] %>% pull(Time),
+        selected = selected_time
       )
     }
   })

@@ -494,7 +494,7 @@ shiny::shinyApp(
                                                      label = h6("Element:"),
                                                      width = "100%",
                                                      choices = unique(climr::variables %>% filter(!Code_Element %in% c("CMI", "EXT", "EMT", "MAP", "MAT", "RH", "MSP", "AHM", "SHM")) %>% pull(Code_Element)),
-                                                     selected = "Tmax"
+                                                     selected = "Tave"
                                                    )
                                                  ),
                                                  column(
