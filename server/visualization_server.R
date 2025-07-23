@@ -1084,7 +1084,7 @@ visualization_server <- function(input, output, session) {
   
   output$wl_download <- shiny::downloadHandler(
     filename = function() {
-      paste0("walter_lieth_plot_", if (input$input_type != "Map Point") input$dist_click else "mappoint", ".png")
+      paste0("walter_lieth_plot_", if (input$input_type != "Map point") input$dist_click else "mappoint", ".png")
     },
     content = function(file) {
       pixelratio <- session$clientData$pixelratio
@@ -1092,11 +1092,23 @@ visualization_server <- function(input, output, session) {
       height <- session$clientData$output_wl_plot_height
       
       png(file, width = width*pixelratio*1.5, height = height*pixelratio*1.5, res = 120*pixelratio)
-      print(climr::plot_WalterLieth(
-        X = wl_data,
-        diurnal = input$wl_diurnal,
-        obs_period = input$wl_obs_period
-      ))
+      if (input$input_type == "Map point") {
+        print(climr::plot_WalterLieth(
+          X = wl_data,
+          diurnal = input$wl_diurnal,
+          obs_period = input$wl_obs_period,
+          location = vis_sg_dt$dt[,wkt],
+          app = TRUE
+        ))
+      } else {
+        print(climr::plot_WalterLieth(
+          X = wl_data,
+          diurnal = input$wl_diurnal,
+          obs_period = input$wl_obs_period,
+          location = input$dist_click,
+          app = TRUE
+        ))
+      }
       dev.off()
     }
   )
