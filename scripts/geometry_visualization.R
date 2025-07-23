@@ -277,14 +277,29 @@ visualization_geometry <- function(dt, mp) {
           warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
           error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
           {
-            isolate({
-              climr::plot_timeSeries_preprocess(
-                X = timeseries_data,
-                var1 = climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code],
-                obs_ts_dataset = vstore[["ts_datasets"]],
-                ssps = vstore[["ts_ssps"]],
-                app = TRUE
-              )
+            tryCatch({
+              isolate({
+                climr::plot_timeSeries_preprocess(
+                  X = timeseries_data,
+                  var1 = climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code],
+                  obs_ts_dataset = vstore[["ts_datasets"]],
+                  ssps = vstore[["ts_ssps"]],
+                  app = TRUE
+                  )
+                })
+              }, error = function(e) {
+                if (grepl("need finite 'ylim' values", e$message)) {
+                  showModal(
+                    modalDialog(
+                      title = "Error!",
+                      paste("We don't currently have time series data for this ecoregion, but we are working on it!"),
+                      easyClose = TRUE
+                    )
+                  )
+                  return()
+                } else {
+                  stop(e)  # Re-throw if not the expected error
+                }
             })
           }
         )
