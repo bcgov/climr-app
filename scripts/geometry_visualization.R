@@ -310,7 +310,7 @@ visualization_geometry <- function(dt, mp) {
             )
           }
         )
-      } else if (input$input_type == "FLP Area" | input$input_type == "Ecoregion") {
+      } else if (input$input_type == "FLP Area") {
         withCallingHandlers(
           message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
           warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
@@ -322,6 +322,23 @@ visualization_geometry <- function(dt, mp) {
                 diurnal = input$wl_diurnal,
                 obs_period = input$wl_obs_period,
                 location = input$dist_click,
+                app = TRUE
+              )
+            })
+          }
+        )
+      } else if (input$input_type == "Ecoregion") {
+        withCallingHandlers(
+          message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+          warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+          error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+          {
+            isolate({
+              climr::plot_WalterLieth(
+                X = wl_data,
+                diurnal = input$wl_diurnal,
+                obs_period = input$wl_obs_period,
+                location = er_codes[input$dist_click],
                 app = TRUE
               )
             })

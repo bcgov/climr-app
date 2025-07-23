@@ -385,7 +385,7 @@ shiny::shinyApp(
                                              class = "tight-card",
                                              style = "height: 75vh;", 
                                              bslib::card(
-                                               title = "Time Series Variable",
+                                               title = "Time Series",
                                                style = "height: 99%; overflow-y: auto;",
                                                shiny::div(
                                                  style = "text-align: center;",
@@ -456,7 +456,7 @@ shiny::shinyApp(
                                              class = "tight-card",
                                              style = "height: 75vh;", 
                                              bslib::card(
-                                               title = "Bivariate Plot Variables",
+                                               title = "Bivariate Plot",
                                                style = "height: 99%; overflow-y: auto;",
                                                shiny::div(
                                                  style = "text-align: center;",
@@ -547,7 +547,7 @@ shiny::shinyApp(
                                              class = "tight-card",
                                              style = "height: 75vh;", 
                                              bslib::card(
-                                               title = "Walter-Lieth Variables",
+                                               title = "Walter-Lieth Climate Diagram",
                                                style = "height: 99%; overflow-y: auto;",
                                                shiny::div(
                                                  style = "text-align: center;",

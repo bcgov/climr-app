@@ -1100,6 +1100,14 @@ visualization_server <- function(input, output, session) {
           location = vis_sg_dt$dt[,wkt],
           app = TRUE
         ))
+      } else if (input$input_type == "Ecoregion") {
+        print(climr::plot_WalterLieth(
+          X = wl_data,
+          diurnal = input$wl_diurnal,
+          obs_period = input$wl_obs_period,
+          location = er_codes[input$dist_click],
+          app = TRUE
+        ))
       } else {
         print(climr::plot_WalterLieth(
           X = wl_data,
