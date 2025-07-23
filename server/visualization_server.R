@@ -1091,7 +1091,7 @@ visualization_server <- function(input, output, session) {
       width  <- session$clientData$output_wl_plot_width
       height <- session$clientData$output_wl_plot_height
       
-      png(file, width = width*pixelratio*1.5, height = height*pixelratio*1.5, res = 120*pixelratio)
+      png(file, width = width*pixelratio*1.75, height = height*pixelratio*1.5, res = 120*pixelratio)
       if (input$input_type == "Map point") {
         print(climr::plot_WalterLieth(
           X = wl_data,
