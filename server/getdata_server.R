@@ -109,7 +109,8 @@ getdata_server <- function(input, output, session) {
     downscale_output = "csv",
     downscale_resolution = 2500,
     vscale = "none",
-    processing = FALSE
+    processing = FALSE,
+    include_dem = TRUE
   )
   
   # ---- Geometry
@@ -776,6 +777,10 @@ getdata_server <- function(input, output, session) {
     downscale_modal()
   })
   
+  shiny::observeEvent(input$include_dem, {
+    if (shiny::in_devmode()) cat("Event: include_dem", sep = "\n")
+    vstore[["include_dem"]] <- input$include_dem
+  })
   shiny::observeEvent(input$generate_results, {
     if (shiny::in_devmode()) cat("Event: generate_results", sep = "\n")
     # check that it is possible to downscale the data 
@@ -823,6 +828,15 @@ getdata_server <- function(input, output, session) {
             title = "Preferences for Downscale Processing", size = "l",
             shiny::uiOutput("downscale_output_buttons"),
             shiny::uiOutput("downscale_points_count_estimate"),
+            shiny::conditionalPanel(
+              condition = "input.downscale_output == 'tif'",
+              tags$div(style = "margin-top: 10px;"),
+              shiny::checkboxInput(
+                inputId = "include_dem",
+                label = "Include elevation map in results",
+                value = TRUE
+              )
+            ),
             shiny::actionButton(
               inputId = "downscale_process_launch",
               label = "Launch Downscale Process",
@@ -833,7 +847,7 @@ getdata_server <- function(input, output, session) {
             
             # preview for csv results
             shiny::uiOutput("preview_table_ui"),
-
+            
             shiny::conditionalPanel(
               condition = "input.downscale_output == 'csv'",
               tags$div(style = "margin-top: 10px;"),
@@ -888,7 +902,7 @@ getdata_server <- function(input, output, session) {
   shiny::observeEvent(input$downscale_process_launch, {
     if (shiny::in_devmode()) cat("Event: downscale_process_launch", sep = "\n")
     if (vstore[["processing"]]) return()
-    
+
     if (input$downscale_output == "csv") {
       show_csv_dt(TRUE)
     } else {

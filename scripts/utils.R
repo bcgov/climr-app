@@ -557,7 +557,6 @@ generate_run_id <- function() {
 albers_crs <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m"
 
 process_downscale <- function(sg, cec, vstore, fg, run_id) {
-
   output_files <- c()
   n <- \(x) if (length(x) && !"NULL" %in% x) x
   # Create temporary directory
@@ -681,6 +680,10 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
     }  
 
     res <- ds(xyz)
+    # add xyz as dem if indicated
+    if (vstore[["include_dem"]]) {
+      add(res) <- xyz
+    }
     
     # keep a copy of res for previewing raster
     preview_raster <<- res
@@ -731,6 +734,10 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
         }
       } 
       res <- ds(xyz)
+      # add xyz as dem if indicated
+      if (vstore[["include_dem"]]) {
+        add(res) <- xyz
+      }
       # Write the current res to tif using the same run_id
       out_file <- file.path(temp_dir, paste0("downscale_", run_id, "_raster_",i,".%s" |> sprintf(vstore[["downscale_output"]])))
       if (vstore[["downscale_output"]] %in% "tif") {
@@ -792,6 +799,10 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
         }
       } 
       res <- ds(xyz)
+      # add xyz as dem if indicated
+      if (vstore[["include_dem"]]) {
+        add(res) <- xyz
+      }
       res <- terra::mask(res, g)
       
       # Write the current res to tif using the same run_id
@@ -844,6 +855,10 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
           }
         } 
         res <- ds(xyz)
+        # add xyz as dem if indicated
+        if (vstore[["include_dem"]]) {
+          add(res) <- xyz
+        }
         res <- terra::mask(res, g)
         
         # Write the current res to tif using the same run_id
