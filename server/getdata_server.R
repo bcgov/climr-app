@@ -959,7 +959,7 @@ getdata_server <- function(input, output, session) {
   shiny::observeEvent(input$preview_raster, {
     if (shiny::in_devmode()) cat("Event: downscale_raster_preview", sep = "\n")
     if (vstore[["downscale_output"]] == "tif") {
-      
+
       # update all preview options in vstore
       vstore[["ds_ras_elements"]] = input$ds_ras_elements
       vstore[["ds_ras_time_periods"]] = input$ds_ras_time_periods
@@ -994,7 +994,10 @@ getdata_server <- function(input, output, session) {
         keywords <- c(code, period, time_period)
         
         layer_match <- raster_names[
-          Reduce(`&`, lapply(keywords, function(k) grepl(k, raster_names)))
+          Reduce(`&`, lapply(keywords, function(k) {
+            pattern <- if (k %in% keywords[1]) paste0("(^|_)", k, "(_|$)") else k
+            grepl(pattern, raster_names)
+          }))
         ]
       }
       
@@ -1006,7 +1009,10 @@ getdata_server <- function(input, output, session) {
         keywords <- c(code, gcm, ssp, run, time_period)
         
         layer_match <- raster_names[
-          Reduce(`&`, lapply(keywords, function(k) grepl(k, raster_names)))
+          Reduce(`&`, lapply(keywords, function(k) {
+            pattern <- if (k %in% keywords[1]) paste0("(^|_)", k, "(_|$)") else k
+            grepl(pattern, raster_names)
+          }))
         ]
       }
       
@@ -1034,7 +1040,10 @@ getdata_server <- function(input, output, session) {
         type <- raster_layers[Code_Element == vstore[["ds_ras_elements"]] & Time == vstore[["ds_ras_time_periods"]], Type]
         keywords <- c("REFPERIOD", code)
         ref_period_raster <- raster_names[
-          Reduce(`&`, lapply(keywords, function(k) grepl(k, raster_names)))
+          Reduce(`&`, lapply(keywords, function(k) {
+            pattern <- if (k %in% keywords[2]) paste0("(^|_)", k, "(_|$)") else k
+            grepl(pattern, raster_names)
+          }))
         ]
         
         # set palettes
@@ -1100,7 +1109,7 @@ getdata_server <- function(input, output, session) {
             legend_title <- glue::glue("Change in {legend_title} from 1961_1990 to {time_period}")
             
             leaflet::addRasterImage(getdata_mp, display_raster, layerId = "rast_layer", colors = pal)
-            leaflet::addLegend(getdata_mp, pal = pal, values = values(display_raster), title = HTML(sprintf("<div style='width: 200px;'>%s</div>", legend_title)), labFormat = labelFormat(suffix = units))
+            leaflet::addLegend(getdata_mp, pal = pal, values = values(display_raster), title = HTML(sprintf("<div style='width: 100px;'>%s</div>", legend_title)), labFormat = labelFormat(suffix = units))
           }
         }
       } else {
@@ -1136,7 +1145,7 @@ getdata_server <- function(input, output, session) {
         # if log-transformed, set legend steps - need to do this!
         
         # add legend
-        leaflet::addLegend(getdata_mp, pal = pal, values = values(raster_layer_values), title = HTML(sprintf("<div style='width: 200px;'>%s</div>", legend_title)), labFormat = if (vstore[["log_transform_raster"]] & variable_type == "ratio") inv_log2_formatter else labelFormat(suffix = units))
+        leaflet::addLegend(getdata_mp, pal = pal, values = values(raster_layer_values), title = HTML(sprintf("<div style='width: 100px;'>%s</div>", legend_title)), labFormat = if (vstore[["log_transform_raster"]] & variable_type == "ratio") inv_log2_formatter else labelFormat(suffix = units))
       }
     }  
   })
