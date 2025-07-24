@@ -1182,15 +1182,6 @@ visualization_server <- function(input, output, session) {
           app = TRUE
         )
         )
-      } else if (input$input_type == "FLP Area") {
-        print(climr::plot_timeSeries(
-          X = timeseries_data,
-          var1 = climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code],
-          obs_ts_dataset = vstore[["ts_datasets"]],
-          ssps = vstore[["ts_ssps"]],
-          app = TRUE
-        )
-        )
       } else {
         print(climr::plot_timeSeries_preprocess(
           X = timeseries_data,
