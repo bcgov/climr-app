@@ -515,7 +515,7 @@ visualization_server <- function(input, output, session) {
             easyClose = TRUE
           )
         )
-      } else if ((!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area")) {
+      } else if (!is.null(vstore[["flp_area"]]) & input$input_type == "FLP Area") {
         show_plots(TRUE)
         withCallingHandlers(
           message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
@@ -526,32 +526,73 @@ visualization_server <- function(input, output, session) {
             region <- vstore[["flp_area"]]
             if (!input$ts_adj_plot) {
               dataset <- paste(dataset_id[dataset %in% c("mswx.blend", "cru.gpcc", "climatena"), dataset_id], collapse = ",")
-              ssps <- paste(ssp_id[ssp %in% climr::list_ssps()[c(1:3)], ssp_id], collapse = ",")
+              ssps <- paste(ssp_id2[ssp %in% climr::list_ssps()[c(1:3)], ssp_id], collapse = ",")
             } else {
               dataset <- paste(dataset_id[dataset %in% input$time_series_dataset, dataset_id], collapse = ",")
-              ssps <- paste(ssp_id[ssp %in% input$time_series_ssps, ssp_id], collapse = ",")
+              ssps <- paste(ssp_id2[ssp %in% input$time_series_ssps, ssp_id], collapse = ",")
             }
-            gcms <- paste(gcm_id[gcm %in% climr::list_gcms()[c(1, 4, 5, 6, 7, 10, 11, 12)], gcm_id], collapse = ",")
             code <- paste(climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code], collapse = ",")
             var <- var_id[var == code, var_id]
-
-            query <- sprintf("SELECT * FROM ds_timeseries WHERE region = '%s' 
-                            AND (gcm_id IN (%s) OR gcm_id IS NULL)
-                            AND (ssp_id IN (%s) OR ssp_id IS NULL)
-                            AND (dataset_id IN (%s) OR dataset_id IS NULL)
-                            AND var_id = %s
-                            ORDER BY gcm_id, period, run_id, ssp_id", region, gcms, ssps, dataset, var)
-            dat <- climr:::db_safe_query(query)
-            dat <- as.data.table(dat)
-
+            
+            ## datasets
+            query <- sprintf("SELECT region, dataset_id, type_id, var_id, unnest(vals) value 
+                            FROM flp_ts_datasets 
+                            WHERE region = '%s'
+                            AND var_id = %s", region, var)
+            dat_ds <- climr:::db_safe_query(query)
+            dat_ds <- as.data.table(dat_ds)
+            
+            # add periods
+            dataset_years <- c(1901:2024, 1901:2022, NA, NA, 1902:2023, NA, NA)
+            dat_ds[, period := dataset_years]
+            
             # reformat data
-            dat[gcm_id, gcm := i.gcm, on = "gcm_id"]
-            dat[ssp_id, ssp := i.ssp, on = "ssp_id"]
-            dat[dataset_id, dataset := i.dataset, on = "dataset_id"]
-            dat[, run_id := as.character(run_id)]
-            dat[run_id == "1", run_id := "ensembleMean"]
-            dat <- dat[,-c("gcm_id","ssp_id", "dataset_id", "region", "var_id")]
-            setnames(dat, old = c("run_id", "period", "value", "gcm", "ssp", "dataset"), new = c("RUN", "PERIOD", code, "GCM", "SSP", "DATASET"))
+            dat_ds[, dataset_id %in% dataset]
+            dat_ds[dataset_id, dataset := i.dataset, on = "dataset_id"]
+            dat_ds[type_id, type := i.type, on = "type_id"]
+            dat_ds <- dat_ds[,-c("var_id", "dataset_id", "type_id")]
+            setnames(dat_ds, old = c("region", "dataset", "type", "value", "period"), new = c("REGION", "DATASET", "TYPE", "VAL", "PERIOD"))
+            
+            ## historical
+            query <- sprintf("SELECT region, ssp_id, type_id, var_id, unnest(vals) value 
+                            FROM flp_ts_hist 
+                            WHERE region = '%s'
+                            AND var_id = %s", region, var)
+            dat_hist <- climr:::db_safe_query(query)
+            dat_hist <- as.data.table(dat_hist)
+            
+            # add periods
+            years_hist <- rep(sort(c(seq(1855, 2015, by=5), 2014)), 3)
+            dat_hist[, period := years_hist]
+            
+            # reformat data
+            dat_hist[ssp_id2, ssp := i.ssp, on = "ssp_id"]
+            dat_hist[type_id, type := i.type, on = "type_id"]
+            dat_hist <- dat_hist[,-c("var_id", "ssp_id", "type_id")]
+            setnames(dat_hist, old = c("region", "ssp", "type", "value", "period"), new = c("REGION", "SSP", "TYPE", "VAL", "PERIOD"))
+            
+            ## projected
+            query <- sprintf("SELECT region, ssp_id, type_id, var_id, unnest(vals) value 
+                            FROM flp_ts_proj 
+                            WHERE region = '%s'
+                            AND var_id = %s", region, var)
+            dat_proj <- climr:::db_safe_query(query)
+            dat_proj <- as.data.table(dat_proj)
+            
+            # add periods
+            years_proj <- rep(c(2014, seq(2015, 2100, by=5)), 3*3)
+            dat_proj[, period := years_proj]
+            
+            # reformat data
+            dat_proj[, ssp_id %in% ssps]
+            dat_proj[ssp_id2, ssp := i.ssp, on = "ssp_id"]
+            dat_proj[type_id, type := i.type, on = "type_id"]
+            dat_proj <- dat_proj[,-c("var_id", "ssp_id", "type_id")]
+            setnames(dat_proj, old = c("region", "ssp", "type", "value", "period"), new = c("REGION", "SSP", "TYPE", "VAL", "PERIOD"))
+            
+            # join
+            dat <- rbindlist(list(dat_ds, dat_hist, dat_proj), fill = TRUE)
+            
             timeseries_data <<- dat
             vis_sg$timeseries(timeseries_data)
             shinyjs::enable("timeseries_download")

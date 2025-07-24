@@ -254,24 +254,7 @@ visualization_geometry <- function(dt, mp) {
             )
           }
         )
-      } else if (input$input_type == "FLP Area") {
-        withCallingHandlers(
-          message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
-          warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
-          error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
-          {
-            isolate({
-              climr::plot_timeSeries(
-                X = timeseries_data,
-                var1 = climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code],
-                obs_ts_dataset = vstore[["ts_datasets"]],
-                ssps = vstore[["ts_ssps"]],
-                app = TRUE
-              )
-            })
-          }
-        )
-      } else if (input$input_type == "Ecoregion") {
+      } else if (input$input_type == "FLP Area" | input$input_type == "Ecoregion") {
         withCallingHandlers(
           message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
           warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
