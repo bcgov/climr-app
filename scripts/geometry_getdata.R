@@ -138,7 +138,28 @@ session_geometry <- function(sg_dt, mp) {
     e_poly <- as.polygons(e)
     crs(e_poly) <- "EPSG:4326"
     
-    if (grepl("POINT", new)) {
+    if (grepl("MULTIPOINT", new)) {
+      
+      # check if points are within valid space
+      mp <- terra::vect(new, crs = crs(e_poly))
+      intersection <- terra::intersect(e_poly, mp)
+      
+      lat <- NA
+      lon <- NA
+      area <- 0
+      
+      if (nrow(intersection) == 0) {
+        showModal(
+          modalDialog(
+            title = "Warning",
+            paste("Please select a point or area within North America." ),
+            easyClose = TRUE
+          )
+        )
+        return()
+      }
+      
+    } else if (grepl("POINT", new)) {
       
       # Extract long and lat coordinates
       coords <- gsub("POINT \\(|\\)", "", new)
@@ -391,7 +412,7 @@ session_geometry <- function(sg_dt, mp) {
           shiny::showNotification("Uploaded point csv has more than 100 points. Displaying convex hull.", type = "message")
           new_p <- terra::vect(new_p, "EPSG:4326") |>
             terra::aggregate() |>
-            terra::hull(type = "convex") |>
+            terra::convHull() |>
             terra::geom(wkt = TRUE)
         }
         push(new_p, "marker", "file_upload", d0)
@@ -769,7 +790,7 @@ session_geometry <- function(sg_dt, mp) {
           marker <- sum(marker, length(file_idx))
           marker_count <- vapply(file_idx, \(i) {
             curf <- fg[[(sg_dt$dt)[["datapath"]][i]]]
-            nrow(curf$table)  
+            nrow(curf$table)
           }, FUN.VALUE = integer(1)) |> sum(marker_count, na.rm = TRUE)
         }
       }

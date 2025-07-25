@@ -793,7 +793,7 @@ getdata_server <- function(input, output, session) {
       # ensure all data sources are the same before opening Downscale Launch window
       if (length(unique((sources))) == 1) {
         # ensure only 1 area has been selected
-        if (any(c("map_draw", "file_upload") %in% sources) & nrow(temp_dt) > 1) {
+        if (any(c("map_draw", "file_upload") %in% sources) & nrow(temp_dt) > 1 & unique(temp_dt$group) != "marker") {
           showModal(
             modalDialog(
               title = "Warning",

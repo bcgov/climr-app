@@ -680,14 +680,6 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
     }  
     
     res <- ds(xyz)
-    # add xyz as dem if indicated
-    if (vstore[["include_dem"]]) {
-      add(res) <- xyz
-      names(res)[nlyr(res)] <- "NA_DEM"
-    }
-    
-    # keep a copy of res for previewing raster
-    preview_raster <<- res
     
     # Write the current res to CSV using the same run_id
     csv_file <- file.path(temp_dir, paste0("downscale_", run_id, ".csv"))
@@ -736,7 +728,7 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
       } 
       res <- ds(xyz)
       # add xyz as dem if indicated
-      if (vstore[["include_dem"]]) {
+      if (vstore[["downscale_output"]] %in% "tif" & vstore[["include_dem"]]) {
         add(res) <- xyz
         names(res)[nlyr(res)] <- "NA_DEM"
       }
@@ -802,7 +794,7 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
       } 
       res <- ds(xyz)
       # add xyz as dem if indicated
-      if (vstore[["include_dem"]]) {
+      if (vstore[["downscale_output"]] %in% "tif" & vstore[["include_dem"]]) {
         add(res) <- xyz
         names(res)[nlyr(res)] <- "NA_DEM"
       }
@@ -859,7 +851,7 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
         } 
         res <- ds(xyz)
         # add xyz as dem if indicated
-        if (vstore[["include_dem"]]) {
+        if (vstore[["downscale_output"]] %in% "tif" & vstore[["include_dem"]]) {
           add(res) <- xyz
           names(res)[nlyr(res)] <- "NA_DEM"
         }
