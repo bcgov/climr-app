@@ -485,7 +485,8 @@ getdata_server <- function(input, output, session) {
   
   # applies all user specified downscale parameters
   shiny::observeEvent(input$downscale_apply, {
-    # remove any existing raster previews
+    # remove any existing csv or raster previews
+    show_csv_dt(FALSE)
     show_raster_ui(FALSE)
     leaflet::removeImage(getdata_mp, "rast_layer")
     leaflet::clearControls(getdata_mp)
@@ -1183,7 +1184,7 @@ getdata_server <- function(input, output, session) {
             ),
             shiny::radioButtons(
               inputId = "downscale_obs_ts_dataset",
-              label = h5("Choose observation time-series data:",
+              label = h5("Choose observational time-series dataset:",
                          prompter::add_prompt(
                            tooltipsIcon,
                            message = HTML(paste("Dataset for observational time series data. MSWX Blend for Multi-Source Weather, ClimateNA gridded time series, CRU/GPCC for CRU TS (temperature) and GPCC (precipitation).")),
