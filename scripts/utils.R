@@ -596,7 +596,7 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
       elevs <- terra::extract(cec, marker_geoms, method = "bilinear", ID = FALSE, raw = TRUE)[,1]
       marker_dt <- data.table::data.table(
         sg_id = sg$id[marker_idx],
-        id = seq_len(length(marker_idx)) + 9999,
+        id = sg$id[marker_idx],
         lon = coords[, 1],
         lat = coords[, 2],
         elev = elevs
