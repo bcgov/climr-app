@@ -506,7 +506,6 @@ session_geometry <- function(sg_dt, mp) {
               req(output_files)
               
               dt <- head(read.csv(output_files))
-              
               DT::datatable(dt, rownames = FALSE, escape = FALSE, options = list(
                 dom = 't', scrollX = TRUE),   caption = htmltools::tags$caption(
                   style = 'caption-side: top; text-align: left; color: black; font-weight: bold;',

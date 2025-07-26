@@ -605,7 +605,7 @@ getdata_server <- function(input, output, session) {
           easyClose = TRUE
         )
       )
-    } else if (n_layers > 4000) { # THIS THRESHOLD MAY NEED TO CHANGE
+    } else if (n_layers > 40000) {
       showModal(
         modalDialog(
           title = "Warning - Exceeds job size limit!",
@@ -721,6 +721,16 @@ getdata_server <- function(input, output, session) {
       safe_length(vstore[[p]])
     })
     
+    # for derived variables, add in months and seasons
+    if (!is.null(vstore[["downscale_custom_time_periods"]]) & "Custom" %in% vstore[["downscale_extra_vars_sets"]]) {
+      if ("Annual" %in% vstore[["downscale_custom_time_periods"]]) {
+        layer_factors <- c(layer_factors, Annual = 16)
+      }
+      if (any(c("Winter", "Spring", "Summer", "Fall") %in% vstore[["downscale_custom_time_periods"]])) {
+        layer_factors <- c(layer_factors, Seasonal = 4)
+      }
+    }
+    
     return(prod(layer_factors))
   }
   
@@ -729,13 +739,13 @@ getdata_server <- function(input, output, session) {
     n_layers <- calculate_layers()
 
     # predefine point caps based on the number of layers to downscale
-    if (n_layers <= 50) cap <- 150000
-    else if (n_layers <= 100) cap <- 75000
-    else if (n_layers <= 200) cap <- 35000
-    else if (n_layers <= 500) cap <- 15000
-    else if (n_layers <= 1000) cap <- 7500
-    else if (n_layers <= 2000) cap <- 3500
-    else cap <- 1750
+    if (n_layers <= 1000) cap <- 150000
+    else if (n_layers <= 2000) cap <- 75000
+    else if (n_layers <= 4000) cap <- 37500
+    else if (n_layers <= 8000) cap <- 20000
+    else if (n_layers <= 16000) cap <- 10000
+    else if (n_layers <= 32000) cap <- 5000
+    else cap <- 2500
     
     # base cell area on AOI area in m^2 / number of allowed points
     cell_area <- as.numeric((getdata_sg_dt$dt)$area)/cap
@@ -788,7 +798,8 @@ getdata_server <- function(input, output, session) {
     temp_dt <- getdata_sg_dt$dt
     n_layers <- calculate_layers()
     
-    if (!is.null(temp_dt) & nrow(temp_dt) > 0 & n_layers < 4000) {
+    if (!is.null(temp_dt) & nrow(temp_dt) > 0 & n_layers < 40000) {
+      
       sources <- unique(na.omit(temp_dt$source))
       
       # ensure all data sources are the same before opening Downscale Launch window
@@ -869,7 +880,7 @@ getdata_server <- function(input, output, session) {
           )
         )
       }
-    } else if (n_layers >= 4000) {
+    } else if (n_layers >= 40000) {
       showModal(
         modalDialog(
           title = "Warning - Exceeds job size limit!",
