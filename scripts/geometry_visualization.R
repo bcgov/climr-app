@@ -254,37 +254,35 @@ visualization_geometry <- function(dt, mp) {
             )
           }
         )
-      } else if (input$input_type == "FLP Area") {
+      } else if (input$input_type == "FLP Area" | input$input_type == "Ecoregion") {
         withCallingHandlers(
           message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
           warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
           error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
           {
-            isolate({
-              climr::plot_timeSeries(
-                X = timeseries_data,
-                var1 = climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code],
-                obs_ts_dataset = vstore[["ts_datasets"]],
-                ssps = vstore[["ts_ssps"]],
-                app = TRUE
-              )
-            })
-          }
-        )
-      } else if (input$input_type == "Ecoregion") {
-        withCallingHandlers(
-          message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
-          warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
-          error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
-          {
-            isolate({
-              climr::plot_timeSeries_preprocess(
-                X = timeseries_data,
-                var1 = climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code],
-                obs_ts_dataset = vstore[["ts_datasets"]],
-                ssps = vstore[["ts_ssps"]],
-                app = TRUE
-              )
+            tryCatch({
+              isolate({
+                climr::plot_timeSeries_preprocess(
+                  X = timeseries_data,
+                  var1 = climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code],
+                  obs_ts_dataset = vstore[["ts_datasets"]],
+                  ssps = vstore[["ts_ssps"]],
+                  app = TRUE
+                  )
+                })
+              }, error = function(e) {
+                if (grepl("need finite 'ylim' values", e$message)) {
+                  showModal(
+                    modalDialog(
+                      title = "Error!",
+                      paste("We don't currently have time series data for this ecoregion, but we are working on it!"),
+                      easyClose = TRUE
+                    )
+                  )
+                  return()
+                } else {
+                  stop(e)  # Re-throw if not the expected error
+                }
             })
           }
         )
@@ -304,11 +302,13 @@ visualization_geometry <- function(dt, mp) {
           climr::plot_WalterLieth(
               X = wl_data,
               diurnal = input$wl_diurnal,
-              obs_period = input$wl_obs_period
+              obs_period = input$wl_obs_period,
+              location = dt$dt[,wkt],
+              app = TRUE
             )
           }
         )
-      } else if (input$input_type == "FLP Area" | input$input_type == "Ecoregion") {
+      } else if (input$input_type == "FLP Area") {
         withCallingHandlers(
           message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
           warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
@@ -318,7 +318,26 @@ visualization_geometry <- function(dt, mp) {
               climr::plot_WalterLieth(
                 X = wl_data,
                 diurnal = input$wl_diurnal,
-                obs_period = input$wl_obs_period
+                obs_period = input$wl_obs_period,
+                location = input$dist_click,
+                app = TRUE
+              )
+            })
+          }
+        )
+      } else if (input$input_type == "Ecoregion") {
+        withCallingHandlers(
+          message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
+          warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
+          error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
+          {
+            isolate({
+              climr::plot_WalterLieth(
+                X = wl_data,
+                diurnal = input$wl_diurnal,
+                obs_period = input$wl_obs_period,
+                location = er_codes[input$dist_click],
+                app = TRUE
               )
             })
           }

@@ -557,7 +557,6 @@ generate_run_id <- function() {
 albers_crs <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m"
 
 process_downscale <- function(sg, cec, vstore, fg, run_id) {
-
   output_files <- c()
   n <- \(x) if (length(x) && !"NULL" %in% x) x
   # Create temporary directory
@@ -597,7 +596,7 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
       elevs <- terra::extract(cec, marker_geoms, method = "bilinear", ID = FALSE, raw = TRUE)[,1]
       marker_dt <- data.table::data.table(
         sg_id = sg$id[marker_idx],
-        id = seq_len(length(marker_idx)) + 9999,
+        id = sg$id[marker_idx],
         lon = coords[, 1],
         lat = coords[, 2],
         elev = elevs
@@ -679,11 +678,8 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
         return()
       }
     }  
-
-    res <- ds(xyz)
     
-    # keep a copy of res for previewing raster
-    preview_raster <<- res
+    res <- ds(xyz)
     
     # Write the current res to CSV using the same run_id
     csv_file <- file.path(temp_dir, paste0("downscale_", run_id, ".csv"))
@@ -731,6 +727,11 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
         }
       } 
       res <- ds(xyz)
+      # add xyz as dem if indicated
+      if (vstore[["downscale_output"]] %in% "tif" & vstore[["include_dem"]]) {
+        add(res) <- xyz
+        names(res)[nlyr(res)] <- "NA_DEM"
+      }
       # Write the current res to tif using the same run_id
       out_file <- file.path(temp_dir, paste0("downscale_", run_id, "_raster_",i,".%s" |> sprintf(vstore[["downscale_output"]])))
       if (vstore[["downscale_output"]] %in% "tif") {
@@ -792,6 +793,11 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
         }
       } 
       res <- ds(xyz)
+      # add xyz as dem if indicated
+      if (vstore[["downscale_output"]] %in% "tif" & vstore[["include_dem"]]) {
+        add(res) <- xyz
+        names(res)[nlyr(res)] <- "NA_DEM"
+      }
       res <- terra::mask(res, g)
       
       # Write the current res to tif using the same run_id
@@ -844,6 +850,11 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
           }
         } 
         res <- ds(xyz)
+        # add xyz as dem if indicated
+        if (vstore[["downscale_output"]] %in% "tif" & vstore[["include_dem"]]) {
+          add(res) <- xyz
+          names(res)[nlyr(res)] <- "NA_DEM"
+        }
         res <- terra::mask(res, g)
         
         # Write the current res to tif using the same run_id

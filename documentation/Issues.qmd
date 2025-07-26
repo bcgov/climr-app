@@ -18,3 +18,5 @@ repo </a>.
 - For raster downscaling in the **Get Data** tab, there are limits set on the job size based on the estimated number of output raster layers. If a user wants a higher resolution than is available given the input parameters, we recommend either running the downscale process one GCM at a time or one variable at a time, as this will decrease the number of output raster layers. We are currently working on ways to address this issue.
 
 - In the **Visualization** tab, the 1961-1990 baseline for Continentality (TD) in the Time Series plots (the dashed line) is incorrect. This is likely inherent in the calculation of TD.
+
+- In the **Visualization** tab, we are missing time series data for some ecoregions. We are working on this!

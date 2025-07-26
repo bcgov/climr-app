@@ -109,7 +109,8 @@ getdata_server <- function(input, output, session) {
     downscale_output = "csv",
     downscale_resolution = 2500,
     vscale = "none",
-    processing = FALSE
+    processing = FALSE,
+    include_dem = TRUE
   )
   
   # ---- Geometry
@@ -484,7 +485,8 @@ getdata_server <- function(input, output, session) {
   
   # applies all user specified downscale parameters
   shiny::observeEvent(input$downscale_apply, {
-    # remove any existing raster previews
+    # remove any existing csv or raster previews
+    show_csv_dt(FALSE)
     show_raster_ui(FALSE)
     leaflet::removeImage(getdata_mp, "rast_layer")
     leaflet::clearControls(getdata_mp)
@@ -603,7 +605,7 @@ getdata_server <- function(input, output, session) {
           easyClose = TRUE
         )
       )
-    } else if (n_layers > 4000) { # THIS THRESHOLD MAY NEED TO CHANGE
+    } else if (n_layers > 40000) {
       showModal(
         modalDialog(
           title = "Warning - Exceeds job size limit!",
@@ -719,6 +721,16 @@ getdata_server <- function(input, output, session) {
       safe_length(vstore[[p]])
     })
     
+    # for derived variables, add in months and seasons
+    if (!is.null(vstore[["downscale_custom_time_periods"]]) & "Custom" %in% vstore[["downscale_extra_vars_sets"]]) {
+      if ("Annual" %in% vstore[["downscale_custom_time_periods"]]) {
+        layer_factors <- c(layer_factors, Annual = 16)
+      }
+      if (any(c("Winter", "Spring", "Summer", "Fall") %in% vstore[["downscale_custom_time_periods"]])) {
+        layer_factors <- c(layer_factors, Seasonal = 4)
+      }
+    }
+    
     return(prod(layer_factors))
   }
   
@@ -727,13 +739,13 @@ getdata_server <- function(input, output, session) {
     n_layers <- calculate_layers()
 
     # predefine point caps based on the number of layers to downscale
-    if (n_layers <= 50) cap <- 150000
-    else if (n_layers <= 100) cap <- 75000
-    else if (n_layers <= 200) cap <- 35000
-    else if (n_layers <= 500) cap <- 15000
-    else if (n_layers <= 1000) cap <- 7500
-    else if (n_layers <= 2000) cap <- 3500
-    else cap <- 1750
+    if (n_layers <= 1000) cap <- 150000
+    else if (n_layers <= 2000) cap <- 75000
+    else if (n_layers <= 4000) cap <- 37500
+    else if (n_layers <= 8000) cap <- 20000
+    else if (n_layers <= 16000) cap <- 10000
+    else if (n_layers <= 32000) cap <- 5000
+    else cap <- 2500
     
     # base cell area on AOI area in m^2 / number of allowed points
     cell_area <- as.numeric((getdata_sg_dt$dt)$area)/cap
@@ -776,19 +788,24 @@ getdata_server <- function(input, output, session) {
     downscale_modal()
   })
   
+  shiny::observeEvent(input$include_dem, {
+    if (shiny::in_devmode()) cat("Event: include_dem", sep = "\n")
+    vstore[["include_dem"]] <- input$include_dem
+  })
   shiny::observeEvent(input$generate_results, {
     if (shiny::in_devmode()) cat("Event: generate_results", sep = "\n")
     # check that it is possible to downscale the data 
     temp_dt <- getdata_sg_dt$dt
     n_layers <- calculate_layers()
     
-    if (!is.null(temp_dt) & nrow(temp_dt) > 0 & n_layers < 4000) {
+    if (!is.null(temp_dt) & nrow(temp_dt) > 0 & n_layers < 40000) {
+      
       sources <- unique(na.omit(temp_dt$source))
       
       # ensure all data sources are the same before opening Downscale Launch window
       if (length(unique((sources))) == 1) {
         # ensure only 1 area has been selected
-        if (any(c("map_draw", "file_upload") %in% sources) & nrow(temp_dt) > 1) {
+        if (any(c("map_draw", "file_upload") %in% sources) & nrow(temp_dt) > 1 & unique(temp_dt$group) != "marker") {
           showModal(
             modalDialog(
               title = "Warning",
@@ -823,6 +840,15 @@ getdata_server <- function(input, output, session) {
             title = "Preferences for Downscale Processing", size = "l",
             shiny::uiOutput("downscale_output_buttons"),
             shiny::uiOutput("downscale_points_count_estimate"),
+            shiny::conditionalPanel(
+              condition = "input.downscale_output == 'tif'",
+              tags$div(style = "margin-top: 10px;"),
+              shiny::checkboxInput(
+                inputId = "include_dem",
+                label = "Include elevation map in results",
+                value = TRUE
+              )
+            ),
             shiny::actionButton(
               inputId = "downscale_process_launch",
               label = "Launch Downscale Process",
@@ -833,7 +859,7 @@ getdata_server <- function(input, output, session) {
             
             # preview for csv results
             shiny::uiOutput("preview_table_ui"),
-
+            
             shiny::conditionalPanel(
               condition = "input.downscale_output == 'csv'",
               tags$div(style = "margin-top: 10px;"),
@@ -854,7 +880,7 @@ getdata_server <- function(input, output, session) {
           )
         )
       }
-    } else if (n_layers >= 4000) {
+    } else if (n_layers >= 40000) {
       showModal(
         modalDialog(
           title = "Warning - Exceeds job size limit!",
@@ -888,7 +914,7 @@ getdata_server <- function(input, output, session) {
   shiny::observeEvent(input$downscale_process_launch, {
     if (shiny::in_devmode()) cat("Event: downscale_process_launch", sep = "\n")
     if (vstore[["processing"]]) return()
-    
+
     if (input$downscale_output == "csv") {
       show_csv_dt(TRUE)
     } else {
@@ -945,7 +971,7 @@ getdata_server <- function(input, output, session) {
   shiny::observeEvent(input$preview_raster, {
     if (shiny::in_devmode()) cat("Event: downscale_raster_preview", sep = "\n")
     if (vstore[["downscale_output"]] == "tif") {
-      
+
       # update all preview options in vstore
       vstore[["ds_ras_elements"]] = input$ds_ras_elements
       vstore[["ds_ras_time_periods"]] = input$ds_ras_time_periods
@@ -980,7 +1006,10 @@ getdata_server <- function(input, output, session) {
         keywords <- c(code, period, time_period)
         
         layer_match <- raster_names[
-          Reduce(`&`, lapply(keywords, function(k) grepl(k, raster_names)))
+          Reduce(`&`, lapply(keywords, function(k) {
+            pattern <- if (k %in% keywords[1]) paste0("(^|_)", k, "(_|$)") else k
+            grepl(pattern, raster_names)
+          }))
         ]
       }
       
@@ -992,7 +1021,10 @@ getdata_server <- function(input, output, session) {
         keywords <- c(code, gcm, ssp, run, time_period)
         
         layer_match <- raster_names[
-          Reduce(`&`, lapply(keywords, function(k) grepl(k, raster_names)))
+          Reduce(`&`, lapply(keywords, function(k) {
+            pattern <- if (k %in% keywords[1]) paste0("(^|_)", k, "(_|$)") else k
+            grepl(pattern, raster_names)
+          }))
         ]
       }
       
@@ -1020,7 +1052,10 @@ getdata_server <- function(input, output, session) {
         type <- raster_layers[Code_Element == vstore[["ds_ras_elements"]] & Time == vstore[["ds_ras_time_periods"]], Type]
         keywords <- c("REFPERIOD", code)
         ref_period_raster <- raster_names[
-          Reduce(`&`, lapply(keywords, function(k) grepl(k, raster_names)))
+          Reduce(`&`, lapply(keywords, function(k) {
+            pattern <- if (k %in% keywords[2]) paste0("(^|_)", k, "(_|$)") else k
+            grepl(pattern, raster_names)
+          }))
         ]
         
         # set palettes
@@ -1086,7 +1121,7 @@ getdata_server <- function(input, output, session) {
             legend_title <- glue::glue("Change in {legend_title} from 1961_1990 to {time_period}")
             
             leaflet::addRasterImage(getdata_mp, display_raster, layerId = "rast_layer", colors = pal)
-            leaflet::addLegend(getdata_mp, pal = pal, values = values(display_raster), title = HTML(sprintf("<div style='width: 200px;'>%s</div>", legend_title)), labFormat = labelFormat(suffix = units))
+            leaflet::addLegend(getdata_mp, pal = pal, values = values(display_raster), title = HTML(sprintf("<div style='width: 100px;'>%s</div>", legend_title)), labFormat = labelFormat(suffix = units))
           }
         }
       } else {
@@ -1122,7 +1157,7 @@ getdata_server <- function(input, output, session) {
         # if log-transformed, set legend steps - need to do this!
         
         # add legend
-        leaflet::addLegend(getdata_mp, pal = pal, values = values(raster_layer_values), title = HTML(sprintf("<div style='width: 200px;'>%s</div>", legend_title)), labFormat = if (vstore[["log_transform_raster"]] & variable_type == "ratio") inv_log2_formatter else labelFormat(suffix = units))
+        leaflet::addLegend(getdata_mp, pal = pal, values = values(raster_layer_values), title = HTML(sprintf("<div style='width: 100px;'>%s</div>", legend_title)), labFormat = if (vstore[["log_transform_raster"]] & variable_type == "ratio") inv_log2_formatter else labelFormat(suffix = units))
       }
     }  
   })
@@ -1160,7 +1195,7 @@ getdata_server <- function(input, output, session) {
             ),
             shiny::radioButtons(
               inputId = "downscale_obs_ts_dataset",
-              label = h5("Choose observation time-series data:",
+              label = h5("Choose observational time-series dataset:",
                          prompter::add_prompt(
                            tooltipsIcon,
                            message = HTML(paste("Dataset for observational time series data. MSWX Blend for Multi-Source Weather, ClimateNA gridded time series, CRU/GPCC for CRU TS (temperature) and GPCC (precipitation).")),
