@@ -940,7 +940,12 @@ getdata_server <- function(input, output, session) {
       vstore[["downscale_gcm_ssp_years"]] <- NULL
     }
     
-    # set obs period as ref period if none selected
+    # model run handling
+    if (vstore[["downscale_max_run"]] == 0) {
+      vstore[["downscale_ensemble_mean"]] <- TRUE
+    }
+     
+    # set obs period as ref period in modal if none selected
     if (is.null(vstore[["downscale_obs_periods_checkbox"]])) {
       vstore[["downscale_obs_periods_checkbox"]] <- "1961_2020"
     }
