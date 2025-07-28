@@ -18,6 +18,7 @@ getdata_server <- function(input, output, session) {
   
   # reactive state for csv/raster preview
   show_csv_dt <<- reactiveVal(TRUE)
+  csv_data <<- reactiveVal(NULL)
   show_raster_ui <<- reactiveVal(TRUE)
   
   # ---- Modal input storage
@@ -487,7 +488,11 @@ getdata_server <- function(input, output, session) {
   shiny::observeEvent(input$downscale_apply, {
     # remove any existing csv or raster previews
     show_csv_dt(FALSE)
+    csv_data(NULL)
     show_raster_ui(FALSE)
+    lapply(c("ds_ras_elements", "ds_ras_time_periods", "ds_ras_obs_sim", "ds_ras_obs_periods", "ds_ras_gcms", "ds_ras_ssps", "ds_ras_run_choices", "ds_ras_run", "ds_ras_gcm_periods", "calculate_diff", "calculate_percent_diff", "log_transform_raster", "downscale_raster_preview"), \(x) {
+      vstore[[x]] <- downscale_default[[x]]
+    })
     leaflet::removeImage(getdata_mp, "rast_layer")
     leaflet::clearControls(getdata_mp)
     

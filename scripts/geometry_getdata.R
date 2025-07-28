@@ -266,6 +266,7 @@ session_geometry <- function(sg_dt, mp) {
     
     # remove csv/raster preview
     show_csv_dt(FALSE)
+    csv_data(NULL)
     show_raster_ui(FALSE)
     
     # reset all parameters to defaults
@@ -495,6 +496,7 @@ session_geometry <- function(sg_dt, mp) {
           run_id <- generate_run_id()
 
           output_files <- process_downscale(sg_dt$dt, cec, vstore, fg, run_id)
+          csv_data(output_files)
 
           if (!length(output_files)) {
             vstore[["processing"]] <- FALSE
@@ -504,6 +506,7 @@ session_geometry <- function(sg_dt, mp) {
           } else if (tools::file_ext(output_files) == "csv") {
             output$preview_table <- DT::renderDT(server = TRUE, {
               req(output_files)
+              req(csv_data())
               
               dt <- head(read.csv(output_files))
               DT::datatable(dt, rownames = FALSE, escape = FALSE, options = list(
