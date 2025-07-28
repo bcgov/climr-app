@@ -29,10 +29,10 @@ The climr App is organized into three tabs.
     b.  **Instructions**: Instructions on how to use the tool
     c.  **Methods**: Detailed background information about what's happening "under the hood"
     d.  **Known issues**: Documentation on current known issues with the tool
-    e.  **Definitions**: Glossary of climate variables?
+    e.  **Definitions**: Glossary of terms and climate variables 
     f.  **Providing feedback**: Ways users can report issues or provide suggestions for future improvements
     g.  **FAQs**: Frequently asked questions
-    h.  **Resources**: 
+    h.  **Resources**
 
 ## Open source code
 
