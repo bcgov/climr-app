@@ -632,7 +632,6 @@ session_geometry <- function(sg_dt, mp) {
                   shiny::uiOutput("preview_obs_periods"),
                   shiny::uiOutput("preview_gcms"),
                   shiny::uiOutput("preview_ssps"),
-                  shiny::uiOutput("preview_model_run"),
                   shiny::uiOutput("preview_gcm_periods")
                 )
               }
@@ -680,36 +679,9 @@ session_geometry <- function(sg_dt, mp) {
               }
             })
             
-            # reactive output for model run names
-            output$preview_model_run <- shiny::renderUI({
-              if (input$ds_ras_obs_sim == 'Simulated' & !is.null(input$ds_ras_gcms)) {
-                # choices for ensemble mean / max runs
-                if (vstore[["downscale_ensemble_mean"]]) {
-                  if (vstore[["downscale_max_run"]] == 0) {
-                    vstore[["ds_ras_run_choices"]] <- c("ensembleMean")
-                  } else {
-                    matching_rasters <- names(preview_raster)[stringr::str_detect(names(preview_raster), input$ds_ras_gcms)]
-                    run_names <- na.omit(stringr::str_extract(matching_rasters, "(?<=_)r[^_]*"))
-                    vstore[["ds_ras_run_choices"]] <- c("ensembleMean", unique(run_names))
-                  }
-                } else {
-                  run_names <- na.omit(stringr::str_extract(names(preview_raster), "(?<=_)r[^_]*"))
-                  vstore[["ds_ras_run_choices"]] <- unique(run_names)
-                }
-                shiny::radioButtons(
-                  inputId = "ds_ras_run",
-                  label = h5("Choose model run to preview:"),
-                  width = "100%",
-                  inline = TRUE,
-                  choices = vstore[["ds_ras_run_choices"]],
-                  selected = vstore[["ds_ras_run"]]
-                )
-              }
-            })
-            
             # reactive output for GCM periods
             output$preview_gcm_periods <- shiny::renderUI({
-              if (input$ds_ras_obs_sim == 'Simulated' & !is.null(input$ds_ras_run)) {
+              if (input$ds_ras_obs_sim == 'Simulated' & !is.null(vstore[["ds_ras_run"]])) {
                 shiny::radioButtons(
                   inputId = "ds_ras_gcm_periods",
                   label = h5("Choose period to preview:"),

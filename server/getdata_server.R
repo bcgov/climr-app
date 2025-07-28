@@ -57,8 +57,7 @@ getdata_server <- function(input, output, session) {
     ds_ras_obs_periods = NULL,
     ds_ras_gcms = NULL,
     ds_ras_ssps = NULL,
-    ds_ras_run_choices = NULL,
-    ds_ras_run = NULL,
+    ds_ras_run = "ensembleMean",
     ds_ras_gcm_periods = NULL,
     calculate_diff = FALSE,
     calculate_percent_diff = FALSE,
@@ -100,7 +99,6 @@ getdata_server <- function(input, output, session) {
     ds_ras_obs_periods = downscale_default[["ds_ras_obs_periods"]],
     ds_ras_gcms = downscale_default[["ds_ras_gcms"]],
     ds_ras_ssps = downscale_default[["ds_ras_ssps"]],
-    ds_ras_run_choices = downscale_default[["ds_ras_run_choices"]],
     ds_ras_run = downscale_default[["ds_ras_run"]],
     ds_ras_gcm_periods = downscale_default[["ds_ras_gcm_periods"]],
     calculate_diff = downscale_default[["calculate_diff"]],
@@ -490,7 +488,7 @@ getdata_server <- function(input, output, session) {
     show_csv_dt(FALSE)
     csv_data(NULL)
     show_raster_ui(FALSE)
-    lapply(c("ds_ras_elements", "ds_ras_time_periods", "ds_ras_obs_sim", "ds_ras_obs_periods", "ds_ras_gcms", "ds_ras_ssps", "ds_ras_run_choices", "ds_ras_run", "ds_ras_gcm_periods", "calculate_diff", "calculate_percent_diff", "log_transform_raster", "downscale_raster_preview"), \(x) {
+    lapply(c("ds_ras_elements", "ds_ras_time_periods", "ds_ras_obs_sim", "ds_ras_obs_periods", "ds_ras_gcms", "ds_ras_ssps", "ds_ras_gcm_periods", "calculate_diff", "calculate_percent_diff", "log_transform_raster", "downscale_raster_preview"), \(x) {
       vstore[[x]] <- downscale_default[[x]]
     })
     leaflet::removeImage(getdata_mp, "rast_layer")
@@ -984,7 +982,6 @@ getdata_server <- function(input, output, session) {
       vstore[["ds_ras_obs_periods"]] = input$ds_ras_obs_periods
       vstore[["ds_ras_gcms"]] = input$ds_ras_gcms
       vstore[["ds_ras_ssps"]] = input$ds_ras_ssps
-      vstore[["ds_ras_run"]] = input$ds_ras_run
       vstore[["ds_ras_gcm_periods"]] = input$ds_ras_gcm_periods
       vstore[["calculate_diff"]] = input$calculate_diff
       if (!is.null(input$log_transform_raster)) {
