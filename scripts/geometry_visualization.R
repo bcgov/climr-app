@@ -187,7 +187,7 @@ visualization_geometry <- function(dt, mp) {
                   showModal(
                     modalDialog(
                       title = "Error!",
-                      paste("The values for the reference period 1961-1990 are 0, while there are non-zero values for the variables selected. Unable to calculate percent change. If interested in this variable, please view the Time Series plot."),
+                      paste("Values for the 1961-1990 reference period are zero, while the selected variables have non-zero values. Percent change cannot be calculated. To explore this variable, please refer to the Time Series plot."),
                       easyClose = TRUE
                     )
                   )
