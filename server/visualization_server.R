@@ -189,6 +189,12 @@ visualization_server <- function(input, output, session) {
         )
       }
     )
+    
+    # reset time series defaults
+    vstore[["ts_datasets"]] <- defaults[["ts_datasets"]]
+    vstore[["ts_gcms"]] <- defaults[["ts_gcms"]]
+    vstore[["ts_ssps"]] <- defaults[["ts_ssps"]]
+    
     show_plots(FALSE)
   })
   
