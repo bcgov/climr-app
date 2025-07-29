@@ -1085,7 +1085,7 @@ getdata_server <- function(input, output, session) {
           legend_title <- glue::glue("Change in {legend_title} from 1961_1990 to {time_period}")
           
           leaflet::addRasterImage(getdata_mp, display_raster, layerId = "rast_layer", colors = pal)
-          leaflet::addLegend(getdata_mp, pal = pal, values = values(display_raster), title = HTML(sprintf("<div style='width: 200px;'>%s</div>", legend_title)), labFormat = labelFormat(suffix = units))
+          leaflet::addLegend(getdata_mp, pal = pal, values = values(display_raster), title = HTML(sprintf("<div style='width: 150px;'>%s</div>", legend_title)), labFormat = labelFormat(suffix = units))
         }
         if (type == "ratio") {
           display_raster <- preview_raster[[layer_match]] - preview_raster[[ref_period_raster]]
@@ -1115,7 +1115,7 @@ getdata_server <- function(input, output, session) {
               legend_title <- glue::glue("Percent change in {legend_title} from 1961_1990 to {time_period}")
               
               leaflet::addRasterImage(getdata_mp, display_raster, layerId = "rast_layer", colors = pal)
-              leaflet::addLegend(getdata_mp, pal = pal, values = values(display_raster), title = HTML(sprintf("<div style='width: 200px;'>%s</div>", legend_title)), labFormat = labelFormat(suffix = "%"))
+              leaflet::addLegend(getdata_mp, pal = pal, values = values(display_raster), title = HTML(sprintf("<div style='width: 150px;'>%s</div>", legend_title)), labFormat = labelFormat(suffix = "%"))
             }
           } else {
             pal <- colorNumeric(
@@ -1128,7 +1128,7 @@ getdata_server <- function(input, output, session) {
             legend_title <- glue::glue("Change in {legend_title} from 1961_1990 to {time_period}")
             
             leaflet::addRasterImage(getdata_mp, display_raster, layerId = "rast_layer", colors = pal)
-            leaflet::addLegend(getdata_mp, pal = pal, values = values(display_raster), title = HTML(sprintf("<div style='width: 100px;'>%s</div>", legend_title)), labFormat = labelFormat(suffix = units))
+            leaflet::addLegend(getdata_mp, pal = pal, values = values(display_raster), title = HTML(sprintf("<div style='width: 150px;'>%s</div>", legend_title)), labFormat = labelFormat(suffix = units))
           }
         }
       } else {
@@ -1164,7 +1164,7 @@ getdata_server <- function(input, output, session) {
         # if log-transformed, set legend steps - need to do this!
         
         # add legend
-        leaflet::addLegend(getdata_mp, pal = pal, values = values(raster_layer_values), title = HTML(sprintf("<div style='width: 100px;'>%s</div>", legend_title)), labFormat = if (vstore[["log_transform_raster"]] & variable_type == "ratio") inv_log2_formatter else labelFormat(suffix = units))
+        leaflet::addLegend(getdata_mp, pal = pal, values = values(raster_layer_values), title = HTML(sprintf("<div style='width: 150px;'>%s</div>", legend_title)), labFormat = if (vstore[["log_transform_raster"]] & variable_type == "ratio") inv_log2_formatter else labelFormat(suffix = units))
       }
     }  
   })
