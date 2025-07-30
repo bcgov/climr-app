@@ -124,11 +124,50 @@ getdata_server <- function(input, output, session) {
       easyClose = TRUE,
       size = "xl",
       footer = NULL,
-      tags$iframe(
-        src = "How_to_use_getdata.pdf#toolbar=0",
-        width = "100%",
-        height = "700px",
-        style = "border:none;"
+      tabsetPanel(
+        type = "tabs",
+        tabPanel(
+          "PDF",
+          tags$iframe(
+            src = "How_to_use_getdata.pdf#toolbar=0",
+            width = "100%",
+            height = "700px",
+            style = "border:none;"
+          )
+        ),
+        tabPanel(
+          "Video",
+          tags$div(style = "margin-top: 10px;"),
+          paste("How to downscale data by map point input:"),
+          tags$div(style = "margin-top: 10px;"),
+           tags$video(
+             src = "1_climr_tutorial_point_input.mp4",
+             type = "video/mp4",
+             controls = NA,
+             width = "100%",
+             autoplay = FALSE
+           ),
+          tags$div(style = "margin-top: 10px;"),
+          paste("How to downscale data by shape input:"),
+          tags$div(style = "margin-top: 10px;"),
+          tags$video(
+            src = "2_climr_tutorial_shape_input.mp4",
+            type = "video/mp4",
+            controls = NA,
+            width = "100%",
+            autoplay = FALSE
+          ),
+          tags$div(style = "margin-top: 10px;"),
+          paste("Quick tips for troubleshooting:"),
+          tags$div(style = "margin-top: 10px;"),
+          tags$video(
+            src = "5_climr_tutorial_troubleshooting.mp4",
+            type = "video/mp4",
+            controls = NA,
+            width = "100%",
+            autoplay = FALSE
+          )
+        )
       )
     ))
   })

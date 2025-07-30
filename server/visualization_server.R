@@ -74,11 +74,40 @@ visualization_server <- function(input, output, session) {
       easyClose = TRUE,
       size = "xl",
       footer = NULL,
-      tags$iframe(
-        src = "How_to_use_visualization.pdf#toolbar=0",
-        width = "100%",
-        height = "700px",
-        style = "border:none;"
+      tabsetPanel(
+        type = "tabs",
+        tabPanel(
+          "PDF",
+          tags$iframe(
+            src = "How_to_use_visualization.pdf#toolbar=0",
+            width = "100%",
+            height = "700px",
+            style = "border:none;"
+          )
+        ),
+        tabPanel(
+          "Video",
+          tags$div(style = "margin-top: 10px;"),
+          paste("How to use the climate map overlays:"),
+          tags$div(style = "margin-top: 10px;"),
+          tags$video(
+            src = "3_climr_tutorial_overlays.mp4",
+            type = "video/mp4",
+            controls = NA,
+            width = "100%",
+            autoplay = FALSE
+          ),
+          tags$div(style = "margin-top: 10px;"),
+          paste("How to use the climate data plots:"),
+          tags$div(style = "margin-top: 10px;"),
+          tags$video(
+            src = "4_climr_tutorial_plots.mp4",
+            type = "video/mp4",
+            controls = NA,
+            width = "100%",
+            autoplay = FALSE
+          )
+        )
       )
     ))
   })
