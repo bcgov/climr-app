@@ -93,7 +93,7 @@ visualization_server <- function(input, output, session) {
           tags$video(
             src = "3_climr_tutorial_overlays.mp4",
             type = "video/mp4",
-            controls = NA,
+            controls = TRUE,
             width = "100%",
             autoplay = FALSE
           ),
@@ -103,7 +103,7 @@ visualization_server <- function(input, output, session) {
           tags$video(
             src = "4_climr_tutorial_plots.mp4",
             type = "video/mp4",
-            controls = NA,
+            controls = TRUE,
             width = "100%",
             autoplay = FALSE
           )

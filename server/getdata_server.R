@@ -143,7 +143,7 @@ getdata_server <- function(input, output, session) {
            tags$video(
              src = "1_climr_tutorial_point_input.mp4",
              type = "video/mp4",
-             controls = NA,
+             controls = TRUE,
              width = "100%",
              autoplay = FALSE
            ),
@@ -153,7 +153,7 @@ getdata_server <- function(input, output, session) {
           tags$video(
             src = "2_climr_tutorial_shape_input.mp4",
             type = "video/mp4",
-            controls = NA,
+            controls = TRUE,
             width = "100%",
             autoplay = FALSE
           ),
@@ -163,7 +163,7 @@ getdata_server <- function(input, output, session) {
           tags$video(
             src = "5_climr_tutorial_troubleshooting.mp4",
             type = "video/mp4",
-            controls = NA,
+            controls = TRUE,
             width = "100%",
             autoplay = FALSE
           )
