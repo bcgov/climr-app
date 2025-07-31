@@ -142,21 +142,21 @@ getdata_server <- function(input, output, session) {
           tags$div(style = "margin-top: 10px;"),
           tags$iframe(
             style = "width: 100%; height: 625px; border: none;",
-            src = "1_climr_tutorial_point_input.mp4"
+            src = "https://youtube.com/embed/66xQF4Yn9n4"
           ),
           tags$div(style = "margin-top: 10px;"),
           paste("How to downscale data by shape input:"),
           tags$div(style = "margin-top: 10px;"),
           tags$iframe(
             style = "width: 100%; height: 625px; border: none;",
-            src = "2_climr_tutorial_shape_input.mp4"
+            src = "https://youtube.com/embed/3S01hpS6Kmc"
           ),
           tags$div(style = "margin-top: 10px;"),
           paste("Quick tips for troubleshooting:"),
           tags$div(style = "margin-top: 10px;"),
           tags$iframe(
             style = "width: 100%; height: 625px; border: none;",
-            src = "5_climr_tutorial_troubleshooting.mp4"
+            src = "https://youtube.com/embed/DtKGB0OWLXU"
           )
         )
       )
