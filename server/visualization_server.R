@@ -88,13 +88,15 @@ visualization_server <- function(input, output, session) {
         tabPanel(
           "Video",
           tags$div(style = "margin-top: 10px;"),
-          tags$div(style = "margin-top: 10px;"),
           paste("How to use the climate map overlays:"),
           tags$div(style = "margin-top: 10px;"),
           tags$iframe(
             style = "width: 100%; height: 625px; border: none;",
             src = "https://youtube.com/embed/hY8VbLCBA3k"
           ),
+          tags$div(style = "margin-top: 10px;"),
+          paste("How to use climate plots:"),
+          tags$div(style = "margin-top: 10px;"),
           tags$iframe(
             style = "width: 100%; height: 625px; border: none;",
             src = "https://youtube.com/embed/SiIbLHNgvrw"
