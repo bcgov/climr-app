@@ -211,7 +211,7 @@ shiny::shinyApp(
                 title = h5("Method 2: Upload a file",
                            prompter::add_prompt(
                              tooltipsIcon,
-                             message = HTML(paste("Upload a csv, a raster or a shape file to add geographies.")),
+                             message = HTML(paste("Upload a csv, a raster or a spatial file to add geographies.")),
                              position = "top",
                              size = "large",
                              shadow = FALSE
