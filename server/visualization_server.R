@@ -93,14 +93,14 @@ visualization_server <- function(input, output, session) {
           tags$div(style = "margin-top: 10px;"),
           tags$iframe(
             style = "width: 100%; height: 625px; border: none;",
-            src = "video3.html"
+            src = "3_climr_tutorial_overlays.mp4"
           ),
           tags$div(style = "margin-top: 10px;"),
           paste("How to use the climate data plots:"),
           tags$div(style = "margin-top: 10px;"),
           tags$iframe(
             style = "width: 100%; height: 625px; border: none;",
-            src = "video4.html"
+            src = "4_climr_tutorial_plots.mp4"
           )
         )
       )
