@@ -653,15 +653,23 @@ shiny::shinyApp(
     showModal(
       modalDialog(
         title = "Welcome to the climr App!",
-        HTML("This is a graphical interface for <a href='https://bcgov.github.io/climr/' target='_blank'>climr</a>, 
-              an R package that provides downscaled climate data for North America. 
-              This app allows users to download custom climate data for their areas of interest. 
-              It also provides visualizations of the climates of North America and how they are changing.
-              All content of this app is for information only and does not represent BC government policy.
-              This app is currently designed for screens that are 15\" and larger." 
+        tagList(
+          HTML("This is a graphical interface for <a href='https://bcgov.github.io/climr/' target='_blank'>climr</a>, 
+            an R package that provides downscaled climate data for North America. 
+            This app allows users to download custom climate data for their areas of interest. 
+            It also provides visualizations of the climates of North America and how they are changing.
+            All content of this app is for information only and does not represent BC government policy.
+            This app is currently designed for screens that are 15\" and larger." 
+          ),
+          tags$div(style = "margin-top: 10px;"),
+          tags$iframe(
+            style = "width: 100%; height: 625px; border: none;",
+            src = "https://www.youtube.com/embed/Sc_rxmFuGgI",
+            allowfullscreen = NA
+          )
         ),
         easyClose = TRUE,
-        size = "l"
+        size = "xl"
       )
     )
     
