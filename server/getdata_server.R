@@ -138,6 +138,13 @@ getdata_server <- function(input, output, session) {
         tabPanel(
           "Video",
           tags$div(style = "margin-top: 10px;"),
+          paste("An overview of the climr app:"),
+          tags$div(style = "margin-top: 10px;"),
+          tags$iframe(
+            style = "width: 100%; height: 625px; border: none;",
+            src = "https://youtube.com/embed/Sc_rxmFuGgI"
+          ),
+          tags$div(style = "margin-top: 10px;"),
           paste("How to downscale data by map point input:"),
           tags$div(style = "margin-top: 10px;"),
           tags$iframe(
