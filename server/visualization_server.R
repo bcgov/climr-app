@@ -572,7 +572,7 @@ visualization_server <- function(input, output, session) {
             dat_ds <- as.data.table(dat_ds)
             
             # add periods
-            dataset_years <- c(1901:2024, 1901:2022, NA, NA, 1902:2023, NA, NA)
+            dataset_years <- c(1901:2024, 1901:2022, NA, NA, 1902:2023, NA, NA) # NEED TO CHANGE THIS TO BE DYNAMIC
             dat_ds[, period := dataset_years]
             
             # reformat data
@@ -655,7 +655,7 @@ visualization_server <- function(input, output, session) {
             dat_ds <- as.data.table(dat_ds)
             
             # add periods
-            dataset_years <- c(1901:2024, 1901:2022, NA, NA, 1902:2023, NA, NA)
+            dataset_years <- c(1901:2024, 1901:2022, NA, NA, 1902:2023, NA, NA) # NEED TO CHANGE THIS TO BE DYNAMIC
             dat_ds[, period := dataset_years]
             
             # reformat data

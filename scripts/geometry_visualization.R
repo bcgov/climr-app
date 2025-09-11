@@ -262,7 +262,7 @@ visualization_geometry <- function(dt, mp) {
           {
             tryCatch({
               isolate({
-                climr::plot_timeSeries_preprocess(
+                climr:::plot_timeSeries_preprocess(
                   X = timeseries_data,
                   var1 = climr::variables[Code_Element == input$time_series_element & Time == input$time_series_season, Code],
                   obs_ts_dataset = vstore[["ts_datasets"]],
