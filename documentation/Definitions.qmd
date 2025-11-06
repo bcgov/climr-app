@@ -17,6 +17,14 @@
     -   **SSP3-7.0**: Represents a broader range of scenarios where no climate policy is implemented, leading to a steady, linear rise in greenhouse gas emissions over time.
 
     -   **SSP5-8.5**: Represents a high-emissions scenario driven by rapid expansion in greenhouse gas emissions over the next several decades, resulting in end-of-century emission levels more than three times higher than current emissions.
+    
+-   **Observational time-series datasets**: These datasets provide an annual sequence of climate data as observed by weather stations and other sources.
+
+    -   **MSWX Blend**: 
+    
+    -   **ClimateNA**: 
+    
+    -   **Climatic Research Unit / Global Precipitation Climatology Centre (CPU/GPCC)**: 
 
 ## **Climate Variables**
 

@@ -298,7 +298,8 @@ getdata_server <- function(input, output, session) {
               ),
               shiny::checkboxGroupInput(
                 inputId = "downscale_gcms",
-                label = h5("Choose Global Climate Model (GCM):",
+                label = h5(
+                  tags$span(HTML("Choose <a href='https://vonuma.com/climr-docs/Definitions.html#glossary-of-terms' target='_blank'>Global Climate Model (GCM)</a>:")),
                            prompter::add_prompt(
                              tooltipsIcon,
                              message = HTML(paste("Global climate models to downscale. Select multiple GCMs for ensemble outputs.")),
@@ -316,7 +317,8 @@ getdata_server <- function(input, output, session) {
             shiny::div(
               shiny::checkboxGroupInput(
                 inputId = "downscale_ssps",
-                label = h5("Choose Shared Socio-economic Pathways (SSP) scenarios:",
+                label = h5(
+                  tags$span(HTML("Choose <a href='https://vonuma.com/climr-docs/Definitions.html#glossary-of-terms' target='_blank'>Shared Socio-economic Pathways (SSP)</a> scenarios:")),
                            prompter::add_prompt(
                              tooltipsIcon,
                              message = HTML(paste("SSP scenarios pairing shared socioeconomic pathways with representative concentration pathways (only necessary if choosing periods/years past 2014).")),
@@ -358,7 +360,8 @@ getdata_server <- function(input, output, session) {
         shiny::div(
           shiny::checkboxGroupInput(
             inputId = "downscale_extra_vars_sets",
-            label = h5("Choose extra climate variables:",
+            label = h5(
+              tags$span(HTML("Choose <a href='https://vonuma.com/climr-docs/Definitions.html#climate-variables' target='_blank'>extra climate variables</a>:")),
                        prompter::add_prompt(
                          tooltipsIcon,
                          message = HTML(paste("Extra climate variables to compute. Select a set which contains all variables of that category, and/or create a custom set. Defaults to monthly PPT, Tmax, Tmin if not specified.")),
@@ -377,7 +380,8 @@ getdata_server <- function(input, output, session) {
             shiny::div(
               shiny::checkboxGroupInput(
                 inputId = "downscale_custom_elements",
-                label = h5("Choose elements:", 
+                label = h5(
+                  tags$span(HTML("Choose <a href='https://vonuma.com/climr-docs/Definitions.html#climate-variables' target='_blank'>elements</a>:")), 
                            prompter::add_prompt(
                              tooltipsIcon,
                              message = HTML("See Definitions section in Documentation for more information on climate variables."),
@@ -1239,7 +1243,8 @@ getdata_server <- function(input, output, session) {
             ),
             shiny::radioButtons(
               inputId = "downscale_obs_ts_dataset",
-              label = h5("Choose observational time-series dataset:",
+              label = h5(
+                tags$span(HTML("Choose <a href='https://vonuma.com/climr-docs/Definitions.html#glossary-of-terms' target='_blank'>observational time-series dataset</a>:")),
                          prompter::add_prompt(
                            tooltipsIcon,
                            message = HTML(paste("These datasets provide an annual sequence (a time-series) of climate data as observed by weather stations and other sources.")),
