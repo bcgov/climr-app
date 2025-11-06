@@ -96,7 +96,7 @@ visualization_server <- function(input, output, session) {
               title = h5("How to use the climate map overlays:"),
               tags$div(style = "margin-top: 10px;"),
               tags$iframe(
-                style = "width: 100%; height: 625px; border: none;",
+                style = "width: 100%; height: 600px; border: none;",
                 src = "https://youtube.com/embed/hY8VbLCBA3k"
               ),
               value = "vis_vid1"
@@ -106,7 +106,7 @@ visualization_server <- function(input, output, session) {
               title = h5("How to use climate plots:"),
               tags$div(style = "margin-top: 10px;"),
               tags$iframe(
-                style = "width: 100%; height: 625px; border: none;",
+                style = "width: 100%; height: 600px; border: none;",
                 src = "https://youtube.com/embed/SiIbLHNgvrw"
               ),
               value = "vis_vid2"

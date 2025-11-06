@@ -146,7 +146,7 @@ getdata_server <- function(input, output, session) {
               title = h5("An overview of the climr app:"),
               tags$div(style = "margin-top: 10px;"),
               tags$iframe(
-                style = "width: 100%; height: 625px; border: none;",
+                style = "width: 100%; height: 600px; border: none;",
                 src = "https://youtube.com/embed/Sc_rxmFuGgI"
               ),
               value = "get_data_vid1"
@@ -156,7 +156,7 @@ getdata_server <- function(input, output, session) {
               title = h5("How to downscale data by map point input:"),
               tags$div(style = "margin-top: 10px;"),
               tags$iframe(
-                style = "width: 100%; height: 625px; border: none;",
+                style = "width: 100%; height: 600px; border: none;",
                 src = "https://youtube.com/embed/66xQF4Yn9n4"
               ),
               value = "get_data_vid2"
@@ -166,7 +166,7 @@ getdata_server <- function(input, output, session) {
               title = h5("How to downscale data by shape input:"),
               tags$div(style = "margin-top: 10px;"),
               tags$iframe(
-                style = "width: 100%; height: 625px; border: none;",
+                style = "width: 100%; height: 600px; border: none;",
                 src = "https://youtube.com/embed/3S01hpS6Kmc"
               ),
               value = "get_data_vid3"
@@ -176,7 +176,7 @@ getdata_server <- function(input, output, session) {
               title = h5("Quick tips for troubleshooting:"),
               tags$div(style = "margin-top: 10px;"),
               tags$iframe(
-                style = "width: 100%; height: 625px; border: none;",
+                style = "width: 100%; height: 600px; border: none;",
                 src = "https://youtube.com/embed/DtKGB0OWLXU"
               ),
               value = "get_data_vid4"
