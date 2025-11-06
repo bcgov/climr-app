@@ -1,10 +1,10 @@
 # Overview
 
-The climr App is a graphical interface for [climr](https://bcgov.github.io/climr/), an R package that provides downscaled climate data for North America. This app allows users to download custom climate data for their areas of interest. It also provides visualizations of the climates of North America and how they are changing. The climr App is created by the Future Forest Ecosystem Centre of the BC Ministry of Forests. If you have ideas for how we can improve it, let us know via [email](mailto:ffec@gov.bc.ca) or [GitHub](https://github.com/bcgov/climr-app/issues).
+The climr app is a graphical interface for [climr](https://bcgov.github.io/climr/), an R package that provides downscaled climate data for North America. This app allows users to download custom climate data for their areas of interest. It also provides visualizations of the climates of North America and how they are changing. The climr App is created by the Future Forest Ecosystem Centre of the BC Ministry of Forests. If you have ideas for how we can improve it, let us know via [email](mailto:ffec@gov.bc.ca) or [GitHub](https://github.com/bcgov/climr-app/issues).
 
 ## Structure
 
-The climr App is organized into three tabs.
+The climr app is organized into three tabs.
 
 1.  **Get Data:** Users can select points or areas of interest using one of 2 methods:
 
@@ -23,7 +23,7 @@ The climr App is organized into three tabs.
 
     Users can also add climate maps as an overlay on North America.
 
-3.  **Documentation**: Help files and data sources
+3.  **About**: Help files and data sources
 
     a.  **Overview**: You're reading it!
     b.  **Instructions**: Instructions on how to use the tool
@@ -33,47 +33,3 @@ The climr App is organized into three tabs.
     f.  **Providing feedback**: Ways users can report issues or provide suggestions for future improvements
     g.  **FAQs**: Frequently asked questions
     h.  **Resources**
-
-## Open source code
-
-The code for this app is open source:
-
-- climr R package: https://github.com/bcgov/climr
-- climr App: https://github.com/bcgov/climr-app
-
-## Acknowledgements
-
-The collaborators on the climr app are: Tirion Grice (front end developer), Kiri Daust (lead developer), Colin Mahony (science lead), and Bruno Tremblay (back end developer). We also thank Ceres Barros and Aseem Sharma for their contributions to the `climr` package.
-
-`climr` uses the downscaling framework pioneered by Dr. Tongli Wang (University of British Columbia) and Dr. Andreas Hamann (University of Alberta) in the <a href='https://climatena.ca/' target='_blank'>ClimateNA</a> tool (Wang et al. 2016, 2024). In addition, `climr` uses the ClimateNA derived variable equations published by Wang et al. (2016). 
-
-We gratefully acknowledge the following groups for making their climate data available:
-
--   PRISM Climate Group (PRISM monthly climatological normals for USA) (Daly et al. 2008).
--   NASA Oak Ridge National Laboratory (Daymet climatological normals for North America) (Thornton et al. 2021).
--   Pacific Climate Impacts Consortium (PRISM monthly climatological normals for BC) (PCIC 2014).
--   Climatic Research Unit, University of East Anglia (CRU gridded time series) (Harris et al. 2020).
--   GloH2O (MSWX and MSWEP gridded time series) (Beck et al. 2019, 2022).
--   Deutscher Wetterdienst Global Precipitation Climatology Centre (GPCC gridded precipitation time series) (Becker et al. 2013)
-
-Finally, we acknowledge the World Climate Research Program’s Working Group on Coupled Modelling, which is responsible for the Coupled Model Intercomparison Project (CMIP6), and we thank the global climate climate modelling groups for producing and making available their model output.
-
-## References:
-
-Beck, Hylke E., Albert I. J. M. van Dijk, Pablo R. Larraondo, Tim R. McVicar, Ming Pan, Emanuel Dutra, and Diego G. Miralles. 2022. “MSWX: Global 3-Hourly 0.1° Bias-Corrected Meteorological Data Including Near-Real-Time Updates and Forecast Ensembles.” Bulletin of the American Meteorological Society 103 (3): E710–32. <https://doi.org/10.1175/BAMS-D-21-0145.1>.
-
-Beck, Hylke E., Eric F. Wood, Ming Pan, Colby K. Fisher, Diego G. Miralles, Albert I. J. M. van Dijk, Tim R. McVicar, and Robert F. Adler. 2019. “MSWEP V2 Global 3-Hourly 0.1° Precipitation: Methodology and Quantitative Assessment.” Bulletin of the American Meteorological Society 100 (3): 473–500. <https://doi.org/10.1175/BAMS-D-17-0138.1>.
-
-Becker, Andreas, Peter Finger, Anja Meyer-Christoffer, Bruno Rudolf, Kathrin Schamm, Udo Schneider, and Markus Ziese. 2013. “A Description of the Global Land-Surface Precipitation Data Products of the Global Precipitation Climatology Centre with Sample Applications Including Centennial (Trend) Analysis from 1901–Present.” Earth System Science Data 5 (1): 71–99. <https://doi.org/10.5194/essd-5-71-2013>.
-
-Daly, C., M. Halbleib, J. I. Smith, W. P. Gibson, M. K. Doggett, G. H. Taylor, J. Curtis, and P. A. Pasteris. 2008. “Physiographically Sensitive Mapping of Climatological Temperature and Precipitation Across the Conterminous United States.” International Journal of Climatology 28 (15): 2031–64. <https://doi.org/10.1002/joc.1688>.
-
-Harris, Ian, Timothy J. Osborn, Phil Jones, and David Lister. 2020. “Version 4 of the CRU TS Monthly High-Resolution Gridded Multivariate Climate Dataset.” Scientific Data 7 (1): 109. <https://doi.org/10.1038/s41597-020-0453-3>.
-
-Pacific Climate Impacts Consortium. 2014. “High-Resolution 1981-2010 Gridded Precipitation and Temperature Climatologies for British Columbia.” Unpublished. <https://www.pacificclimate.org/data/prism-climatology-and-monthly-timeseries>.
-
-Thornton, P. E., R. Shrestha, M. Thornton, S.-C. Kao, Y. Wei, and B. E. Wilson. 2021. “Gridded Daily Weather Data for North America with Comprehensive Uncertainty Quantification.” Scientific Data 8 (190): 1–17. <https://doi.org/10.1038/s41597-021-00973-0>.
-
-Wang, Tongli, Andreas Hamann, Dave Spittlehouse, and Carlos Carroll. 2016. “Locally Downscaled and Spatially Customizable Climate Data for Historical and Future Periods for North America.” Edited by Inés Álvarez. PLOS ONE 11 (6): [e0156720](https://doi.org/10.1371/journal.pone.0156720).
-
-Wang, Tongli, Andreas Hamann, and Zihaohan Sang. 2024. “Monthly High-Resolution Historical Climate Data for North America Since 1901.” International Journal of Climatology. early view: <https://doi.org/10.1002/joc.8726>.

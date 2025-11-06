@@ -137,33 +137,50 @@ getdata_server <- function(input, output, session) {
         ),
         tabPanel(
           "Video",
-          tags$div(style = "margin-top: 10px;"),
-          paste("An overview of the climr app:"),
-          tags$div(style = "margin-top: 10px;"),
-          tags$iframe(
-            style = "width: 100%; height: 625px; border: none;",
-            src = "https://youtube.com/embed/Sc_rxmFuGgI"
-          ),
-          tags$div(style = "margin-top: 10px;"),
-          paste("How to downscale data by map point input:"),
-          tags$div(style = "margin-top: 10px;"),
-          tags$iframe(
-            style = "width: 100%; height: 625px; border: none;",
-            src = "https://youtube.com/embed/66xQF4Yn9n4"
-          ),
-          tags$div(style = "margin-top: 10px;"),
-          paste("How to downscale data by shape input:"),
-          tags$div(style = "margin-top: 10px;"),
-          tags$iframe(
-            style = "width: 100%; height: 625px; border: none;",
-            src = "https://youtube.com/embed/3S01hpS6Kmc"
-          ),
-          tags$div(style = "margin-top: 10px;"),
-          paste("Quick tips for troubleshooting:"),
-          tags$div(style = "margin-top: 10px;"),
-          tags$iframe(
-            style = "width: 100%; height: 625px; border: none;",
-            src = "https://youtube.com/embed/DtKGB0OWLXU"
+          accordion(
+            multiple = FALSE,
+            open = FALSE,
+            id = "get_data_videos",
+            
+            accordion_panel(
+              title = h5("An overview of the climr app:"),
+              tags$div(style = "margin-top: 10px;"),
+              tags$iframe(
+                style = "width: 100%; height: 625px; border: none;",
+                src = "https://youtube.com/embed/Sc_rxmFuGgI"
+              ),
+              value = "get_data_vid1"
+            ),
+            
+            accordion_panel(
+              title = h5("How to downscale data by map point input:"),
+              tags$div(style = "margin-top: 10px;"),
+              tags$iframe(
+                style = "width: 100%; height: 625px; border: none;",
+                src = "https://youtube.com/embed/66xQF4Yn9n4"
+              ),
+              value = "get_data_vid2"
+            ),
+            
+            accordion_panel(
+              title = h5("How to downscale data by shape input:"),
+              tags$div(style = "margin-top: 10px;"),
+              tags$iframe(
+                style = "width: 100%; height: 625px; border: none;",
+                src = "https://youtube.com/embed/3S01hpS6Kmc"
+              ),
+              value = "get_data_vid3"
+            ),
+            
+            accordion_panel(
+              title = h5("Quick tips for troubleshooting:"),
+              tags$div(style = "margin-top: 10px;"),
+              tags$iframe(
+                style = "width: 100%; height: 625px; border: none;",
+                src = "https://youtube.com/embed/DtKGB0OWLXU"
+              ),
+              value = "get_data_vid4"
+            )
           )
         )
       )
@@ -176,7 +193,7 @@ getdata_server <- function(input, output, session) {
     updateActionButton(session = getDefaultReactiveDomain(),
                        "downscale_parameters", disabled = FALSE)
     updateActionButton(session = getDefaultReactiveDomain(),
-                       "generate_results", disabled = FALSE)
+                       "output_preferences", disabled = FALSE)
   })
   shiny::observeEvent(input$getdata_map_draw_stop, {
     if (shiny::in_devmode()) cat("Event: getdata_map_draw_stop", sep = "\n")
@@ -193,7 +210,7 @@ getdata_server <- function(input, output, session) {
     updateActionButton(session = getDefaultReactiveDomain(),
                        "downscale_parameters", disabled = FALSE)
     updateActionButton(session = getDefaultReactiveDomain(),
-                       "generate_results", disabled = FALSE)
+                       "output_preferences", disabled = FALSE)
     bslib::accordion_panel_open("acc_methods", "acc_method1")
   })
   
@@ -204,7 +221,7 @@ getdata_server <- function(input, output, session) {
     updateActionButton(session = getDefaultReactiveDomain(),
                        "downscale_parameters", disabled = FALSE)
     updateActionButton(session = getDefaultReactiveDomain(),
-                       "generate_results", disabled = FALSE)
+                       "output_preferences", disabled = FALSE)
   })
   
   # pop-up remove button for map points
@@ -215,37 +232,18 @@ getdata_server <- function(input, output, session) {
       updateActionButton(session = getDefaultReactiveDomain(),
                          "downscale_parameters", disabled = TRUE)
       updateActionButton(session = getDefaultReactiveDomain(),
+                         "output_preferences", disabled = TRUE)
+      updateActionButton(session = getDefaultReactiveDomain(),
                          "generate_results", disabled = TRUE)
     }
   })
   
   # ---- Get Data - Data table events
-  # delete a map point via data table
-  shiny::observeEvent(input$delete_button, {
-    if (shiny::in_devmode()) cat("Event: sg_remove", sep = "\n")
-    row_num <- input$geom_dt_rows_selected
-    point_id <- getdata_sg_dt$filtered_dt[row_num,1] 
-    if (length(point_id) != 0) {
-      getdata_sg$rm(point_id)
-      if (nrow(getdata_sg_dt$dt) < 1) {
-        updateActionButton(session = getDefaultReactiveDomain(),
-                           "downscale_parameters", disabled = TRUE)
-        updateActionButton(session = getDefaultReactiveDomain(),
-                           "generate_results", disabled = TRUE)
-      }
-    } else {
-      showModal(
-        modalDialog(
-          title = "Warning",
-          paste("Please select row(s)." ),
-          easyClose = TRUE
-        )
-      )
-    } 
-  })
-  
   # clear all selections (map and file) logic
-  shiny::observeEvent(input$clear_selections, {
+  shiny::observeEvent(input$reset_app, {
+    show_csv_dt(FALSE)
+    csv_data(NULL)
+    show_raster_ui(FALSE)
     getdata_sg$clear_all(getdata_mp)
   })
   
@@ -408,7 +406,14 @@ getdata_server <- function(input, output, session) {
         shiny::div(
           shiny::checkboxInput(
             inputId = "downscale_core_ppt_lr",
-            label = tags$span("Apply elevation adjustment to precipitation values during downscaling", style = "font-size: 0.85em; font-weight: bold;"),
+            label = tags$span("Apply elevation adjustment to precipitation values during downscaling", style = "font-size: 0.85em; font-weight: bold;",
+                              prompter::add_prompt(
+                                tooltipsIcon,
+                                message = HTML(paste("By default, climr doesn’t apply elevation adjustment to precipitation, because in most cases elevation does not influence precipitation at scales less than 2km. Instead, precipitation at scales finer than 800m is simply interpolated from the nearest four grid points in the reference map.")),
+                                position = "top",
+                                size = "large",
+                                shadow = FALSE
+                              )),
             value = vstore[["downscale_core_ppt_lr"]],
             width = "100%"
           )
@@ -832,8 +837,8 @@ getdata_server <- function(input, output, session) {
     if (shiny::in_devmode()) cat("Event: include_dem", sep = "\n")
     vstore[["include_dem"]] <- input$include_dem
   })
-  shiny::observeEvent(input$generate_results, {
-    if (shiny::in_devmode()) cat("Event: generate_results", sep = "\n")
+  shiny::observeEvent(input$output_preferences, {
+    if (shiny::in_devmode()) cat("Event: output_preferences", sep = "\n")
     # check that it is possible to downscale the data 
     temp_dt <- getdata_sg_dt$dt
     n_layers <- calculate_layers()
@@ -869,8 +874,9 @@ getdata_server <- function(input, output, session) {
             bslib::card_body(
               shiny::tags$span(
                 if (pce$marker_count > 0) "[%s] points from [%s] markers geometries." |> sprintf(format(pce$marker_count, big.mark = ","), format(pce$marker, big.mark = ",")),
+                if (pce$shape_count > 0) "[%s] points from [%s] shapes geometries." |> sprintf(format(pce$shape_count, big.mark = ","), format(pce$shape, big.mark = ",")),
                 shiny::br(),
-                if (pce$shape_count > 0) "[%s] points from [%s] shapes geometries." |> sprintf(format(pce$shape_count, big.mark = ","), format(pce$shape, big.mark = ","))
+                if (vstore[["downscale_resolution"]] > 10000) HTML("<b>Warning:</b> The available downscale resolution is very coarse. For finer resolution, try a smaller region or selecting fewer variables.")
               )
             )
           )
@@ -889,26 +895,15 @@ getdata_server <- function(input, output, session) {
                 value = TRUE
               )
             ),
-            shiny::actionButton(
-              inputId = "downscale_process_launch",
-              label = "Launch Downscale Process",
-              class = "btn btn-primary btn-lg",
-              icon = shiny::icon("play"),
-              width = "100%"
+            footer = shiny::tagList(
+              shiny::actionButton(
+                inputId = "preferences_apply",
+                label = "Apply",
+                style = "background-color:#1d8f0e; color: #FFF",
+                icon = icon("check")
+              ), 
             ),
-            
-            # preview for csv results
-            shiny::uiOutput("preview_table_ui"),
-            
-            shiny::conditionalPanel(
-              condition = "input.downscale_output == 'csv'",
-              tags$div(style = "margin-top: 10px;"),
-              shiny::downloadButton(
-                outputId = "downscale_download",
-                label = "Download Downscaled Data",
-                style = "width: 100%;"
-              )
-            )
+            easyClose = TRUE
           )
         )
       } else {
@@ -951,11 +946,16 @@ getdata_server <- function(input, output, session) {
     if (shiny::in_devmode()) cat("Event: downscale_resolution", sep = "\n")
     vstore[["downscale_resolution"]] <- input$downscale_resolution
   })
-  shiny::observeEvent(input$downscale_process_launch, {
-    if (shiny::in_devmode()) cat("Event: downscale_process_launch", sep = "\n")
+  shiny::observeEvent(input$preferences_apply, {
+    updateActionButton(session = getDefaultReactiveDomain(),
+                       "generate_results", disabled = FALSE)
+    removeModal()
+  })
+  shiny::observeEvent(input$generate_results, {
+    if (shiny::in_devmode()) cat("Event: generate_results", sep = "\n")
     if (vstore[["processing"]]) return()
 
-    if (input$downscale_output == "csv") {
+    if (vstore[["downscale_output"]] == "csv") {
       show_csv_dt(TRUE)
     } else {
       show_raster_ui(TRUE)
@@ -1242,7 +1242,7 @@ getdata_server <- function(input, output, session) {
               label = h5("Choose observational time-series dataset:",
                          prompter::add_prompt(
                            tooltipsIcon,
-                           message = HTML(paste("Dataset for observational time series data. MSWX Blend for Multi-Source Weather, ClimateNA gridded time series, CRU/GPCC for CRU TS (temperature) and GPCC (precipitation).")),
+                           message = HTML(paste("These datasets provide an annual sequence (a time-series) of climate data as observed by weather stations and other sources.")),
                            position = "top",
                            size = "large",
                            shadow = FALSE

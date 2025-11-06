@@ -125,7 +125,7 @@ session_geometry <- function(sg_dt, mp) {
   
   refresh <- function(g) {
     refresh_DT()
-    shiny::updateActionButton(inputId = "generate_results", disabled = {nrow(sg_dt$dt) <= 0})
+    shiny::updateActionButton(inputId = "output_preferences", disabled = {nrow(sg_dt$dt) <= 0})
     if ("marker" %in% g) update_map_marker(mp)
     if ("shape" %in% g) update_map_shape(mp)
   }
@@ -255,6 +255,8 @@ session_geometry <- function(sg_dt, mp) {
     # disable buttons
     updateActionButton(session = getDefaultReactiveDomain(),
                        "downscale_parameters", disabled = TRUE)
+    updateActionButton(session = getDefaultReactiveDomain(),
+                       "output_preferences", disabled = TRUE)
     updateActionButton(session = getDefaultReactiveDomain(),
                        "generate_results", disabled = TRUE)
     
@@ -486,6 +488,7 @@ session_geometry <- function(sg_dt, mp) {
     },
     process = function() {
       vstore[["processing"]] <- TRUE
+      shiny::updateActionButton(inputId = "output_preferences", disabled = TRUE)
       shiny::updateActionButton(inputId = "generate_results", disabled = TRUE)
       withCallingHandlers(
         message = function(m) {shiny::showNotification(ui = shiny::span(conditionMessage(m)), type = "message")},
@@ -500,7 +503,7 @@ session_geometry <- function(sg_dt, mp) {
 
           if (!length(output_files)) {
             vstore[["processing"]] <- FALSE
-            shiny::updateActionButton(inputId = "generate_results", disabled = FALSE)
+            shiny::updateActionButton(inputId = "output_preferences", disabled = FALSE)
             shiny::showNotification("No output generated.", type = "warning")
             return()
           } else if (tools::file_ext(output_files) == "csv") {
@@ -510,10 +513,8 @@ session_geometry <- function(sg_dt, mp) {
               
               dt <- head(read.csv(output_files))
               DT::datatable(dt, rownames = FALSE, escape = FALSE, options = list(
-                dom = 't', scrollX = TRUE),   caption = htmltools::tags$caption(
-                  style = 'caption-side: top; text-align: left; color: black; font-weight: bold;',
-                  'Preview of Downscaled Data:'
-                ))
+                dom = 't', scrollX = TRUE)
+                )
             })
           } else if (tools::file_ext(output_files) == "tif") {
             
@@ -535,7 +536,7 @@ session_geometry <- function(sg_dt, mp) {
                 shiny::div(
                   shiny::radioButtons(
                     inputId = "ds_ras_elements",
-                    label = h5("Choose element of raster to preview:"),
+                    label = "Choose element of raster to preview:",
                     width = "100%",
                     inline = TRUE,
                     choices = variables,
@@ -561,13 +562,7 @@ session_geometry <- function(sg_dt, mp) {
                     label = "Preview Raster Layer",
                     style = "width: 100%;",
                     icon = shiny::icon("map")
-                    ),
-                  tags$div(style = "margin-top: 10px;"),
-                  shiny::downloadButton(
-                    outputId = "downscale_download",
-                    label = "Download Downscaled Data",
-                    style = "width: 100%;"
-                  )
+                    )
                 )
               }
             })
@@ -584,7 +579,7 @@ session_geometry <- function(sg_dt, mp) {
                 
                 shiny::radioButtons(
                   inputId = "ds_ras_time_periods",
-                  label = h5("Choose time period of raster to preview:"),
+                  label = "Choose time period of raster to preview:",
                   width = "100%",
                   inline = TRUE,
                   choices = time_periods,
@@ -615,7 +610,7 @@ session_geometry <- function(sg_dt, mp) {
               if (show_raster_ui() & !is.null(input$ds_ras_elements) & !is.null(input$ds_ras_time_periods)) {
                 shiny::radioButtons(
                   inputId = "ds_ras_obs_sim",
-                  label = h5("Preview observed or simulated data?"),
+                  label = "Preview observed or simulated data?",
                   width = "100%",
                   inline = TRUE,
                   choices = choices,
@@ -642,7 +637,7 @@ session_geometry <- function(sg_dt, mp) {
               if (input$ds_ras_obs_sim == 'Observed' & !is.null(vstore[["downscale_obs_periods_checkbox"]])) {
                 shiny::radioButtons(
                   inputId = "ds_ras_obs_periods",
-                  label = h5("Choose period to preview:"),
+                  label = "Choose period to preview:",
                   width = "100%",
                   inline = TRUE,
                   choices = vstore[["downscale_obs_periods_checkbox"]],
@@ -656,7 +651,7 @@ session_geometry <- function(sg_dt, mp) {
               if (input$ds_ras_obs_sim == 'Simulated' & !is.null(vstore[["downscale_gcms"]])) {
                 shiny::radioButtons(
                   inputId = "ds_ras_gcms",
-                  label = h5("Choose GCM to preview:"),
+                  label = "Choose GCM to preview:",
                   width = "100%",
                   inline = TRUE,
                   choices = vstore[["downscale_gcms"]],
@@ -670,7 +665,7 @@ session_geometry <- function(sg_dt, mp) {
               if (input$ds_ras_obs_sim == 'Simulated' & !is.null(vstore[["downscale_ssps"]])) {
                 shiny::radioButtons(
                   inputId = "ds_ras_ssps",
-                  label = h5("Choose SSP to preview:"),
+                  label = "Choose SSP to preview:",
                   width = "100%",
                   inline = TRUE,
                   choices = vstore[["downscale_ssps"]],
@@ -684,7 +679,7 @@ session_geometry <- function(sg_dt, mp) {
               if (input$ds_ras_obs_sim == 'Simulated' & !is.null(vstore[["ds_ras_run"]])) {
                 shiny::radioButtons(
                   inputId = "ds_ras_gcm_periods",
-                  label = h5("Choose period to preview:"),
+                  label = "Choose period to preview:",
                   width = "100%",
                   inline = TRUE,
                   choices = vstore[["downscale_gcm_periods"]],
@@ -740,7 +735,7 @@ session_geometry <- function(sg_dt, mp) {
         }
       )
       vstore[["processing"]] <- FALSE
-      shiny::updateActionButton(inputId = "generate_results", disabled = FALSE)
+      shiny::updateActionButton(inputId = "output_preferences", disabled = FALSE)
     },
     rm = function(rid) {
         rem(rid)

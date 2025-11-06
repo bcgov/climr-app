@@ -1,5 +1,7 @@
 # Instructions
 
+For instructional videos, <a href="https://www.youtube.com/playlist?list=PLt-XQAbbH_-pRO0usT5dHjTt1WidQZIH7" target="_blank" rel="noopener noreferrer">click here</a>.
+
 ## Get Data:
 
 In the first tab of the climr App, users can select points or areas of interest, choose parameters, downscale the data, and preview and download the data.  For a very quick summary of functionality of this page, users can also click the *What does this page do* link at the top of the left-hand panel.

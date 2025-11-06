@@ -2,7 +2,7 @@ project:
   type: book
 
 book:
-  title: "climr Web Application"
+  title: "climr app"
   author: "FFEC"
   date: "2025-06-20"
   chapters:

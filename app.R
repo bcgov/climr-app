@@ -163,7 +163,7 @@ shiny::shinyApp(
         shinyjs::useShinyjs(),
         shiny::sidebarLayout(
           shiny::sidebarPanel(
-            style = "height: 84vh; overflow-y: auto; overflow-x: auto;", # FIX HEIGHT TO BE ADAPTIVE
+            style = "height: 84vh; overflow-y: auto; overflow-x: auto;",
             shiny::div(
               style = "text-align: center;",
               shiny::actionLink(
@@ -173,20 +173,11 @@ shiny::shinyApp(
                 )
             ),
             tags$div(style = "margin-top: 10px;"),
-            splitLayout(
-              actionButton("clear_selections", "Clear Selections",
-                            style = "width:100%; height:70px; background-color:#c21104; color: #FFF"),
-              actionButton(
-                "generate_results",
-                label = "Generate Results",
-                icon = icon("plus-square"),
-                style = "width:100%; height:70px; background-color:#003366; color: #FFF",
-                disabled = TRUE
-              )
-            ),
-            tags$div(style = "margin-top: 20px;"),
-            
-            strong("Add Sites Using One of the 2 Methods Below:"),
+            actionButton("reset_app", "Reset App", icon = icon("arrows-rotate"),
+                          style = "width:100%; background-color:#c21104; color: #FFF"),
+
+            tags$div(style = "margin-top: 10px;"),
+            HTML("<b>Step 1:</b> Add Sites Using One of the 2 Methods Below"),
             accordion(
               multiple = FALSE,
               open = FALSE,
@@ -196,14 +187,13 @@ shiny::shinyApp(
                 title = h5("Method 1: By selection on map",
                             prompter::add_prompt(
                               tooltipsIcon,
-                              message = HTML(paste("Click on map to add points or draw an area-of-interest using shape tools in left-hand corner of map.")),
+                              message = HTML(paste("Click on map to add points or draw an area-of-interest using shape tools in lower left-hand corner of map.")),
                               position = "top",
                               size = "large",
                               shadow = FALSE
                             )
                 ),
                 DT::DTOutput("geom_dt", width = "100%"),
-                shiny::actionButton("delete_button", "Delete Selected", icon("trash-alt")),
                 value = "acc_method1"
               ),
               
@@ -226,18 +216,39 @@ shiny::shinyApp(
                 value = "acc_method2"
               )
             ),
-            tags$div(style = "margin-top: 20px;"),
+            tags$div(style = "margin-top: 10px;"),
+            HTML("<b>Step 2:</b>"),
             shiny::actionButton("downscale_parameters", "Choose Downscale Parameters",
                                 disabled = TRUE, icon = icon("sliders-h"), style = "width:100%; align:center;"),
             
-            tags$div(style = "margin-top: 20px;"),
+            tags$div(style = "margin-top: 10px;"),
+            HTML("<b>Step 3:</b>"),
+            shiny::actionButton("output_preferences", label = "Choose Output Preferences",
+                                icon = icon("sliders-h"), style = "width:100%; align:center;", disabled = TRUE),
             
-            # options for raster preview
-            uiOutput("preview_raster_elements", width = "100%"),
+            tags$div(style = "margin-top: 10px;"),
+            HTML("<b>Step 4:</b>"),
+            shiny::actionButton("generate_results", label = "Generate Results",
+                                icon = icon("play"), style = "width:100%; align:center; background-color:#006633; color: #FFF", disabled = TRUE),
+            
+            # options for csv or raster preview
+            tags$div(style = "margin-top: 10px;"),
+            HTML("<b>Step 5:</b> Preview Downscaled Data"),
+            tags$div(style = "margin-top: 10px;"),
+            shiny::uiOutput("preview_table_ui", width = "100%"),
+            shiny::uiOutput("preview_raster_elements", width = "100%"),
+            
+            tags$div(style = "margin-top: 10px;"),
+            HTML("<b>Step 6:</b>"),
+            shiny::downloadButton(
+              outputId = "downscale_download",
+              label = "Download Downscaled Data",
+              style = "width: 100%;"
+            )
           ),
           shiny::mainPanel(
             # create map as UI element
-            leaflet::leafletOutput("getdata_map", width = "100%", height = "84vh") #height needs to be fixed to be adaptive
+            leaflet::leafletOutput("getdata_map", width = "100%", height = "84vh") 
           )
         )
       ),
@@ -308,7 +319,7 @@ shiny::shinyApp(
                         class = "input-control",
                         top = 90,            
                         left = 60,           
-                        width = 180,
+                        width = 205,
                         style = "padding: 10px;",
                         shiny::div(
                           style = "text-align: center;",
@@ -334,7 +345,7 @@ shiny::shinyApp(
                         ),
                         shiny::conditionalPanel(
                           condition = "input.show_overlay_controls == true",
-                          h4("Overlay Controls"),
+                          tags$h4("Overlay Controls", style = "margin-bottom: 10px;"),
                           shiny::radioButtons(
                             inputId = "overlay_res",
                             label = "Resolution:",
@@ -342,8 +353,21 @@ shiny::shinyApp(
                             inline = TRUE,
                             selected = "2500m"
                           ),
-                          shiny::selectInput("element", "Element:", choices = NULL),
-                          shiny::selectInput("time", "Season:", choices = NULL),
+                          tags$div(
+                            style = "display: flex; gap: 5px;",
+                            shiny::selectInput(
+                              inputId = "element",
+                              label = "Element:",
+                              width = "100%",
+                              choices = NULL
+                            ),
+                            shiny::selectInput(
+                              inputId = "time",
+                              label = "Season:",
+                              width = "100%",
+                              choices = NULL
+                            )
+                          ),
                           shiny::uiOutput("scale_adj"),
                           shiny::actionButton(
                             inputId = "load_overlay",
@@ -366,7 +390,7 @@ shiny::shinyApp(
                             disabled = TRUE,
                             icon = shiny::icon("sliders-h"),
                             width = "100%"
-                          ) 
+                          )
                         )
                       ),
                   ),
@@ -610,7 +634,7 @@ shiny::shinyApp(
       ),
      
 
-    shiny::tabPanel("Documentation",
+    shiny::tabPanel("About",
                     tags$iframe(src = "https://vonuma.com/climr-docs/index.html",
                                 style = "width: 100%; height: calc(100vh - 130px); border: none;")
                     ),
@@ -663,13 +687,15 @@ shiny::shinyApp(
           ),
           tags$div(style = "margin-top: 10px;"),
           tags$iframe(
-            style = "width: 100%; height: 625px; border: none;",
+            style = "width: 100%; height: 430px; border: none;",
             src = "https://www.youtube.com/embed/Sc_rxmFuGgI",
             allowfullscreen = NA
-          )
+          ),
+          tags$div(style = "margin-top: 10px;"),
+          HTML("For more instructional videos, click on the <strong>What does this page do</strong> links!")
         ),
         easyClose = TRUE,
-        size = "xl"
+        size = "l"
       )
     )
     

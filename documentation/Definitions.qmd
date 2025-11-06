@@ -44,13 +44,13 @@
 
 -   Degree-days: a unit of heat accumulation (a.k.a. heat sum) relevant to biological development (like plant growth or insect emergence) and building energy demand for heating and cooling. Degree-days indices are calculated as the difference between the daily average temperature (in degrees Celsius) and a threshold temperature, summed over all days within the specified time period such as month or season. For example, growing degree-days track how much heat is available for plant growth above a certain threshold (e.g., 5°C), while heating and cooling degree-days quantify how much heating or cooling is needed when temperatures fall below or rise above a comfort threshold (e.g., 18°C).
 
--   DDsub0: Degree-days below 0°C (annual, seasonal, monthly) - Estimated freezing degree-days. See "degree-days" above.
-
--   DDsub18: Degree-days below 18°C (annual, seasonal, monthly), Estimated heating degree-days. See "degree-days" above.
-
--   DD18: Degree-days above 18°C (annual, seasonal, monthly), Estimated cooling degree-days. See "degree-days" above.
-
--   DD5: Degree-days above 5°C (annual, seasonal, monthly), Estimated growing degree-days. See "degree-days" above.
+    -   DDsub0: Degree-days below 0°C (annual, seasonal, monthly) - Estimated freezing degree-days. See "degree-days" above.
+    
+    -   DDsub18: Degree-days below 18°C (annual, seasonal, monthly), Estimated heating degree-days. See "degree-days" above.
+    
+    -   DD18: Degree-days above 18°C (annual, seasonal, monthly), Estimated cooling degree-days. See "degree-days" above.
+    
+    -   DD5: Degree-days above 5°C (annual, seasonal, monthly), Estimated growing degree-days. See "degree-days" above.
 
 -   NFFD: Number of frost-free days (annual, seasonal, monthly) - An estimate of the total number of days where Tmin is greater than zero.
 

@@ -87,19 +87,30 @@ visualization_server <- function(input, output, session) {
         ),
         tabPanel(
           "Video",
-          tags$div(style = "margin-top: 10px;"),
-          paste("How to use the climate map overlays:"),
-          tags$div(style = "margin-top: 10px;"),
-          tags$iframe(
-            style = "width: 100%; height: 625px; border: none;",
-            src = "https://youtube.com/embed/hY8VbLCBA3k"
-          ),
-          tags$div(style = "margin-top: 10px;"),
-          paste("How to use climate plots:"),
-          tags$div(style = "margin-top: 10px;"),
-          tags$iframe(
-            style = "width: 100%; height: 625px; border: none;",
-            src = "https://youtube.com/embed/SiIbLHNgvrw"
+          accordion(
+            multiple = FALSE,
+            open = FALSE,
+            id = "vis_videos",
+            
+            accordion_panel(
+              title = h5("How to use the climate map overlays:"),
+              tags$div(style = "margin-top: 10px;"),
+              tags$iframe(
+                style = "width: 100%; height: 625px; border: none;",
+                src = "https://youtube.com/embed/hY8VbLCBA3k"
+              ),
+              value = "vis_vid1"
+            ),
+            
+            accordion_panel(
+              title = h5("How to use climate plots:"),
+              tags$div(style = "margin-top: 10px;"),
+              tags$iframe(
+                style = "width: 100%; height: 625px; border: none;",
+                src = "https://youtube.com/embed/SiIbLHNgvrw"
+              ),
+              value = "vis_vid2"
+            ),
           )
         )
       )
