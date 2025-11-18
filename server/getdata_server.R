@@ -603,10 +603,6 @@ getdata_server <- function(input, output, session) {
     # handle sets
     extra_var_handler()
     
-    # handle custom
-    vstore[["downscale_custom_elements"]] <- input$downscale_custom_elements
-    vstore[["downscale_custom_time_periods"]] <- input$downscale_custom_time_periods
-    
     ## elev adjustment ##
     vstore[["downscale_core_ppt_lr"]] <- input$downscale_core_ppt_lr
     
@@ -638,7 +634,7 @@ getdata_server <- function(input, output, session) {
           easyClose = TRUE
         )
       )
-    } else if (nrow(compatible_periods) == 0 & !is.null(input$downscale_custom_elements) & !is.null(input$downscale_custom_time_periods)) {
+    } else if (nrow(compatible_periods) == 0 & !is.null(vstore[["downscale_custom_elements"]]) & !is.null(vstore[["downscale_custom_time_periods"]])) {
       showModal(
         modalDialog(
           title = "Warning",
@@ -737,6 +733,11 @@ getdata_server <- function(input, output, session) {
   
   # handler for extra climate variable sets
   extra_var_handler <- function() {
+    # reset to original core vars as error handling
+    vstore[["downscale_extra_vars"]] <- downscale_default[["downscale_extra_vars"]]
+    vstore[["downscale_custom_elements"]] <- downscale_default[["downscale_custom_elements"]]
+    vstore[["downscale_custom_time_periods"]] <- downscale_default[["downscale_custom_time_periods"]]
+    
     # add new variables
     vstore[["downscale_extra_vars_sets"]] <- input$downscale_extra_vars_sets
     
@@ -757,6 +758,10 @@ getdata_server <- function(input, output, session) {
     if ("Annual" %in% vstore[["downscale_extra_vars_sets"]]) {
       annual_vars <- climr::variables %>% filter(Category == "Annual") %>% filter(!Code_Element %in% c("CMI", "EXT", "EMT", "MAP", "MAT", "RH", "MSP", "AHM", "SHM")) %>% pull(Code)
       append_vstore_and_notify("downscale_extra_vars", annual_vars, "Annual vars")
+    }
+    if ("Custom" %in% vstore[["downscale_extra_vars_sets"]]) {
+      vstore[["downscale_custom_elements"]] <- input$downscale_custom_elements
+      vstore[["downscale_custom_time_periods"]] <- input$downscale_custom_time_periods
     }
   }
   

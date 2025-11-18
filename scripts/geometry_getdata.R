@@ -536,7 +536,7 @@ session_geometry <- function(sg_dt, mp) {
                 shiny::div(
                   shiny::radioButtons(
                     inputId = "ds_ras_elements",
-                    label = "Choose element of raster to preview:",
+                    label = h5("Choose element of raster to preview:"),
                     width = "100%",
                     inline = TRUE,
                     choices = variables,
@@ -579,7 +579,7 @@ session_geometry <- function(sg_dt, mp) {
                 
                 shiny::radioButtons(
                   inputId = "ds_ras_time_periods",
-                  label = "Choose time period of raster to preview:",
+                  label = h5("Choose time period of raster to preview:"),
                   width = "100%",
                   inline = TRUE,
                   choices = time_periods,
@@ -610,7 +610,7 @@ session_geometry <- function(sg_dt, mp) {
               if (show_raster_ui() & !is.null(input$ds_ras_elements) & !is.null(input$ds_ras_time_periods)) {
                 shiny::radioButtons(
                   inputId = "ds_ras_obs_sim",
-                  label = "Preview observed or simulated data?",
+                  label = h5("Preview observed or simulated data?"),
                   width = "100%",
                   inline = TRUE,
                   choices = choices,
@@ -637,7 +637,7 @@ session_geometry <- function(sg_dt, mp) {
               if (input$ds_ras_obs_sim == 'Observed' & !is.null(vstore[["downscale_obs_periods_checkbox"]])) {
                 shiny::radioButtons(
                   inputId = "ds_ras_obs_periods",
-                  label = "Choose period to preview:",
+                  label = h5("Choose period to preview:"),
                   width = "100%",
                   inline = TRUE,
                   choices = vstore[["downscale_obs_periods_checkbox"]],
@@ -651,7 +651,7 @@ session_geometry <- function(sg_dt, mp) {
               if (input$ds_ras_obs_sim == 'Simulated' & !is.null(vstore[["downscale_gcms"]])) {
                 shiny::radioButtons(
                   inputId = "ds_ras_gcms",
-                  label = "Choose GCM to preview:",
+                  label = h5("Choose GCM to preview:"),
                   width = "100%",
                   inline = TRUE,
                   choices = vstore[["downscale_gcms"]],
@@ -665,7 +665,7 @@ session_geometry <- function(sg_dt, mp) {
               if (input$ds_ras_obs_sim == 'Simulated' & !is.null(vstore[["downscale_ssps"]])) {
                 shiny::radioButtons(
                   inputId = "ds_ras_ssps",
-                  label = "Choose SSP to preview:",
+                  label = h5("Choose SSP to preview:"),
                   width = "100%",
                   inline = TRUE,
                   choices = vstore[["downscale_ssps"]],
@@ -679,7 +679,7 @@ session_geometry <- function(sg_dt, mp) {
               if (input$ds_ras_obs_sim == 'Simulated' & !is.null(vstore[["ds_ras_run"]])) {
                 shiny::radioButtons(
                   inputId = "ds_ras_gcm_periods",
-                  label = "Choose period to preview:",
+                  label = h5("Choose period to preview:"),
                   width = "100%",
                   inline = TRUE,
                   choices = vstore[["downscale_gcm_periods"]],
