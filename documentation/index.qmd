@@ -23,7 +23,7 @@ The code for this app is open source:
 
 The collaborators on the climr app are: Tirion Grice (front end developer), Kiri Daust (lead developer), Colin Mahony (science lead), and Bruno Tremblay (back end developer). We also thank Ceres Barros and Aseem Sharma for their contributions to the `climr` package.
 
-We thank Cameron Cosgrove, Caren Dymond and Greg O'Neill for completing the peer review of the climr app.
+We thank Cameron Cosgrove, Caren Dymond, Elizabeth Kleynhans, and Greg O'Neill for completing the peer review of the climr app.
 
 `climr` uses the downscaling framework pioneered by Dr. Tongli Wang (University of British Columbia) and Dr. Andreas Hamann (University of Alberta) in the <a href='https://climatena.ca/' target='_blank'>ClimateNA</a> tool (Wang et al. 2016, 2024). In addition, `climr` uses the ClimateNA derived variable equations published by Wang et al. (2016). 
 
