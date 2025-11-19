@@ -201,66 +201,68 @@ time_labels_month <- c(
   "December" = "12"
 )
 
-# for csv output file restructuring
-gcms <- c("REFPERIOD", "OBS", climr::list_gcms())
-periods <- c("1961_1990", climr::list_obs_periods(), climr::list_gcm_periods())
-runs <- "ensembleMean"
-ssps <- climr::list_ssps()
-pieces <- strsplit(climr::list_vars(), "_")
-vars <- unique(sapply(pieces, `[`, 1))
-time_codes <- unique(sapply(pieces, `[`, 2))
-time_codes <- time_codes[!is.na(time_codes)]
-
-parse_scenario <- function(x, gcms, vars, time_codes, ssps, runs, periods) {
-  pieces <- unlist(strsplit(x, "_"))
-  result <- list(GCM = "", SSP = "", RUN = "", PERIOD = "", var = "")
-  i <- 1
-  while (i <= length(pieces)) {
-    part <- pieces[i]
-    # GCM
-    if (result$GCM == "" && part %in% gcms) {
-      if (part == "REFPERIOD" | part == "OBS") {
-        result$GCM <- ""
-      } else {
-        result$GCM <- part
-      }
-      i <- i + 1
-      next
+parse_scenario <- function(scenarios, gcms, vars, time_codes, ssps, runs, periods) {
+  dt <- data.table(raw = scenarios)
+  
+  # Split into max 7 parts
+  parts <- tstrsplit(dt$raw, "_", fill = NA_character_)
+  max_p <- length(parts)
+  
+  dt[, paste0("p", 1:max_p) := parts]
+  
+  # Count non-NA parts for each scenario
+  dt[, n_parts := rowSums(!is.na(.SD)), .SDcols = paste0("p", 1:max_p)]
+  
+  # Split by n_parts
+  split_list <- split(dt, by = "n_parts", keep.by = TRUE)
+  
+  parsed <- lapply(split_list, function(sub) {
+    np <- unique(sub$n_parts)
+    
+    if (np == 4) {
+      out <- sub[, .(
+        GCM = ifelse(p1 %in% c("REFPERIOD", "OBS"), NA_character_, p1),
+        SSP = NA_character_,
+        RUN = NA_character_,
+        PERIOD = paste(p3,p4,sep="_"),
+        var = p2
+      )]
+      
+    } else if (np == 5) {
+      out <- sub[, .(
+        GCM = ifelse(p1 %in% c("REFPERIOD", "OBS"), NA_character_, p1),
+        SSP = NA_character_,
+        RUN = NA_character_,
+        PERIOD = paste(p4,p5,sep="_"),
+        var = paste(p2,p3,sep="_")
+      )]
+      
+    } else if (np == 6) {
+      out <- sub[, .(
+        GCM = ifelse(p1 %in% c("REFPERIOD", "OBS"), NA_character_, p1),
+        SSP = p3,
+        RUN = p4,
+        PERIOD = paste(p5,p6,sep="_"),
+        var = p2
+      )]
+      
+    } else if (np == 7) {
+      out <- sub[, .(
+        GCM = ifelse(p1 %in% c("REFPERIOD", "OBS"), NA_character_, p1),
+        SSP = p4,
+        RUN = p5,
+        PERIOD = paste(p6,p7,sep="_"),
+        var = paste(p2,p3,sep="_")
+      )]
     }
-    # variables, need to glue var name and time together
-    if (result$var == "" && part %in% vars && i < length(pieces)) {
-      if (pieces[i+1] %in% time_codes) {
-        result$var <- paste(part, pieces[i+1], sep = "_")
-        i <- i + 2
-      } else {
-        result$var <- part
-        i <- i + 1
-      }
-      next
-    }
-    # SSP
-    if (result$SSP == "" && part %in% ssps) {
-      result$SSP <- part
-      i <- i + 1
-      next
-    }
-    # run
-    if (result$RUN == "" && part %in% runs) {
-      result$RUN <- part
-      i <- i + 1
-      next
-    }
-    # period
-    if (result$PERIOD == "" && i < length(pieces)) {
-      result$PERIOD <- paste(part, pieces[i+1], sep = "_")
-      i <- i + 2
-      next
-    }
-    # break out of loop
-    i <- i + 1
-  }
-  result <- lapply(result, function(x) if (length(x)==0) "" else x)
-  return(result)
+    
+    out
+  })
+  
+  # Bind all together — consistent column order by specifying columns
+  wanted_cols <- c("GCM", "SSP", "RUN", "PERIOD", "var")
+  
+  rbindlist(parsed, use.names = TRUE, fill = TRUE)[, ..wanted_cols]
 }
 
 # Tiles source
@@ -802,29 +804,17 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
         
         terra::writeRaster(x = res, filename = out_file, gdal=c("PREDICTOR=2"), datatype="FLT4S", overwrite = TRUE)
       } else {
+        shiny::showNotification("Converting output to csv format.")
         dat <- data.table::as.data.table(res, keep.rownames = "X")
         dat[, (ncol(dat)) := NULL]
         dat_long <- melt(dat, id.vars = "X", variable.name = "scenario", value.name = "value")
         dat_long[, scenario := as.character(scenario)]
         setnames(dat_long, old = "X", new = "id")
-        dat_long[, c("GCM", "SSP", "RUN", "PERIOD", "var") :=
-                   {
-                     parsed <- lapply(scenario, parse_scenario,
-                                      gcms = gcms,
-                                      vars = vars,
-                                      time_codes = time_codes,
-                                      ssps = ssps,
-                                      runs = runs,
-                                      periods = periods)
-                     # Extract each element as a vector
-                     GCM    <- sapply(parsed, `[[`, "GCM")
-                     SSP    <- sapply(parsed, `[[`, "SSP")
-                     RUN    <- sapply(parsed, `[[`, "RUN")
-                     PERIOD <- sapply(parsed, `[[`, "PERIOD")
-                     var    <- sapply(parsed, `[[`, "var")
-                     list(GCM, SSP, RUN, PERIOD, var)
-                   }]
         
+        uniq <- unique(dat_long[, .(scenario)])
+        uniq[, c("GCM","SSP","RUN","PERIOD","var") :=
+               parse_scenario(scenario, gcms, vars, time_codes, ssps, runs, periods)]
+        dat_long <- uniq[dat_long, on="scenario"]
         dat_long[, scenario := NULL]
         dat_wide <- dcast(
           dat_long,
@@ -836,6 +826,7 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
         dat_wide[, (empty_cols) := NULL]
         
         data.table::as.data.table(dat_wide) |> data.table::fwrite(file = out_file, row.names = FALSE)
+        shiny::showNotification("Conversion complete.")
       }      
       output_files <- c(output_files, out_file)
       rm(xyz, res)
@@ -903,46 +894,17 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
         
         terra::writeRaster(x = res, filename = out_file, gdal=c("PREDICTOR=2"), datatype="FLT4S", overwrite = TRUE)
       } else {
+        shiny::showNotification("Converting output to csv format.")
         dat <- data.table::as.data.table(res, keep.rownames = "X")
         dat[, (ncol(dat)) := NULL]
         dat_long <- melt(dat, id.vars = "X", variable.name = "scenario", value.name = "value")
         dat_long[, scenario := as.character(scenario)]
         setnames(dat_long, old = "X", new = "id")
-        # pieces <- tstrsplit(dat_long$scenario, "_", fixed = TRUE)
-        # pieces_dt <- as.data.table(pieces)
-        # dat_long[, `:=`(GCM = "", SSP = "", RUN = "", PERIOD = "", var = "")]
-        # dat_long[, GCM := fifelse(pieces_dt[[1]] %in% gcms & !pieces_dt[[1]] %in% c("REFPERIOD","OBS"),
-        #                           pieces_dt[[1]], "")]
-        # dat_long[, SSP := fifelse(pieces_dt[[2]] %in% ssps, pieces_dt[[2]], "")]
-        # dat_long[, RUN := fifelse(pieces_dt[[3]] %in% runs, pieces_dt[[3]], "")]
-        # dat_long[, PERIOD := fifelse(
-        #   paste(pieces_dt[[4]], pieces_dt[[5]], sep="_") %in% periods,
-        #   paste(pieces_dt[[4]], pieces_dt[[5]], sep="_"),
-        #   pieces_dt[[4]]
-        # )]
-        # dat_long[, var := fifelse(
-        #   pieces_dt[[2]] %in% vars & pieces_dt[[3]] %in% time_codes,
-        #   paste(pieces_dt[[2]], pieces_dt[[3]], sep="_"),
-        #   pieces_dt[[2]]
-        # )]
-        dat_long[, c("GCM", "SSP", "RUN", "PERIOD", "var") :=
-                   {
-                     parsed <- lapply(scenario, parse_scenario,
-                                      gcms = gcms,
-                                      vars = vars,
-                                      time_codes = time_codes,
-                                      ssps = ssps,
-                                      runs = runs,
-                                      periods = periods)
-                     # Extract each element as a vector
-                     GCM    <- sapply(parsed, `[[`, "GCM")
-                     SSP    <- sapply(parsed, `[[`, "SSP")
-                     RUN    <- sapply(parsed, `[[`, "RUN")
-                     PERIOD <- sapply(parsed, `[[`, "PERIOD")
-                     var    <- sapply(parsed, `[[`, "var")
-                     list(GCM, SSP, RUN, PERIOD, var)
-                   }]
-
+        
+        uniq <- unique(dat_long[, .(scenario)])
+        uniq[, c("GCM","SSP","RUN","PERIOD","var") :=
+               parse_scenario(scenario, gcms, vars, time_codes, ssps, runs, periods)]
+        dat_long <- uniq[dat_long, on="scenario"]
         dat_long[, scenario := NULL]
         dat_wide <- dcast(
           dat_long,
@@ -954,6 +916,7 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
         dat_wide[, (empty_cols) := NULL]
         
         data.table::as.data.table(dat_wide) |> data.table::fwrite(file = out_file, row.names = FALSE)
+        shiny::showNotification("Conversion complete.")
       }      
       output_files <- c(output_files, out_file)
       rm(xyz, res, g)
@@ -1010,29 +973,17 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
           
           terra::writeRaster(x = res, filename = out_file, gdal=c("PREDICTOR=2"), datatype="FLT4S", overwrite = TRUE)
         } else {
+          shiny::showNotification("Converting output to csv format.")
           dat <- data.table::as.data.table(res, keep.rownames = "X")
           dat[, (ncol(dat)) := NULL]
           dat_long <- melt(dat, id.vars = "X", variable.name = "scenario", value.name = "value")
           dat_long[, scenario := as.character(scenario)]
           setnames(dat_long, old = "X", new = "id")
-          dat_long[, c("GCM", "SSP", "RUN", "PERIOD", "var") :=
-                     {
-                       parsed <- lapply(scenario, parse_scenario,
-                                        gcms = gcms,
-                                        vars = vars,
-                                        time_codes = time_codes,
-                                        ssps = ssps,
-                                        runs = runs,
-                                        periods = periods)
-                       # Extract each element as a vector
-                       GCM    <- sapply(parsed, `[[`, "GCM")
-                       SSP    <- sapply(parsed, `[[`, "SSP")
-                       RUN    <- sapply(parsed, `[[`, "RUN")
-                       PERIOD <- sapply(parsed, `[[`, "PERIOD")
-                       var    <- sapply(parsed, `[[`, "var")
-                       list(GCM, SSP, RUN, PERIOD, var)
-                     }]
           
+          uniq <- unique(dat_long[, .(scenario)])
+          uniq[, c("GCM","SSP","RUN","PERIOD","var") :=
+                 parse_scenario(scenario, gcms, vars, time_codes, ssps, runs, periods)]
+          dat_long <- uniq[dat_long, on="scenario"]
           dat_long[, scenario := NULL]
           dat_wide <- dcast(
             dat_long,
@@ -1044,6 +995,7 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
           dat_wide[, (empty_cols) := NULL]
           
           data.table::as.data.table(dat_wide) |> data.table::fwrite(file = out_file, row.names = FALSE)
+          shiny::showNotification("Conversion complete.")
         }      
         output_files <- c(output_files, out_file)
         rm(xyz, res, g) 
