@@ -127,6 +127,8 @@ knitr::include_graphics("Figure_Instructions_percent_change.png")
 
 To clear all selections on the map and start again with new data, click on the red **Clear Selections** button in the main panel.
 
+Please note that users will not be able to open GeoTIFF downloads in Photos. We recommend reading the output in R or opening the file in GIS software.
+
 ### Job Size Limits for Raster Output:
 
 Currently, there are job size limits implemented on the downscaling of map-drawn shapes and uploaded shape files (see [Known Issues](Issues.qmd#issues-requiring-fixing) for more information). After a user has chosen the downscale parameters wanted and clicked **Apply**, a warning box may appear (@fig-job-size-warning). This occurs when a user has selected too many parameters, which creates too many raster layers to downscale. We recommend running the downscale process one GCM at a time if this happens; or if a user has selected multiple climate variable packages, try downscaling one package at a time.
