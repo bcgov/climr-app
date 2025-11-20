@@ -17,7 +17,7 @@ If you have a question that is not answered in the **Frequently Asked Questions*
 The code for this app is open source:
 
 - climr R package: [https://github.com/bcgov/climr](https://github.com/bcgov/climr)
-- climr App: [https://github.com/bcgov/climr-app](https://github.com/bcgov/climr-app)
+- climr app: [https://github.com/bcgov/climr-app](https://github.com/bcgov/climr-app)
 
 ## Acknowledgements
 

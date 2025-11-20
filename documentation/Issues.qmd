@@ -1,6 +1,6 @@
 # Known Issues
 
-## Known issues with the climr App :(
+## Known issues with the climr app :(
 
 This section is focused on aspects of the climr App related to
 trade-offs and intrinsic sources of error. We also list bugs or minor
