@@ -201,7 +201,7 @@ time_labels_month <- c(
   "December" = "12"
 )
 
-parse_scenario <- function(scenarios, gcms, vars, time_codes, ssps, runs, periods) {
+parse_scenario <- function(scenarios) {
   dt <- data.table(raw = scenarios)
   
   # Split into max 7 parts
@@ -813,7 +813,7 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
         
         uniq <- unique(dat_long[, .(scenario)])
         uniq[, c("GCM","SSP","RUN","PERIOD","var") :=
-               parse_scenario(scenario, gcms, vars, time_codes, ssps, runs, periods)]
+               parse_scenario(scenario)]
         dat_long <- uniq[dat_long, on="scenario"]
         dat_long[, scenario := NULL]
         dat_wide <- dcast(
@@ -903,7 +903,7 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
         
         uniq <- unique(dat_long[, .(scenario)])
         uniq[, c("GCM","SSP","RUN","PERIOD","var") :=
-               parse_scenario(scenario, gcms, vars, time_codes, ssps, runs, periods)]
+               parse_scenario(scenario)]
         dat_long <- uniq[dat_long, on="scenario"]
         dat_long[, scenario := NULL]
         dat_wide <- dcast(
@@ -982,7 +982,7 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
           
           uniq <- unique(dat_long[, .(scenario)])
           uniq[, c("GCM","SSP","RUN","PERIOD","var") :=
-                 parse_scenario(scenario, gcms, vars, time_codes, ssps, runs, periods)]
+                 parse_scenario(scenario)]
           dat_long <- uniq[dat_long, on="scenario"]
           dat_long[, scenario := NULL]
           dat_wide <- dcast(
