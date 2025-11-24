@@ -721,7 +721,7 @@ session_geometry <- function(sg_dt, mp) {
 
           output$downscale_download <- shiny::downloadHandler(
             filename = function() {
-              paste0("downscale_", run_id, ".zip")
+              paste0("climr_", run_id, ".zip")
             },
             content = function(file) {
               on.exit(unlink(output_files), add = TRUE)

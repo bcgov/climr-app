@@ -746,7 +746,7 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
     res <- ds(xyz)
     
     # Write the current res to CSV using the same run_id
-    csv_file <- file.path(temp_dir, paste0("downscale_", run_id, ".csv"))
+    csv_file <- file.path(temp_dir, paste0("climr_", run_id, ".csv"))
     data.table::fwrite(x = res, file = csv_file, row.names = FALSE)
 
     rm(res, xyz, file_dt, marker_geoms, coords, elevs, marker_dt)
@@ -797,7 +797,7 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
         names(res)[nlyr(res)] <- "NA_DEM"
       }
       # Write the current res to tif using the same run_id
-      out_file <- file.path(temp_dir, paste0("downscale_", run_id, "_raster_",i,".%s" |> sprintf(vstore[["downscale_output"]])))
+      out_file <- file.path(temp_dir, paste0("climr_", run_id, ".%s" |> sprintf(vstore[["downscale_output"]])))
       if (vstore[["downscale_output"]] %in% "tif") {
         # keep a copy of res for previewing raster
         preview_raster <<- res
@@ -887,7 +887,7 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
       res <- terra::mask(res, g)
       
       # Write the current res to tif using the same run_id
-      out_file <- file.path(temp_dir, paste0("downscale_", run_id, "_map_draw_",i,".%s" |> sprintf(vstore[["downscale_output"]])))
+      out_file <- file.path(temp_dir, paste0("climr_", run_id,".%s" |> sprintf(vstore[["downscale_output"]])))
       if (vstore[["downscale_output"]] %in% "tif") {
         # keep a copy of res for previewing raster
         preview_raster <<- res
@@ -966,7 +966,7 @@ process_downscale <- function(sg, cec, vstore, fg, run_id) {
         res <- terra::mask(res, g)
         
         # Write the current res to tif using the same run_id
-        out_file <- file.path(temp_dir, paste0("downscale_", run_id, "_file_upload_", i,"_shape_", j, ".%s" |> sprintf(vstore[["downscale_output"]])))
+        out_file <- file.path(temp_dir, paste0("climr_", run_id, ".%s" |> sprintf(vstore[["downscale_output"]])))
         if (vstore[["downscale_output"]] %in% "tif") {
           # keep a copy of res for previewing raster
           preview_raster <<- res
