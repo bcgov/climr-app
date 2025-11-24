@@ -357,7 +357,7 @@ shiny::shinyApp(
                             style = "display: flex; gap: 5px;",
                             shiny::selectInput(
                               inputId = "element",
-                              label = "Element:",
+                              label = tags$span(HTML("<a href='https://vonuma.com/climr-docs/Definitions.html#climate-variables' target='_blank'>Element</a>:")),
                               width = "100%",
                               choices = NULL
                             ),
@@ -443,7 +443,7 @@ shiny::shinyApp(
                                                    width = 6,
                                                    shiny::selectInput(
                                                      inputId = "time_series_element",
-                                                     label = h5("Element:"),
+                                                     label = h5(tags$span(HTML("<a href='https://vonuma.com/climr-docs/Definitions.html#climate-variables' target='_blank'>Element</a>:"))),
                                                      width = "100%",
                                                      choices = unique(climr::variables %>% filter(!Code_Element %in% c("CMI", "EXT", "EMT", "MAP", "MAT", "RH", "MSP", "AHM", "SHM")) %>% pull(Code_Element)),
                                                      selected = "Tmax"
@@ -515,7 +515,7 @@ shiny::shinyApp(
                                                    width = 6,
                                                    shiny::selectInput(
                                                      inputId = "bivariate_element_x",
-                                                     label = h6("Element:"),
+                                                     label = h6(tags$span(HTML("<a href='https://vonuma.com/climr-docs/Definitions.html#climate-variables' target='_blank'>Element</a>:"))),
                                                      width = "100%",
                                                      choices = unique(climr::variables %>% filter(!Code_Element %in% c("CMI", "EXT", "EMT", "MAP", "MAT", "RH", "MSP", "AHM", "SHM")) %>% pull(Code_Element)),
                                                      selected = "Tave"
@@ -532,7 +532,7 @@ shiny::shinyApp(
                                                    width = 6,
                                                    shiny::selectInput(
                                                      inputId = "bivariate_element_y",
-                                                     label = h6("Element:"),
+                                                     label = h6(tags$span(HTML("<a href='https://vonuma.com/climr-docs/Definitions.html#climate-variables' target='_blank'>Element</a>:"))),
                                                      width = "100%",
                                                      choices = unique(climr::variables %>% filter(!Code_Element %in% c("CMI", "EXT", "EMT", "MAP", "MAT", "RH", "MSP", "AHM", "SHM")) %>% pull(Code_Element)),
                                                      selected = "PPT"

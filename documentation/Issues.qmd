@@ -2,7 +2,7 @@
 
 ## Known issues with the climr app :(
 
-This section is focused on aspects of the climr App related to
+This section is focused on aspects of the **climr app** related to
 trade-offs and intrinsic sources of error. We also list bugs or minor
 enhancements that have not yet been resolved. If you have a problem or
 suggestion to report, you can enter it as a "New issue" in our

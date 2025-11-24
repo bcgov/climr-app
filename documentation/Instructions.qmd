@@ -4,7 +4,16 @@ For instructional videos, <a href="https://www.youtube.com/playlist?list=PLt-XQA
 
 ## Get Data:
 
-In the first tab of the climr App, users can select points or areas of interest, choose parameters, downscale the data, and preview and download the data.  For a very quick summary of functionality of this page, users can also click the *What does this page do* link at the top of the left-hand panel.
+In the first tab of the **climr app**, users can select points or areas of interest, choose parameters, downscale the data, and preview and download the data.  For a very quick summary of functionality of this page, users can also click the *What does this page do* link at the top of the left-hand panel. Throughout the app, there are also blue underlined phrases. Click on these hyperlinks to be brought to the relevant help pages.
+
+```{r}
+#| label: fig-Get_Data
+#| fig-cap: "Get Data tab"
+#| fig-align: center
+#| out.width: 100%
+#| echo: false
+knitr::include_graphics("Figure_Instructions_Get_Data.png")
+```
 
 ### **Step 1.** Select points or areas of interest:
 
@@ -64,9 +73,9 @@ Click **Apply**!
 
 To clear all selections, click **Reset**.
 
-### **Step 3.** Generate Results:
+### **Step 3.** Choose output preferences:
 
-Click on the **Generate Results** button. If the area of interest are map point(s) or an uploaded file of single points, the only output format available for the downscaled data is csv. If the area of interest is a map drawn shape or a shape file, users can choose between csv and GeoTIFF as the output format.
+Click on the **Choose Output Preferences** button. If the area of interest are map point(s) or an uploaded file of single points, the only output format available for the downscaled data is csv. If the area of interest is a map drawn shape or a shape file, users can choose between csv and GeoTIFF as the output format, and choose to include the elevation map in the putput.
 
 If GeoTIFF is selected, users will need to choose downscale resolution (@fig-GeoTIFF_downscale).
 
@@ -79,15 +88,21 @@ If GeoTIFF is selected, users will need to choose downscale resolution (@fig-Geo
 knitr::include_graphics("Figure_Instructions_GeoTIFF_downscale.png")
 ```
 
-Click **Launch Downscale Process**. Notification boxes will appear on the right-hand side of the screen while the downscale is processing, indicating each step.
+Click **Apply**. 
 
-If csv has been selected, a preview will appear under the **Launch Downscale Process** button, and users can choose to download the data (@fig-csv_preview).
+### **Step 4.** Generate results:
+
+Click on the green **Generate Results** button. Notification boxes will appear on the right-hand side of the screen while the downscale is processing, indicating each step.
+
+### **Step 5.** Preview downscaled data:
+
+If csv has been selected, a preview will appear under **Step 5** in the main panel beside the map, and users can choose to download the data by clicking on the **Download Downscaled Data** button (@fig-csv_preview).
 
 ```{r}
 #| label: fig-csv_preview
 #| fig-cap: "Example of the Preview of Downscaled Data for single map points"
 #| fig-align: center
-#| out.width: 90%
+#| out.width: 100%
 #| echo: false
 knitr::include_graphics("Figure_Instructions_csv_preview.png")
 ```
@@ -125,9 +140,9 @@ Users can also view the the percent change between the period selected and the r
 knitr::include_graphics("Figure_Instructions_percent_change.png")
 ```
 
-To clear all selections on the map and start again with new data, click on the red **Clear Selections** button in the main panel.
+To clear all selections on the map and start again with new data, click on the red **Reset App** button in the main panel.
 
-Please note that users will not be able to open GeoTIFF downloads in Photos. We recommend reading the output in R or opening the file in GIS software.
+Please note that users will not be able to open GeoTIFF downloads in Photos. We recommend reading the output into RStudio or opening the file in GIS software.
 
 ### Job Size Limits for Raster Output:
 
@@ -142,7 +157,7 @@ Currently, there are job size limits implemented on the downscaling of map-drawn
 knitr::include_graphics("Figure_Instructions_warning_job_size.png")
 ```
 
-After clicking **Generate Results**, the available range for downscale resolution is dependent on how many raster layers will be output (@fig-low-res). If a user wants a higher resolution (the highest possible is 250m), we recommend downscaling one GCM at a time.
+After clicking **Choose Output Preferences**, the available range for downscale resolution is dependent on how many raster layers will be output (@fig-low-res). If a user wants a higher resolution (the highest possible is 250m), we recommend downscaling one GCM at a time.
 
 ```{r}
 #| label: fig-low-res
@@ -195,7 +210,7 @@ Choose the variable to plot by clicking on the **Element** and **Season/month** 
 knitr::include_graphics("Figure_Instructions_Timeseries_ecoregion.png")
 ```
 
-To adjust the plot parameters from the recommended defaults, click on the **Adjust Plot** button, select the observational dataset(s), GCM(s) and SSP(s), and click **OK!** (@fig-Timeseries_ecoregion_parameters).
+To adjust the plot parameters from the recommended defaults, click on the **Adjust Plot** button, select the observational dataset(s) and SSP(s), and click **OK!** (@fig-Timeseries_ecoregion_parameters).
 
 ```{r}
 #| label: fig-Timeseries_ecoregion_parameters
@@ -265,7 +280,7 @@ To adjust the plot parameters from the recommended defaults, click on the **Adju
 #| fig-align: center
 #| out.width: 100%
 #| echo: false
-knitr::include_graphics("Figure_Instructions_Timeseries_ecoregion_parameters.png")
+knitr::include_graphics("Figure_Instructions_Timeseries_mappoint_parameters.png")
 ```
 
 To download the plot as a PNG, click the **Download Plot** button.

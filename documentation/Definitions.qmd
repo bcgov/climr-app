@@ -20,11 +20,11 @@
     
 -   **Observational time-series datasets**: These datasets provide an annual sequence of climate data as observed by weather stations and other sources.
 
-    -   **MSWX Blend**: 
+    -   **MSWX Blend**: The 1981-2024 Multi-Source Weather (MSWX; @beck2022mswx) for temperature and Multi-Source Weighted-Ensemble Precipitation (MSWEP; @beck2019mswep) for precipitation, which we have extended back to 1901 using the CRU/GPCC dataset.
     
-    -   **ClimateNA**: 
+    -   **ClimateNA**: The 1901-2023 ClimateNA time series (@wang2024monthly).
     
-    -   **Climatic Research Unit / Global Precipitation Climatology Centre (CPU/GPCC)**: 
+    -   **Climatic Research Unit / Global Precipitation Climatology Centre (CPU/GPCC)**: The 1901-2023 combined Climatic Research Unit TS dataset (CRU; @harris2020cruts) for temperature and Global Precipitation Climatology Centre dataset (GPCC; @becker2013gpcc) for precipitation. 
 
 ## **Climate Variables**
 

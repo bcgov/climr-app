@@ -239,7 +239,9 @@ visualization_server <- function(input, output, session) {
         title = "Adjust Plot Options", size = "l", fade = FALSE, class = "modal-dialog-scrollable",
         shiny::checkboxGroupInput(
           inputId = "time_series_dataset",
-          label = h5("Choose observational dataset:"),
+          label = h5(
+            tags$span(HTML("Choose <a href='https://vonuma.com/climr-docs/Definitions.html#glossary-of-terms' target='_blank'>observational time-series dataset</a>:"))
+          ),
           width = "100%",
           inline = TRUE,
           choices = c("MSWX Blend" = "mswx.blend", "ClimateNA" = "climatena", "Climatic Research Unit / Global Precipitation Climatology Centre" = "cru.gpcc"),
@@ -249,7 +251,9 @@ visualization_server <- function(input, output, session) {
           condition = "input.input_type == 'Map point'",
           shiny::checkboxGroupInput(
             inputId = "time_series_gcms",
-            label = h5("Choose GCMs:"),
+            label = h5(
+              tags$span(HTML("Choose <a href='https://vonuma.com/climr-docs/Definitions.html#glossary-of-terms' target='_blank'>GCMs</a>:"))
+            ),
             width = "100%",
             inline = TRUE,
             choices = climr::list_gcms()[c(1, 4, 5, 6, 7, 10, 11, 12)],
@@ -258,7 +262,9 @@ visualization_server <- function(input, output, session) {
         ),
         shiny::checkboxGroupInput(
           inputId = "time_series_ssps",
-          label = h5("Choose SSPs:"),
+          label = h5(
+            tags$span(HTML("Choose <a href='https://vonuma.com/climr-docs/Definitions.html#glossary-of-terms' target='_blank'>SSPs</a>:"))
+          ),
           width = "100%",
           inline = TRUE,
           choices = climr::list_ssps()[c(1:3)],
