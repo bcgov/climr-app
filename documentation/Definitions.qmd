@@ -24,7 +24,7 @@
     
     -   **ClimateNA**: The 1901-2023 ClimateNA time series (@wang2024monthly).
     
-    -   **Climatic Research Unit / Global Precipitation Climatology Centre (CPU/GPCC)**: The 1901-2023 combined Climatic Research Unit TS dataset (CRU; @harris2020cruts) for temperature and Global Precipitation Climatology Centre dataset (GPCC; @becker2013gpcc) for precipitation. 
+    -   **Climatic Research Unit / Global Precipitation Climatology Centre (CRU/GPCC)**: The 1901-2023 combined Climatic Research Unit TS dataset (CRU; @harris2020cruts) for temperature and Global Precipitation Climatology Centre dataset (GPCC; @becker2013gpcc) for precipitation. 
 
 ## **Climate Variables**
 
