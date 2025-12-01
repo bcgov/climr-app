@@ -676,7 +676,7 @@ shiny::shinyApp(
     
     showModal(
       modalDialog(
-        title = "Welcome to the climr App!",
+        title = "Welcome to the climr app!",
         tagList(
           HTML("This is a graphical interface for <a href='https://bcgov.github.io/climr/' target='_blank'>climr</a>, 
             an R package that provides downscaled climate data for North America. 
