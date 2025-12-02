@@ -1409,7 +1409,7 @@ getdata_server <- function(input, output, session) {
         value = if (res_min > vstore[["downscale_resolution"]]) res_min else vstore[["downscale_resolution"]],
         width = "100%",
         min = res_min,
-        max = 10000,
+        max = if (res_min < 1000) 4000 else 10000,
         step = 50,
         post = "m",
         ticks = FALSE
