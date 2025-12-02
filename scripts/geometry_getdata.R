@@ -315,7 +315,14 @@ session_geometry <- function(sg_dt, mp) {
       d0 <- dirname(f$datapath)
       
       if (tolower(tools::file_ext(f0)) %in% c("shp")) {
-        shiny::showNotification("Shape file needs to be uploaded as an archive with .shx, .dbf, .shp and other optional files like .prj.", type = "error")
+        # shiny::showNotification("Shape file needs to be uploaded as an archive with .shx, .dbf, .shp and other optional files like .prj.", type = "error")
+        showModal(
+          modalDialog(
+            title = "Error",
+            paste("Shape file needs to be uploaded as an archive (eg - a zip file) with .shx, .dbf, .shp and other optional files like .prj. Please try uploading again with an archive."),
+            easyClose = TRUE
+          )
+        )
         return()
       }
       

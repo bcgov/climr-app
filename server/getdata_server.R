@@ -281,6 +281,12 @@ getdata_server <- function(input, output, session) {
                 selected = vstore[["downscale_obs_periods_checkbox"]]
               )
             ),
+            shiny::checkboxInput(
+              inputId = "observed_years_checkbox",
+              label = tags$span("Specify Observed Years", style = "font-size: 0.85em; font-weight: bold;"),
+              value = vstore[["downscale_obs_years_checkbox"]],
+              width = "100%"
+            ),
             shiny::uiOutput("observed_years")
           ),
           
@@ -350,6 +356,12 @@ getdata_server <- function(input, output, session) {
                 choices = c(climr::list_gcm_periods() |> sn()),
                 selected = vstore[["downscale_gcm_periods"]]
               )
+            ),
+            shiny::checkboxInput(
+              inputId = "gcm_years_checkbox",
+              label = tags$span("Specify GCM Years", style = "font-size: 0.85em; font-weight: bold;"),
+              value = vstore[["downscale_gcm_years_checkbox"]],
+              width = "100%"
             ),
             shiny::uiOutput("gcm_years"),
             shiny::uiOutput("gcm_max_run")
@@ -548,16 +560,23 @@ getdata_server <- function(input, output, session) {
     vstore[["downscale_obs_periods"]] <- input$downscale_obs_periods_checkbox[input$downscale_obs_periods_checkbox != "1961_1990"]
     
     ## observed years ##
-    if (!is.null(input$observed_years_checkbox)) {
+    if (!is.null(input$observed_years_checkbox) & all(getdata_sg_dt$dt$group == "marker")) {
       vstore[["downscale_obs_years_checkbox"]] <- input$observed_years_checkbox
       if (vstore[["downscale_obs_years_checkbox"]]) {
         date_range <- c(min(input$downscale_obs_years):max(input$downscale_obs_years))
         vstore[["downscale_obs_years"]] <- date_range
       }
+    } else {
+      vstore[["downscale_obs_years_checkbox"]] <- downscale_default[["downscale_obs_years_checkbox"]]
+      vstore[["downscale_obs_years"]] <- downscale_default[["downscale_obs_years"]]
     }
     
     ## time series dataset ##
-    vstore[["downscale_obs_ts_dataset"]] <- input$downscale_obs_ts_dataset
+    if (all(getdata_sg_dt$dt$group == "marker")) {
+      vstore[["downscale_obs_ts_dataset"]] <- input$downscale_obs_ts_dataset
+    } else {
+      vstore[["downscale_obs_ts_dataset"]] <- downscale_default[["downscale_obs_ts_dataset"]]
+    }
     
     ## GCMs ##
     vstore[["downscale_gcms"]] <- input$downscale_gcms
@@ -569,7 +588,7 @@ getdata_server <- function(input, output, session) {
     vstore[["downscale_gcm_periods"]] <- input$downscale_gcm_periods
     
     ## GCM years ##
-    if (!is.null(input$gcm_years_checkbox)) {
+    if (!is.null(input$gcm_years_checkbox) & all(getdata_sg_dt$dt$group == "marker")) {
       vstore[["downscale_gcm_years_checkbox"]] <- input$gcm_years_checkbox
       if (vstore[["downscale_gcm_years_checkbox"]]) {
         # add selected range
@@ -595,8 +614,10 @@ getdata_server <- function(input, output, session) {
       vstore[["downscale_ensemble_mean"]] <- as.logical(input$downscale_ensemble_mean)
       
     }
-    if (!is.null(input$downscale_max_run)) {
+    if (!is.null(input$downscale_max_run)& all(getdata_sg_dt$dt$group == "marker")) {
       vstore[["downscale_max_run"]] <- input$downscale_max_run
+    } else {
+      vstore[["downscale_max_run"]] <- downscale_default[["downscale_max_run"]]
     }
     
     ## extra climate variables ##
@@ -1217,93 +1238,73 @@ getdata_server <- function(input, output, session) {
   
   # reactive output for observed years
   output$observed_years <- shiny::renderUI({
-    if (all(getdata_sg_dt$dt$group == "marker")) {
-      tagList(
-        shiny::checkboxInput(
-          inputId = "observed_years_checkbox",
-          label = tags$span("Specify Observed Years", style = "font-size: 0.85em; font-weight: bold;"),
-          value = vstore[["downscale_obs_years_checkbox"]],
-          width = "100%"
+    if (all(getdata_sg_dt$dt$group == "marker") & input$observed_years_checkbox == TRUE) {
+      shiny::div(
+        shiny::sliderInput(
+          inputId = "downscale_obs_years",
+          label = h5("Choose observed years range:",
+                     prompter::add_prompt(
+                       tooltipsIcon,
+                       message = HTML(paste("Choose years to obtain individual years or time series of observational climate data.")),
+                       position = "top",
+                       size = "large",
+                       shadow = FALSE
+                     )
+          ),
+          min = min(climr::list_obs_years()),
+          max = max(climr::list_obs_years()),
+          value = c(1951,2024),
+          width = "100%",
+          step = 1,
+          sep = ""
         ),
-        shiny::conditionalPanel(
-          condition = "input.observed_years_checkbox == true",
-          shiny::div(
-            shiny::sliderInput(
-              inputId = "downscale_obs_years",
-              label = h5("Choose observed years range:",
-                         prompter::add_prompt(
-                           tooltipsIcon,
-                           message = HTML(paste("Choose years to obtain individual years or time series of observational climate data.")),
-                           position = "top",
-                           size = "large",
-                           shadow = FALSE
-                         )
-              ),
-              min = min(climr::list_obs_years()),
-              max = max(climr::list_obs_years()),
-              value = c(1951,2024),
-              width = "100%",
-              step = 1,
-              sep = ""
-            ),
-            shiny::radioButtons(
-              inputId = "downscale_obs_ts_dataset",
-              label = h5(
-                tags$span(HTML("Choose <a href='https://vonuma.com/climr-docs/Definitions.html#glossary-of-terms' target='_blank'>observational time-series dataset</a>:")),
-                         prompter::add_prompt(
-                           tooltipsIcon,
-                           message = HTML(paste("These datasets provide an annual sequence (a time-series) of climate data as observed by weather stations and other sources.")),
-                           position = "top",
-                           size = "large",
-                           shadow = FALSE
-                         )
-              ),
-              width = "100%",
-              selected = vstore[["downscale_obs_ts_dataset"]],
-              choices = c("MSWX Blend" = "mswx.blend", "ClimateNA" = "climatena", "Climatic Research Unit / Global Precipitation Climatology Centre" = "cru.gpcc")
+        shiny::radioButtons(
+          inputId = "downscale_obs_ts_dataset",
+          label = h5(
+            tags$span(HTML("Choose <a href='https://vonuma.com/climr-docs/Definitions.html#glossary-of-terms' target='_blank'>observational time-series dataset</a>:")),
+            prompter::add_prompt(
+              tooltipsIcon,
+              message = HTML(paste("These datasets provide an annual sequence (a time-series) of climate data as observed by weather stations and other sources.")),
+              position = "top",
+              size = "large",
+              shadow = FALSE
             )
-          )
+          ),
+          width = "100%",
+          selected = vstore[["downscale_obs_ts_dataset"]],
+          choices = c("MSWX Blend" = "mswx.blend", "ClimateNA" = "climatena", "Climatic Research Unit / Global Precipitation Climatology Centre" = "cru.gpcc")
         )
       )
+    } else if (all(getdata_sg_dt$dt$group != "marker") & input$observed_years_checkbox == TRUE) {
+      HTML("Individual observed years and observational time series datasets are only available for map point input. If you would like to use this functionality for shape input, please use the <a href='https://bcgov.github.io/climr/' target='_blank'>climr R package</a>.")
     }
   })
   
   # reactive output for GCM years
   output$gcm_years <- shiny::renderUI({
-    if (all(getdata_sg_dt$dt$group == "marker")) {
-      tagList(
-        shiny::div(
-          shiny::checkboxInput(
-            inputId = "gcm_years_checkbox",
-            label = tags$span("Specify GCM Years", style = "font-size: 0.85em; font-weight: bold;"),
-            value = vstore[["downscale_gcm_years_checkbox"]],
-            width = "100%"
-          )
-        ),
-        shiny::conditionalPanel(
-          condition = "input.gcm_years_checkbox == true",
-          shiny::div(
-            shiny::sliderInput(
-              inputId = "downscale_gcm_years",
-              label = h5("Choose GCM years:",
-                         prompter::add_prompt(
-                           tooltipsIcon,
-                           message = HTML(paste("Choose time series years for GCM simulations of the historical scenario and future SSP scenarios.")),
-                           position = "top",
-                           size = "large",
-                           shadow = FALSE
-                         )
-              ),
-              width = "100%",
-              min = min(climr::list_gcm_hist_years()),
-              max = max(climr::list_gcm_ssp_years()),
-              value = c(1951, 2100),
-              step = 1,
-              sep = ""
-            ),
-          )
-        ),
+    if (all(getdata_sg_dt$dt$group == "marker") & input$gcm_years_checkbox == TRUE) {
+      shiny::div(
+        shiny::sliderInput(
+          inputId = "downscale_gcm_years",
+          label = h5("Choose GCM years:",
+                     prompter::add_prompt(
+                       tooltipsIcon,
+                       message = HTML(paste("Choose time series years for GCM simulations of the historical scenario and future SSP scenarios.")),
+                       position = "top",
+                       size = "large",
+                       shadow = FALSE
+                     )
+          ),
+          width = "100%",
+          min = min(climr::list_gcm_hist_years()),
+          max = max(climr::list_gcm_ssp_years()),
+          value = c(1951, 2100),
+          step = 1,
+          sep = ""
+        )
       )
+    } else if (all(getdata_sg_dt$dt$group != "marker") & input$gcm_years_checkbox == TRUE) {
+      HTML("Individual GCM years are only available for map point input. If you would like to use this functionality for shape input, please use the <a href='https://bcgov.github.io/climr/' target='_blank'>climr R package</a>.")
     }
   })
   
