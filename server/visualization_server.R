@@ -890,7 +890,7 @@ visualization_server <- function(input, output, session) {
     
     # get scaling
     vstore[["vscale"]] <- input$vscale
-    if (isTRUE(vstore[["vscale"]]) & input$element %in% c("PPT", "CMD", "PAS")) {
+    if (isTRUE(vstore[["vscale"]]) & input$element %in% climr::variables[Type == "ratio", Code_Element]) {
       vstore[["vscale"]] <- "log1p"
     } else {
       vstore[["vscale"]] <- ""
@@ -1134,7 +1134,7 @@ visualization_server <- function(input, output, session) {
   # reactive output for scale adj
   output$scale_adj <- shiny::renderUI({
     if (!is.null(input$element)) {
-      if (input$element %in% c("PPT", "CMD", "PAS")) {
+      if (input$element %in% climr::variables[Type == "ratio", Code_Element]) {
         shiny::checkboxInput(
           inputId = "vscale",
           label = tags$span("Apply scale adj.", style = "font-size: 15px; display: inline-block; max-width: 160px; white-space: normal;"),

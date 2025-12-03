@@ -359,7 +359,7 @@ add_custom_render <- function(map) {
       var updateClimatePalette = function(message) {
         var prefixedLayerId = map.layerManager._layerIdKey(message.category, message.layerId);
     
-        function tryApplyPalette(attemptsLeft = 10) {
+        function tryApplyPalette(attemptsLeft = 20) {
             var layer = map.layerManager._byLayerId[prefixedLayerId];
     
             if (layer) {
@@ -370,6 +370,7 @@ add_custom_render <- function(map) {
                 }
             } else if (attemptsLeft > 0) {
                 // Wait 300ms and try again
+                console.log(attemptsLeft);
                 setTimeout(() => tryApplyPalette(attemptsLeft - 1), 300);
             } else {
                 console.warn("Layer not found after multiple attempts:", message.layerId);
