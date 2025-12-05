@@ -93,24 +93,44 @@ visualization_server <- function(input, output, session) {
             id = "vis_videos",
             
             accordion_panel(
-              title = h5("How to use the climate map overlays:"),
+              title = h5("An overview of the climr app:"),
               tags$div(style = "margin-top: 10px;"),
               tags$iframe(
                 style = "width: 100%; height: 600px; border: none;",
-                src = "https://youtube.com/embed/hY8VbLCBA3k"
+                src = "https://youtube.com/embed/eW4XqUrtGrQ"
               ),
               value = "vis_vid1"
             ),
             
             accordion_panel(
-              title = h5("How to use climate plots:"),
+              title = h5("How to use the climate map overlays:"),
               tags$div(style = "margin-top: 10px;"),
               tags$iframe(
                 style = "width: 100%; height: 600px; border: none;",
-                src = "https://youtube.com/embed/SiIbLHNgvrw"
+                src = "https://youtube.com/embed/MiUiQH6f9O0"
               ),
               value = "vis_vid2"
             ),
+            
+            accordion_panel(
+              title = h5("How to visualize climate data by plots:"),
+              tags$div(style = "margin-top: 10px;"),
+              tags$iframe(
+                style = "width: 100%; height: 600px; border: none;",
+                src = "https://youtube.com/embed/oi0TTK0Q5jw"
+              ),
+              value = "vis_vid3"
+            ),
+            
+            accordion_panel(
+              title = h5("Known issues:"),
+              tags$div(style = "margin-top: 10px;"),
+              tags$iframe(
+                style = "width: 100%; height: 600px; border: none;",
+                src = "https://youtube.com/embed/DlusAstpkrI"
+              ),
+              value = "vis_vid4"
+            )
           )
         )
       )

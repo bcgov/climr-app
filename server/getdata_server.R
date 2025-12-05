@@ -147,7 +147,7 @@ getdata_server <- function(input, output, session) {
               tags$div(style = "margin-top: 10px;"),
               tags$iframe(
                 style = "width: 100%; height: 600px; border: none;",
-                src = "https://youtube.com/embed/Sc_rxmFuGgI"
+                src = "https://youtube.com/embed/eW4XqUrtGrQ"
               ),
               value = "get_data_vid1"
             ),
@@ -157,7 +157,7 @@ getdata_server <- function(input, output, session) {
               tags$div(style = "margin-top: 10px;"),
               tags$iframe(
                 style = "width: 100%; height: 600px; border: none;",
-                src = "https://youtube.com/embed/66xQF4Yn9n4"
+                src = "https://youtube.com/embed/Wl3J49DvV4Q"
               ),
               value = "get_data_vid2"
             ),
@@ -167,7 +167,7 @@ getdata_server <- function(input, output, session) {
               tags$div(style = "margin-top: 10px;"),
               tags$iframe(
                 style = "width: 100%; height: 600px; border: none;",
-                src = "https://youtube.com/embed/3S01hpS6Kmc"
+                src = "https://youtube.com/embed/bFVAkxOvH-A"
               ),
               value = "get_data_vid3"
             ),
@@ -177,7 +177,7 @@ getdata_server <- function(input, output, session) {
               tags$div(style = "margin-top: 10px;"),
               tags$iframe(
                 style = "width: 100%; height: 600px; border: none;",
-                src = "https://youtube.com/embed/DtKGB0OWLXU"
+                src = "https://youtube.com/embed/ipx5MQ_X0iQ"
               ),
               value = "get_data_vid4"
             )
