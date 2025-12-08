@@ -205,6 +205,16 @@ visualization_geometry <- function(dt, mp) {
           warning = function(w) {shiny::showNotification(ui = shiny::span(conditionMessage(w)), type = "warning")},
           error = function(e) {shiny::showNotification(ui = shiny::span(conditionMessage(e)), type = "error")},
           {
+            if (climr::variables[Code_Element == input$bivariate_element_x & Time == input$bivariate_time_x, Code] %in% c("CMD_03", "Eref_02") | climr::variables[Code_Element == input$bivariate_element_y & Time == input$bivariate_time_y, Code] %in% c("CMD_03", "Eref_02")) {
+              showModal(
+                modalDialog(
+                  title = "Error!",
+                  paste("Values for the 1961-1990 reference period are zero, while the selected variables have non-zero values. Percent change cannot be calculated. To explore this variable, please refer to the Time Series plot."),
+                  easyClose = TRUE
+                )
+              )
+              return()
+            }
             tryCatch({
               isolate({
                 climr::plot_bivariate(
